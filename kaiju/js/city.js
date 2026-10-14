@@ -79,7 +79,31 @@ export class Buf {
 const ZERO = [0, 0, 0];
 
 // Extruded footprint between y0 and y1.
-export function prism(buf, t, y0, y1, info, off = ZERO, bottom = false, colorScale = 1) {
+const SCORCH = [0.045, 0.04, 0.036];
+
+// Jagged shards on a broken floor plate (dir +1 = up from a stump, -1 = down from a hanging part).
+function jag(buf, t, y, dir, off, seed) {
+  const n = Math.min(28, 6 + Math.floor(t.area / 40));
+  for (let k = 0; k < n; k++) {
+    const hx = hash(seed + k * 7 + 1), hz = hash(seed + k * 7 + 2), hh = hash(seed + k * 7 + 3);
+    const x = t.minx + hx * (t.maxx - t.minx), z = t.minz + hz * (t.maxz - t.minz);
+    if (!pointInRing(x, z, t.rings[0])) continue;
+    const s = 0.8 + hh * 1.8, s2 = s * 0.35, top = y + (1.2 + hh * 4.5) * dir;
+    const c = hh < 0.3 ? [t.col[0] * 0.7, t.col[1] * 0.7, t.col[2] * 0.7] : SCORCH;
+    const lo = [[x - s, z - s], [x + s, z - s], [x + s, z + s], [x - s, z + s]];
+    const hi = [[x - s2, z - s2 * 0.5], [x + s2, z - s2], [x + s2 * 0.6, z + s2], [x - s2, z + s2]];
+    for (let e = 0; e < 4; e++) {
+      const f = (e + 1) % 4, mx = (lo[e][0] + lo[f][0]) / 2 - x, mz = (lo[e][1] + lo[f][1]) / 2 - z, L = Math.hypot(mx, mz) || 1;
+      buf.tri([lo[e][0], y, lo[e][1]], [lo[f][0], y, lo[f][1]], [hi[f][0], top, hi[f][1]], mx / L, 0.3 * dir, mz / L, c, [2, 0], off);
+      buf.tri([lo[e][0], y, lo[e][1]], [hi[f][0], top, hi[f][1]], [hi[e][0], top, hi[e][1]], mx / L, 0.3 * dir, mz / L, c, [2, 0], off);
+    }
+    buf.tri([hi[0][0], top, hi[0][1]], [hi[1][0], top, hi[1][1]], [hi[2][0], top, hi[2][1]], 0, dir, 0, c, [2, 0], off);
+    buf.tri([hi[0][0], top, hi[0][1]], [hi[2][0], top, hi[2][1]], [hi[3][0], top, hi[3][1]], 0, dir, 0, c, [2, 0], off);
+  }
+}
+
+// broken: bit 1 = top is a fracture, bit 2 = bottom is a fracture
+export function prism(buf, t, y0, y1, info, off = ZERO, bottom = false, colorScale = 1, broken = 0) {
   const col = [t.col[0] * colorScale, t.col[1] * colorScale, t.col[2] * colorScale];
   for (const r of t.rings) {
     const n = r.length / 2;
@@ -92,12 +116,16 @@ export function prism(buf, t, y0, y1, info, off = ZERO, bottom = false, colorSca
     }
   }
   const roof = [col[0] * 0.62, col[1] * 0.62, col[2] * 0.64];
+  const topCol = broken & 1 ? SCORCH : roof, botCol = broken & 2 ? SCORCH : roof;
+  const topInfo = broken & 1 ? [2, 0] : info, botInfo = broken & 2 ? [2, 0] : info;
   const v = t.flat;
   for (let k = 0; k < t.tris.length; k += 3) {
     const a = t.tris[k] * 2, b = t.tris[k + 1] * 2, c = t.tris[k + 2] * 2;
-    buf.tri([v[a], y1, v[a + 1]], [v[b], y1, v[b + 1]], [v[c], y1, v[c + 1]], 0, 1, 0, roof, info, off);
-    if (bottom) buf.tri([v[a], y0, v[a + 1]], [v[b], y0, v[b + 1]], [v[c], y0, v[c + 1]], 0, -1, 0, roof, info, off);
+    buf.tri([v[a], y1, v[a + 1]], [v[b], y1, v[b + 1]], [v[c], y1, v[c + 1]], 0, 1, 0, topCol, topInfo, off);
+    if (bottom) buf.tri([v[a], y0, v[a + 1]], [v[b], y0, v[b + 1]], [v[c], y0, v[c + 1]], 0, -1, 0, botCol, botInfo, off);
   }
+  if (broken & 1) jag(buf, t, y1, 1, off, t.id * 977 + Math.round(y1));
+  if (broken & 2 && bottom) jag(buf, t, y0, -1, off, t.id * 977 + Math.round(y0) + 5);
 }
 
 function pointInRing(x, z, r) {
@@ -182,6 +210,18 @@ export class City {
     }
     for (const t of this.tiles) this.refreshTile(t);
     for (const mc of this.mcells) { mc.dirty = false; this.rebuildCell(mc); }
+    // named tall buildings, tallest first
+    const byName = new Map();
+    this.landmarks = [];
+    for (const t of this.tiles) {
+      if (!t.name) continue;
+      let L = byName.get(t.name);
+      if (!L) { L = { name: t.name, tiles: [], vol0: 0, top: 0, down: false }; byName.set(t.name, L); this.landmarks.push(L); }
+      L.tiles.push(t);
+      L.vol0 += t.area * (t.segs[0][1] - t.segs[0][0]);
+      L.top = Math.max(L.top, t.top);
+    }
+    this.landmarks.sort((a, b) => b.top - a.top);
   }
 
   mcellIndex(x, z) {
@@ -253,7 +293,7 @@ export class City {
     if (mc.mesh) { this.scene.remove(mc.mesh); mc.mesh.geometry.dispose(); mc.mesh = null; }
     const buf = new Buf();
     for (const t of mc.tiles) {
-      for (const s of t.segs) prism(buf, t, s[0], s[1], [0, t.seed], ZERO, s[0] > 0.5);
+      for (const s of t.segs) prism(buf, t, s[0], s[1], [0, t.seed], ZERO, s[0] > 0.5, 1, (s[3] ? 1 : 0) | (s[2] ? 2 : 0));
       if (!t.segs.length && t.rubble > 0) prism(buf, t, 0, t.rubble, [2, t.seed], ZERO, false, 0.45);
     }
     if (!buf.p.length) return;
@@ -265,10 +305,11 @@ export class City {
   // Remove the band [yb, yt] from a tile. Returns removed [a,b] intervals.
   cut(t, yb, yt) {
     const keep = [], removed = [];
-    for (const [a, b] of t.segs) {
-      if (b <= yb || a >= yt) { keep.push([a, b]); continue; }
-      if (a < yb) keep.push([a, yb]);
-      if (b > yt) keep.push([yt, b]);
+    for (const s of t.segs) {
+      const [a, b] = s;
+      if (b <= yb || a >= yt) { keep.push(s); continue; }
+      if (a < yb) keep.push([a, yb, s[2] || 0, 1]);
+      if (b > yt) keep.push([yt, b, 1, s[3] || 0]);
       removed.push([Math.max(a, yb), Math.min(b, yt)]);
     }
     t.segs = keep.filter(([a, b]) => { if (b - a < 1.2) { removed.push([a, b]); return false; } return true; });
@@ -341,7 +382,7 @@ export class City {
     }
     for (const comp of comps) {
       const grounded = comp.some((n) => n.s[0] < 0.5);
-      if (!grounded) { this.fall(comp.map((n) => ({ t: n.t, a: n.s[0], b: n.s[1], n })), dir); continue; }
+      if (!grounded) { this.fall(comp.map((n) => ({ t: n.t, a: n.s[0], b: n.s[1], bb: n.s[2] || 0, tb: n.s[3] || 0, n })), dir); continue; }
       if (band.yt > 1e8) continue;
       const level = (band.yb + band.yt) / 2;
       const above = new Set(), neck = new Set();
@@ -354,7 +395,7 @@ export class City {
       for (const t of neck) aN += t.area;
       if (aA > 0 && aN < 0.45 * aA) {
         const pieces = [];
-        for (const n of comp) if (n.s[1] > band.yt) pieces.push({ t: n.t, a: Math.max(n.s[0], band.yt), b: n.s[1], n });
+        for (const n of comp) if (n.s[1] > band.yt) pieces.push({ t: n.t, a: Math.max(n.s[0], band.yt), b: n.s[1], bb: n.s[0] < band.yt ? 1 : n.s[2] || 0, tb: n.s[3] || 0, n });
         this.fall(pieces, dir);
       }
     }
@@ -370,7 +411,7 @@ export class City {
       // detach from tile
       const s = p.n.s;
       if (s[0] >= p.a - 0.01) p.t.segs = p.t.segs.filter((x) => x !== s);
-      else s[1] = p.a;
+      else { s[1] = p.a; s[3] = 1; }
       this.refreshTile(p.t);
     }
     if (vol < 1) return;
@@ -395,7 +436,10 @@ export class City {
     if (b.mesh) { this.scene.remove(b.mesh); b.mesh.geometry.dispose(); }
     const buf = new Buf();
     const off = [b.pivot.x, b.pivot.y, b.pivot.z];
-    for (const p of b.pieces) if (p.b > p.a + 0.3) prism(buf, p.t, p.a, p.b, [0, p.t.seed], off, true);
+    for (const p of b.pieces) {
+      const a = Math.max(p.a, b.cut);
+      if (p.b > a + 0.3) prism(buf, p.t, a, p.b, [0, p.t.seed], off, true, 1, (p.tb ? 1 : 0) | (p.bb || a > p.a ? 2 : 0));
+    }
     b.mesh = new THREE.Mesh(buf.geometry(), this.material);
     b.mesh.castShadow = b.mesh.receiveShadow = true;
     b.mesh.position.copy(b.pos); b.mesh.quaternion.copy(b.q);
@@ -420,6 +464,7 @@ export class City {
       this.fx.shatter(this.bodySampler(b, p, a, p.b), v, p.t.col, b.vel, b.vel.clone().setY(0).multiplyScalar(0.3), 1);
     }
     this.fx.ring(b.pos.x, 0, b.pos.z, 30 + b.height * 0.2, 60);
+    if (b.vol > 3e4 && Math.random() < 0.5) this.fx.ignite(b.pos.x, 0, b.pos.z, 1.5, 40);
     if (this.onImpact) this.onImpact(b.pos, Math.min(1, b.vol / 2e5));
     this.scene.remove(b.mesh); b.mesh.geometry.dispose();
     this.bodies.splice(i, 1);
@@ -455,6 +500,7 @@ export class City {
         }
       }
       const tilt = _v.set(0, 1, 0).applyQuaternion(b.q).y;
+      if (!b.split && b.height > 70 && (tilt < 0.94 || (n && b.age > 0.4))) { this.split(b, i); continue; }
       if (n) {
         cp.divideScalar(n);
         // crush: decelerate, eat our own bottom, and pancake whatever is below
@@ -486,6 +532,62 @@ export class City {
       const remaining = b.pieces.some((p) => p.b > b.cut + 0.5);
       if (!remaining || topHit || tilt < 0.35 || b.age > 30 || b.pos.y < -100) this.shatterBody(b, i);
     }
+  }
+
+  // A tall falling section fractures into 2-3 stacked bodies that keep the parent's motion.
+  split(b, i) {
+    const lo0 = Math.max(b.cut, Math.min(...b.pieces.map((p) => p.a)));
+    const hi0 = Math.max(...b.pieces.map((p) => p.b));
+    const k = hi0 - lo0 > 200 ? 3 : 2;
+    const levels = [];
+    for (let j = 0; j <= k; j++) levels.push(lo0 + ((hi0 - lo0) * j) / k + (j && j < k ? (hash(b.pieces.length * 31 + j) - 0.5) * 12 : 0));
+    this.scene.remove(b.mesh); b.mesh.geometry.dispose();
+    this.bodies.splice(i, 1);
+    const tmp = new THREE.Vector3(), rel = new THREE.Vector3();
+    for (let j = 0; j < k; j++) {
+      const lo = levels[j], hi = levels[j + 1];
+      const pieces = [];
+      for (const p of b.pieces) {
+        const a = Math.max(p.a, lo, b.cut), c = Math.min(p.b, hi);
+        if (c - a > 0.5) pieces.push({ t: p.t, a, b: c, bb: a > p.a ? 1 : p.bb, tb: c < p.b ? 1 : p.tb });
+      }
+      if (!pieces.length) continue;
+      let vol = 0; const piv = new THREE.Vector3();
+      for (const p of pieces) { const v = p.t.area * (p.b - p.a); vol += v; piv.x += p.t.cx * v; piv.y += (p.a + p.b) / 2 * v; piv.z += p.t.cz * v; }
+      piv.divideScalar(vol);
+      const pos = this.toWorld(b, piv.x, piv.y, piv.z, new THREE.Vector3());
+      rel.subVectors(pos, b.pos);
+      const vel = b.vel.clone().add(tmp.crossVectors(b.w, rel)).add(new THREE.Vector3((Math.random() - 0.5) * 3, 0, (Math.random() - 0.5) * 3));
+      const nb = {
+        pieces, pivot: piv, pos, vel, q: b.q.clone(),
+        w: b.w.clone().multiplyScalar(1 + j * 0.6 + Math.random() * 0.4).add(new THREE.Vector3((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.05)),
+        axis: b.axis, cut: Math.min(...pieces.map((p) => p.a)), built: -1, mesh: null, age: b.age, lastHit: b.age,
+        height: hi - lo, vol, split: true,
+      };
+      this.buildBody(nb);
+      this.bodies.push(nb);
+      // fracture burst along the break plane
+      if (j > 0) {
+        let area = 0; for (const p of pieces) if (p.a <= lo + 0.6) area += p.t.area;
+        const plane = pieces.filter((p) => p.a <= lo + 0.6);
+        if (plane.length) {
+          const p = plane[Math.floor(Math.random() * plane.length)];
+          this.fx.shatter(this.bodySampler(b, p, lo - 2, lo + 2), area * 3, p.t.col, vel, rel.normalize().multiplyScalar(6), 1);
+        }
+      }
+    }
+  }
+
+  // Landmarks whose remaining volume dropped below half since the last call.
+  newlyFallen() {
+    const out = [];
+    for (const L of this.landmarks) {
+      if (L.down) continue;
+      let rem = 0;
+      for (const t of L.tiles) for (const s of t.segs) rem += t.area * (s[1] - s[0]);
+      if (rem < 0.5 * L.vol0) { L.down = true; out.push(L); }
+    }
+    return out;
   }
 
   update(dt) {

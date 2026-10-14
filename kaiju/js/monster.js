@@ -344,6 +344,7 @@ export class Monster {
       if (!this.lastBeamHit || this.t - this.lastBeamHit > 0.07) {
         this.lastBeamHit = this.t;
         this.city.damage(hit, 13, dir, 1.3);
+        this.fx.ignite(hit.x, hit.y, hit.z, 1, 30);
         if (this.onImpact) this.onImpact(hit, 0.15);
       }
     }

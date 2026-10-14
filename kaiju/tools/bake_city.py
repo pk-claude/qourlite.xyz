@@ -103,12 +103,30 @@ for b in buildings:
             t["n"] = name
         out.append(t)
 
+# streets: centre lines of drivable/pedestrian roads, clipped to the square
+ROAD = ["motorway", "trunk", "primary", "secondary", "tertiary", "residential", "unclassified",
+        "living_street", "service", "pedestrian", "unknown"]
+d = ds.dataset(f"overturemaps-us-west-2/release/{RELEASE}/theme=transportation/type=segment/", filesystem=fs, format="parquet")
+f = ((pc.field("bbox", "xmin") < lon + dlon) & (pc.field("bbox", "xmax") > lon - dlon) &
+     (pc.field("bbox", "ymin") < lat + dlat) & (pc.field("bbox", "ymax") > lat - dlat))
+square = box(-half, -half, half, half)
+roads = []
+for r in d.to_table(filter=f, columns=["subtype", "class", "geometry", "level_rules"]).to_pylist():
+    if r["subtype"] != "road" or r["class"] not in ROAD:
+        continue
+    if any((lv.get("value") or 0) < 0 and not lv.get("between") for lv in (r["level_rules"] or [])):
+        continue  # tunnels
+    g = shapely.transform(shapely.from_wkb(r["geometry"]), lambda a: (a - [lon, lat]) * [mlon, -mlat]).intersection(square)
+    for line in (g.geoms if hasattr(g, "geoms") else [g]):
+        if line.geom_type == "LineString" and line.length > 2:
+            roads.append([ROAD.index(r["class"])] + [round(v, 1) for xy in line.simplify(0.5).coords for v in xy])
+
 out.sort(key=lambda t: -t["h"])
 json.dump({"id": cid, "name": cname, "lat": lat, "lon": lon, "half": half,
            "source": f"Overture Maps Foundation {RELEASE} (ODbL; includes OpenStreetMap contributors)",
-           "tiles": out}, open(f"{sys.argv[0].rsplit('/', 2)[0]}/data/{cid}.json", "w"), separators=(",", ":"))
+           "tiles": out, "roadClasses": ROAD, "roads": roads}, open(f"{sys.argv[0].rsplit('/', 2)[0]}/data/{cid}.json", "w"), separators=(",", ":"))
 names = []
 for t in out:
     if t.get("n") and t["n"] not in names:
         names.append(t["n"])
-print(cid, len(out), "tiles,", group, "buildings; tallest:", names[:5])
+print(cid, len(roads), "roads,", len(out), "tiles,", group, "buildings; tallest:", names[:5])
