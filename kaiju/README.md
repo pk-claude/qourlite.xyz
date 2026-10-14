@@ -12,6 +12,7 @@ Open `kaiju/index.html` through any static web server (the data files are fetche
   (connected parts + weak-neck test) detaches unsupported tops as rigid bodies that tilt,
   crush the floors below them and damage what they land on.
 - `js/fx.js`: debris chunks (settle into permanent rubble), dust and fire particles.
+- `js/streets.js`: real road centre lines (also baked by `bake_city.py`) drawn as sidewalks and marked asphalt.
 - `js/monster.js`: two placeholder monsters built from primitives. To be replaced by models
   from the ComfyUI pipeline.
 

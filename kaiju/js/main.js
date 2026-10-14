@@ -2,11 +2,21 @@ import * as THREE from 'three';
 import { City, Buf, prism, buildingMaterial, hash } from './city.js';
 import { FX } from './fx.js';
 import { Monster, MONSTERS } from './monster.js';
+import { streets } from './streets.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 export const CITIES = {
   newyork: { name: 'New York', area: 'Midtown Manhattan', start: [0, 600], sun: [-0.55, 0.32, -0.25], grid: 0.51, fill: [30, 160] },
   tokyo: { name: 'Tokyo', area: 'Shinjuku', start: [100, 600], sun: [0.6, 0.3, -0.3], grid: 0.2, fill: [12, 70] },
   moscow: { name: 'Moscow', area: 'Moscow City', start: [0, 600], sun: [-0.4, 0.28, 0.5], grid: -0.3, fill: [12, 60] },
+};
+
+export const MODES = {
+  timed: { name: '3-minute rampage', blurb: 'Topple as much as you can. Landmarks are targets.', seconds: 180 },
+  free: { name: 'Free play', blurb: 'No clock. Wreck at leisure.', seconds: 0 },
 };
 
 const params = new URLSearchParams(location.search);
@@ -26,7 +36,8 @@ function sky(scene, sunDir) {
         c = mix(low, c, smoothstep(-0.05, 0.02, vD.y));
         float s = max(dot(vD, uSun), 0.0);
         c += vec3(1.0, 0.62, 0.32) * pow(s, 12.0) * 0.6 + vec3(1.0, 0.85, 0.6) * pow(s, 900.0) * 3.0;
-        gl_FragColor = vec4(c, 1.0);
+        // authored in display space; the composer expects linear
+        gl_FragColor = vec4(pow(c, vec3(2.2)), 1.0);
       }`,
   });
   const mesh = new THREE.Mesh(geo, m);
@@ -85,12 +96,13 @@ class Audio {
 }
 
 export class Game {
-  constructor(canvas, cityData, cityId, monsterType) {
+  constructor(canvas, cityData, cityId, monsterType, mode = 'timed') {
     this.canvas = canvas;
     const R = this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     R.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
     R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.05;
+    R.info.autoReset = false;
     const S = this.scene = new THREE.Scene();
     const cfg = CITIES[cityId];
     const sunDir = new THREE.Vector3(...cfg.sun).normalize();
@@ -108,8 +120,9 @@ export class Game {
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), new THREE.MeshStandardMaterial({ color: 0x3a3a3e, roughness: 0.95 }));
     ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; S.add(ground);
     // sidewalk apron under the city
-    const apron = new THREE.Mesh(new THREE.PlaneGeometry(cityData.half * 2, cityData.half * 2), new THREE.MeshStandardMaterial({ color: 0x55545a, roughness: 0.9 }));
+    const apron = new THREE.Mesh(new THREE.PlaneGeometry(cityData.half * 2, cityData.half * 2), new THREE.MeshStandardMaterial({ color: 0x5c5a57, roughness: 0.9 }));
     apron.rotation.x = -Math.PI / 2; apron.position.y = 0.05; apron.receiveShadow = true; S.add(apron);
+    streets(S, cityData);
 
     filler(S, cityData.half, cfg);
     this.fx = new FX(S);
@@ -128,6 +141,13 @@ export class Game {
     this.city.onImpact = impact; this.monster.onImpact = impact;
     this.monster.onStep = (p) => { const d = p.distanceTo(this.camera.position); this.shake = Math.min(3, this.shake + 0.25 * 300 / (d + 200)); this.audio.rumble(0.12, d); };
 
+    // glow on lit windows, fire and the beam
+    this.composer = new EffectComposer(R);
+    this.composer.addPass(new RenderPass(S, this.camera));
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.45, 0.9);
+    this.composer.addPass(this.bloom);
+    this.composer.addPass(new OutputPass());
+
     this.cam = { yaw: 0, pitch: 0.32, dist: 340 };
     this.keys = new Set();
     this.bindInput();
@@ -139,6 +159,13 @@ export class Game {
     $('hud-monster').textContent = MONSTERS[monsterType].name;
     const at = MONSTERS[monsterType].attacks;
     $('hud-keys').innerHTML = `<b>WASD</b> move &nbsp; <b>Shift</b> run &nbsp; <b>Mouse</b> look &nbsp; <b>Click</b> ${at.swipe} &nbsp; <b>Space</b> ${at.stomp} &nbsp; <b>E</b> ${at.special} &nbsp; <b>F</b> (hold) ${at.beam}`;
+    // game layer
+    this.cityId = cityId; this.monsterType = monsterType; this.mode = mode;
+    this.timeLeft = MODES[mode].seconds;
+    this.targets = this.city.landmarks.slice(0, 10);
+    this.fallen = [];
+    $('hud-timer-row').classList.toggle('hidden', !this.timeLeft);
+    this.updateHud();
     this.running = true;
     this.loop = this.loop.bind(this);
     requestAnimationFrame(this.loop);
@@ -147,6 +174,7 @@ export class Game {
   resize() {
     const w = innerWidth, h = innerHeight;
     this.renderer.setSize(w, h, false);
+    if (this.composer) this.composer.setSize(w, h);
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
     const sc = h * this.renderer.getPixelRatio() / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)));
     this.fx.dust.mat.uniforms.uScale.value = sc; this.fx.fire.mat.uniforms.uScale.value = sc;
@@ -228,19 +256,64 @@ export class Game {
     requestAnimationFrame(this.loop);
     const real = this.clock.getDelta(), dt = Math.min(real, 1 / 20);
     this.step(dt);
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.info.reset();
+    this.composer.render();
     this.fpsN++; this.fpsT += real;
+    if (this.timeLeft) {
+      this.timeLeft = Math.max(0, this.timeLeft - dt);
+      if (!this.timeLeft) this.finish();
+    }
     if (this.fpsT > 0.5) {
       this.fps = this.fpsN / this.fpsT; this.fpsN = 0; this.fpsT = 0;
-      $('hud-destroy').textContent = (this.city.destruction() * 100).toFixed(1) + '%';
-      $('hud-toppled').textContent = this.city.toppled;
-      $('hud-fps').textContent = params.has('debug') ? `${this.fps.toFixed(0)} fps | ${this.renderer.info.render.calls} calls | ${this.fx.n} chunks` : '';
+      this.updateHud();
     }
+  }
+
+  updateHud() {
+    for (const L of this.city.newlyFallen()) {
+      this.fallen.push(L);
+      this.toast(`${L.name} destroyed`);
+    }
+    const left = this.targets.filter((L) => !L.down);
+    $('hud-destroy').textContent = (this.city.destruction() * 100).toFixed(1) + '%';
+    $('hud-toppled').textContent = this.city.toppled;
+    $('hud-landmarks').textContent = `${this.targets.length - left.length}/${this.targets.length}`;
+    $('hud-target').textContent = left.length ? left[0].name : 'all down';
+    const t = Math.ceil(this.timeLeft);
+    $('hud-timer').textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    $('hud-fps').textContent = params.has('debug') ? `${this.fps.toFixed(0)} fps | ${this.renderer.info.render.calls} calls | ${this.fx.n} chunks` : '';
+  }
+
+  toast(text) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = text;
+    $('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  finish() {
+    this.updateHud();
+    this.running = false;
+    document.exitPointerLock?.();
+    this.monster.release('beam');
+    const pct = this.city.destruction() * 100;
+    const key = `kaiju-best-${this.cityId}-${this.monsterType}`;
+    let best = 0;
+    try { best = parseFloat(localStorage.getItem(key)) || 0; if (pct > best) localStorage.setItem(key, String(pct)); } catch (e) { /* storage blocked */ }
+    $('end-stats').innerHTML = `<div><b>${pct.toFixed(1)}%</b> of the city destroyed</div>
+      <div><b>${this.city.toppled}</b> sections toppled</div>
+      <div><b>${this.fallen.length}</b> landmarks destroyed</div>
+      <div class="best">${pct > best ? 'New best for this city and monster' : `Best: ${best.toFixed(1)}%`}</div>`;
+    $('end-list').textContent = this.fallen.map((L) => L.name).join(' | ');
+    $('end').classList.remove('hidden');
+    // keep the scene visible behind the panel
+    this.composer.render();
   }
 }
 
 // ---- menu ----
-let pick = { city: params.get('city') || 'newyork', monster: params.get('monster') || 'rhagon' };
+let pick = { city: params.get('city') || 'newyork', monster: params.get('monster') || 'rhagon', mode: params.get('mode') || 'timed' };
 
 function cards(el, items, key) {
   el.innerHTML = '';
@@ -259,11 +332,15 @@ async function start() {
   const data = await (await fetch(`data/${pick.city}.json`)).json();
   $('loading').classList.add('hidden');
   $('hud').classList.remove('hidden');
-  window.GAME = new Game($('c'), data, pick.city, pick.monster);
+  window.GAME = new Game($('c'), data, pick.city, pick.monster, pick.mode);
   $('attrib').textContent = 'Buildings: ' + data.source;
 }
 
 cards($('pick-monster'), MONSTERS, 'monster');
 cards($('pick-city'), CITIES, 'city');
+cards($('pick-mode'), MODES, 'mode');
+const go = (extra) => { location.search = new URLSearchParams({ city: pick.city, monster: pick.monster, mode: pick.mode, ...extra }).toString(); };
+$('again').onclick = () => go({ auto: 1 });
+$('to-menu').onclick = () => go({});
 $('go').onclick = start;
 if (params.has('auto')) start();

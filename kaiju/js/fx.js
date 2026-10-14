@@ -4,7 +4,8 @@ import * as THREE from 'three';
 const G = 12;
 const MAX_ACTIVE = 3000;
 const MAX_RUBBLE = 30000;
-const MAX_DUST = 5000;
+const MAX_DUST = 8000;
+const MAX_FIRES = 24;
 const MAX_FIRE = 1500;
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _c = new THREE.Color();
@@ -28,7 +29,7 @@ function particleMaterial(additive) {
         vec2 d = gl_PointCoord - 0.5;
         float r = dot(d, d) * 4.0;
         if (r > 1.0) discard;
-        gl_FragColor = vec4(vC * uLight, vA * (1.0 - r) * (1.0 - r));
+        gl_FragColor = vec4(pow(vC * uLight, vec3(2.2)), vA * (1.0 - r) * (1.0 - r));
       }`,
     transparent: true,
     depthWrite: false,
@@ -115,6 +116,7 @@ export class FX {
     this.fire = new Particles(scene, MAX_FIRE, true);
     this.budget = 0;
     this.dustColor = [0.62, 0.58, 0.52];
+    this.fires = [];
   }
 
   // Spawn one chunk. Oldest active chunk is settled into rubble when the pool is full.
@@ -160,13 +162,17 @@ export class FX {
     for (let k = 0; k < count; k++) {
       const p = sample(_p);
       const v = 0.85 + Math.random() * 0.3;
-      const dark = Math.random() < 0.25 ? 0.45 : 1;
+      const kind = Math.random();
+      let sx = size * (0.5 + Math.random()), sy = size * (0.4 + Math.random() * 0.8), sz = size * (0.5 + Math.random());
+      let c = color, dark = Math.random() < 0.25 ? 0.45 : 1;
+      if (kind < 0.25) { sy *= 0.25; sx *= 1.5; sz *= 1.5; }                  // floor slab
+      else if (kind < 0.4) { sx *= 0.25; sz *= 0.25; sy *= 2.2; dark = 0.5; }  // column / beam
+      else if (kind < 0.5) { sx *= 0.35; sy *= 0.35; sz *= 0.35; c = [0.55, 0.68, 0.78]; dark = 1; } // glass
       this.chunk(p.x, p.y, p.z,
         base.x + push.x * (0.3 + Math.random()) * power + (Math.random() - 0.5) * 6,
         base.y + push.y * Math.random() * power + Math.random() * 5,
         base.z + push.z * (0.3 + Math.random()) * power + (Math.random() - 0.5) * 6,
-        size * (0.5 + Math.random()), size * (0.4 + Math.random() * 0.8), size * (0.5 + Math.random()),
-        color[0] * v * dark, color[1] * v * dark, color[2] * v * dark);
+        sx, sy, sz, c[0] * v * dark, c[1] * v * dark, c[2] * v * dark);
     }
     const puffs = Math.min(70, 4 + vol / 1200);
     const dc = this.dustColor;
@@ -201,8 +207,38 @@ export class FX {
     if (Math.random() < 0.5) this.dust.emit(x, y + 6, z, (Math.random() - 0.5) * 4, 10, (Math.random() - 0.5) * 4, 14 * scale, 14, 5, 0.5, 0.12, 0.11, 0.1, 3);
   }
 
+  // A burning spot: flames plus a smoke column for `life` seconds. Nearby fires merge.
+  ignite(x, y, z, scale = 1, life = 30) {
+    for (const f of this.fires) {
+      if ((f.x - x) ** 2 + (f.z - z) ** 2 < 400 && Math.abs(f.y - y) < 30) { f.life = Math.max(f.life, life); f.scale = Math.min(2.5, f.scale + 0.1); return; }
+    }
+    if (this.fires.length >= MAX_FIRES) this.fires.shift();
+    this.fires.push({ x, y, z, scale, life, acc: 0 });
+  }
+
+  updateFires(dt) {
+    for (let i = this.fires.length - 1; i >= 0; i--) {
+      const f = this.fires[i];
+      f.life -= dt;
+      if (f.life <= 0) { this.fires.splice(i, 1); continue; }
+      // fire drops with the structure it sits on
+      if (this.city) f.y = Math.min(f.y, this.city.heightAt(f.x, f.z) + 1);
+      f.acc += dt;
+      const fade = Math.min(1, f.life / 8);
+      while (f.acc > 0.12) {
+        f.acc -= 0.12;
+        if (Math.random() < fade) this.flame(f.x, f.y, f.z, f.scale * 0.8);
+        const g = 0.3 + Math.random() * 0.12, sm = (14 + Math.random() * 10) * f.scale;
+        this.dust.emit(f.x + (Math.random() - 0.5) * 8, f.y + 8, f.z + (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 3 + 3, 9 + Math.random() * 6, (Math.random() - 0.5) * 3 + 1.5,
+          sm, sm * 1.1, 12 + Math.random() * 6, 0.32 * fade, g, g * 0.96, g * 0.92, 1.5);
+      }
+    }
+  }
+
   update(dt) {
     this.budget = Math.max(0, this.budget - 600 * dt);
+    this.updateFires(dt);
     const city = this.city;
     for (let i = this.n - 1; i >= 0; i--) {
       const j = i * 3;
