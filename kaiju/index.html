@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaiju Rampage</title>
+<style>
+  :root { --ink: #f3ede4; --dim: #b9ada0; --accent: #ff8a3d; --panel: rgba(18, 14, 16, 0.72); }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #120e10; color: var(--ink); font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hidden { display: none !important; }
+  #menu { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 16px;
+    background: radial-gradient(ellipse at 50% 30%, #4a2a22 0%, #120e10 70%); }
+  h1 { margin: 0; font-size: clamp(36px, 8vw, 72px); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 900; color: var(--accent); text-shadow: 0 4px 30px rgba(255, 120, 40, 0.4); }
+  h2 { margin: 6px 0 0; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 760px; }
+  .card { width: 220px; padding: 14px 16px; text-align: left; border: 1px solid #5a4a44; background: var(--panel); color: var(--ink); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; font: inherit; }
+  .card .t { font-weight: 800; font-size: 18px; }
+  .card .s { color: var(--dim); font-size: 13px; }
+  .card.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+  #go { margin-top: 10px; padding: 12px 40px; font: 800 18px system-ui; letter-spacing: 0.15em; text-transform: uppercase; background: var(--accent); color: #1a0f08; border: 0; border-radius: 8px; cursor: pointer; }
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  #hud .tl { position: absolute; top: 14px; left: 16px; background: var(--panel); padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
+  #hud .tl b { color: var(--accent); }
+  #hud-keys { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: var(--panel); padding: 8px 14px; border-radius: 8px; font-size: 13px; white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+  #hud-keys b { color: var(--accent); }
+  #hud-fps { position: absolute; top: 14px; right: 16px; font: 12px ui-monospace, monospace; color: var(--dim); }
+  #attrib { position: absolute; bottom: 52px; right: 16px; font-size: 10px; color: rgba(243, 237, 228, 0.55); }
+  .foot { font-size: 11px; color: var(--dim); max-width: 600px; text-align: center; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="menu">
+  <h1>Kaiju Rampage</h1>
+  <h2>Choose your monster</h2>
+  <div class="row" id="pick-monster"></div>
+  <h2>Choose your city</h2>
+  <div class="row" id="pick-city"></div>
+  <button id="go">Rampage</button>
+  <div class="foot">Concept prototype. Monsters are placeholders. Building footprints and heights: Overture Maps Foundation / OpenStreetMap contributors (ODbL). Keyboard and mouse required.</div>
+</div>
+<div id="loading" class="hidden">Loading city...</div>
+<div id="hud" class="hidden">
+  <div class="tl"><b id="hud-monster"></b> in <span id="hud-city"></span><br>Destroyed: <b id="hud-destroy">0%</b> &nbsp; Toppled: <b id="hud-toppled">0</b></div>
+  <div id="hud-fps"></div>
+  <div id="attrib"></div>
+  <div id="hud-keys"></div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
