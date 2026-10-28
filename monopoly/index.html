@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Monopoly: All-Hands Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=Lilita+One&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mono.css">
+</head>
+<body class="host">
+
+<header class="hud">
+  <div class="hud-l"><span class="kicker" id="hudSeg">Monopoly: All-Hands Edition</span></div>
+  <div class="hud-r">
+    <span class="pill" title="Players in the game"><b id="hudCount">0</b> players</span>
+    <span class="pill" title="Live relays: green = connected" id="hudRelays"></span>
+    <button class="pill" id="btnMute">Sound on</button>
+    <button class="pill" id="btnMenu">Menu</button>
+  </div>
+</header>
+
+<main id="stage">
+  <!-- BOARD STAGE: lobby, rules and dice rolls -->
+  <section class="view" id="vStage">
+    <div class="board-wrap">
+      <div class="board" id="board">
+        <div class="board-center">
+          <div class="center-pane" id="cLobby">
+            <div class="logo c-logo"><span class="logo-bar">MONOPOLY</span><span class="logo-sub">All-Hands Edition</span></div>
+            <div class="c-qr" id="qrBig"></div>
+            <div class="c-url">Scan or go to <b id="joinText">qourlite.xyz/go</b></div>
+            <div class="c-sub">The Bank gives every player $500 to start.</div>
+          </div>
+          <div class="center-pane" id="cRules">
+            <div class="logo c-logo" style="font-size:clamp(22px,2.6vw,48px)"><span class="logo-bar">HOW TO WIN</span></div>
+            <div class="rules">
+              <div class="rule"><span class="ri">🎲</span><div>We roll. The token lands on a space.<small>Every space is a question. Six of them.</small></div></div>
+              <div class="rule"><span class="ri">💵</span><div>Right answer = you collect rent<small>$200, plus up to $200 more for speed. Chance and Boardwalk pay double.</small></div></div>
+              <div class="rule"><span class="ri">🔨</span><div>Spend your cash at the Prize Auction<small>Sealed bids from your phone. Highest bid wins. One prize per person.</small></div></div>
+              <div class="rule"><span class="ri">🎁</span><div>Community Chest<small>A random draw at the end. Anyone can win, remote included.</small></div></div>
+              <div class="rule"><span class="ri">🟨</span><div>Bingo, all meeting long<small>Your phone has your own card. A bingo earns a second Community Chest ticket.</small></div></div>
+            </div>
+          </div>
+          <div class="center-pane" id="cRoll">
+            <div class="roll-total" id="rollTitle">Question 1 of 6</div>
+            <div class="dice-row"><div class="die" id="die1"></div><div class="die" id="die2"></div></div>
+            <div class="roll-total num" id="rollSum">&nbsp;</div>
+            <div class="roll-land" id="rollLand">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+      <div class="walker" id="walker">🎩</div>
+    </div>
+    <aside class="side">
+      <div class="side-pane" id="sLobby">
+        <div class="stat-row">
+          <div class="stat"><b class="num" id="stPlayers">0</b><span>Players</span></div>
+          <div class="stat"><b class="num" id="stDeeds">0</b><span>AI deeds</span></div>
+          <div class="stat"><b class="num" id="stBingo">0</b><span>Bingos</span></div>
+        </div>
+        <span class="ai-badge"><span class="dot"></span>Claude is writing everyone a personal title deed</span>
+        <div class="spot" id="spot"><div class="spot-empty">Join on your phone, answer 3 silly questions,<br>and the AI Banker writes you a property deed. It shows up here.</div></div>
+        <div class="crowd" id="crowd"></div>
+      </div>
+      <div class="side-pane" id="sRoll">
+        <div class="kicker" style="text-align:center">Landing on</div>
+        <div class="landcard" id="landCard"></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- QUESTION -->
+  <section class="view" id="vQ">
+    <div class="q-top">
+      <div class="q-space" id="qSpace"><span class="qs-c"></span><span class="qs-n"></span></div>
+      <div class="q-tag" id="qTag"></div>
+      <div class="q-count" id="qCount"></div>
+    </div>
+    <h1 class="q-text" id="qText"></h1>
+    <div class="q-mid">
+      <div class="timer" id="timer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="t-bg"/><circle cx="50" cy="50" r="44" class="t-fg" id="timerArc"/></svg><span class="num" id="timerNum">20</span></div>
+      <div class="answered"><b class="num" id="ansN">0</b><span>answers</span><div class="ans-faces" id="ansFaces"></div></div>
+    </div>
+    <div class="opts" id="opts"></div>
+    <div class="fact" id="fact"></div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="view" id="vBoard">
+    <div class="kicker" id="bKick">After 3 questions</div>
+    <h1 class="board-title">Richest tycoons</h1>
+    <ol class="ranks" id="ranks"></ol>
+    <div class="board-empty muted" id="boardEmpty">No one has collected rent yet.</div>
+  </section>
+
+  <!-- PODIUM -->
+  <section class="view" id="vPodium">
+    <div class="kicker">The Monopoly Champion is...</div>
+    <div class="podium">
+      <div class="pod p2"><div class="pod-av" id="pAv2"></div><div class="pod-nm" id="pNm2"></div><div class="pod-sc num" id="pSc2"></div><div class="pod-block">2</div></div>
+      <div class="pod p1"><div class="pod-av" id="pAv1"></div><div class="pod-nm" id="pNm1"></div><div class="pod-sc num" id="pSc1"></div><div class="pod-block">1</div></div>
+      <div class="pod p3"><div class="pod-av" id="pAv3"></div><div class="pod-nm" id="pNm3"></div><div class="pod-sc num" id="pSc3"></div><div class="pod-block">3</div></div>
+    </div>
+  </section>
+
+  <!-- AUCTION (intro, lot, sold) -->
+  <section class="view" id="vAuction">
+    <div class="kicker" id="aKick">The Prize Auction</div>
+    <h1 class="big-title" id="aTitle">Going, going...</h1>
+    <p class="big-sub" id="aSub"></p>
+    <div class="lots" id="lots"></div>
+    <div class="timer hidden" id="aTimer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="t-bg"/><circle cx="50" cy="50" r="44" class="t-fg" id="aTimerArc"/></svg><span class="num" id="aTimerNum">25</span></div>
+    <div class="bid-meter hidden" id="bidMeter"><div><b class="num" id="bidN">0</b>sealed bids</div></div>
+    <div class="bid-faces" id="bidFaces"></div>
+    <ol class="reveal-bids" id="revealBids"></ol>
+    <div class="going" id="going"></div>
+  </section>
+
+  <!-- COMMUNITY CHEST -->
+  <section class="view" id="vChest">
+    <div class="chest-card">
+      <div class="ck">COMMUNITY CHEST</div>
+      <div class="muted" style="color:#555;font-weight:700" id="chestSub">Random draw. Everyone who played is in, except auction winners.</div>
+      <div class="slot"><div class="slot-in" id="slotIn"></div></div>
+      <div style="font-weight:800" id="chestMsg">Press Next to draw</div>
+    </div>
+    <div class="chest-past" id="chestPast"></div>
+  </section>
+
+  <!-- END -->
+  <section class="view" id="vEnd">
+    <div class="logo" style="font-size:clamp(40px,7vw,120px);transform:rotate(-6deg)"><span class="logo-bar">GAME OVER</span></div>
+    <p class="big-sub">Thanks for playing. Prize winners: see the host after the meeting.<br>You may now flip the board.</p>
+    <div class="lots" id="endLots"></div>
+  </section>
+</main>
+
+<div class="mini-join" id="miniJoin"><div class="mini-qr" id="qrMini"></div><div><div class="kicker">Join</div><b class="num">qourlite.xyz/go</b></div></div>
+<div class="reactions" id="reactions" aria-hidden="true"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="fine">Fan-made for an internal event. Not affiliated with or endorsed by Hasbro.</div>
+
+<div class="overlay hidden" id="qrOverlay"><div class="over-card"><div class="over-qr" id="qrOver"></div><h2>qourlite.xyz/go</h2><div class="muted">Press Q to close</div></div></div>
+
+<div class="overlay hidden" id="gate"><div class="over-card" style="max-width:640px">
+  <div class="kicker">This is the presenter's big screen</div>
+  <h1 style="font-family:var(--disp);font-size:clamp(2rem,5vw,3.4rem);margin:.3em 0">Here to play?</h1>
+  <p class="muted" style="font-size:1.15rem">Join on your phone or laptop instead.</p>
+  <p><a class="btn primary" href="/go/" style="text-decoration:none;font-size:1.15rem;padding:14px 22px">Take me to the game</a></p>
+  <p style="margin-top:36px"><button class="btn" id="gateYes">I'm the presenter. Run the game from this screen.</button></p>
+</div></div>
+
+<div class="overlay hidden" id="menu"><div class="over-card menu-card">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Jump to</h2><button class="btn" id="menuClose">Close</button></div>
+  <div class="menu-list" id="menuList"></div>
+  <div class="menu-keys">
+    <span><kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>PgDn</kbd> next</span>
+    <span><kbd>&larr;</kbd> <kbd>PgUp</kbd> back</span>
+    <span><kbd>T</kbd> +10 sec</span>
+    <span><kbd>Q</kbd> big QR</span>
+    <span><kbd>S</kbd> sound</span>
+    <span><kbd>F</kbd> full screen</span>
+    <span><kbd>G</kbd> this menu</span>
+  </div>
+  <h3 style="margin:14px 0 4px">Prizes (shown on the auction cards)</h3>
+  <div class="prize-edit" id="prizeEdit"></div>
+  <div class="menu-actions">
+    <button id="btnCopy">Copy results summary</button>
+    <button id="btnSim" title="Adds 12 pretend players so you can rehearse">Rehearse with bots</button>
+    <button class="danger" id="btnReset">Reset everything and start over</button>
+  </div>
+  <div class="muted small" id="relayDetail"></div>
+</div></div>
+
+<script>window.LIVE_ROOM = 'mono-dec4';</script>
+<script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
+<script src="/q2/vendor/qrcode-generator-1.4.4.js"></script>
+<script src="/q2/assets/fx.js"></script>
+<script src="/q2/assets/live.js"></script>
+<script src="assets/program.js"></script>
+<script src="assets/deed.js"></script>
+<script src="assets/host.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

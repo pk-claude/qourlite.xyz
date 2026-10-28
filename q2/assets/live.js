@@ -177,5 +177,7 @@
     del(k) { try { localStorage.removeItem(k); } catch (e) {} },
   };
 
-  window.Live = { create, rid, store, room: (params.get('room') || 'icqa-pk26').replace(/[^a-z0-9-]/gi, '').slice(0, 24) || 'icqa-pk26', test: TEST };
+  // A page can set window.LIVE_ROOM before loading this file to get its own default room.
+  const DEF_ROOM = window.LIVE_ROOM || 'icqa-pk26';
+  window.Live = { create, rid, store, defRoom: DEF_ROOM, room: (params.get('room') || DEF_ROOM).replace(/[^a-z0-9-]/gi, '').slice(0, 24) || DEF_ROOM, test: TEST };
 })();
