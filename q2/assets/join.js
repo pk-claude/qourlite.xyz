@@ -196,7 +196,7 @@
       sound.play('boing');
     } else if (a === rv.a) {
       el.className = 'result good';
-      el.innerHTML = `<div class="r-head">Correct!</div><div class="r-pts">+${mine ? mine[0].toLocaleString() : ''}</div><div class="r-line">${pick(RIGHT)}</div><div class="r-rank">${rankLine}</div>${factLine}`;
+      el.innerHTML = `<div class="r-head">Correct!</div>${q.fun ? '<div class="r-line">Bragging rights only. No points this round.</div>' : `<div class="r-pts">+${mine ? mine[0].toLocaleString() : ''}</div>`}<div class="r-line">${pick(RIGHT)}</div><div class="r-rank">${rankLine}</div>${factLine}`;
       sound.play('ding'); confetti({ count: 90 });
       if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     } else {

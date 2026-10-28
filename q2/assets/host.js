@@ -23,10 +23,13 @@
       if (it.type !== 'text') steps.push({ v: 'reveal', s, i });
     });
     if (seg.id === 'fight') steps.push({ v: 'fightend', s });
-    if (seg.items.some(it => it.type === 'mc' || it.type === 'vs')) steps.push({ v: 'board', s });
+    if (!seg.extra && seg.items.some(it => it.type === 'mc' || it.type === 'vs')) steps.push({ v: 'board', s });
     if (seg.id === 'final') steps.push({ v: 'podium', s });
   });
   const item = st => (st && st.i != null ? PROGRAM[st.s].items[st.i] : null);
+  // Extras (Fight Night, Hot Takes) are for fun only: they never change the scores.
+  const EXTRA = new Set(PROGRAM.filter(seg => seg.extra).flatMap(seg => seg.items.map(it => it.id)));
+  const MAIN = PROGRAM.filter(seg => !seg.extra);
 
   // ---------- persistent host state ----------
   const fresh = () => ({ sid: Live.rid(6), pos: 0, players: {}, answers: {}, opened: {}, closed: {}, scored: {}, gained: {}, hidden: {}, bingo: [], prevRank: {} });
@@ -68,7 +71,7 @@
     if (seg) out.seg = { title: seg.title, sub: seg.sub, color: seg.color };
     if (it) {
       const open = isOpen(it.id);
-      out.q = { id: it.id, type: it.type, tag: it.tag, q: it.q, opts: it.type === 'vs' ? ['Home Depot', "Lowe's"] : it.opts, mode: it.mode, double: !!it.double, open };
+      out.q = { id: it.id, type: it.type, tag: it.tag, q: it.q, opts: it.type === 'vs' ? ['Home Depot', "Lowe's"] : it.opts, mode: it.mode, double: !!it.double, open, fun: EXTRA.has(it.id) };
       if (open && it.type !== 'text') out.q.left = Math.max(0, (H.opened[it.id] + limitOf(it) * 1000 - Date.now()) / 1000);
       out.ap = Object.keys(H.answers[it.id] || {});
       if (st.v === 'reveal') {
@@ -188,7 +191,7 @@
 
   // ---------- scoring ----------
   function score(it) {
-    if (H.scored[it.id] || (it.type !== 'mc' && it.type !== 'vs')) return;
+    if (H.scored[it.id] || (it.type !== 'mc' && it.type !== 'vs') || EXTRA.has(it.id)) return;
     H.scored[it.id] = true;
     const box = H.answers[it.id] || {};
     const g = (H.gained[it.id] = {});
@@ -311,7 +314,7 @@
   // title
   function renderTitle(seg, s, silent) {
     show('vTitle');
-    $('tKick').textContent = `Round ${s + 1} of ${PROGRAM.length}`;
+    $('tKick').textContent = seg.extra ? 'Bonus round (just for fun, no points)' : `Round ${MAIN.indexOf(seg) + 1} of ${MAIN.length}`;
     $('tTitle').textContent = seg.title;
     $('tSub').textContent = seg.sub;
     $('tBlurb').textContent = seg.blurb;
