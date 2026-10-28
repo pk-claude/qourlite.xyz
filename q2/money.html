@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Where $100 Goes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .split { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: 36px; align-items: center; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+  .waffle { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; aspect-ratio: 1; padding: 14px; background: var(--bg2); border: 1px solid var(--line); border-radius: 22px; position: relative; }
+  .sq { border-radius: 6px; background: #24262c; transform: scale(.9); transition: background .35s, transform .35s, opacity .35s, box-shadow .35s; }
+  .sq.on { transform: scale(1); }
+  .waffle.focus .sq:not(.hl) { opacity: .18; }
+  .sq.hl { box-shadow: 0 0 0 2px #fff; }
+  .sq.net.on { animation: glow 1.6s ease-in-out infinite; }
+  @keyframes glow { 50% { box-shadow: 0 0 18px var(--orange); } }
+  .bill { z-index: 2; position: absolute; inset: -6px; display: grid; place-items: center; border-radius: 22px; background: repeating-linear-gradient(45deg, #1c5b35, #1c5b35 10px, #1f6a3c 10px, #1f6a3c 20px); border: 6px solid #2f8d55; color: #d9f99d; font: 900 clamp(4rem, 10vw, 8rem) var(--font); text-shadow: 0 4px 0 rgba(0,0,0,.3); transition: transform .8s cubic-bezier(.6,-.3,.4,1.3), opacity .6s; cursor: pointer; }
+  .bill small { display: block; font-size: .16em; letter-spacing: .3em; text-align: center; color: #bbf7d0; }
+  .bill.gone { transform: rotate(-12deg) scale(.2) translateY(-60%); opacity: 0; pointer-events: none; }
+  .cap .amt { font-size: clamp(3rem, 7vw, 5.6rem); font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+  .cap h2 { font-size: clamp(1.4rem, 2.6vw, 2.2rem); margin: 6px 0 8px; letter-spacing: -.02em; }
+  .cap p { color: var(--muted); font-size: clamp(1rem, 1.5vw, 1.25rem); margin: 0 0 18px; max-width: 560px; }
+  .legend { display: grid; gap: 8px; margin-top: 10px; }
+  .lg { display: grid; grid-template-columns: 18px 1fr auto; gap: 12px; align-items: center; padding: 8px 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); opacity: .35; transition: opacity .4s, border-color .3s; cursor: pointer; }
+  .lg.on { opacity: 1; }
+  .lg:hover { border-color: var(--orange); }
+  .lg i { width: 18px; height: 18px; border-radius: 5px; }
+  .lg b { font-family: var(--mono); }
+  .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .go { font: inherit; font-weight: 900; font-size: 1.05rem; padding: 12px 20px; border-radius: 12px; border: 0; background: var(--orange); color: #fff; cursor: pointer; }
+  section { margin-top: 64px; }
+  h2.sec { font-size: clamp(1.8rem, 3.6vw, 3rem); letter-spacing: -.03em; margin: 0 0 8px; }
+  .bp-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+  @media (max-width: 900px) { .bp-row { grid-template-columns: 1fr; } }
+  .zoom { display: flex; align-items: center; gap: 18px; }
+  .zoom .one { width: 70px; height: 70px; border-radius: 10px; background: var(--orange); flex: none; }
+  .zoom .arrow { color: var(--dim); font-size: 2rem; }
+  .micro { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; width: 150px; height: 150px; flex: none; }
+  .micro i { background: #2b2e35; border-radius: 2px; }
+  .micro i.on { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+  .bp-out .big { color: var(--orange); }
+  .eq { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .eq span { padding: 8px 12px; border-radius: 10px; background: var(--bg2); border: 1px solid var(--line); color: var(--muted); }
+  .eq b { font-family: var(--mono); }
+  .levers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .levers { grid-template-columns: 1fr 1fr; } }
+  .lever { padding: 18px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); border-top: 5px solid var(--c); cursor: pointer; transition: transform .2s; }
+  .lever:hover { transform: translateY(-4px); }
+  .lever h3 { margin: 0 0 6px; font-size: 1.15rem; }
+  .lever p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .lever .where { margin-top: 10px; font-size: .8rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--c); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="kicker">The P&amp;L in one picture</div>
+  <h1 class="title">Where does <em>$100</em> go?</h1>
+  <p class="lede">A customer spends $100 at Home Depot in Q2. Before anyone gets to keep a dime, a lot of people get paid. Click the bill (or press <kbd>Space</kbd>) to follow the money.</p>
+
+  <div class="split">
+    <div class="waffle" id="waffle"><div class="bill" id="bill">$100<small>ONE CUSTOMER, ONE CART</small></div></div>
+    <div class="cap">
+      <div class="kicker" id="cKick">Step 0 of 6</div>
+      <div class="amt num" id="cAmt">$100.00</div>
+      <h2 id="cHead">One customer, one cart</h2>
+      <p id="cText">Each square is $1. Let's pay everybody, in order.</p>
+      <div class="legend" id="legend"></div>
+      <div class="btns"><button class="go" id="next">Follow the money</button><button class="pill" id="reset">Start over</button></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="kicker">The tiniest unit with the biggest bill</div>
+    <h2 class="sec">One basis point</h2>
+    <p class="lede">A basis point (bp) is one hundredth of one percent. Take one of those $1 squares and cut it into 100 pieces: one piece is 1 bp of a sale. Tiny. Until you multiply it by $47.9 billion.</p>
+    <div class="bp-row">
+      <div class="card">
+        <div class="zoom"><div class="one"></div><div class="arrow">&rarr;</div><div class="micro" id="micro"></div></div>
+        <label class="muted" for="bp" style="display:block;margin:18px 0 8px">Basis points saved: <b class="num" id="bpN" style="color:#fff">1</b></label>
+        <input type="range" id="bp" min="1" max="50" value="1">
+      </div>
+      <div class="bp-out">
+        <div class="muted">Worth to Home Depot, per quarter</div>
+        <div class="big num" id="bpQ">$4.8M</div>
+        <div class="muted" style="margin-top:6px">Per year (about $170B of sales): <b class="num" id="bpY">$17M</b></div>
+        <div class="eq" id="eq"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Where quality work shows up</div>
+    <h2 class="sec">Which squares can this room move?</h2>
+    <p class="lede">Click a card to light up the part of the $100 it usually touches.</p>
+    <div class="levers" id="levers"></div>
+  </section>
+
+  <div class="takeaway">Of every $100 customers spent in Q2, about <b>$10</b> became net earnings. Move one square by a few cents and, at our size, it is worth millions.</div>
+  <div class="src">Source: Home Depot Q2 FY2026 (13 weeks ended 8/2/2026): sales $47,861M; cost of sales 66.33%, SG&amp;A 17.60%, depreciation 1.78%, interest and other 1.09%, taxes 3.24%, net earnings 9.96% of sales. Squares rounded to whole dollars. The quality mapping is a general guide to where these costs usually land, not an accounting policy.</div>
+</div>
+
+<script src="assets/fx.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const CATS = [
+    { k: 'cogs', n: 66, v: 66.33, c: '#64748b', h: 'The product itself', t: 'Paying the companies that make what we sell (lumber mills, paint makers, tool brands) and getting it to us.' },
+    { k: 'sga', n: 18, v: 17.60, c: '#3b82f6', h: 'Running the place', t: 'SG&A: paychecks, stores, DCs, trucks, technology, marketing. Everything it takes to put the product in front of you.' },
+    { k: 'dep', n: 2, v: 1.78, c: '#a855f7', h: 'Wear and tear', t: 'Depreciation: stores, DCs, forklifts and racks wear out, so we spread their cost over their useful life.' },
+    { k: 'int', n: 1, v: 1.09, c: '#facc15', h: 'Rent on money', t: 'Interest on the money we borrowed, for example to buy SRS and GMS.' },
+    { k: 'tax', n: 3, v: 3.24, c: '#ef4444', h: 'Taxes', t: 'Federal, state and international income taxes.' },
+    { k: 'net', n: 10, v: 9.96, c: '#F96302', h: 'What we keep', t: 'Net earnings. About $10 of every $100. It pays dividends and gets reinvested in the business.' },
+  ];
+  const sq = [];
+  for (let i = 0; i < 100; i++) { const d = document.createElement('div'); d.className = 'sq'; $('waffle').appendChild(d); sq.push(d); }
+  let start = 0; CATS.forEach(c => { c.from = start; start += c.n; });
+  $('legend').innerHTML = CATS.map((c, i) => `<div class="lg" data-i="${i}"><i style="background:${c.c}"></i><span>${c.h}</span><b>$${c.v.toFixed(2)}</b></div>`).join('');
+  let step = 0, remaining = 100;
+  function show(i) {
+    const c = CATS[i];
+    for (let j = c.from; j < c.from + c.n; j++) setTimeout(() => { sq[j].style.background = c.c; sq[j].classList.add('on'); if (c.k === 'net') sq[j].classList.add('net'); }, (j - c.from) * (c.n > 20 ? 14 : 60));
+    document.querySelector(`.lg[data-i="${i}"]`).classList.add('on');
+    $('cKick').textContent = `Step ${i + 1} of ${CATS.length}`;
+    $('cHead').textContent = c.h;
+    $('cText').textContent = c.t;
+    $('cAmt').style.color = c.c;
+    FX.countUp($('cAmt'), c.v, { dur: 700, fmt: v => '$' + v.toFixed(2) });
+    FX.sound.play(c.k === 'net' ? 'cash' : 'pop');
+    if (c.k === 'net') setTimeout(() => FX.confetti({ count: 120, colors: ['#F96302', '#fff', '#ffb37a'] }), 500);
+  }
+  function next() {
+    if (step === 0) { $('bill').classList.add('gone'); FX.sound.play('whoosh'); }
+    if (step >= CATS.length) { reset(); return; }
+    show(step++);
+    $('next').textContent = step >= CATS.length ? 'Again' : 'Next';
+  }
+  function reset() {
+    step = 0; sq.forEach(s => { s.style.background = ''; s.classList.remove('on', 'net', 'hl'); });
+    document.querySelectorAll('.lg').forEach(l => l.classList.remove('on'));
+    $('bill').classList.remove('gone'); $('waffle').classList.remove('focus');
+    $('cKick').textContent = 'Step 0 of 6'; $('cAmt').textContent = '$100.00'; $('cAmt').style.color = '';
+    $('cHead').textContent = 'One customer, one cart'; $('cText').textContent = 'Each square is $1. Let\'s pay everybody, in order.';
+    $('next').textContent = 'Follow the money';
+  }
+  $('next').onclick = next; $('bill').onclick = next; $('reset').onclick = reset;
+  Steps.on(next, reset);
+  $('legend').onclick = e => { const l = e.target.closest('.lg'); if (l) focusCats([CATS[+l.dataset.i].k]); };
+
+  function focusCats(keys) {
+    while (step < CATS.length) next();
+    sq.forEach(s => s.classList.remove('hl'));
+    CATS.filter(c => keys.includes(c.k)).forEach(c => { for (let j = c.from; j < c.from + c.n; j++) sq[j].classList.add('hl'); });
+    $('waffle').classList.add('focus');
+    clearTimeout(focusCats.t); focusCats.t = setTimeout(() => { $('waffle').classList.remove('focus'); sq.forEach(s => s.classList.remove('hl')); }, 4000);
+    $('waffle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // basis points
+  const micro = $('micro');
+  for (let i = 0; i < 100; i++) micro.appendChild(document.createElement('i'));
+  const Q = 47861e6, Y = 170e9;
+  const fmtM = v => v >= 1e9 ? '$' + (v / 1e9).toFixed(2) + 'B' : '$' + (v / 1e6).toFixed(1) + 'M';
+  function bp() {
+    const n = +$('bp').value;
+    $('bpN').textContent = n;
+    [...micro.children].forEach((m, i) => m.classList.toggle('on', i < n));
+    $('bpQ').textContent = fmtM(Q * n / 1e4);
+    $('bpY').textContent = fmtM(Y * n / 1e4);
+    const q = Q * n / 1e4;
+    $('eq').innerHTML = `<span>= <b>${Math.round(q / 92.5).toLocaleString()}</b> average Q2 receipts ($92.50)</span><span>= about <b>${Math.round(q / 5).toLocaleString()}</b> orange buckets (at roughly $5)</span><span>= about <b>${Math.round(q / (Q / (91 * 1440)))}</b> minutes of all Q2 sales</span>`;
+  }
+  $('bp').oninput = () => { bp(); FX.sound.play('tick'); };
+  bp();
+
+  const LEVERS = [
+    { k: ['cogs'], c: '#64748b', h: 'Damage & defects', p: 'Product damaged in the network or returned defective gets marked down or written off.', w: 'Product cost' },
+    { k: ['cogs'], c: '#94a3b8', h: 'Vendor compliance', p: 'Barcode, labeling and ASN accuracy. Chargebacks and recoveries offset product cost.', w: 'Product cost' },
+    { k: ['sga'], c: '#3b82f6', h: 'Rework & redelivery', p: 'Second trips, re-picks, repairs and service calls add labor and delivery cost.', w: 'SG&A' },
+    { k: ['net'], c: '#F96302', h: 'In-stock', p: 'Accurate on-hands keep product sellable in store and online. Product in stock is product we can sell.', w: 'Sales, then all of it' },
+  ];
+  $('levers').innerHTML = LEVERS.map((l, i) => `<div class="lever" style="--c:${l.c}" data-i="${i}"><h3>${l.h}</h3><p>${l.p}</p><div class="where">${l.w}</div></div>`).join('');
+  $('levers').onclick = e => { const l = e.target.closest('.lever'); if (l) { focusCats(LEVERS[+l.dataset.i].k); FX.sound.play('ding'); } };
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

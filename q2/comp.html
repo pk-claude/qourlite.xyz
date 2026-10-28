@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>The Comp Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .machine { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 16px; align-items: center; }
+  @media (max-width: 1000px) { .machine { grid-template-columns: 1fr; } .op { text-align: center; } }
+  .op { font-size: 3rem; font-weight: 900; color: var(--dim); }
+  .part h3 { margin: 0 0 4px; font-size: 1.25rem; }
+  .part .val { font-size: clamp(2.2rem, 4.4vw, 3.6rem); font-weight: 900; letter-spacing: -.03em; line-height: 1.1; }
+  .part .sub { color: var(--muted); margin-bottom: 12px; min-height: 1.4em; }
+  .pos { color: var(--green); } .neg { color: var(--red); }
+  .people { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 12px 0; }
+  .people i { font-style: normal; font-size: 1.15rem; text-align: center; transition: opacity .3s, filter .3s, transform .3s; }
+  .people i.gone { opacity: .15; filter: grayscale(1); transform: scale(.8); }
+  .people i.extra { filter: drop-shadow(0 0 6px var(--green)); }
+  .receipt { background: #f6f3ee; color: #111; border-radius: 6px; padding: 16px 18px 22px; font-family: var(--mono); font-size: .95rem; position: relative; margin: 12px 0; max-width: 280px; }
+  .receipt::after { content: ''; position: absolute; left: 0; right: 0; bottom: -10px; height: 12px; background: radial-gradient(circle at 8px -2px, transparent 8px, #f6f3ee 9px) repeat-x; background-size: 16px 12px; }
+  .receipt .row { display: flex; justify-content: space-between; }
+  .receipt .tot { border-top: 2px dashed #999; margin-top: 8px; padding-top: 8px; font-weight: 800; font-size: 1.2rem; }
+  .result { text-align: center; }
+  .result .val { font-size: clamp(3.4rem, 7vw, 6rem); }
+  .formula { font-family: var(--mono); color: var(--muted); font-size: .9rem; margin-top: 8px; }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 20px; }
+  .chip { font: inherit; font-weight: 800; padding: 8px 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer; }
+  .chip.on, .chip:hover { border-color: var(--orange); color: #fff; }
+  section { margin-top: 64px; }
+  h2.sec { font-size: clamp(1.8rem, 3.6vw, 3rem); letter-spacing: -.03em; margin: 0 0 8px; }
+  .bridge { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; align-items: end; height: 340px; border-bottom: 2px solid var(--line); }
+  .bcol { position: relative; height: 100%; }
+  .seg { position: absolute; left: 12%; right: 12%; border-radius: 8px; transition: all 1s cubic-bezier(.2,.8,.2,1); display: grid; place-items: center; font-weight: 900; font-family: var(--mono); }
+  .seg.base { background: #3a3e46; }
+  .seg.bought { background: repeating-linear-gradient(45deg, #a855f7, #a855f7 8px, #7e22ce 8px, #7e22ce 16px); }
+  .seg.earned { background: var(--green); color: #052e16; }
+  .seg.total { background: var(--orange); }
+  .seg .lab { position: absolute; top: -28px; left: 0; right: 0; text-align: center; color: #fff; font-size: 1rem; }
+  .bridge.comp .seg.bought { opacity: .12; }
+  .blabels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; text-align: center; color: var(--muted); margin-top: 10px; font-weight: 700; }
+  .go { font: inherit; font-weight: 900; font-size: 1.05rem; padding: 12px 20px; border-radius: 12px; border: 0; background: var(--orange); color: #fff; cursor: pointer; margin-top: 18px; }
+  .gym { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  @media (max-width: 800px) { .gym { grid-template-columns: 1fr; } }
+  .gym .card h3 { margin: 0 0 6px; }
+  .gym .card p { margin: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="kicker">The number Wall Street watches first</div>
+  <h1 class="title">The <em>Comp</em> Machine</h1>
+  <p class="lede">Comparable sales ("comp") answer one question: did the stores we already had sell more than last year? It comes from two levers: how much each customer spends, and how many times customers buy.</p>
+
+  <div class="presets" id="presets"></div>
+  <div class="machine">
+    <div class="card part">
+      <h3>Average ticket</h3>
+      <div class="sub">What each customer spends per purchase</div>
+      <div class="val num" id="tV">+2.8%</div>
+      <div class="receipt"><div class="row"><span>LAST YEAR</span><span>$90.01</span></div><div class="row tot"><span>THIS YEAR</span><span id="rcpt">$92.50</span></div></div>
+      <input type="range" id="t" min="-5" max="5" step="0.1" value="2.8" aria-label="Average ticket change">
+    </div>
+    <div class="op">+</div>
+    <div class="card part">
+      <h3>Transactions</h3>
+      <div class="sub">How often customers buy (443.2M purchases in Q2)</div>
+      <div class="val num" id="xV">(1.0%)</div>
+      <div class="people" id="people"></div>
+      <input type="range" id="x" min="-5" max="5" step="0.1" value="-1" aria-label="Transactions change">
+    </div>
+    <div class="op">=</div>
+    <div class="card part result">
+      <h3>Comp sales</h3>
+      <div class="sub" id="cSub">Same stores, vs last year</div>
+      <div class="val num" id="cV">+1.8%</div>
+      <div class="formula">(1 + ticket) &times; (1 + transactions) &minus; 1</div>
+      <div class="formula" id="note">Actual Q2: +1.7%</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="kicker">Two ways to grow</div>
+    <h2 class="sec">Buy it, or earn it</h2>
+    <p class="lede">Total sales grew $2.6B. But $1.4B of that came from GMS, a company Home Depot bought. Comp leaves bought growth out, so you can see what the business earned on its own.</p>
+    <div class="bridge" id="bridge">
+      <div class="bcol"><div class="seg base" style="bottom:0;height:0" data-b="0" data-h="45.3"><span class="lab">$45.3B</span></div></div>
+      <div class="bcol"><div class="seg bought" style="bottom:0;height:0" data-b="45.3" data-h="1.4"><span class="lab">+$1.4B</span></div></div>
+      <div class="bcol"><div class="seg earned" style="bottom:0;height:0" data-b="46.7" data-h="1.2"><span class="lab">+$1.2B</span></div></div>
+      <div class="bcol"><div class="seg total" style="bottom:0;height:0" data-b="0" data-h="47.9"><span class="lab">$47.9B</span></div></div>
+    </div>
+    <div class="blabels"><span>Q2 2025 sales</span><span>Bought: GMS</span><span>Earned: comps, new stores, other</span><span>Q2 2026 sales</span></div>
+    <button class="go" id="onlyComp">Show only what counts in comp</button>
+    <div class="gym">
+      <div class="card"><h3>Lowe's: +8.3% sales, +0.2% comp</h3><p>Most of its growth came from buying FBM and ADG. That is getting stronger by buying a gym.</p></div>
+      <div class="card"><h3>Home Depot: +5.7% sales, +1.7% comp</h3><p>Less bought growth, more earned growth. US comp +1.3% vs Lowe's +0.2%: a 110 bps lead.</p></div>
+    </div>
+  </section>
+
+  <div class="takeaway">Comp shows how the core business grew. Customers spent more per trip (+2.8%) and came in slightly less often (1.0%). Accurate on-hands keep comp-store shelves sellable.</div>
+  <div class="src">Source: Home Depot Q2 FY2026 earnings release: comparable average ticket +2.8% ($92.50 vs $90.01), comparable transactions (1.0%); total transactions 443.2M vs 446.8M, comp +1.7%, US comp +1.3%, GMS contributed $1.4B. Lowe's Q2 2026 release. Ticket and transactions exclude HD Supply and SRS. The sales bridge is rounded and its axis starts at $43B so the steps are visible.</div>
+</div>
+
+<script src="assets/fx.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const pct = v => (v >= 0 ? '+' : '(') + Math.abs(v).toFixed(1) + '%' + (v >= 0 ? '' : ')');
+  const P = [['Q2 2026 actual', 2.8, -1.0], ['Spring rush', 1.0, 4.0], ['Big projects, few trips', 4.5, -3.5], ['Rough quarter', -2.0, -3.0], ['Flat as a board', 0, 0]];
+  $('presets').innerHTML = P.map((p, i) => `<button class="chip ${i === 0 ? 'on' : ''}" data-i="${i}">${p[0]}</button>`).join('');
+  $('presets').onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; const p = P[+b.dataset.i]; $('t').value = p[1]; $('x').value = p[2]; document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); calc(true); FX.sound.play('whoosh'); };
+  const EMO = ['🧑‍🔧', '👩', '👨', '🧑', '👷', '👩‍🦰', '🧔', '👵', '👴', '🧑‍🦱'];
+  $('people').innerHTML = Array.from({ length: 50 }, (_, i) => `<i>${EMO[i % EMO.length]}</i>`).join('');
+  let lastC = null;
+  function calc(sound) {
+    const t = +$('t').value, x = +$('x').value;
+    const c = ((1 + t / 100) * (1 + x / 100) - 1) * 100;
+    $('tV').textContent = pct(t); $('tV').className = 'val num ' + (t >= 0 ? 'pos' : 'neg');
+    $('xV').textContent = pct(x); $('xV').className = 'val num ' + (x >= 0 ? 'pos' : 'neg');
+    $('cV').textContent = pct(c); $('cV').className = 'val num ' + (c >= 0 ? 'pos' : 'neg');
+    $('rcpt').textContent = Math.abs(t - 2.8) < 0.05 ? '$92.50' : '$' + (90.01 * (1 + t / 100)).toFixed(2);
+    // 50 people = last year; each one is 2% of trips
+    const n = Math.round(x / 2);
+    [...$('people').children].forEach((el, i) => { el.classList.toggle('gone', n < 0 && i >= 50 + n); el.classList.toggle('extra', n > 0 && i < n); });
+    $('note').textContent = (Math.abs(t - 2.8) < 0.05 && Math.abs(x + 1) < 0.05) ? 'Actual Q2: +1.7% (rounding and mix)' : 'Rule of thumb: comp is about ticket + transactions';
+    if (lastC !== null && Math.sign(c) !== Math.sign(lastC)) FX.sound.play(c >= 0 ? 'ding' : 'buzz');
+    lastC = c;
+  }
+  ['t', 'x'].forEach(id => $(id).addEventListener('input', () => { document.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); calc(); }));
+  calc();
+
+  // bridge
+  const MIN = 43, MAX = 48.4;
+  const ys = v => ((v - MIN) / (MAX - MIN)) * 100;
+  let built = false;
+  function build() {
+    if (built) return; built = true;
+    document.querySelectorAll('.seg').forEach((s, i) => setTimeout(() => {
+      const b = +s.dataset.b, h = +s.dataset.h;
+      const bottom = b === 0 ? 0 : ys(b), top = b === 0 ? ys(h) : ys(b + h);
+      s.style.bottom = bottom + '%'; s.style.height = (top - bottom) + '%';
+      FX.sound.play('pop');
+    }, i * 450));
+  }
+  new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting) { build(); o.disconnect(); } }), { threshold: 0.15 }).observe($('bridge'));
+  $('onlyComp').onclick = () => { const on = $('bridge').classList.toggle('comp'); $('onlyComp').textContent = on ? 'Show everything' : 'Show only what counts in comp'; FX.sound.play('whoosh'); };
+  let k = 0;
+  Steps.on(() => { const ps = document.querySelectorAll('.chip'); k = (k + 1) % ps.length; ps[k].click(); }, () => {});
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

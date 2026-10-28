@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Presenter Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .shell { max-width: 1000px; }
+  h2 { font-size: 1.7rem; letter-spacing: -.02em; margin: 44px 0 12px; }
+  ol.check { padding-left: 1.4em; display: grid; gap: 10px; }
+  ol.check li { padding-left: 6px; }
+  ol.check li label { cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; font-size: .98rem; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; }
+  td.s { font-family: var(--mono); color: var(--orange); white-space: nowrap; font-weight: 800; }
+  td .do { display: inline-block; padding: 2px 8px; border-radius: 6px; background: rgba(249,99,2,.18); color: #fff; font-weight: 800; font-size: .8rem; margin-right: 6px; }
+  td .say { display: block; color: var(--muted); margin-top: 4px; font-style: italic; }
+  tr.flip td { background: rgba(249,99,2,.05); }
+  .keys { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 24px; }
+  @media (max-width: 700px) { .keys { grid-template-columns: 1fr; } }
+  .keys div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .callout { padding: 16px 18px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--yellow); }
+  .callout + .callout { margin-top: 10px; }
+  .chat { font-family: var(--mono); background: var(--bg2); border: 1px solid var(--line); padding: 12px 14px; border-radius: 10px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+  .chat button { flex: none; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><a class="brand" href="./"><span class="dot">Q2</span>Earnings Unpacked</a><a class="pill" href="live.html">Open the live quiz</a></div>
+  <div class="kicker">For the presenter (not shown to the room)</div>
+  <h1 class="title">Presenter <em>guide</em></h1>
+  <p class="lede">Your PowerPoint stays the spine. Flip to the browser at the orange rows. Everything in the browser is driven with the arrow keys or your clicker.</p>
+
+  <h2>15 minutes before</h2>
+  <ol class="check">
+    <li><label><input type="checkbox"> Open <b>qourlite.xyz/q2/live.html</b> in Chrome or Edge. Press <kbd>F</kbd> for full screen.</label></li>
+    <li><label><input type="checkbox"> Look at the three dots top right. <b>Any green dot = live voting works.</b> Yellow = still connecting. All red = see "If voting will not connect" below.</label></li>
+    <li><label><input type="checkbox"> Scan the QR with your own phone, join, and check your name pops up on the screen.</label></li>
+    <li><label><input type="checkbox"> Press <kbd>G</kbd> (menu) and click <b>Reset scores and start over</b> so you start clean. Do this again if you rehearsed with bots.</label></li>
+    <li><label><input type="checkbox"> In Teams, share your <b>screen</b> (not a single window) so you can Alt+Tab between PowerPoint and the browser. Turn on <b>Include sound</b> for the sound effects.</label></li>
+    <li><label><input type="checkbox"> Paste this into the Teams chat when you start:</label>
+      <div class="chat" style="margin-top:8px"><span id="chatTxt">Grab your phone and join the live quiz: https://qourlite.xyz/join (no login, takes 10 seconds). Hear 5 bingo words in a row? Hit BINGO.</span><button class="pill" id="copy">Copy</button></div></li>
+  </ol>
+
+  <h2>Run of show</h2>
+  <table>
+    <thead><tr><th>Slide</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr class="flip"><td class="s">Before 1</td><td><span class="do">BROWSER</span>Live quiz on the <b>Lobby</b> (QR screen) while people join. The ticker counts what Home Depot sold since the page opened.<span class="say">"Phones out. This is the only meeting where I'll ask you to look at your phone."</span></td></tr>
+      <tr><td class="s">1 - 2</td><td><span class="do">PPT</span>Title and the team's win on slide 2. Mention Jargon Bingo is on their phone (second tab).</td></tr>
+      <tr class="flip"><td class="s">3 - 4</td><td><span class="do">BROWSER</span>Press <kbd>&rarr;</kbd>: <b>Round 1 Warm-Up</b>. Four questions, each reveals with the right answer and a fun fact. Back to PPT for slide 4's ICQA links if you want them.<span class="say">"Speed counts. Your answer locks when you tap, so no take-backs."</span></td></tr>
+      <tr><td class="s">5 - 6</td><td><span class="do">PPT</span>Agenda, then macro.</td></tr>
+      <tr class="flip"><td class="s">6</td><td><span class="do">BROWSER</span>Optional Hot Take: <kbd>G</kbd> &rarr; Hot Takes &rarr; <b>TODAY, 2PM ET</b> (Fed call). Then <b>Ripple Map</b> (hub &rarr; Ripple Map): click <i>The Fed raises rates</i>, press <kbd>Space</kbd> step by step. Try <i>Oil spikes</i> too.<span class="say">"Let's follow one decision in Washington all the way to our buildings."</span></td></tr>
+      <tr><td class="s">7 - 8</td><td><span class="do">PPT</span>Consumer and housing.</td></tr>
+      <tr class="flip"><td class="s">8</td><td><span class="do">BROWSER</span><b>Lock-In Machine</b>: drag "Today's rate" down to 4.3% and watch it unlock, then back up to 7.4%. Press <kbd>Space</kbd> for the domino run. Hot Take <b>BE HONEST</b> (would you trade your rate?) lands well here. Then <b>Round 2 Pop Quiz</b> (press <kbd>2</kbd> in the live quiz).<span class="say">"Hands up if you have a mortgage under 4%. Congratulations, you are the housing market's problem."</span></td></tr>
+      <tr><td class="s">9 - 10</td><td><span class="do">PPT</span>Scorecard and the primer.</td></tr>
+      <tr class="flip"><td class="s">11</td><td><span class="do">BROWSER</span><b>Where $100 Goes</b>: press <kbd>Space</kbd> six times to pay everybody. Slide the basis-point slider. Click the four cards at the bottom to show where quality work lands.</td></tr>
+      <tr><td class="s">12</td><td><span class="do">PPT</span>ROIC and debt.</td></tr>
+      <tr class="flip"><td class="s">13</td><td><span class="do">BROWSER</span><b>Comp Machine</b>: show the Q2 preset, then let someone shout a scenario. Scroll to "Buy it, or earn it" and press the comp button. Then <b>Round 3 Results</b> (press <kbd>3</kbd>).</td></tr>
+      <tr><td class="s">14 - 15</td><td><span class="do">PPT</span>Momentum and investments.</td></tr>
+      <tr class="flip"><td class="s">16</td><td><span class="do">BROWSER</span><b>Round 4 Fight Night</b> (press <kbd>4</kbd>). The room calls each round on their phones; the reveal throws the punch. Final bell shows the round score, then the leaderboard.<span class="say">"Round 1 is a trap. Think about how they grew."</span></td></tr>
+      <tr><td class="s">17 - 18</td><td><span class="do">PPT</span>Departments and quality.</td></tr>
+      <tr class="flip"><td class="s">19</td><td><span class="do">BROWSER</span><b>Turns Race</b>: press <kbd>Space</kbd> to race one year. Then tap the ICQA boosts and race again.<span class="say">"Every boost on this screen is something someone in this room does."</span></td></tr>
+      <tr class="flip"><td class="s">20 - 21</td><td><span class="do">BROWSER</span><b>Round 5 Final Exam</b> (press <kbd>5</kbd>). The last question is double points. Keep pressing <kbd>&rarr;</kbd> to the <b>Podium</b>: drumroll, confetti, champion.</td></tr>
+      <tr class="flip"><td class="s">22</td><td><span class="do">BROWSER</span>Hot Takes &rarr; <b>YOUR TURN</b> (one number, one action) as a live wall instead of the chat. Click any answer to hide it. <b>ONE WORD</b> makes a word cloud if you have time.</td></tr>
+      <tr class="flip"><td class="s">Close</td><td><span class="do">BROWSER</span><b>Built with AI</b> (hub). Two minutes on how this was made and the prompts they can steal.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Live quiz keys</h2>
+  <div class="keys">
+    <div><span>Next (open, reveal, next question)</span><span><kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>PgDn</kbd></span></div>
+    <div><span>Back</span><span><kbd>&larr;</kbd> <kbd>PgUp</kbd></span></div>
+    <div><span>Jump to round 1 to 6</span><span><kbd>1</kbd> &hellip; <kbd>6</kbd></span></div>
+    <div><span>Menu (jump anywhere, reset, bots)</span><span><kbd>G</kbd></span></div>
+    <div><span>Big QR code for late joiners</span><span><kbd>Q</kbd></span></div>
+    <div><span>Add 10 seconds</span><span><kbd>T</kbd></span></div>
+    <div><span>Leaderboard</span><span><kbd>L</kbd></span></div>
+    <div><span>Sound on/off</span><span><kbd>S</kbd></span></div>
+    <div><span>Full screen</span><span><kbd>F</kbd></span></div>
+    <div><span>Close menus</span><span><kbd>Esc</kbd></span></div>
+  </div>
+  <p class="muted">Questions close on their own when time runs out or when everyone has answered. Scores, answers and the current question survive a page refresh.</p>
+
+  <h2>If something goes sideways</h2>
+  <div class="callout"><b>Voting will not connect (all dots red).</b> Corporate networks sometimes block the free relays. Try your phone's hotspot for the laptop. If that is not an option, run it as a show of hands: read the question, take answers in the Teams chat, press <kbd>&rarr;</kbd> to reveal. Every animation still works.</div>
+  <div class="callout"><b>Someone cannot join.</b> Have them open qourlite.xyz/join on their phone using mobile data (not office Wi-Fi), or on their laptop browser.</div>
+  <div class="callout"><b>Something inappropriate shows up on the word wall.</b> Click it. It disappears.</div>
+  <div class="callout"><b>You refreshed by accident.</b> Nothing is lost. The quiz comes back where you were.</div>
+  <div class="callout"><b>Rehearse tonight.</b> Menu &rarr; <i>Rehearse with bots</i> adds 12 pretend players who answer on their own. Then Menu &rarr; <i>Reset</i> before the real thing.</div>
+
+  <h2>What is on this site, and what is not</h2>
+  <p class="muted">Only public information is on qourlite.xyz: the Q2 release, the 10-Q, the earnings call, Lowe's public results, and public macro data. Internal numbers from your deck (MIP payouts, plan comparisons, division and department comps, the RDC reject rate, internal macro-pack figures) were left off on purpose. They stay in your PowerPoint. The pages are marked noindex so search engines skip them.</p>
+</div>
+<script>
+  document.getElementById('copy').onclick = e => { navigator.clipboard.writeText(document.getElementById('chatTxt').textContent).then(() => (e.target.textContent = 'Copied')); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

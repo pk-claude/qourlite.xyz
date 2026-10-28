@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f1012">
+<title>Join the Q2 Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/q2/assets/style.css">
+<style>
+  body { min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); overscroll-behavior: none; }
+  .app { max-width: 520px; margin: 0 auto; padding: 14px 16px 150px; min-height: 100dvh; display: flex; flex-direction: column; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .me { display: flex; align-items: center; gap: 8px; font-weight: 800; min-width: 0; }
+  .me .av { font-size: 1.6rem; }
+  .me .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .score { font-family: var(--mono); font-weight: 800; color: var(--orange); white-space: nowrap; }
+  .conn { width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); flex: none; }
+  .conn.up { background: var(--green); } .conn.down { background: var(--red); }
+  .screen { display: none; flex-direction: column; gap: 14px; flex: 1; animation: in .35s cubic-bezier(.2,1.2,.4,1); }
+  .screen.on { display: flex; }
+  @keyframes in { from { opacity: 0; transform: translateY(12px); } }
+  h1 { font-size: 2.3rem; line-height: 1; letter-spacing: -.04em; margin: 6px 0; font-weight: 900; }
+  h1 em { font-style: normal; color: var(--orange); }
+  h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.02em; line-height: 1.15; }
+  label { font-weight: 800; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .namebox { display: flex; gap: 8px; }
+  input[type=text] { flex: 1; min-width: 0; font: inherit; font-size: 1.2rem; font-weight: 700; padding: 14px 16px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); color: #fff; outline: none; }
+  input[type=text]:focus { border-color: var(--orange); }
+  .dice { flex: none; width: 56px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); font-size: 1.5rem; cursor: pointer; }
+  .avs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .avs button { aspect-ratio: 1; font-size: 1.7rem; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); cursor: pointer; }
+  .avs button.sel { border-color: var(--orange); background: rgba(249,99,2,.2); transform: scale(1.06); }
+  .go { font: inherit; font-size: 1.3rem; font-weight: 900; padding: 18px; border-radius: 16px; border: 0; background: var(--orange); color: #fff; cursor: pointer; box-shadow: 0 8px 30px rgba(249,99,2,.35); }
+  .go:active { transform: scale(.98); }
+  .go:disabled { opacity: .5; }
+  .wait { margin: auto 0; text-align: center; }
+  .wait .bigav { font-size: 5rem; animation: bob 2.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-10px) rotate(4deg); } }
+  .wait p { color: var(--muted); font-size: 1.1rem; }
+  .tag { align-self: flex-start; font-weight: 900; letter-spacing: .14em; font-size: .78rem; background: var(--seg, var(--orange)); color: #fff; padding: 6px 12px; border-radius: 8px; }
+  .qtext { font-size: 1.35rem; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; }
+  .bar { height: 8px; background: var(--line); border-radius: 9px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--orange); transform-origin: left; }
+  .answers { display: grid; gap: 10px; flex: 1; }
+  .ans { --c: var(--a0); display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 14px 16px; border-radius: 16px; border: 0; color: #fff; font: inherit; font-size: 1.2rem; font-weight: 800; text-align: left; background: var(--c); cursor: pointer; box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 55%, #000); transition: transform .08s; }
+  .ans:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 55%, #000); }
+  .ans.c1 { --c: var(--a1); } .ans.c2 { --c: #16a34a; } .ans.c3 { --c: var(--a3); }
+  .ans .sh { font-size: 1.3rem; width: 26px; text-align: center; opacity: .85; }
+  .ans.vs-hd { --c: var(--orange); justify-content: center; font-size: 1.6rem; min-height: 120px; }
+  .ans.vs-low { --c: #2563eb; justify-content: center; font-size: 1.6rem; min-height: 120px; }
+  .locked { margin: auto 0; text-align: center; }
+  .locked .big-l { font-size: 4.6rem; font-weight: 900; color: var(--orange); line-height: 1; }
+  .locked p { color: var(--muted); }
+  .ack { color: var(--green); font-weight: 800; }
+  .result { margin: auto 0; text-align: center; padding: 26px 18px; border-radius: 22px; }
+  .result.good { background: linear-gradient(160deg, rgba(34,197,94,.35), var(--panel)); border: 2px solid var(--green); }
+  .result.bad { background: linear-gradient(160deg, rgba(239,68,68,.3), var(--panel)); border: 2px solid var(--red); }
+  .result.neutral { background: var(--panel); border: 2px solid var(--line); }
+  .result .r-head { font-size: 2.6rem; font-weight: 900; letter-spacing: -.03em; }
+  .result .r-pts { font-family: var(--mono); font-size: 2.2rem; font-weight: 800; margin: 6px 0; }
+  .result .r-line { color: var(--muted); font-size: 1.05rem; }
+  .result .r-rank { margin-top: 14px; font-weight: 800; }
+  .pollbars { display: grid; gap: 8px; text-align: left; margin-top: 12px; }
+  .pb { position: relative; padding: 10px 12px; border-radius: 10px; background: var(--bg2); overflow: hidden; font-weight: 700; }
+  .pb i { position: absolute; inset: 0 auto 0 0; background: rgba(249,99,2,.35); }
+  .pb span { position: relative; }
+  .pb.mine { outline: 2px solid var(--orange); }
+  .textform { display: flex; gap: 8px; }
+  .sent { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sent span { background: var(--panel); border: 1px solid var(--orange); padding: 6px 12px; border-radius: 99px; font-weight: 700; }
+  .rank-card { margin: auto 0; text-align: center; }
+  .rank-card .rk { font-size: 5.4rem; font-weight: 900; color: var(--orange); line-height: 1; font-family: var(--mono); }
+
+  /* bingo */
+  .bingo { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .bingo button { min-height: 64px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; font-size: .66rem; font-weight: 800; line-height: 1.1; padding: 3px; word-break: normal; cursor: pointer; overflow-wrap: anywhere; hyphens: auto; }
+  .bingo button.on { background: var(--orange); border-color: var(--orange); color: #fff; transform: rotate(-3deg) scale(.96); }
+  .bingo button.free { background: #fff; color: #000; }
+  .bingo button.line { box-shadow: 0 0 0 3px var(--yellow); }
+  .bingo-call { font-size: 2rem; padding: 16px; background: var(--yellow); color: #000; animation: pulseb 1s infinite; }
+  @keyframes pulseb { 50% { transform: scale(1.04); } }
+
+  /* bottom dock */
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
+  .dock-in { max-width: 520px; margin: 0 auto; display: grid; gap: 10px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--panel); padding: 5px; border-radius: 14px; border: 1px solid var(--line); }
+  .tabs button { font: inherit; font-weight: 800; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
+  .tabs button.on { background: var(--orange); color: #fff; }
+  .reacts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .reacts button { font-size: 1.5rem; padding: 6px 0; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  .reacts button:active { transform: scale(1.25); }
+  .linkish { background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; padding: 0; }
+  .center { text-align: center; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="me"><span class="conn" id="conn" title="Connection"></span><span class="av" id="meAv"></span><span class="nm" id="meNm">Q2 Live</span></div>
+    <div class="score" id="meScore"></div>
+  </div>
+
+  <!-- join -->
+  <section class="screen" id="sJoin">
+    <div class="kicker">Earnings Unpacked</div>
+    <h1>Join the <em>live quiz</em></h1>
+    <label for="nm">Your name (or a fun one)</label>
+    <div class="namebox"><input type="text" id="nm" maxlength="18" autocomplete="off" placeholder="e.g. Captain Comp"><button class="dice" id="dice" aria-label="Random name">🎲</button></div>
+    <label>Pick your avatar</label>
+    <div class="avs" id="avs"></div>
+    <button class="go" id="goBtn">Let's go</button>
+    <p class="muted center" style="font-size:.8rem">No login, no app. Only your name and answers are shared, and only with this game.</p>
+  </section>
+
+  <!-- waiting -->
+  <section class="screen" id="sWait">
+    <div class="wait">
+      <div class="bigav" id="wAv"></div>
+      <h2 id="wHead">You're in!</h2>
+      <p id="wSub">Eyes on the big screen. Questions show up here.</p>
+      <p id="wNet" class="muted" style="font-size:.85rem"></p>
+      <button class="linkish" id="editMe">Change name or avatar</button>
+    </div>
+  </section>
+
+  <!-- question -->
+  <section class="screen" id="sQ">
+    <div class="tag" id="qTag"></div>
+    <div class="qtext" id="qText"></div>
+    <div class="bar"><i id="qBar"></i></div>
+    <div class="answers" id="answers"></div>
+  </section>
+
+  <!-- locked -->
+  <section class="screen" id="sLocked">
+    <div class="locked">
+      <p>Locked in</p>
+      <div class="big-l" id="lockL">B</div>
+      <h2 id="lockT"></h2>
+      <p id="lockAck">Sending...</p>
+      <p class="muted">Waiting for the reveal. Fingers crossed.</p>
+    </div>
+  </section>
+
+  <!-- text answer -->
+  <section class="screen" id="sText">
+    <div class="tag" id="tTag"></div>
+    <div class="qtext" id="tText"></div>
+    <div class="textform"><input type="text" id="tIn" maxlength="40" placeholder="Type here" autocomplete="off"><button class="go" id="tSend" style="padding:12px 18px">Send</button></div>
+    <div class="muted" id="tLeft" style="font-size:.85rem">Up to 3 answers. Keep it work-friendly: it goes on the big screen.</div>
+    <div class="sent" id="tSent"></div>
+  </section>
+
+  <!-- result -->
+  <section class="screen" id="sResult">
+    <div class="result" id="res"></div>
+  </section>
+
+  <!-- rank -->
+  <section class="screen" id="sRank">
+    <div class="rank-card">
+      <p class="muted" id="rkLead">You are</p>
+      <div class="rk" id="rkN">#1</div>
+      <h2 id="rkOf"></h2>
+      <p class="muted" id="rkLine"></p>
+    </div>
+  </section>
+
+  <!-- bingo -->
+  <section class="screen" id="sBingo">
+    <div class="kicker">Jargon Bingo</div>
+    <h2>Tap a square when you hear it.</h2>
+    <p class="muted" style="margin:0;font-size:.9rem">Five in a row (any direction) and the BINGO button lights up. First one gets their name on the big screen.</p>
+    <div class="bingo" id="bingo"></div>
+    <button class="go bingo-call hidden" id="bingoBtn">BINGO!</button>
+    <button class="linkish" id="bingoNew">New card</button>
+  </section>
+</div>
+
+<div class="dock" id="dock">
+  <div class="dock-in">
+    <div class="reacts" id="reacts"></div>
+    <div class="tabs"><button class="on" id="tabPlay">Play</button><button id="tabBingo">Jargon Bingo</button></div>
+  </div>
+</div>
+
+<script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
+<script src="/q2/assets/fx.js"></script>
+<script src="/q2/assets/live.js"></script>
+<script src="/q2/assets/join.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

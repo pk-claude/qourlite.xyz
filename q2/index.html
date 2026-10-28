@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<base href="/q2/">
+<title>Earnings Unpacked</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: center; margin-bottom: 40px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat { padding: 16px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
+  .stat .v { font: 800 clamp(1.6rem, 3vw, 2.4rem) var(--mono); color: var(--orange); letter-spacing: -.03em; }
+  .stat .l { color: var(--muted); font-size: .9rem; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .tiles { grid-template-columns: 1fr; } }
+  .tile { display: flex; flex-direction: column; gap: 6px; padding: 22px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); text-decoration: none; color: var(--ink); transition: transform .2s, border-color .2s; position: relative; overflow: hidden; min-height: 170px; }
+  .tile:hover { transform: translateY(-4px); border-color: var(--c, var(--orange)); }
+  .tile .e { font-size: 2.2rem; }
+  .tile h3 { margin: 4px 0 0; font-size: 1.35rem; letter-spacing: -.01em; }
+  .tile p { margin: 0; color: var(--muted); }
+  .tile .when { margin-top: auto; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--c, var(--orange)); }
+  .tile.main { grid-column: span 2; background: linear-gradient(135deg, rgba(249,99,2,.35), var(--panel) 60%); border-color: var(--orange); }
+  @media (max-width: 900px) { .tile.main { grid-column: auto; } }
+  .tile.main h3 { font-size: 2rem; }
+  .tile .qr { position: absolute; right: 18px; top: 18px; width: 110px; height: 110px; background: #fff; border-radius: 10px; padding: 5px; }
+  .tile .qr svg { width: 100%; height: 100%; display: block; }
+  h2.sec { font-size: clamp(1.6rem, 3vw, 2.4rem); letter-spacing: -.03em; margin: 56px 0 6px; }
+  .flips { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 1000px) { .flips { grid-template-columns: repeat(2, 1fr); } }
+  .flip { perspective: 900px; height: 170px; cursor: pointer; }
+  .flip-in { position: relative; width: 100%; height: 100%; transition: transform .6s cubic-bezier(.3,1.3,.5,1); transform-style: preserve-3d; }
+  .flip.on .flip-in { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--line); }
+  .front { background: var(--panel); text-align: center; align-items: center; }
+  .front b { font-size: 1.25rem; }
+  .front span { color: var(--dim); font-size: .75rem; margin-top: 8px; }
+  .back { background: var(--orange); color: #fff; transform: rotateY(180deg); font-size: .92rem; line-height: 1.35; }
+  .back i { display: block; margin-top: 8px; font-style: normal; font-size: .8rem; opacity: .9; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><a class="brand" href="./"><span class="dot">Q2</span>Earnings Unpacked</a><a class="pill" href="presenter.html">Presenter guide</a></div>
+  <div class="hero">
+    <div>
+      <div class="kicker">Home Depot Q2 2026 &middot; the economy &middot; and us</div>
+      <h1 class="title">Earnings, <em>unpacked</em>.</h1>
+      <p class="lede">No finance degree required. A live quiz you play on your phone, plus a few toys that show how interest rates in Washington end up as pallets in our buildings.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">$47.9B</div><div class="l">Q2 sales, +5.7%</div></div>
+      <div class="stat"><div class="v">+1.7%</div><div class="l">Comp sales (US +1.3%)</div></div>
+      <div class="stat"><div class="v">$4.79</div><div class="l">Diluted EPS, +4.6%</div></div>
+      <div class="stat"><div class="v">7.4%</div><div class="l">30-year mortgage rate</div></div>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <a class="tile main" href="live.html"><span class="e">🎮</span><h3>Live Quiz</h3><p>The big screen: QR code, timed questions, Fight Night, leaderboard, podium. Open this on the presenter laptop.</p><span class="when">Presenter: share this screen</span><div class="qr" id="qr"></div></a>
+    <a class="tile" href="/join/" style="--c:var(--green)"><span class="e">📱</span><h3>Join on your phone</h3><p>qourlite.xyz/join. Pick a name, answer fast, play Jargon Bingo.</p><span class="when">Everyone</span></a>
+    <a class="tile" href="ripple.html" style="--c:var(--blue)"><span class="e">🌊</span><h3>Ripple Map</h3><p>Pick a shock (Fed hike, oil spike, storm) and watch it travel from the world to our DCs.</p><span class="when">Macro chapter</span></a>
+    <a class="tile" href="lockin.html" style="--c:var(--red)"><span class="e">🔒</span><h3>Lock-In Machine</h3><p>Why nobody is moving: drag two mortgage rates and feel the monthly bill.</p><span class="when">Housing</span></a>
+    <a class="tile" href="money.html" style="--c:var(--yellow)"><span class="e">💵</span><h3>Where $100 Goes</h3><p>The whole P&amp;L as 100 squares, plus why one basis point is worth $4.8M.</p><span class="when">P&amp;L</span></a>
+    <a class="tile" href="comp.html" style="--c:var(--green)"><span class="e">🧾</span><h3>Comp Machine</h3><p>Ticket times transactions, and the difference between buying growth and earning it.</p><span class="when">Growth</span></a>
+    <a class="tile" href="turns.html" style="--c:var(--purple)"><span class="e">🚚</span><h3>Turns Race</h3><p>Inventory turns as a race track. Give our truck an ICQA boost.</p><span class="when">Inventory</span></a>
+    <a class="tile" href="ai.html" style="--c:var(--orange2)"><span class="e">🤖</span><h3>Built with AI</h3><p>How this whole session was made overnight, and prompts you can steal.</p><span class="when">Closing</span></a>
+  </div>
+
+  <h2 class="sec">Jargon, decoded</h2>
+  <p class="lede">Tap a card to flip it. Learn these ten and you can read any earnings report.</p>
+  <div class="flips" id="flips"></div>
+
+  <div class="disclaimer" style="margin-top:40px">Independent, educational recap built from public information (company releases and filings, BEA, Freddie Mac, NAR). Not an official Home Depot page. Figures rounded.</div>
+</div>
+<script src="vendor/qrcode-generator-1.4.4.js"></script>
+<script src="assets/fx.js"></script>
+<script>
+  document.getElementById('qr').innerHTML = FX.qrSVG(location.origin + '/join/');
+  const T = [
+    ['Sales', 'Everything we sold, minus returns.', '$47.9B in Q2'],
+    ['Comp sales', 'Growth from stores and sites open over a year. Leaves out new stores and acquisitions.', '+1.7% in Q2'],
+    ['Average ticket', 'What a customer spends per purchase.', '$92.50, +2.8%'],
+    ['Transactions', 'How many purchases. Comp is about ticket + transactions.', '443M, (1.0%)'],
+    ['Gross margin', 'Sales minus what the product cost us, as a % of sales.', '33.67%'],
+    ['SG&A', 'Selling, general and admin: payroll, stores, DCs, tech, marketing.', '17.60% of sales'],
+    ['Operating margin', 'What is left after product cost, SG&A and depreciation.', '14.29%'],
+    ['EPS', 'Net earnings divided by the number of shares.', '$4.79 ($4.92 adjusted)'],
+    ['Basis point', 'One hundredth of a percent. 100 bps = 1%.', '1 bp of Q2 sales = $4.8M'],
+    ['Inventory turns', 'Product cost divided by average inventory. Higher = product moves faster.', '4.31x a year'],
+  ];
+  document.getElementById('flips').innerHTML = T.map(([a, b, c]) => `<div class="flip" tabindex="0" role="button" aria-label="${a}"><div class="flip-in"><div class="face front"><b>${a}</b><span>tap to flip</span></div><div class="face back">${b}<i>Q2: ${c}</i></div></div></div>`).join('');
+  document.getElementById('flips').addEventListener('click', e => { const f = e.target.closest('.flip'); if (f) { f.classList.toggle('on'); FX.sound.play('whoosh'); } });
+  document.getElementById('flips').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.target.closest('.flip')?.classList.toggle('on'); } });
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
