@@ -111,6 +111,7 @@
     if (S.seg) document.body.style.setProperty('--seg', S.seg.color);
     const q = S.q;
     if (S._stale) return waitScreen(`You're in, ${me.nm}!`, 'Nothing to tap yet. The first question pops up here on its own. Keep this page open.', 'Waiting for the presenter to start');
+    if (S.ph === 'lobby' && q && q.type === 'text' && q.open) return textScreen(q, true);
     if (S.ph === 'lobby') return waitScreen(joined ? `You're in, ${me.nm}!` : 'Joining...', 'Nothing to tap yet. The first question pops up here on its own. Meanwhile, try Jargon Bingo below.', 'Waiting for the presenter to start');
     if (S.ph === 'title') return waitScreen(S.seg.title, S.seg.sub + '. The first question is coming up.', 'Get ready');
     if ((S.ph === 'q' || S.ph === 'reveal') && q) {
@@ -237,7 +238,8 @@
       : rank <= Math.ceil(S.n / 2) ? 'Top half. Solid beat.' : 'Plenty of quarters left to turn it around.';
     if (final && rank <= 3 && $('sRank').dataset.done !== S.sid) { $('sRank').dataset.done = S.sid; confetti({ count: 200 }); sound.play('fanfare'); }
   }
-  function textScreen(q) {
+  function textScreen(q, lobby) {
+    $('tStatus').classList.toggle('hidden', !lobby || !joined);
     const already = $('sText').classList.contains('on') && $('sText').dataset.q === q.id;
     showScreen('sText');
     $('sText').dataset.q = q.id;
@@ -247,7 +249,7 @@
     $('tSent').innerHTML = sent.map(t => `<span>${esc(t)}</span>`).join('');
     const can = q.open && sent.length < 3;
     $('tIn').disabled = !can; $('tSend').disabled = !can;
-    $('tLeft').textContent = !q.open ? 'Closed. Thanks!' : sent.length >= 3 ? 'That\'s 3. Thanks!' : `Up to ${3 - sent.length} more. Keep it work-friendly: it goes on the big screen.`;
+    $('tLeft').textContent = !q.open ? 'Closed. Thanks!' : sent.length >= 3 ? 'That\'s 3. Thanks! Your words may star in a story.' : `Up to ${3 - sent.length} more. Keep it work-friendly: it goes on the big screen${lobby ? ', and into a story' : ''}.`;
     if (!already && can) setTimeout(() => $('tIn').focus(), 200);
   }
   function sendText() {
@@ -258,7 +260,7 @@
     if (sent.length >= 3 || sent.includes(v)) return;
     myAns[q.id] = [...sent, v]; store.set(ansKey, myAns);
     $('tIn').value = '';
-    send({ k: 'ans', q: q.id, a: v });
+    send({ k: 'ans', q: q.id, a: v, all: myAns[q.id] });
     sound.play('pop');
     render();
   }

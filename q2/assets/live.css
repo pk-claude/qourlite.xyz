@@ -15,6 +15,19 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 .pdot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
 .relays { display: inline-flex; gap: 5px; }
+.offline-pill { padding: 6px 12px; border-radius: 99px; background: rgba(239,68,68,.18); border: 1px solid var(--red); color: #fca5a5; font-weight: 800; font-size: .85rem; cursor: pointer; animation: pulse 1.6s infinite; }
+/* who has joined, shown on the right while waiting */
+body.with-roster .view { padding-right: calc(4vw + 300px); }
+.roster { position: fixed; top: 76px; right: 18px; bottom: 112px; width: 280px; background: rgba(23,24,28,.92); border: 1px solid var(--line); border-radius: 18px; padding: 14px 14px 10px; z-index: 30; display: flex; flex-direction: column; }
+.roster-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.roster-h b { font-size: 1.6rem; color: #fff; }
+.roster ol { list-style: none; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; gap: 6px; }
+.roster li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; background: var(--panel); animation: popIn .5s cubic-bezier(.3,1.6,.5,1); }
+.roster li .av { font-size: 1.5rem; line-height: 1; }
+.roster li .nm { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roster li .cs { display: block; font-size: .78rem; color: var(--orange2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roster li > span:last-child { min-width: 0; }
+.roster .more { color: var(--muted); font-size: .85rem; padding: 4px 8px; }
 .relay { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
 .relay.up { background: var(--green); }
 .relay.connecting, .relay.standby { background: var(--yellow); }
@@ -31,9 +44,9 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 /* lobby */
 .lobby { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 4vw; height: 100%; align-items: center; }
 .lobby-left { text-align: center; }
-.lobby-title { font-size: clamp(2.6rem, 6.4vw, 6.4rem); margin: .2em 0 .25em; letter-spacing: -.045em; line-height: .95; font-weight: 900; }
+.lobby-title { font-size: clamp(2.2rem, 4.6vw, 4.8rem); margin: .2em 0 .25em; letter-spacing: -.045em; line-height: .95; font-weight: 900; }
 .lobby-title em { font-style: normal; color: var(--orange); }
-.qr-big { width: min(38vh, 34vw); aspect-ratio: 1; margin: 0 auto; background: #fff; border-radius: 22px; padding: 10px; box-shadow: 0 0 0 8px rgba(249,99,2,.35), 0 30px 80px rgba(0,0,0,.55); animation: qrGlow 3s ease-in-out infinite; }
+.qr-big { width: min(36vh, 26vw); aspect-ratio: 1; margin: 0 auto; background: #fff; border-radius: 22px; padding: 10px; box-shadow: 0 0 0 8px rgba(249,99,2,.35), 0 30px 80px rgba(0,0,0,.55); animation: qrGlow 3s ease-in-out infinite; }
 .qr-big svg { width: 100%; height: 100%; display: block; }
 @keyframes qrGlow { 50% { box-shadow: 0 0 0 14px rgba(249,99,2,.18), 0 30px 80px rgba(0,0,0,.55); } }
 .join-url { margin-top: 2.4vh; font-size: clamp(1.1rem, 2.2vw, 2rem); color: var(--muted); }
@@ -51,7 +64,14 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 .bubble { cursor: default; }
 @keyframes bob { 50% { transform: translateY(-6px); } }
 @keyframes popIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
-.lobby-hint { color: var(--dim); font-size: 1rem; }
+.lobby-hint { color: var(--muted); font-size: clamp(.9rem, 1.2vw, 1.15rem); margin-top: .4vh; }
+.lobby-q { font-size: clamp(1.8rem, 3.6vw, 3.8rem); line-height: 1.05; letter-spacing: -.035em; margin: 1.6vh 0 .4vh; font-weight: 900; }
+.lobby-cloud { min-height: 24vh; max-height: 36vh; overflow: hidden; font-size: .8em; }
+.lobby-right { justify-content: flex-start; padding-top: 2vh; }
+.lobby .story-cta { margin-right: 0; justify-content: flex-start; }
+.mini-ticker { margin-top: 1.6vh; color: var(--muted); font-size: clamp(.85rem, 1.1vw, 1.05rem); }
+.mini-ticker b { color: var(--orange); font-size: 1.15em; }
+.roster li { cursor: default; }
 
 /* title card */
 .title-card { margin: auto; text-align: center; max-width: 1100px; }

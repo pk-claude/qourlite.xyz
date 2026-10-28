@@ -1,6 +1,6 @@
 /* Live transport for the quiz.
-   No server of our own: messages go over free public relays, on several at once,
-   so one blocked or rate-limited relay does not stop the room.
+   Messages go over several relays at once, so one blocked or rate-limited relay does not stop the room.
+     - this site's own relay (/api/relay, polled over HTTPS): works on any network that can load the page
      - EMQX public MQTT broker (wss, port 8084)
      - Eclipse public MQTT broker (wss, port 443)
      - ntfy.sh (plain HTTPS) as the fallback, used sparingly because it rate-limits per IP
@@ -11,11 +11,13 @@
   const TEST = params.get('test');
   const CHANNELS = TEST
     ? [
+        { id: 'web', type: 'http', base: `http://${TEST}/api/relay` },
         { id: 'm1', type: 'mqtt', url: `ws://${TEST}/mqtt` },
         { id: 'm2', type: 'mqtt', url: `ws://${TEST}/mqtt2` },
         { id: 'nt', type: 'ntfy', base: `http://${TEST}` },
       ]
     : [
+        { id: 'web', type: 'http', base: '/api/relay' },
         { id: 'emqx', type: 'mqtt', url: 'wss://broker.emqx.io:8084/mqtt' },
         { id: 'eclipse', type: 'mqtt', url: 'wss://mqtt.eclipseprojects.io:443/mqtt' },
         { id: 'ntfy', type: 'ntfy', base: 'https://ntfy.sh' },
@@ -38,6 +40,7 @@
     let lastLive = 0; // when we last received a fresh host state
     let bestSt = 0; // start time of the newest presenter screen seen; older ones are ignored
     let lastNtfyStateKey = '';
+    let hostSid = null; // players: the host session their messages belong to
     let ntfyStateTimer = null;
 
     const setStatus = (id, s) => {
@@ -57,7 +60,7 @@
         // Two presenter screens in one room (e.g. an old tab left open): the most recently opened one wins.
         if (!msg._stale && (msg.st || 0) > bestSt) bestSt = msg.st || 0;
         msg._old = !msg._stale && (msg.st || 0) < bestSt;
-        if (!msg._stale && !msg._old) { lastLive = Date.now(); if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
+        if (!msg._stale && !msg._old) { lastLive = Date.now(); hostSid = msg.sid || hostSid; if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
       }
       onMsg && onMsg(topicKey, msg, chId);
     }
@@ -96,7 +99,13 @@
         try { es = new EventSource(`${ch.base}/${ntfyTopic(k)}/sse?since=15m`); } catch (e) { setStatus(ch.id, 'down'); return; }
         ntfySources[k] = es;
         es.onopen = () => setStatus(ch.id, 'up');
-        es.onerror = () => setStatus(ch.id, es.readyState === 2 ? 'down' : 'connecting');
+        es.onerror = () => {
+          if (es.readyState !== 2) { setStatus(ch.id, 'connecting'); return; }
+          // The browser gives up on a refused stream (e.g. a rate limit); try again ourselves.
+          setStatus(ch.id, 'down');
+          es.close(); delete ntfySources[k];
+          setTimeout(() => connectNtfy(ch), 8000);
+        };
         es.onmessage = ev => {
           let d; try { d = JSON.parse(ev.data); } catch (e) { return; }
           if (d.event && d.event !== 'message') return;
@@ -111,6 +120,31 @@
         .catch(() => { setStatus(ch.id, 'down'); return false; });
     }
 
+    // ---- this site's relay: plain HTTPS polling ----
+    const webCh = CHANNELS.find(c => c.type === 'http' && !disabled.includes(c.id));
+    const webUp = () => webCh && status[webCh.id] === 'up';
+    let mySid = null, webFails = 0, webPostTimer = null, webPending = null;
+    const webUrl = q => `${webCh.base}?room=${encodeURIComponent(room)}&${q}`;
+    function webGet(q, key) {
+      return fetch(webUrl(q), { cache: 'no-store' })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(j => { webFails = 0; setStatus(webCh.id, 'up'); (j.msgs || []).forEach(m => receive(webCh.id, key, m)); })
+        .catch(() => { webFails++; setStatus(webCh.id, webFails > 2 ? 'down' : 'connecting'); });
+    }
+    function webPost(k, msg) {
+      return fetch(webUrl('k=' + k), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(msg) })
+        .then(r => { if (!r.ok) throw new Error(r.status); setStatus(webCh.id, 'up'); return true; })
+        .catch(() => { setStatus(webCh.id, 'down'); return false; });
+    }
+    if (webCh) {
+      setStatus(webCh.id, 'connecting');
+      const poll = () => {
+        const p = role === 'host' ? (mySid ? webGet('k=up&sid=' + mySid, 'up') : Promise.resolve()) : webGet('k=state', 'state');
+        p.finally(() => setTimeout(poll, webFails > 2 ? 5000 : role === 'host' ? 1500 : 2000));
+      };
+      poll();
+    }
+
     const ntfyCh = CHANNELS.find(c => c.type === 'ntfy' && !disabled.includes(c.id));
     CHANNELS.filter(c => c.type === 'mqtt' && !disabled.includes(c.id)).forEach(connectMqtt);
     if (ntfyCh) {
@@ -119,8 +153,8 @@
         // Players only use ntfy if the MQTT relays have not brought them the host's state.
         setStatus(ntfyCh.id, 'standby');
         // ...and also whenever the host goes quiet on them (a relay the host cannot reach only holds stale state).
-        setTimeout(() => { if (!lastLive) connectNtfy(ntfyCh); }, 6000);
-        setInterval(() => { if (Date.now() - lastLive > 25000) connectNtfy(ntfyCh); }, 5000);
+        setTimeout(() => { if (!lastLive && !webUp()) connectNtfy(ntfyCh); }, 6000);
+        setInterval(() => { if (Date.now() - lastLive > 25000 && !webUp()) connectNtfy(ntfyCh); }, 5000);
       }
     }
 
@@ -130,9 +164,14 @@
     // ntfy gets only phase changes (not every vote count) to stay far under its limits.
     function publishState(state, phaseKey) {
       const ids = upMqtt();
-      const msg = { ...state, id: rid(), ch: [...ids, ...(ntfyCh && status[ntfyCh.id] === 'up' ? [ntfyCh.id] : [])] };
+      const msg = { ...state, id: rid(), ch: [...(webUp() ? [webCh.id] : []), ...ids, ...(ntfyCh && status[ntfyCh.id] === 'up' ? [ntfyCh.id] : [])] };
       const body = JSON.stringify(msg);
       ids.forEach(id => clients[id].publish(mqttTopic('state'), body, { qos: 0, retain: true }));
+      if (webCh) {
+        mySid = state.sid;
+        webPending = msg; // at most one POST every 800ms; always the latest state
+        if (!webPostTimer) webPostTimer = setTimeout(() => { webPostTimer = null; const m = webPending; webPending = null; if (m) webPost('state', m); }, 800);
+      }
       if (ntfyCh && !disabled.includes(ntfyCh.id) && phaseKey !== lastNtfyStateKey) {
         clearTimeout(ntfyStateTimer);
         ntfyStateTimer = setTimeout(() => {
@@ -157,17 +196,18 @@
 
     function publishUp(payload, opts) { return whenReady().then(() => publishUpNow(payload, opts)); }
     function publishUpNow(payload, { important = true } = {}) {
-      const msg = { ...payload, id: rid() };
+      const msg = { ...payload, id: rid(), ...(hostSid ? { sid: hostSid } : {}) };
       const body = JSON.stringify(msg);
+      const viaWeb = webCh ? webPost('up', msg) : Promise.resolve(false);
       const mine = upMqtt();
       const hostKnown = hostChannels && Date.now() - lastLive < 30000;
       const shared = hostKnown ? mine.filter(id => hostChannels.includes(id)) : mine;
       shared.forEach(id => clients[id].publish(mqttTopic('up'), body, { qos: important ? 1 : 0 }));
-      if (important && ntfyCh && !disabled.includes(ntfyCh.id) && (shared.length === 0 || !hostKnown)) {
+      if (important && ntfyCh && !disabled.includes(ntfyCh.id) && !webUp() && (shared.length === 0 || !hostKnown)) {
         if (!ntfySources.state) connectNtfy(ntfyCh);
         return ntfyPublish(ntfyCh, 'up', msg);
       }
-      return Promise.resolve(shared.length > 0);
+      return viaWeb.then(ok => ok || shared.length > 0);
     }
 
     return {
