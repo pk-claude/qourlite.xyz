@@ -469,6 +469,7 @@
     $('xN').textContent = visible.length;
     $('xNl').textContent = visible.length === 1 ? 'response' : 'responses';
     $('cloud').classList.toggle('hidden', it.mode !== 'cloud');
+    $('storyCta').classList.toggle('hidden', it.mode !== 'cloud');
     $('wall').classList.toggle('hidden', it.mode === 'cloud');
     if (it.mode === 'cloud') {
       const counts = {};
@@ -490,6 +491,28 @@
     }
     if (live) sound.play('pop');
   }
+  // The room's words, most popular first, with who said them (hidden words excluded).
+  function cloudWords(it) {
+    const box = H.answers[it.id] || {};
+    const hidden = new Set(H.hidden[it.id] || []);
+    const m = {};
+    Object.entries(box).forEach(([pid, x]) => x.a.forEach(t => {
+      if (hidden.has(pid + '|' + t)) return;
+      const w = t.toLowerCase().replace(/[^a-z0-9'\- ]/g, '').trim();
+      if (!w || STOP.has(w)) return;
+      const p = H.players[pid] || { nm: 'Someone', av: '' };
+      (m[w] = m[w] || { w, n: 0, by: [] }).n++;
+      if (!m[w].by.some(b => b.nm === p.nm)) m[w].by.push({ nm: p.nm, av: p.av });
+    }));
+    return Object.values(m).sort((a, b) => b.n - a.n);
+  }
+  function playStory() {
+    const it = item(steps[H.pos]);
+    if (!it || it.type !== 'text' || it.mode !== 'cloud' || !window.Story) return;
+    const words = cloudWords(it);
+    Story.play({ words, storytellers: new Set(Object.keys(H.answers[it.id] || {})).size });
+  }
+  $('storyBtn').onclick = playStory;
   ['cloud', 'wall'].forEach(id => $(id).addEventListener('click', e => {
     const el = e.target.closest('[data-keys]');
     if (!el) return;
@@ -630,6 +653,7 @@
     else if (k === 'Escape') { $('menu').classList.add('hidden'); $('qrOverlay').classList.add('hidden'); }
     else if (k.toLowerCase() === 'g' || k.toLowerCase() === 'm') toggleMenu();
     else if (k.toLowerCase() === 'q') $('qrOverlay').classList.toggle('hidden');
+    else if (k.toLowerCase() === 'k') playStory();
     else if (k.toLowerCase() === 's') { sound.toggle(); muteLabel(); }
     else if (k.toLowerCase() === 'f') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
     else if (k.toLowerCase() === 'l') go(steps.findIndex((x, i) => i >= H.pos && x.v === 'board') > -1 ? steps.findIndex((x, i) => i >= H.pos && x.v === 'board') : steps.findIndex(x => x.v === 'podium'));

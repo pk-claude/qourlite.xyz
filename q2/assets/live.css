@@ -145,6 +145,9 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 
 /* text: cloud + wall */
 .cloud { flex: 1; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 1vh 2vw; padding: 2vh 2vw; }
+.story-cta { display: flex; align-items: center; justify-content: center; gap: 14px; padding-bottom: 1vh; margin-right: 280px; }
+.story-btn { font: 700 clamp(1rem, 1.6vw, 1.4rem) 'Fredoka', var(--font); padding: 12px 26px; border-radius: 99px; border: 3px solid #3b2a20; background: #ffe066; color: #3b2a20; cursor: pointer; box-shadow: 0 5px 0 #3b2a20; }
+.story-btn:hover { transform: translateY(-2px); }
 .cw { font-weight: 900; letter-spacing: -.03em; cursor: pointer; transform: rotate(var(--r)); animation: popIn .5s cubic-bezier(.3,1.6,.5,1); transition: font-size .5s; line-height: 1.05; }
 .cw sup { font-size: .4em; color: var(--muted); margin-left: 2px; }
 .cw.c0 { color: var(--orange); } .cw.c1 { color: #fff; } .cw.c2 { color: #93c5fd; } .cw.c3 { color: var(--yellow); }
