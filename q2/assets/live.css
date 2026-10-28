@@ -46,6 +46,9 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 .bubble { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); font-weight: 700; font-size: clamp(.9rem, 1.3vw, 1.2rem); animation: bob 3.2s ease-in-out infinite; animation-delay: var(--d); }
 .bubble.new { animation: popIn .6s cubic-bezier(.3,1.6,.5,1), bob 3.2s ease-in-out .6s infinite; border-color: var(--orange); }
 .b-av { font-size: 1.5em; line-height: 1; }
+.b-txt { display: flex; flex-direction: column; line-height: 1.15; }
+.b-cs { font-size: .78em; font-weight: 600; color: var(--orange2); }
+.bubble { cursor: default; }
 @keyframes bob { 50% { transform: translateY(-6px); } }
 @keyframes popIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
 .lobby-hint { color: var(--dim); font-size: 1rem; }
