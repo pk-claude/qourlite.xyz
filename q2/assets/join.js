@@ -183,24 +183,25 @@
       el.className = 'result neutral';
       el.innerHTML = `<div class="r-head">The room says...</div><div class="pollbars">${q.opts.map((o, i) =>
         `<div class="pb ${a === i ? 'mine' : ''}"><i style="width:${((rv.dist || [])[i] || 0) / tot * 100}%"></i><span>${esc(o)}: ${Math.round(((rv.dist || [])[i] || 0) / tot * 100)}%</span></div>`).join('')}</div>
-        <div class="r-line" style="margin-top:12px">${a == null ? 'You sat this one out.' : 'Your pick is outlined.'}</div>`;
+        <div class="r-line" style="margin-top:12px">${a == null ? 'You sat this one out.' : 'Your pick is outlined.'}</div>${rv.fact ? `<div class="r-line" style="margin-top:10px;font-size:.92rem">${esc(rv.fact)}</div>` : ''}`;
       sound.play('ding');
       return;
     }
     const answerText = q.type === 'vs' ? (rv.a === 0 ? 'Home Depot' : 'Lowe\'s') : `${LETTERS[rv.a]}: ${q.opts[rv.a]}`;
+    const factLine = rv.fact ? `<div class="r-line" style="margin-top:14px;font-size:.92rem">${esc(rv.fact)}</div>` : '';
     const rankLine = mine ? `You're <b>#${mine[2]}</b> of ${S.n} with <b>${mine[1].toLocaleString()}</b> pts${mine[3] >= 3 ? ` · ${mine[3]} in a row!` : ''}` : '';
     if (a == null) {
       el.className = 'result neutral';
-      el.innerHTML = `<div class="r-head">Too slow!</div><div class="r-line">The answer was <b>${esc(answerText)}</b>.</div><div class="r-rank">${rankLine}</div>`;
+      el.innerHTML = `<div class="r-head">Too slow!</div><div class="r-line">The answer was <b>${esc(answerText)}</b>.</div><div class="r-rank">${rankLine}</div>${factLine}`;
       sound.play('boing');
     } else if (a === rv.a) {
       el.className = 'result good';
-      el.innerHTML = `<div class="r-head">Correct!</div><div class="r-pts">+${mine ? mine[0].toLocaleString() : ''}</div><div class="r-line">${pick(RIGHT)}</div><div class="r-rank">${rankLine}</div>`;
+      el.innerHTML = `<div class="r-head">Correct!</div><div class="r-pts">+${mine ? mine[0].toLocaleString() : ''}</div><div class="r-line">${pick(RIGHT)}</div><div class="r-rank">${rankLine}</div>${factLine}`;
       sound.play('ding'); confetti({ count: 90 });
       if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     } else {
       el.className = 'result bad';
-      el.innerHTML = `<div class="r-head">Nope.</div><div class="r-line">${pick(WRONG)}</div><div class="r-line" style="margin-top:8px">Answer: <b>${esc(answerText)}</b></div><div class="r-rank">${rankLine}</div>`;
+      el.innerHTML = `<div class="r-head">Nope.</div><div class="r-line">${pick(WRONG)}</div><div class="r-line" style="margin-top:8px">Answer: <b>${esc(answerText)}</b></div><div class="r-rank">${rankLine}</div>${factLine}`;
       sound.play('buzz');
       if (navigator.vibrate) navigator.vibrate(200);
     }
