@@ -173,7 +173,7 @@
     $('bpQ').textContent = fmtM(Q * n / 1e4);
     $('bpY').textContent = fmtM(Y * n / 1e4);
     const q = Q * n / 1e4;
-    $('eq').innerHTML = `<span>= <b>${Math.round(q / 92.5).toLocaleString()}</b> average Q2 receipts ($92.50)</span><span>= about <b>${Math.round(q / 5).toLocaleString()}</b> orange buckets (at roughly $5)</span><span>= about <b>${Math.round(q / (Q / (91 * 1440)))}</b> minutes of all Q2 sales</span>`;
+    $('eq').innerHTML = `<span>= about <b>$${Math.round(q / 91).toLocaleString()}</b> every day of the quarter</span><span>= about <b>${Math.round(q / 5).toLocaleString()}</b> orange buckets (at roughly $5)</span><span>= about <b>${Math.round(q / (Q / (91 * 1440)))}</b> minutes of all Q2 sales</span>`;
   }
   $('bp').oninput = () => { bp(); FX.sound.play('tick'); };
   bp();

@@ -306,7 +306,6 @@
     if (steps[H.pos].v !== 'lobby') return;
     const s = (Date.now() - t0) / 1000;
     $('tickSales').textContent = '$' + Math.floor(s * 6087).toLocaleString();
-    $('tickTx').textContent = Math.floor(s * 56.37).toLocaleString();
   }, 97);
 
   // title
