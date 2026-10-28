@@ -32,6 +32,7 @@
     onStatus: st => {
       const v = Object.values(st);
       $('conn').className = 'conn ' + (v.includes('up') ? 'up' : v.every(s => s === 'down' || s === 'off') ? 'down' : '');
+      if (!S && me) render();
     },
   });
   const send = (payload, opts) => live.publishUp({ p: pid, nm: me && me.nm, av: me && me.av, cs: me && me.cs, ...payload }, opts);
@@ -73,7 +74,7 @@
 
   // ---------- state ----------
   function onState(m, ch) {
-    if (m._old) return; // a presenter screen older than the current one
+    if (m._old || !m.hid) return; // an older presenter screen, or one still running old code
     if (S && !S._stale && m.hid !== S.hid && (m.st || 0) < (S.st || 0)) return;
     if (S && m.hid === S.hid && m.t < S.t) return;
     if (S && !m.hid && S.hid && !S._stale) return;
@@ -102,7 +103,11 @@
     $('dock').classList.remove('hidden');
     renderMe();
     if (tab === 'bingo') { showScreen('sBingo'); return; }
-    if (!S) { waitScreen('Connecting to the room...', 'Hang tight. If this takes more than a few seconds, check you have internet.', 'Connecting'); return; }
+    if (!S) {
+      if (live.anyUp()) waitScreen(`You're in, ${me.nm}!`, 'Nothing to tap yet. The first question pops up here on its own. Keep this page open.', 'Waiting for the presenter to start');
+      else waitScreen('Connecting to the room...', 'Hang tight. If this takes more than a few seconds, check you have internet.', 'Connecting');
+      return;
+    }
     if (S.seg) document.body.style.setProperty('--seg', S.seg.color);
     const q = S.q;
     if (S._stale) return waitScreen(`You're in, ${me.nm}!`, 'Nothing to tap yet. The first question pops up here on its own. Keep this page open.', 'Waiting for the presenter to start');
