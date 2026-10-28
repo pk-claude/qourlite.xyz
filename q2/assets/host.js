@@ -26,7 +26,8 @@
     if (!seg.extra && seg.items.some(it => it.type === 'mc' || it.type === 'vs')) steps.push({ v: 'board', s });
     if (seg.id === 'final') steps.push({ v: 'podium', s });
   });
-  const item = st => (st && st.i != null ? PROGRAM[st.s].items[st.i] : null);
+  // The lobby doubles as the opener: its question (window.LOBBY_Q) is open while people join.
+  const item = st => (st && st.v === 'lobby' ? window.LOBBY_Q : st && st.i != null ? PROGRAM[st.s].items[st.i] : null);
   // Extras (Fight Night, Hot Takes) are for fun only: they never change the scores.
   const EXTRA = new Set(PROGRAM.filter(seg => seg.extra).flatMap(seg => seg.items.map(it => it.id)));
   const MAIN = PROGRAM.filter(seg => !seg.extra);
@@ -62,14 +63,20 @@
     broadcast(true);
   }
   function renderRelays(st) {
-    const names = { emqx: 'Relay A', eclipse: 'Relay B', ntfy: 'Relay C', m1: 'A', m2: 'B', nt: 'C' };
+    const names = { web: 'This site', emqx: 'Relay A', eclipse: 'Relay B', ntfy: 'Relay C', m1: 'A', m2: 'B', nt: 'C' };
     $('hudRelays').innerHTML = live ? live.channels.map(id =>
       `<span class="relay ${st ? st[id] || 'connecting' : 'connecting'}" title="${names[id] || id}: ${st ? st[id] || 'connecting' : ''}"></span>`).join('') : '';
     const up = st ? Object.values(st).filter(s => s === 'up').length : 0;
-    $('relayDetail').textContent = up
-      ? `Live voting is ON (${up} of ${live.channels.length} relays connected). Room: ${ROOM}`
-      : 'Live voting is not connected yet. Everything still works as a show of hands: read the question, ask the room, press Next to reveal.';
+    const each = live.channels.map(id => `${names[id] || id}: ${(st && st[id]) || 'connecting'}`).join(', ');
+    $('relayDetail').textContent = (up
+      ? `Live voting is ON (${up} of ${live.channels.length} relays connected). Room: ${ROOM}.`
+      : 'Live voting is NOT connected: phones cannot reach this screen. Try another network (e.g. a phone hotspot), or run it as a show of hands: read the question, ask the room, press Next to reveal.') + ` (${each})`;
+    if (up) { offlineSince = 0; $('offlinePill').classList.add('hidden'); }
+    else if (!offlineSince) offlineSince = Date.now();
   }
+  let offlineSince = 0;
+  setInterval(() => { if (offlineSince && Date.now() - offlineSince > 15000) $('offlinePill').classList.remove('hidden'); }, 3000);
+  $('offlinePill').onclick = () => toggleMenu(true);
 
   function stateForPhones() {
     const st = steps[H.pos];
@@ -138,12 +145,16 @@
     if (!it || it.id !== m.q || !isOpen(it.id)) return;
     const box = (H.answers[it.id] = H.answers[it.id] || {});
     if (it.type === 'text') {
-      const txt = clean(String(m.a || '').trim().slice(0, 60));
-      if (!txt) return;
-      const prev = box[pid] ? box[pid].a : [];
-      if (prev.length >= 3 || prev.includes(txt)) return;
-      box[pid] = { a: [...prev, txt], ms: Date.now() - H.opened[it.id] };
-      save(); renderText(it, true); broadcast();
+      // 'all' carries every word this phone sent for the question (the site relay keeps only the latest message)
+      const texts = (Array.isArray(m.all) ? m.all : [m.a]).slice(0, 3).map(t => clean(String(t || '').trim().slice(0, 60))).filter(Boolean);
+      let added = false;
+      texts.forEach(txt => {
+        const prev = box[pid] ? box[pid].a : [];
+        if (prev.length >= 3 || prev.includes(txt)) return;
+        box[pid] = { a: [...prev, txt], ms: Date.now() - H.opened[it.id] };
+        added = true;
+      });
+      if (added) { save(); renderText(it, true); broadcast(); }
       return;
     }
     if (box[pid]) return; // first answer counts
@@ -233,7 +244,7 @@
     i = Math.max(0, Math.min(steps.length - 1, i));
     const leaving = steps[H.pos];
     const li = item(leaving);
-    if (li && li.type === 'text' && isOpen(li.id) && steps[i] !== leaving) { H.closed[li.id] = Date.now(); }
+    if (li && li.type === 'text' && leaving.v !== 'lobby' && isOpen(li.id) && steps[i] !== leaving) { H.closed[li.id] = Date.now(); }
     if (leaving.v === 'board' || leaving.v === 'podium') ranking().forEach((p, idx) => (H.prevRank[p.pid] = idx));
     H.pos = i; save();
     render(silent);
@@ -265,7 +276,8 @@
     document.body.style.setProperty('--seg', seg ? seg.color : '#F96302');
     $('hudSeg').textContent = seg ? `${seg.title}: ${seg.sub}` : 'Earnings Unpacked: Live';
     renderSteps(st);
-    if (st.v === 'lobby') { show('vLobby'); renderCrowd(); }
+    renderRoster();
+    if (st.v === 'lobby') { show('vLobby'); delete H.closed[LOBBY_Q.id]; openQuestion(LOBBY_Q); renderCount(); renderText(LOBBY_Q, true, true); }
     else if (st.v === 'title') renderTitle(seg, st.s, silent);
     else if (st.v === 'q' || st.v === 'reveal') {
       if (st.v === 'q' && !H.closed[it.id]) openQuestion(it);
@@ -284,7 +296,23 @@
     const seg = PROGRAM[st.s];
     el.innerHTML = seg.items.map((it, i) => `<span class="sd ${st.i === i ? 'cur' : ''} ${H.closed[it.id] ? 'done' : ''}"></span>`).join('');
   }
+  // Right-hand list of who has joined, shown while the room waits (title cards and the opener).
+  function renderRoster() {
+    const st = steps[H.pos], it = item(st);
+    const on = st.v === 'lobby' || st.v === 'title' || (st.v === 'q' && it && it.type === 'text');
+    document.body.classList.toggle('with-roster', on);
+    $('roster').classList.toggle('hidden', !on);
+    if (!on) return;
+    const list = ranking().slice().sort((a, b) => b.j - a.j);
+    $('rosterN').textContent = list.length;
+    const max = 14;
+    $('rosterList').innerHTML = list.slice(0, max).map(p => {
+      const cs = p.cs && !p.csHidden ? p.cs.replace(/^(A|An|The) /, w => w.toLowerCase()) : '';
+      return `<li data-pid="${p.pid}"><span class="av">${p.av}</span><span><span class="nm">${esc(p.nm)}</span>${cs ? `<span class="cs">as ${esc(cs)}</span>` : ''}</span></li>`;
+    }).join('') + (list.length > max ? `<li class="more">+ ${list.length - max} more</li>` : '') + (list.length ? '' : '<li class="more">Waiting for people to join...</li>');
+  }
   function renderCount() {
+    renderRoster();
     const ids = Object.keys(H.players), bots = ids.filter(id => id.startsWith('bot')).length;
     $('hudCount').textContent = ids.length + (bots ? ` (incl. ${bots} bots: Menu > Reset)` : '');
   }
@@ -456,21 +484,24 @@
 
   // text wall / cloud
   const STOP = new Set(['the', 'a', 'an', 'and', 'of', 'to', 'is', 'it', 'in', 'very', 'so', 'just', 'kinda', 'pretty']);
-  function renderText(it, live) {
-    if (!live) show('vText');
+  function renderText(it, live, quiet) {
+    const L = steps[H.pos].v === 'lobby';
+    if (!live && !L) show('vText');
     if (item(steps[H.pos]) !== it) return;
-    $('xTag').textContent = it.tag;
-    $('xText').textContent = it.q;
+    if (!L) { $('xTag').textContent = it.tag; $('xText').textContent = it.q; }
     const box = H.answers[it.id] || {};
     const hidden = new Set(H.hidden[it.id] || []);
     const entries = [];
     Object.entries(box).forEach(([pid, x]) => x.a.forEach(t => entries.push({ pid, t, key: pid + '|' + t })));
     const visible = entries.filter(e => !hidden.has(e.key));
-    $('xN').textContent = visible.length;
-    $('xNl').textContent = visible.length === 1 ? 'response' : 'responses';
-    $('cloud').classList.toggle('hidden', it.mode !== 'cloud');
-    $('storyCta').classList.toggle('hidden', it.mode !== 'cloud');
-    $('wall').classList.toggle('hidden', it.mode === 'cloud');
+    $(L ? 'lxN' : 'xN').textContent = visible.length;
+    $(L ? 'lxNl' : 'xNl').textContent = L ? (visible.length === 1 ? 'word' : 'words') : (visible.length === 1 ? 'response' : 'responses');
+    if (!L) {
+      $('cloud').classList.toggle('hidden', it.mode !== 'cloud');
+      $('storyCta').classList.toggle('hidden', it.mode !== 'cloud');
+      $('wall').classList.toggle('hidden', it.mode === 'cloud');
+    }
+    const cloudEl = $(L ? 'lcloud' : 'cloud');
     if (it.mode === 'cloud') {
       const counts = {};
       visible.forEach(e => {
@@ -479,17 +510,17 @@
       });
       const words = Object.entries(counts).sort((a, b) => b[1].n - a[1].n).slice(0, 40);
       const max = words.length ? words[0][1].n : 1;
-      $('cloud').innerHTML = words.map(([w, c], i) => {
+      cloudEl.innerHTML = words.map(([w, c], i) => {
         const size = 1.4 + 3.6 * Math.sqrt(c.n / max);
         return `<span class="cw c${i % 4}" data-keys="${esc(c.keys.join('\n'))}" style="font-size:${size.toFixed(2)}rem;--r:${((i * 37) % 9) - 4}deg">${esc(w)}${c.n > 1 ? `<sup>${c.n}</sup>` : ''}</span>`;
-      }).join('') || '<div class="muted">Type a word on your phone...</div>';
+      }).join('') || `<div class="muted">${L ? 'Words show up here as people answer...' : 'Type a word on your phone...'}</div>`;
     } else {
       $('wall').innerHTML = visible.slice().reverse().map((e, i) => {
         const p = H.players[e.pid] || { av: '', nm: '' };
         return `<div class="note c${i % 4}" data-keys="${esc(e.key)}"><div class="note-t">${esc(e.t)}</div><div class="note-by">${p.av} ${esc(p.nm)}</div></div>`;
       }).join('') || '<div class="muted">Answers appear here as they come in...</div>';
     }
-    if (live) sound.play('pop');
+    if (live && !quiet) sound.play('pop');
   }
   // The room's words, most popular first, with who said them (hidden words excluded).
   function cloudWords(it) {
@@ -513,7 +544,12 @@
     Story.play({ words, storytellers: new Set(Object.keys(H.answers[it.id] || {})).size });
   }
   $('storyBtn').onclick = playStory;
-  ['cloud', 'wall'].forEach(id => $(id).addEventListener('click', e => {
+  $('storyBtn2').onclick = playStory;
+  $('rosterList').addEventListener('click', e => {
+    const li = e.target.closest('[data-pid]'); const p = li && H.players[li.dataset.pid];
+    if (p && p.cs) { p.csHidden = true; save(); renderRoster(); }
+  });
+  ['cloud', 'wall', 'lcloud'].forEach(id => $(id).addEventListener('click', e => {
     const el = e.target.closest('[data-keys]');
     if (!el) return;
     const it = item(steps[H.pos]);
@@ -597,7 +633,7 @@
         return `<button class="mq ${H.closed[it.id] ? 'done' : ''}" data-go="${H.closed[it.id] && steps[qi + 1] && steps[qi + 1].v === 'reveal' ? qi + 1 : qi}">${esc(it.tag)}</button>`;
       }).join('');
       return `<div class="mseg" style="--c:${seg.color}"><button class="mt" data-go="${ti}"><span class="num">${s + 1}</span> ${esc(seg.title)}: ${esc(seg.sub)} <small>${esc(seg.deck)}</small></button><div class="mqs">${qs}</div></div>`;
-    }).join('') + `<div class="mseg"><button class="mt" data-go="0">Lobby (QR code)</button><button class="mt" data-go="${steps.findIndex(x => x.v === 'podium')}">Podium</button></div>`;
+    }).join('') + `<div class="mseg"><button class="mt" data-go="0">Lobby (QR + opener)</button><button class="mt" data-go="${steps.findIndex(x => x.v === 'podium')}">Podium</button></div>`;
   }
   const toggleMenu = on => { buildMenu(); $('menu').classList.toggle('hidden', on === undefined ? undefined : !on); };
   $('menuList').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) { $('menu').classList.add('hidden'); go(+b.dataset.go); } });

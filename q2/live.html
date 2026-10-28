@@ -20,6 +20,7 @@
   </div>
   <div class="hud-r">
     <span class="players-pill" id="hudPlayers" title="Players in the room"><span class="pdot"></span><b id="hudCount">0</b> playing</span>
+    <span class="offline-pill hidden" id="offlinePill" title="Phones cannot reach this screen. Open the menu for details.">Voting offline</span>
     <span class="relays" id="hudRelays" title="Live relays: green = connected"></span>
     <button class="icon-btn" id="btnMute" title="Sound (S)">Sound on</button>
     <button class="icon-btn" id="btnMenu" title="Menu (G)">Menu</button>
@@ -35,15 +36,15 @@
         <h1 class="lobby-title">Scan to <em>play</em></h1>
         <div class="qr-big" id="qrBig"></div>
         <div class="join-url">or go to <b class="num" id="joinText">qourlite.xyz/join</b></div>
+        <div class="mini-ticker">While you were scanning, Home Depot sold <b class="num" id="tickSales">$0</b></div>
       </div>
       <div class="lobby-right">
-        <div class="ticker card">
-          <div class="kicker">While you were scanning, Home Depot sold</div>
-          <div class="ticker-num num" id="tickSales">$0</div>
-          <div class="ticker-sub">Q2 pace: about $6,100 every second, day and night, for 13 weeks.</div>
-        </div>
-        <div class="crowd" id="crowd" aria-live="polite"></div>
-        <div class="lobby-hint">Tell us your Halloween costume when you join. Points for right answers <i>and</i> speed.</div>
+        <div class="q-top"><div class="q-tag">OPENER</div><div class="q-count"><b class="num" id="lxN">0</b> <span id="lxNl">words</span> so far &middot; click any to hide it</div></div>
+        <h1 class="lobby-q" id="lqText">One word for the economy right now?</h1>
+        <div class="lobby-hint">Answer on your phone as soon as you join. Your words will star in a story.</div>
+        <div class="cloud lobby-cloud" id="lcloud"></div>
+        <div class="story-cta"><button class="story-btn" id="storyBtn2">Turn it into a story</button><span class="muted">or press <kbd>K</kbd></span></div>
+        <div class="crowd hidden" id="crowd"></div>
       </div>
     </div>
   </section>
@@ -146,6 +147,8 @@
 </main>
 
 <!-- corner QR so late joiners can still get in -->
+<aside class="roster hidden" id="roster"><div class="roster-h"><span class="kicker">In the room</span><b class="num" id="rosterN">0</b></div><ol id="rosterList"></ol></aside>
+
 <div class="mini-join" id="miniJoin"><div class="mini-qr" id="qrMini"></div><div><div class="kicker">Join</div><b class="num">qourlite.xyz/join</b></div></div>
 
 <div class="reactions" id="reactions" aria-hidden="true"></div>
