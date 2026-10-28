@@ -110,8 +110,8 @@
 (function () {
   const $ = id => document.getElementById(id);
   const CATS = [
-    { k: 'cogs', n: 66, v: 66.33, c: '#64748b', h: 'The product itself', t: 'Paying the companies that make what we sell (lumber mills, paint makers, tool brands) and getting it to us.' },
-    { k: 'sga', n: 18, v: 17.60, c: '#3b82f6', h: 'Running the place', t: 'SG&A: paychecks, stores, DCs, trucks, technology, marketing. Everything it takes to put the product in front of you.' },
+    { k: 'cogs', n: 66, v: 66.33, c: '#64748b', h: 'The product itself', t: 'Paying the companies that make what we sell (lumber mills, paint makers, tool brands), plus getting it to the shelf. Supply chain costs, including DCs and ICQA, count here.' },
+    { k: 'sga', n: 18, v: 17.60, c: '#3b82f6', h: 'Running the place', t: 'SG&A: store payroll, store operating costs, technology, marketing and corporate. Everything it takes to sell to you.' },
     { k: 'dep', n: 2, v: 1.78, c: '#a855f7', h: 'Wear and tear', t: 'Depreciation: stores, DCs, forklifts and racks wear out, so we spread their cost over their useful life.' },
     { k: 'int', n: 1, v: 1.09, c: '#facc15', h: 'Rent on money', t: 'Interest on the money we borrowed, for example to buy SRS and GMS.' },
     { k: 'tax', n: 3, v: 3.24, c: '#ef4444', h: 'Taxes', t: 'Federal, state and international income taxes.' },
@@ -181,7 +181,7 @@
   const LEVERS = [
     { k: ['cogs'], c: '#64748b', h: 'Damage & defects', p: 'Product damaged in the network or returned defective gets marked down or written off.', w: 'Product cost' },
     { k: ['cogs'], c: '#94a3b8', h: 'Vendor compliance', p: 'Barcode, labeling and ASN accuracy. Chargebacks and recoveries offset product cost.', w: 'Product cost' },
-    { k: ['sga'], c: '#3b82f6', h: 'Rework & redelivery', p: 'Second trips, re-picks, repairs and service calls add labor and delivery cost.', w: 'SG&A' },
+    { k: ['cogs'], c: '#7c8798', h: 'Rework & redelivery', p: 'Second trips, re-picks, repairs and redeliveries add supply chain labor and freight cost.', w: 'Product cost (supply chain)' },
     { k: ['net'], c: '#F96302', h: 'In-stock', p: 'Accurate on-hands keep product sellable in store and online. Product in stock is product we can sell.', w: 'Sales, then all of it' },
   ];
   $('levers').innerHTML = LEVERS.map((l, i) => `<div class="lever" style="--c:${l.c}" data-i="${i}"><h3>${l.h}</h3><p>${l.p}</p><div class="where">${l.w}</div></div>`).join('');
