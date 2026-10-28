@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>The Ripple Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .shocks { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .shock { font: inherit; font-weight: 800; font-size: 1rem; padding: 12px 18px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; transition: transform .15s, border-color .15s; }
+  .shock:hover { transform: translateY(-2px); border-color: var(--orange); }
+  .shock.on { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .shock .e { font-size: 1.3rem; }
+  .stage { display: grid; gap: 16px; }
+  .mapwrap { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; overflow-x: auto; }
+  svg.map { width: 100%; min-width: 820px; height: auto; display: block; }
+  .colh { fill: var(--dim); font: 800 13px var(--font); letter-spacing: .16em; text-transform: uppercase; }
+  .node rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; rx: 12; transition: fill .4s, stroke .4s; }
+  .node text.l { fill: var(--ink); font: 800 17px var(--font); }
+  .node text.v { fill: var(--muted); font: 600 13px var(--font); }
+  .node .badge { font: 900 18px var(--font); opacity: 0; transition: opacity .3s; }
+  .node.hot rect { stroke-width: 3; }
+  .node.good rect { fill: #15301f; stroke: var(--green); }
+  .node.bad rect { fill: #3a1c1f; stroke: var(--red); }
+  .node.flat rect { fill: #33301a; stroke: var(--yellow); }
+  .node.good .badge { fill: var(--green); opacity: 1; } .node.bad .badge { fill: var(--red); opacity: 1; } .node.flat .badge { fill: var(--yellow); opacity: 1; }
+  .node.hot { animation: nodePop .5s cubic-bezier(.3,1.6,.5,1); transform-box: fill-box; transform-origin: center; }
+  @keyframes nodePop { 40% { transform: scale(1.08); } }
+  .edge { fill: none; stroke: var(--line); stroke-width: 2; opacity: .5; }
+  .edge.live { stroke-width: 4; opacity: 1; stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw .8s ease-out forwards; }
+  .edge.good { stroke: var(--green); } .edge.bad { stroke: var(--red); } .edge.flat { stroke: var(--yellow); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .pulse { fill: #fff; }
+  .now { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; min-height: 120px; }
+  @media (max-width: 700px) { .now { grid-template-columns: 1fr; } .controls { justify-content: flex-start; } }
+  .now h3 { margin: 4px 0; font-size: clamp(1.4rem, 2.4vw, 2rem); letter-spacing: -.02em; }
+  .now p { margin: 0; color: var(--muted); font-size: clamp(1rem, 1.5vw, 1.25rem); max-width: 900px; }
+  .now.good { border-color: var(--green); } .now.bad { border-color: var(--red); } .now.flat { border-color: var(--yellow); }
+  .chain { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; counter-reset: c; }
+  .chain li { padding: 10px 12px; border-radius: 12px; background: var(--panel); border-left: 5px solid var(--line); animation: slideIn .4s cubic-bezier(.2,1.2,.4,1); counter-increment: c; }
+  .chain li::before { content: counter(c); font: 800 .75rem var(--mono); color: var(--dim); margin-right: 6px; }
+  .chain li.good { border-color: var(--green); } .chain li.bad { border-color: var(--red); } .chain li.flat { border-color: var(--yellow); }
+  .chain li b { font-size: .95rem; }
+  .chain li span { display: block; color: var(--muted); font-size: .85rem; margin-top: 2px; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .legend { display: flex; gap: 16px; color: var(--muted); font-size: .85rem; margin-top: 10px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="kicker">Macro, meet Home Depot</div>
+  <h1 class="title">Everything is <em>connected</em></h1>
+  <p class="lede">Pick something that happens in the world. Watch it ripple through your wallet, the housing market, our sales and, eventually, the product moving through our buildings.</p>
+
+  <div class="shocks" id="shocks"></div>
+
+  <div class="stage">
+    <div class="mapwrap"><svg class="map" id="map" viewBox="0 0 1200 540" role="img" aria-label="Map of how economic events flow through to Home Depot results"></svg>
+      <div class="legend"><span><i style="background:var(--green)"></i>Good for us</span><span><i style="background:var(--red)"></i>Bad for us</span><span><i style="background:var(--yellow)"></i>Mixed or one-time</span><span><kbd>Space</kbd> next step</span></div>
+    </div>
+    <div class="card now" id="now">
+      <div><div class="kicker" id="sKick">Pick a shock</div><h3 id="sTitle">What happens when...</h3><p id="sLine">Tap a button above. Press <kbd>Space</kbd> to walk the chain one step at a time, or Play to watch it run.</p></div>
+      <div class="controls"><button class="pill" id="play">Play</button><button class="pill" id="stepBtn">Next step</button><button class="pill" id="reset">Reset</button></div>
+    </div>
+    <ol class="chain" id="chain"></ol>
+  </div>
+
+  <div class="takeaway" id="take">Housing sets the ceiling. Execution sets our share. The economy decides how big the pie is; how well we run decides how big our slice is.</div>
+  <div class="src">Sources: Federal Reserve (9/16 decision), Freddie Mac weekly mortgage survey (10/15), NAR existing-home sales, BEA, Home Depot Q2 FY2026 earnings release and call. Chains are simplified on purpose.</div>
+</div>
+
+<script src="assets/fx.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function () {
+  const COLS = [
+    { x: 110, t: 'The world' }, { x: 345, t: 'Your wallet' }, { x: 590, t: 'Homes & projects' }, { x: 840, t: 'Home Depot' }, { x: 1085, t: 'Our buildings' },
+  ];
+  const N = {
+    fed:     [0, 95,  'The Fed', 'Top rate 4.00%'],
+    oil:     [0, 175, 'Oil & energy', 'Conflict-driven spike'],
+    tariff:  [0, 255, 'Tariff refunds', 'Court-ordered refunds'],
+    stocks:  [0, 335, 'Stock market', 'AI-led gains'],
+    refunds: [0, 415, 'Tax refunds', 'Bigger this spring'],
+    storms:  [0, 495, 'Storms', 'Hurricane season'],
+    mort:    [1, 95,  'Mortgage rates', '30-yr about 7.4%'],
+    gas:     [1, 175, 'Gas & diesel', 'Pricier fill-ups'],
+    wealth:  [1, 335, 'Feeling richer', 'The wealth effect'],
+    cash:    [1, 415, 'Spare cash', 'Money to spend'],
+    moves:   [2, 95,  'Home sales', '2.9% of homes a year'],
+    projects:[2, 175, 'Move-in projects', 'Paint, floors, fix'],
+    bigproj: [2, 255, 'Big projects', 'Kitchens, remodels'],
+    repair:  [2, 455, 'Repairs & prep', 'Fix it, brace for it'],
+    diy:     [3, 95,  'DIY sales', 'Homeowners'],
+    pro:     [3, 175, 'Pro sales', 'Contractors'],
+    ticket:  [3, 255, 'Average ticket', '$92.50, +2.8%'],
+    tx:      [3, 335, 'Transactions', '443M, (1.0%)'],
+    gm:      [3, 415, 'Gross margin', '33.67% of sales'],
+    flow:    [4, 175, 'Units we move', 'Flow through DCs'],
+    cost:    [4, 335, 'Cost per unit', 'Fuel, labor, space'],
+  };
+  // [from, to, effect on us, headline, plain-English line]
+  const SHOCKS = {
+    fed: { e: '🏦', t: 'The Fed raises rates', steps: [
+      ['fed', 'mort', 'bad', 'Rates go up', 'The Fed hiked on 9/16. Mortgage rates follow longer-term rates up: the 30-year is about 7.4%.'],
+      ['mort', 'moves', 'bad', 'Nobody wants to move', 'Most owners have a loan near 4.3%. Trading it for 7.4% costs hundreds a month, so only 2.9% of homes change hands.'],
+      ['moves', 'projects', 'bad', 'No move, no move-in projects', 'New owners paint, floor, fix and furnish. Fewer moves means fewer of those trips.'],
+      ['projects', 'diy', 'bad', 'DIY feels it first', 'The homeowner is the most housing-sensitive customer we have.'],
+      ['mort', 'bigproj', 'bad', 'Big projects get smaller', 'Remodels are often financed. Pricier loans push people to smaller projects.'],
+      ['diy', 'tx', 'bad', 'Fewer trips', 'Q2 transactions fell 1.0% to 443 million.'],
+      ['tx', 'flow', 'bad', 'Less flow to our buildings', 'Fewer small orders means less volume through the network.'],
+      ['bigproj', 'pro', 'flat', 'The Pro keeps working', 'Contractors work off project backlogs. They have carried our growth while DIY waits on housing.'],
+    ] },
+    oil: { e: '🛢️', t: 'Oil spikes', steps: [
+      ['oil', 'gas', 'bad', 'Pricier fill-ups', 'Oil jumped after the conflict with Iran began in late February. Gasoline was up about 26% vs last year in June.'],
+      ['gas', 'cash', 'bad', 'Less spare cash', 'Every extra dollar at the pump is a dollar not spent on a project.'],
+      ['oil', 'cost', 'bad', 'Moving product costs more', 'Diesel and energy raise the cost of every truck, pallet and delivery.'],
+      ['cost', 'gm', 'bad', 'Margin gets squeezed', 'Fuel, energy and product inputs cost about 60 bps of gross margin in Q2.'],
+    ] },
+    tariff: { e: '🧾', t: 'Tariff refunds arrive', steps: [
+      ['tariff', 'gm', 'flat', 'A one-time boost', 'Refunds of tariffs we had already paid lowered our product cost: about +145 bps of gross margin in Q2.'],
+      ['gm', 'cost', 'flat', 'Mostly spoken for', 'The company expects the refunds to be largely offset by unplanned fuel, energy and input costs over the full year.'],
+    ] },
+    stocks: { e: '📈', t: 'Stocks boom', steps: [
+      ['stocks', 'wealth', 'good', 'People feel richer', 'Stock gains, led by AI and energy names, lift household wealth.'],
+      ['wealth', 'bigproj', 'good', 'Bigger purchases', 'Owners who feel richer keep spending on bigger-ticket items.'],
+      ['bigproj', 'ticket', 'good', 'Bigger receipts', 'Average ticket rose 2.8% to $92.50. Purchases over $1,000 grew 2.4%.'],
+      ['ticket', 'flow', 'flat', 'Bigger, bulkier orders', 'Appliances and big-and-bulky items: more value per order, more care per unit in our buildings.'],
+    ] },
+    refunds: { e: '💵', t: 'Bigger tax refunds', steps: [
+      ['refunds', 'cash', 'good', 'A spring windfall', 'The 2025 tax law made this year\'s refunds bigger.'],
+      ['cash', 'repair', 'good', 'Small projects get done', 'Refund money goes to repairs, garden and quick upgrades.'],
+      ['repair', 'diy', 'flat', 'A lift for DIY, but one-time', 'Refunds help spending this year, but they do not repeat. Lower savings and stock gains are also filling the gap.'],
+    ] },
+    storms: { e: '🌀', t: 'A storm is coming', steps: [
+      ['storms', 'repair', 'good', 'Prep and cleanup', 'Generators, plywood, water, tarps and chainsaws fly off the shelves.'],
+      ['repair', 'diy', 'good', 'Sudden demand', 'Homeowners and Pros both rush in, often in the same few days.'],
+      ['diy', 'flow', 'flat', 'Product has to move fast', 'Event response: storm product has to be in the right place before the storm, not after.'],
+      ['flow', 'cost', 'bad', 'Speed costs money', 'Expedited moves and rework add cost. Accurate inventory keeps it under control.'],
+    ] },
+    dream: { e: '🌈', t: 'Rates fall 2 points (wishful thinking)', steps: [
+      ['fed', 'mort', 'good', 'Mortgages get cheaper', 'A 5.4% mortgage instead of 7.4% would cut a $350K loan payment by about $450 a month.'],
+      ['mort', 'moves', 'good', 'Housing unlocks', 'Owners who were stuck start listing and buying.'],
+      ['moves', 'projects', 'good', 'Move-in projects come back', 'Paint, flooring, appliances, furniture.'],
+      ['projects', 'diy', 'good', 'DIY wakes up', 'The customer who has been waiting on housing returns.'],
+      ['diy', 'tx', 'good', 'More trips', 'More customers through the door and online.'],
+      ['tx', 'flow', 'good', 'Our buildings get busy', 'More units, more flow. Accuracy matters even more at higher volume.'],
+    ] },
+  };
+
+  const svg = document.getElementById('map');
+  const W = 190, Hh = 56;
+  const pos = id => { const [c, y] = N[id]; return { x: COLS[c].x, y }; };
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+  COLS.forEach(c => { const t = el('text', { x: c.x, y: 40, 'text-anchor': 'middle', class: 'colh' }); t.textContent = c.t; });
+  const edgeLayer = el('g', {});
+  // faint background edges for every link used in any shock
+  const allEdges = new Set();
+  Object.values(SHOCKS).forEach(s => s.steps.forEach(([a, b]) => allEdges.add(a + '>' + b)));
+  const curve = (a, b) => {
+    const p = pos(a), q = pos(b);
+    const back = q.x < p.x;
+    const x1 = back ? p.x - W / 2 : p.x + W / 2, x2 = back ? q.x + W / 2 : q.x - W / 2;
+    if (q.x === p.x) { const xs = p.x + W / 2; return `M${xs} ${p.y}C${xs + 50} ${p.y},${xs + 50} ${q.y},${xs} ${q.y}`; }
+    const mx = (x1 + x2) / 2;
+    return `M${x1} ${p.y}C${mx} ${p.y},${mx} ${q.y},${x2} ${q.y}`;
+  };
+  allEdges.forEach(k => { const [a, b] = k.split('>'); el('path', { d: curve(a, b), class: 'edge' }, edgeLayer); });
+  const liveLayer = el('g', {});
+  const nodeEls = {};
+  Object.entries(N).forEach(([id, [c, y, l, v]]) => {
+    const g = el('g', { class: 'node', id: 'n-' + id });
+    el('rect', { x: COLS[c].x - W / 2, y: y - Hh / 2, width: W, height: Hh, rx: 12 }, g);
+    const t1 = el('text', { x: COLS[c].x - W / 2 + 14, y: y - 3, class: 'l' }, g); t1.textContent = l;
+    const t2 = el('text', { x: COLS[c].x - W / 2 + 14, y: y + 16, class: 'v' }, g); t2.textContent = v;
+    el('text', { x: COLS[c].x + W / 2 - 14, y: y + 6, class: 'badge', 'text-anchor': 'end' }, g);
+    nodeEls[id] = g;
+  });
+
+  const $ = id => document.getElementById(id);
+  let cur = null, idx = 0, timer = null;
+  $('shocks').innerHTML = Object.entries(SHOCKS).map(([k, s]) => `<button class="shock" data-k="${k}"><span class="e">${s.e}</span>${s.t}</button>`).join('');
+  $('shocks').onclick = e => { const b = e.target.closest('[data-k]'); if (b) start(b.dataset.k, true); };
+
+  function clear() {
+    clearInterval(timer); timer = null; $('play').textContent = 'Play';
+    liveLayer.innerHTML = '';
+    Object.values(nodeEls).forEach(g => { g.classList.remove('good', 'bad', 'flat', 'hot'); g.querySelector('.badge').textContent = ''; });
+    $('chain').innerHTML = ''; idx = 0;
+  }
+  function start(k, autoplay) {
+    clear(); cur = k;
+    document.querySelectorAll('.shock').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+    const s = SHOCKS[k];
+    $('sKick').textContent = `${s.e}  ${s.t}`;
+    $('sTitle').textContent = 'What happens next?';
+    $('sLine').textContent = `${s.steps.length} steps. Press Space or Next step.`;
+    $('now').className = 'card now';
+    FX.sound.play('whoosh');
+    if (autoplay) play();
+  }
+  function mark(id, eff) {
+    const g = nodeEls[id];
+    g.classList.remove('good', 'bad', 'flat', 'hot'); void g.getBBox(); g.classList.add(eff, 'hot');
+    g.querySelector('.badge').textContent = eff === 'good' ? '▲' : eff === 'bad' ? '▼' : '◆';
+  }
+  function step() {
+    if (!cur) { start('fed'); }
+    const s = SHOCKS[cur];
+    if (idx >= s.steps.length) { stop(); return false; }
+    const [a, b, eff, head, line] = s.steps[idx++];
+    if (idx === 1) mark(a, eff === 'flat' ? 'flat' : eff);
+    const p = el('path', { d: curve(a, b), class: 'edge live ' + eff }, liveLayer);
+    const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+    const dot = el('circle', { r: 7, class: 'pulse' }, liveLayer);
+    const t0 = performance.now();
+    (function f(now) { const t = Math.min(1, (now - t0) / 800); const pt = p.getPointAtLength(len * t); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); if (t < 1) requestAnimationFrame(f); else dot.remove(); })(t0);
+    setTimeout(() => { mark(b, eff); FX.sound.play(eff === 'good' ? 'ding' : eff === 'bad' ? 'tock' : 'pop'); }, 780);
+    const li = document.createElement('li'); li.className = eff;
+    li.innerHTML = `<b>${head}</b><span>${line}</span>`;
+    $('chain').appendChild(li);
+    $('sKick').textContent = `${s.e}  ${s.t}  ·  step ${idx} of ${s.steps.length}`;
+    $('sTitle').textContent = head; $('sLine').textContent = line;
+    $('now').className = 'card now ' + eff;
+    return idx < s.steps.length;
+  }
+  function play() { clearInterval(timer); $('play').textContent = 'Pause'; if (step()) timer = setInterval(() => { if (!step()) stop(); }, 1900); else stop(); }
+  function stop() { clearInterval(timer); timer = null; $('play').textContent = 'Play'; }
+  $('play').onclick = () => (timer ? stop() : (cur && idx >= SHOCKS[cur].steps.length ? start(cur, true) : play()));
+  $('stepBtn').onclick = () => { stop(); step(); };
+  $('reset').onclick = () => { clear(); cur = null; document.querySelectorAll('.shock').forEach(b => b.classList.remove('on')); $('sKick').textContent = 'Pick a shock'; $('sTitle').textContent = 'What happens when...'; $('sLine').textContent = ''; $('now').className = 'card now'; };
+  Steps.on(() => { stop(); if (cur && idx >= SHOCKS[cur].steps.length) { const keys = Object.keys(SHOCKS); start(keys[(keys.indexOf(cur) + 1) % keys.length]); } else step(); }, () => {});
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

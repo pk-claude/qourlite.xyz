@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Built with AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .ask { font-size: clamp(1.1rem, 1.8vw, 1.45rem); line-height: 1.5; padding: 26px 28px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line); position: relative; }
+  .ask::before { content: '\201C'; position: absolute; top: -30px; left: 14px; font-size: 7rem; color: var(--orange); font-family: Georgia, serif; line-height: 1; }
+  .ask .typed::after { content: '|'; color: var(--orange); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .ask .by { margin-top: 14px; color: var(--dim); font-size: .9rem; }
+  section { margin-top: 56px; }
+  h2.sec { font-size: clamp(1.8rem, 3.4vw, 2.8rem); letter-spacing: -.03em; margin: 0 0 14px; }
+  .timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: s; }
+  @media (max-width: 900px) { .timeline { grid-template-columns: 1fr; } }
+  .tl { padding: 18px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); counter-increment: s; position: relative; opacity: 0; transform: translateY(16px); transition: .5s; }
+  .tl.on { opacity: 1; transform: none; }
+  .tl::before { content: counter(s); position: absolute; top: 14px; right: 16px; font: 800 2.2rem var(--mono); color: var(--line); }
+  .tl h3 { margin: 0 0 6px; font-size: 1.15rem; }
+  .tl p { margin: 0; color: var(--muted); }
+  .nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .nums { grid-template-columns: 1fr 1fr; } }
+  .nums .card .big { color: var(--orange); }
+  .nums .card p { margin: 6px 0 0; color: var(--muted); }
+  .prompts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .prompts { grid-template-columns: 1fr; } }
+  .prompt { padding: 18px; border-radius: 16px; background: var(--bg2); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+  .prompt .k { font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); }
+  .prompt code { font-family: var(--mono); font-size: .92rem; color: var(--ink); white-space: pre-wrap; line-height: 1.5; }
+  .prompt button { align-self: flex-start; }
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .rules { grid-template-columns: 1fr; } }
+  .rules .card h3 { margin: 0 0 6px; }
+  .rules .card p { margin: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><a class="brand" href="./"><span class="dot">Q2</span>Earnings Unpacked</a><a class="pill" href="live.html">Live quiz</a></div>
+  <div class="kicker">Behind the scenes</div>
+  <h1 class="title">This session was <em>built by AI</em>, overnight.</h1>
+  <p class="lede">The quiz, the QR code, the live voting, the sound effects, the race track and every page on this site came from one request to an AI coding assistant (Claude), the night before this meeting. Here is the actual request:</p>
+
+  <div class="ask"><span class="typed" id="typed"></span><div class="by">The request, as typed (lightly trimmed)</div></div>
+
+  <section>
+    <h2 class="sec">What the AI did with it</h2>
+    <div class="timeline" id="tl">
+      <div class="tl"><h3>Read the deck</h3><p>All 22 slides and speaker notes, to match the quiz to each chapter and reuse the same numbers.</p></div>
+      <div class="tl"><h3>Checked the numbers</h3><p>Against the public Q2 release and Lowe's results. Internal-only figures were kept off the public site.</p></div>
+      <div class="tl"><h3>Designed the games</h3><p>Five quiz rounds, Fight Night, hot takes, a word cloud, Jargon Bingo and emoji reactions.</p></div>
+      <div class="tl"><h3>Wrote the code</h3><p>Live voting over free public relays (no app, no login), a QR code, and sound effects generated in the browser.</p></div>
+      <div class="tl"><h3>Tested it</h3><p>Ran a full game with simulated phones in a headless browser, looked at screenshots and fixed what looked wrong.</p></div>
+      <div class="tl"><h3>Published it</h3><p>Pushed to GitHub. The site redeployed itself to qourlite.xyz. Hosting cost: $0.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">By the numbers</h2>
+    <div class="nums">
+      <div class="card"><div class="big num">1</div><p>request to start</p></div>
+      <div class="card"><div class="big num" data-n="10">10</div><p>pages built</p></div>
+      <div class="card"><div class="big num" data-n="28">28</div><p>quiz and poll questions</p></div>
+      <div class="card"><div class="big num">$0</div><p>hosting, apps or logins</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Steal these prompts</h2>
+    <p class="lede">Use them with any AI assistant your team is allowed to use. Paste your own (non-confidential) content where the brackets are.</p>
+    <div class="prompts" id="prompts"></div>
+  </section>
+
+  <section>
+    <h2 class="sec">Three rules that still apply</h2>
+    <div class="rules">
+      <div class="card"><h3>You own the facts</h3><p>AI is fast, not infallible. Every number here was checked against the deck and public filings. Check yours.</p></div>
+      <div class="card"><h3>Mind what you paste</h3><p>Use approved tools for internal data. This public site only uses public information on purpose.</p></div>
+      <div class="card"><h3>Ask for the audience</h3><p>The best prompts say who is listening: "for a warehouse team", "no jargon", "one joke".</p></div>
+    </div>
+  </section>
+
+  <div class="takeaway">The point is not the tech. It is that a one-hour finance talk can feel like a game show, and that took one evening, not one quarter.</div>
+</div>
+<script src="assets/fx.js"></script>
+<script>
+(function () {
+  const ASK = "I'm doing a presentation to an ICQA team tomorrow on Q2 THD earnings and macro, and the interconnectedness of both. They are not finance people but want to learn. I want this session fun, educational, interactive, conversational and funny. I want a functional QR code and interactive voting system with pop quizzes about the content. The team knows I am close to AI products, so I also want to showcase how to make presentations fun with these tools. Don't overcomplicate topics: make it relatable, add animations, graphics, visuals to stress the point.";
+  const el = document.getElementById('typed');
+  let i = 0;
+  const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { io.disconnect(); (function t() { el.textContent = ASK.slice(0, ++i); if (i < ASK.length) setTimeout(t, 14); })(); } });
+  io.observe(el);
+  const tls = document.querySelectorAll('.tl');
+  const io2 = new IntersectionObserver(es => { if (es[0].isIntersecting) { io2.disconnect(); tls.forEach((t, k) => setTimeout(() => t.classList.add('on'), k * 220)); } });
+  io2.observe(document.getElementById('tl'));
+  const io3 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io3.unobserve(e.target); FX.countUp(e.target, +e.target.dataset.n, { dur: 1200 }); } }));
+  document.querySelectorAll('[data-n]').forEach(n => io3.observe(n));
+  const P = [
+    ['Turn slides into a quiz', 'Here is my slide content: [paste]. Write 3 multiple-choice questions a non-expert could answer in 15 seconds. Include one funny wrong answer and a one-line "fun fact" for the reveal.'],
+    ['Find the analogy', 'Explain [gross margin / inventory turns / comp sales] to a warehouse quality team, using an analogy from their daily work. Two sentences, no jargon.'],
+    ['Make numbers stick', 'From this report: [paste]. Pick the 3 numbers a general audience will remember, and give each a relatable comparison (per second, per person, per day).'],
+    ['Be my toughest audience', 'Act as a skeptical, non-finance audience member. Read this slide: [paste]. What would confuse you, and what question would you ask?'],
+    ['Build an interactive', 'Build a single-page web page with a slider that shows how [mortgage rate] changes [monthly payment]. Big numbers, dark background, works on a phone.'],
+    ['Write it in my voice', 'Write speaker notes for this slide: [paste]. My style: direct, plain English, one light joke, under 90 seconds out loud.'],
+  ];
+  document.getElementById('prompts').innerHTML = P.map(([k, c], i) => `<div class="prompt"><div class="k">${k}</div><code id="p${i}">${FX.esc(c)}</code><button class="pill" data-i="${i}">Copy</button></div>`).join('');
+  document.getElementById('prompts').onclick = e => { const b = e.target.closest('button'); if (!b) return; navigator.clipboard.writeText(document.getElementById('p' + b.dataset.i).textContent).then(() => { b.textContent = 'Copied'; FX.sound.play('ding'); setTimeout(() => (b.textContent = 'Copy'), 1500); }); };
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

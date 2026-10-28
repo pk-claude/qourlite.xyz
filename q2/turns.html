@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>The Turns Race</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .race { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+  @media (max-width: 950px) { .race { grid-template-columns: 1fr; } }
+  .trackwrap { background: var(--bg2); border: 1px solid var(--line); border-radius: 22px; padding: 12px; }
+  svg.track { width: 100%; height: auto; display: block; }
+  .lane { fill: none; stroke: #2a2d34; stroke-width: 54; }
+  .lane-line { fill: none; stroke: #4a4f59; stroke-width: 2; stroke-dasharray: 14 12; }
+  .infield { fill: #15301f; }
+  .finish { stroke: #fff; stroke-width: 6; stroke-dasharray: 6 6; }
+  .board { display: grid; gap: 14px; }
+  .racer { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 16px; background: var(--panel); border: 2px solid var(--c); }
+  .racer .ic { width: 54px; height: 54px; border-radius: 12px; background: var(--c); display: grid; place-items: center; font-size: 1.8rem; }
+  .racer h3 { margin: 0; font-size: 1.2rem; }
+  .racer .muted { font-size: .9rem; }
+  .racer .laps { font-family: var(--mono); font-weight: 800; font-size: 2.4rem; }
+  .go { font: inherit; font-weight: 900; font-size: 1.15rem; padding: 14px 22px; border-radius: 12px; border: 0; background: var(--orange); color: #fff; cursor: pointer; }
+  .yearbar { height: 12px; border-radius: 9px; background: var(--line); overflow: hidden; }
+  .yearbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--orange), var(--yellow)); }
+  .months { display: flex; justify-content: space-between; color: var(--dim); font: 700 .72rem var(--mono); margin-top: 4px; }
+  section { margin-top: 64px; }
+  h2.sec { font-size: clamp(1.8rem, 3.6vw, 3rem); letter-spacing: -.03em; margin: 0 0 8px; }
+  .boosts { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+  .boost { font: inherit; font-weight: 800; padding: 12px 16px; border-radius: 14px; border: 2px dashed var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .boost.on { border-style: solid; border-color: var(--green); background: rgba(34,197,94,.15); }
+  .boost.on::after { content: '  +0.05x'; color: var(--green); font-family: var(--mono); }
+  .what { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .what { grid-template-columns: 1fr; } }
+  .what .big { color: var(--orange); }
+  .what p { color: var(--muted); margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="kicker">Inventory turns, explained with a race</div>
+  <h1 class="title">The <em>Turns</em> Race</h1>
+  <p class="lede">Picture every item in the network as one giant truckload. Each time that whole load sells and gets replaced, that is one lap. More laps a year means product moves faster and less cash sits on shelves. That is inventory turns.</p>
+
+  <div class="race">
+    <div class="trackwrap">
+      <svg class="track" id="track" viewBox="0 0 800 420" aria-label="Race track with two racers">
+        <path id="lap" class="lane" d="M200 60 H600 A150 150 0 0 1 600 360 H200 A150 150 0 0 1 200 60 Z"/>
+        <path class="lane-line" d="M200 60 H600 A150 150 0 0 1 600 360 H200 A150 150 0 0 1 200 60 Z"/>
+        <rect class="infield" x="200" y="105" width="400" height="210" rx="105"/>
+        <text x="400" y="200" text-anchor="middle" fill="#bbf7d0" font-weight="900" font-size="30" font-family="Archivo, system-ui">ONE YEAR</text>
+        <text x="400" y="236" text-anchor="middle" fill="#86efac" font-size="17" font-family="Archivo, system-ui">1 lap = the whole inventory sold once</text>
+        <line class="finish" x1="400" y1="30" x2="400" y2="90"/>
+        <g id="carLOW"><circle r="20" fill="#3b82f6" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="18">🚚</text></g>
+        <g id="carHD"><circle r="20" fill="#F96302" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="18">🚚</text></g>
+      </svg>
+      <div style="padding:10px 6px 2px"><div class="yearbar"><i id="year"></i></div><div class="months"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div></div>
+    </div>
+    <div class="board">
+      <div class="racer" style="--c:#F96302"><div class="ic">🚚</div><div><h3>Home Depot</h3><div class="muted" id="hdSub">4.31 turns a year</div></div><div class="laps" id="hdLaps">0.00</div></div>
+      <div class="racer" style="--c:#3b82f6"><div class="ic">🚚</div><div><h3>Lowe's</h3><div class="muted">3.48 turns a year</div></div><div class="laps" id="lowLaps">0.00</div></div>
+      <button class="go" id="raceBtn">Race one year</button>
+      <div class="muted" id="raceNote">Press <kbd>Space</kbd> to race.</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="kicker">What a lap is worth</div>
+    <h2 class="sec">Faster laps free up cash</h2>
+    <div class="what">
+      <div class="card"><div class="big num" id="daysHD">85 days</div><p>Average time an item waits before it sells at Home Depot (365 / 4.31). Lowe's: about 105 days.</p></div>
+      <div class="card"><div class="big num" id="invNow">~$26B</div><p>Roughly how much inventory it takes to support a year of sales at today's pace (about $113B of product cost / turns).</p></div>
+      <div class="card"><div class="big num" id="freed">$0</div><p>Cash freed if turns improve by the boosts below. Same sales, less money sitting on shelves.</p></div>
+    </div>
+    <h2 class="sec" style="margin-top:36px;font-size:clamp(1.4rem,2.6vw,2rem)">Give our truck a boost</h2>
+    <p class="lede">Tap the things this team does. Each one gives our racer a (pretend) +0.05x boost. Then race again.</p>
+    <div class="boosts" id="boosts"></div>
+  </section>
+
+  <div class="takeaway">We still lead on turns (4.31x vs 3.48x), but the lead is shrinking: ours slipped 0.23x vs last year while Lowe's gained 0.26x. Disposition, cycle count and cull: <b>turns are where ICQA plays.</b></div>
+  <div class="src">Turns: trailing 12 months, cost of sales divided by average inventory, computed from company filings using Lowe's methodology for both companies. Inventory and cash freed are rough estimates: annual product cost of about $113B (about 66% of roughly $170B of sales). Boost sizes are illustrative, not targets.</div>
+</div>
+
+<script src="assets/fx.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const path = $('lap'), L = path.getTotalLength();
+  const startAt = (() => { // start the cars at the finish line (top middle)
+    let best = 0, bd = 1e9; for (let i = 0; i < 400; i++) { const p = path.getPointAtLength(L * i / 400); const d = Math.abs(p.x - 400) + Math.abs(p.y - 60); if (d < bd) { bd = d; best = i / 400; } } return best;
+  })();
+  const place = (id, laps, off) => { const p = path.getPointAtLength(((startAt + laps) % 1) * L); $(id).setAttribute('transform', `translate(${p.x},${p.y + off})`); };
+  const COGS = 113e9, BASE = 4.31, LOW = 3.48;
+  const BOOSTS = ['Cycle count accuracy', 'Timely cull', 'Fast disposition', 'Clean receiving', 'Right product, right slot', 'Liquidate unproductive stock'];
+  let boost = 0;
+  const hdTurns = () => BASE + boost;
+  $('boosts').innerHTML = BOOSTS.map((b, i) => `<button class="boost" data-i="${i}">${b}</button>`).join('');
+  $('boosts').onclick = e => { const b = e.target.closest('.boost'); if (!b) return; b.classList.toggle('on'); boost = document.querySelectorAll('.boost.on').length * 0.05; FX.sound.play(b.classList.contains('on') ? 'cash' : 'tock'); stats(); };
+  function stats() {
+    const t = hdTurns();
+    $('hdSub').textContent = `${t.toFixed(2)} turns a year${boost ? ' (boosted)' : ''}`;
+    $('daysHD').textContent = Math.round(365 / t) + ' days';
+    $('invNow').textContent = '~$' + (COGS / t / 1e9).toFixed(1) + 'B';
+    const f = COGS / BASE - COGS / t;
+    $('freed').textContent = f > 0 ? '~$' + (f / 1e9).toFixed(2) + 'B' : '$0';
+  }
+  stats();
+  place('carHD', 0, -8); place('carLOW', 0, 8);
+  let racing = false;
+  function race() {
+    if (racing) return; racing = true;
+    const D = 12000, t0 = performance.now(), hd = hdTurns();
+    let lastLapHD = 0, lastLapLOW = 0;
+    FX.sound.play('bell');
+    (function f(now) {
+      const t = Math.min(1, (now - t0) / D);
+      const a = hd * t, b = LOW * t;
+      place('carHD', a, -8); place('carLOW', b, 8);
+      $('hdLaps').textContent = a.toFixed(2); $('lowLaps').textContent = b.toFixed(2);
+      $('year').style.width = (t * 100) + '%';
+      if (Math.floor(a) > lastLapHD) { lastLapHD = Math.floor(a); FX.sound.play('ding'); }
+      if (Math.floor(b) > lastLapLOW) { lastLapLOW = Math.floor(b); FX.sound.play('tock'); }
+      if (t < 1) requestAnimationFrame(f);
+      else {
+        racing = false; FX.sound.play('fanfare'); FX.confetti({ count: 120, colors: ['#F96302', '#fff', '#ffb37a'] });
+        $('raceNote').textContent = `Home Depot finished ${(hd - LOW).toFixed(2)} laps ahead. Every extra lap is product that sold instead of sitting.`;
+      }
+    })(t0);
+  }
+  $('raceBtn').onclick = race;
+  Steps.on(race, () => {});
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
