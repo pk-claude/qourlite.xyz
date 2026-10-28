@@ -145,7 +145,7 @@
   @media (prefers-reduced-motion: reduce) { #story * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }`;
 
   // ---------- player ----------
-  let root = null, page = 0, timer = null, slots = [], meta = {}, narrate = true, voice = null, paused = false;
+  let watch = null, root = null, page = 0, timer = null, slots = [], meta = {}, narrate = true, voice = null, paused = false;
   const synth = window.speechSynthesis;
   function pickVoice() {
     if (!synth) return null;
@@ -184,7 +184,7 @@
   const plain = p => p.cover ? `${p.t}. A bedtime story, written live by the people in this room.` : p.t.replace(/\[(\d)\]/g, (_, n) => slots[+n].w);
 
   function show(i) {
-    clearTimeout(timer);
+    clearTimeout(timer); clearInterval(watch);
     if (synth) synth.cancel();
     page = Math.max(0, Math.min(PAGES.length - 1, i));
     const p = PAGES[page];
@@ -198,7 +198,13 @@
   }
   function schedule(p) {
     const text = plain(p);
-    const next = () => { if (page < PAGES.length - 1) timer = setTimeout(() => show(page + 1), 1300); };
+    const myPage = page; // events from a page we already left must not turn pages
+    let done = false;
+    const next = () => {
+      if (done || page !== myPage || paused || !root) return;
+      done = true; clearInterval(watch);
+      if (page < PAGES.length - 1) timer = setTimeout(() => { if (page === myPage && !paused) show(page + 1); }, 1300);
+    };
     const muted = window.FX && FX.sound.muted;
     if (narrate && synth && !muted) {
       const parts = text.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [text];
@@ -206,17 +212,24 @@
         const u = new SpeechSynthesisUtterance(t.trim());
         if (voice) u.voice = voice;
         u.rate = 0.95; u.pitch = 1.08;
-        if (k === parts.length - 1) u.onend = () => { if (!paused && root) next(); };
+        if (k === parts.length - 1) u.onend = next;
         synth.speak(u);
       });
-      // safety net in case the speech engine never reports the end
-      timer = setTimeout(() => show(page + 1 < PAGES.length ? page + 1 : page), 4000 + text.length * 95);
+      // Turn the page only once the voice has really gone quiet (some engines never fire 'end').
+      let started = false, quiet = 0;
+      clearInterval(watch);
+      watch = setInterval(() => {
+        if (page !== myPage || paused || !root) { clearInterval(watch); return; }
+        if (synth.speaking || synth.pending) { started = true; quiet = 0; return; }
+        quiet += 500;
+        if ((started && quiet >= 1500) || quiet >= 8000) next();
+      }, 500);
     } else {
-      timer = setTimeout(() => { if (page < PAGES.length - 1) show(page + 1); }, 3500 + text.length * 55);
+      timer = setTimeout(next, 2200 + text.length * 55);
     }
   }
   function close() {
-    clearTimeout(timer); if (synth) synth.cancel();
+    clearTimeout(timer); clearInterval(watch); if (synth) synth.cancel();
     if (root) root.remove(); root = null;
     removeEventListener('keydown', onKey, true);
   }
@@ -229,7 +242,7 @@
     else if (e.key.toLowerCase() === 'p') togglePause();
   }
   function toggleNarr() { narrate = !narrate; root.querySelector('[data-a=narr]').classList.toggle('on', narrate); show(page); }
-  function togglePause() { paused = !paused; root.querySelector('[data-a=pause]').textContent = paused ? 'Play' : 'Pause'; if (paused) { clearTimeout(timer); if (synth) synth.cancel(); } else show(page); }
+  function togglePause() { paused = !paused; root.querySelector('[data-a=pause]').textContent = paused ? 'Play' : 'Pause'; if (paused) { clearTimeout(timer); clearInterval(watch); if (synth) synth.cancel(); } else show(page); }
 
   function play({ words = [], storytellers = 0 } = {}) {
     if (!document.getElementById('story-css')) { const st = document.createElement('style'); st.id = 'story-css'; st.textContent = css; document.head.appendChild(st); }
