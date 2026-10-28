@@ -99,29 +99,31 @@
     $('dock').classList.remove('hidden');
     renderMe();
     if (tab === 'bingo') { showScreen('sBingo'); return; }
-    if (!S) { waitScreen('Connecting to the room...', 'Hang tight. If this takes more than a few seconds, check you have internet.'); return; }
+    if (!S) { waitScreen('Connecting to the room...', 'Hang tight. If this takes more than a few seconds, check you have internet.', 'Connecting'); return; }
     if (S.seg) document.body.style.setProperty('--seg', S.seg.color);
     const q = S.q;
-    if (S._stale) return waitScreen('Waiting for the host...', 'The quiz shows up here as soon as the presenter starts it. Keep this page open.');
-    if (S.ph === 'lobby') return waitScreen(joined ? 'You\'re in!' : 'Joining...', 'Eyes on the big screen. The game starts soon.');
-    if (S.ph === 'title') return waitScreen(S.seg.title, S.seg.sub + '. Get ready...');
+    if (S._stale) return waitScreen(`You're in, ${me.nm}!`, 'Nothing to tap yet. The first question pops up here on its own. Keep this page open.', 'Waiting for the presenter to start');
+    if (S.ph === 'lobby') return waitScreen(joined ? `You're in, ${me.nm}!` : 'Joining...', 'Nothing to tap yet. The first question pops up here on its own. Meanwhile, try Jargon Bingo below.', 'Waiting for the presenter to start');
+    if (S.ph === 'title') return waitScreen(S.seg.title, S.seg.sub + '. The first question is coming up.', 'Get ready');
     if ((S.ph === 'q' || S.ph === 'reveal') && q) {
       if (q.type === 'text') return textScreen(q);
       if (S.ph === 'q') {
         if (myAns[q.id] != null) return lockedScreen(q);
         if (q.open) return questionScreen(q);
-        return waitScreen('Time\'s up!', 'Reveal coming...');
+        return waitScreen('Time\'s up!', 'Eyes on the big screen.', 'Reveal coming');
       }
       return resultScreen(q);
     }
     if (S.ph === 'board' || S.ph === 'fightend' || S.ph === 'podium') return rankScreen(S.ph === 'podium');
     waitScreen('Stand by', '');
   }
-  function waitScreen(h, p) {
+  function waitScreen(h, p, status) {
     showScreen('sWait');
     $('wAv').textContent = me.av;
     $('wHead').textContent = h;
     $('wSub').textContent = p;
+    $('wStatus').classList.toggle('hidden', !status);
+    $('wStatusT').textContent = status || '';
     $('wNet').textContent = S ? (S.n ? `${S.n} player${S.n === 1 ? '' : 's'} in the room` : '') : '';
   }
 
