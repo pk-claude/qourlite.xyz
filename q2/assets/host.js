@@ -38,11 +38,17 @@
 
   // ---------- live relay ----------
   let lastSent = 0, sendTimer = null;
-  const live = Live.create({
-    room: ROOM, role: 'host',
-    onMsg: (k, m) => k === 'up' && onUp(m),
-    onStatus: renderRelays,
-  });
+  // Only the presenter's screen may act as host: a second host would confuse the phones.
+  let live = { publishState() {}, status: () => ({}), channels: [] };
+  function connect() {
+    live = Live.create({
+      room: ROOM, role: 'host',
+      onMsg: (k, m) => k === 'up' && onUp(m),
+      onStatus: renderRelays,
+    });
+    renderRelays(live.status());
+    broadcast(true);
+  }
   function renderRelays(st) {
     const names = { emqx: 'Relay A', eclipse: 'Relay B', ntfy: 'Relay C', m1: 'A', m2: 'B', nt: 'C' };
     $('hudRelays').innerHTML = live ? live.channels.map(id =>
@@ -626,6 +632,10 @@
   window.__host = { steps, get H() { return H; }, go, next, joinUrl: JOIN_URL };
   renderCount();
   render(true);
-  renderRelays(live.status());
-  broadcast(true);
+  const isPresenter = Live.test || new URLSearchParams(location.search).has('presenter') || Live.store.get('ql-presenter', false);
+  if (isPresenter) connect();
+  else {
+    $('gate').classList.remove('hidden');
+    $('gateYes').onclick = () => { Live.store.set('ql-presenter', true); $('gate').classList.add('hidden'); connect(); };
+  }
 })();
