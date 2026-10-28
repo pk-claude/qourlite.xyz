@@ -105,13 +105,14 @@
     const pid = m.p.slice(0, 8);
     const nm = clean(String(m.nm || 'Player').slice(0, 18)) || 'Player';
     const av = AVATARS.includes(m.av) ? m.av : AVATARS[0];
+    const cs = clean(String(m.cs || '').trim().slice(0, 30));
     const p = H.players[pid];
     if (!p) {
-      H.players[pid] = { nm, av, score: 0, streak: 0, j: Date.now() };
+      H.players[pid] = { nm, av, cs, score: 0, streak: 0, j: Date.now() };
       onJoinVisual(pid);
       save(); renderCount(); broadcast();
-    } else if (p.nm !== nm || p.av !== av) {
-      p.nm = nm; p.av = av; save(); if (steps[H.pos].v === 'lobby') renderCrowd();
+    } else if (p.nm !== nm || p.av !== av || ((p.cs || '') !== cs && !p.csHidden)) {
+      p.nm = nm; p.av = av; p.cs = cs; save(); if (steps[H.pos].v === 'lobby') renderCrowd();
     }
     return pid;
   }
@@ -289,9 +290,16 @@
     const d = document.createElement('div');
     d.className = 'bubble';
     d.style.setProperty('--d', (Math.random() * 3).toFixed(2) + 's');
-    d.innerHTML = `<span class="b-av">${p.av}</span><span class="b-nm">${esc(p.nm)}</span>`;
+    const cs = p.cs && !p.csHidden ? p.cs.replace(/^(A|An|The) /, w => w.toLowerCase()) : '';
+    d.dataset.pid = p.pid;
+    d.innerHTML = `<span class="b-av">${p.av}</span><span class="b-txt"><span class="b-nm">${esc(p.nm)}</span>${cs ? `<span class="b-cs">as ${esc(cs)}</span>` : ''}</span>`;
     return d;
   }
+  $('crowd').addEventListener('click', e => {
+    const b = e.target.closest('.bubble'); const p = b && H.players[b.dataset.pid];
+    if (!p || !p.cs) return;
+    p.csHidden = true; save(); renderCrowd();
+  });
   function onJoinVisual(pid) {
     renderCount();
     if (steps[H.pos].v === 'lobby') {
@@ -301,7 +309,7 @@
       sound.play('pop');
     } else {
       const p = H.players[pid];
-      toast(`${p.av} <b>${esc(p.nm)}</b> joined`, 'join');
+      toast(`${p.av} <b>${esc(p.nm)}</b> joined${p.cs ? ` (going as ${esc(p.cs)})` : ''}`, 'join');
     }
   }
   const t0 = Date.now();
@@ -584,7 +592,7 @@
   let botTimer = null;
   $('btnSim').onclick = () => {
     toggleMenu(false);
-    BOT_NAMES.forEach((nm, i) => setTimeout(() => onUp({ k: 'join', p: 'bot' + i, nm, av: AVATARS[i * 2 % AVATARS.length] }), i * 260));
+    BOT_NAMES.forEach((nm, i) => setTimeout(() => onUp({ k: 'join', p: 'bot' + i, nm, av: AVATARS[i * 2 % AVATARS.length], cs: ['A pirate', 'Inflation', 'Taylor Swift', 'A ghost', '', 'The Fed chair', 'A 3% mortgage', 'Batman', 'An orange bucket', '', 'A vampire', 'Tired parent'][i] }), i * 260));
     clearInterval(botTimer);
     botTimer = setInterval(() => {
       const it = item(steps[H.pos]);

@@ -34,7 +34,7 @@
       $('conn').className = 'conn ' + (v.includes('up') ? 'up' : v.every(s => s === 'down' || s === 'off') ? 'down' : '');
     },
   });
-  const send = (payload, opts) => live.publishUp({ p: pid, nm: me && me.nm, av: me && me.av, ...payload }, opts);
+  const send = (payload, opts) => live.publishUp({ p: pid, nm: me && me.nm, av: me && me.av, cs: me && me.cs, ...payload }, opts);
 
   // ---------- join screen ----------
   let selAv = (me && me.av) || pick(AVATARS);
@@ -46,10 +46,11 @@
     sound.play('pop');
   };
   $('nm').value = me ? me.nm : '';
+  $('cs').value = me && me.cs ? me.cs : '';
   $('dice').onclick = () => { $('nm').value = pick(NAMES); sound.play('boing'); };
   $('goBtn').onclick = () => {
     const nm = $('nm').value.trim() || pick(NAMES);
-    me = { nm: nm.slice(0, 18), av: selAv };
+    me = { nm: nm.slice(0, 18), av: selAv, cs: $('cs').value.trim().slice(0, 30) };
     store.set('ql-me', me);
     joined = false;
     renderMe(); sendJoin(); render();

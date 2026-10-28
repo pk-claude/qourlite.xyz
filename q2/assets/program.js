@@ -78,8 +78,6 @@ window.PROGRAM = [
         fact: 'Every one of these is a future Home Depot basket. <b>Deferred, not cancelled.</b>' },
       { id: 'h5', type: 'text', mode: 'cloud', tag: 'ONE WORD', q: 'One word for the economy right now?',
         fact: 'Bigger words = more people said it.' },
-      { id: 'h6', type: 'text', mode: 'wall', tag: 'YOUR TURN', q: 'One number from today, and one action your team takes that moves it.',
-        fact: 'Sales, operating profit, turns or Pro. Every one runs through this room.' },
     ],
   },
 ];
