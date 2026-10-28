@@ -33,9 +33,9 @@ window.PROGRAM = [
       { id: 'm3', type: 'mc', tag: 'LOCK-IN', q: 'Your mortgage is 4.3%. A new one is about 7.4%. On a $350K loan, how much MORE per month to move?',
         opts: ['$69', '$690', '$6,900'], a: 1,
         fact: '<b>About $690 a month</b> ($1,732 vs $2,423), or roughly $8,300 a year to live in a similar house. So people stay put.' },
-      { id: 'm4', type: 'mc', tag: 'WHO FEELS IT', q: 'When fewer people move, which customer feels it most?',
-        opts: ['The Pro contractor', 'The DIY homeowner', 'Neither'], a: 1,
-        fact: 'Movers paint, floor, fix and furnish. <b>DIY waits on housing.</b> Pros work off their project backlogs and kept growing.' },
+      { id: 'm4', type: 'mc', tag: 'THE WALLET', q: 'Paychecks are barely keeping up with prices, yet people keep spending. Which one is NOT helping?',
+        opts: ['Bigger tax refunds', 'Saving less', 'Stock market gains', 'Big raises'], a: 3,
+        fact: 'Not raises: after inflation, wages are <b>slightly down</b> (about -0.1%). Spending runs on bigger tax refunds, lower savings and stock gains. <b>All three can fade.</b>' },
     ],
   },
   {
