@@ -6,7 +6,7 @@
   const ROOM = Live.room;
   const KEY = 'ql-host-' + ROOM;
   const joinQs = new URLSearchParams();
-  if (ROOM !== 'icqa-pk26') joinQs.set('room', ROOM);
+  if (ROOM !== Live.defRoom) joinQs.set('room', ROOM);
   if (Live.test) joinQs.set('test', Live.test);
   const JOIN_URL = location.origin + '/join/' + (joinQs.toString() ? '?' + joinQs : '');
   const SHORT = 'qourlite.xyz/join';
@@ -674,7 +674,7 @@
   $('qrBig').innerHTML = qrSVG(JOIN_URL);
   $('qrMini').innerHTML = qrSVG(JOIN_URL);
   $('qrOver').innerHTML = qrSVG(JOIN_URL);
-  $('joinText').textContent = Live.test ? JOIN_URL.replace(/^https?:\/\//, '') : SHORT + (ROOM !== 'icqa-pk26' ? '?room=' + ROOM : '');
+  $('joinText').textContent = Live.test ? JOIN_URL.replace(/^https?:\/\//, '') : SHORT + (ROOM !== Live.defRoom ? '?room=' + ROOM : '');
   window.__host = { steps, get H() { return H; }, go, next, joinUrl: JOIN_URL };
   renderCount();
   render(true);

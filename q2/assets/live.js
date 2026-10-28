@@ -187,6 +187,7 @@
   };
 
   // A page can set window.LIVE_ROOM before loading this file to get its own default room.
-  const DEF_ROOM = window.LIVE_ROOM || 'icqa-pk26';
+  // Bumped from icqa-pk26 so screens left open on old code talk to an empty room.
+  const DEF_ROOM = window.LIVE_ROOM || 'icqa-q2b';
   window.Live = { create, rid, store, defRoom: DEF_ROOM, room: (params.get('room') || DEF_ROOM).replace(/[^a-z0-9-]/gi, '').slice(0, 24) || DEF_ROOM, test: TEST };
 })();
