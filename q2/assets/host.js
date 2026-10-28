@@ -94,7 +94,7 @@
     if (!force && now - lastSent < 350) { sendTimer = setTimeout(() => broadcast(true), 350); return; }
     lastSent = now;
     const st = steps[H.pos], it = item(st);
-    const phaseKey = `${st.v}:${H.pos}:${it ? isOpen(it.id) : ''}:${Math.floor(now / 240000)}`;
+    const phaseKey = `${st.v}:${H.pos}:${it ? isOpen(it.id) : ''}:${Object.keys(H.players).length}:${Math.floor(now / 60000)}`;
     live.publishState(stateForPhones(), phaseKey);
   }
   setInterval(() => broadcast(true), 12000);

@@ -21,6 +21,8 @@
         { id: 'ntfy', type: 'ntfy', base: 'https://ntfy.sh' },
       ];
   const disabled = (params.get('off') || '').split(',');
+  // A host state older than this is a leftover (e.g. a retained message from an earlier run), not a live host.
+  const STALE_MS = (TEST && +params.get('stale') * 1000) || 120000;
 
   const rid = (n = 8) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
 
@@ -33,7 +35,7 @@
     const clients = {};
     let ntfySources = {};
     let hostChannels = null; // from the host's state, for players
-    let gotState = false;
+    let lastLive = 0; // when we last received a fresh host state
     let lastNtfyStateKey = '';
     let ntfyStateTimer = null;
 
@@ -50,8 +52,8 @@
       seen.add(msg.id); seenOrder.push(msg.id);
       if (seenOrder.length > 5000) seen.delete(seenOrder.shift());
       if (topicKey === 'state') {
-        gotState = true;
-        if (Array.isArray(msg.ch)) hostChannels = msg.ch;
+        msg._stale = !(Date.now() - (msg.t || 0) < STALE_MS);
+        if (!msg._stale) { lastLive = Date.now(); if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
       }
       onMsg && onMsg(topicKey, msg, chId);
     }
@@ -112,7 +114,9 @@
       else {
         // Players only use ntfy if the MQTT relays have not brought them the host's state.
         setStatus(ntfyCh.id, 'standby');
-        setTimeout(() => { if (!gotState) connectNtfy(ntfyCh); }, 6000);
+        // ...and also whenever the host goes quiet on them (a relay the host cannot reach only holds stale state).
+        setTimeout(() => { if (!lastLive) connectNtfy(ntfyCh); }, 6000);
+        setInterval(() => { if (Date.now() - lastLive > 25000) connectNtfy(ntfyCh); }, 5000);
       }
     }
 
@@ -152,9 +156,10 @@
       const msg = { ...payload, id: rid() };
       const body = JSON.stringify(msg);
       const mine = upMqtt();
-      const shared = hostChannels ? mine.filter(id => hostChannels.includes(id)) : mine;
+      const hostKnown = hostChannels && Date.now() - lastLive < 30000;
+      const shared = hostKnown ? mine.filter(id => hostChannels.includes(id)) : mine;
       shared.forEach(id => clients[id].publish(mqttTopic('up'), body, { qos: important ? 1 : 0 }));
-      if (important && ntfyCh && !disabled.includes(ntfyCh.id) && shared.length === 0) {
+      if (important && ntfyCh && !disabled.includes(ntfyCh.id) && (shared.length === 0 || !hostKnown)) {
         if (!ntfySources.state) connectNtfy(ntfyCh);
         return ntfyPublish(ntfyCh, 'up', msg);
       }

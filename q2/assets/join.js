@@ -76,8 +76,8 @@
     if (S && m.t < S.t) return;
     if (S && S.sid !== m.sid) { myAns = {}; store.set(ansKey, myAns); shownResultFor = null; }
     S = m; lastStateAt = Date.now(); lastStateVia = ch;
-    if (me && Array.isArray(m.pl) && m.pl.includes(pid)) joined = true;
-    else if (me && Array.isArray(m.pl) && joined) { joined = false; sendJoin(); } // host was reset
+    if (!m._stale && me && Array.isArray(m.pl) && m.pl.includes(pid)) joined = true;
+    else if (!m._stale && me && Array.isArray(m.pl) && joined) { joined = false; sendJoin(); } // host was reset
     if (m.q && m.q.left != null) S._deadline = Date.now() + m.q.left * 1000;
     const mine = m.me && m.me[pid];
     if (mine) $('meScore').textContent = mine[1].toLocaleString() + ' pts';
@@ -102,6 +102,7 @@
     if (!S) { waitScreen('Connecting to the room...', 'Hang tight. If this takes more than a few seconds, check you have internet.'); return; }
     if (S.seg) document.body.style.setProperty('--seg', S.seg.color);
     const q = S.q;
+    if (S._stale) return waitScreen('Waiting for the host...', 'The quiz shows up here as soon as the presenter starts it. Keep this page open.');
     if (S.ph === 'lobby') return waitScreen(joined ? 'You\'re in!' : 'Joining...', 'Eyes on the big screen. The game starts soon.');
     if (S.ph === 'title') return waitScreen(S.seg.title, S.seg.sub + '. Get ready...');
     if ((S.ph === 'q' || S.ph === 'reveal') && q) {
