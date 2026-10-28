@@ -62,13 +62,13 @@
       <h3>Average ticket</h3>
       <div class="sub">What each customer spends per purchase</div>
       <div class="val num" id="tV">+2.8%</div>
-      <div class="receipt"><div class="row"><span>LAST YEAR</span><span>$90.01</span></div><div class="row tot"><span>THIS YEAR</span><span id="rcpt">$92.50</span></div></div>
+      <div class="receipt"><div class="row"><span>LAST YEAR</span><span>$100.00</span></div><div class="row tot"><span>THIS YEAR</span><span id="rcpt">$102.80</span></div><div class="row" style="font-size:.7rem;margin-top:6px;color:#666"><span>An example $100 basket</span></div></div>
       <input type="range" id="t" min="-5" max="5" step="0.1" value="2.8" aria-label="Average ticket change">
     </div>
     <div class="op">+</div>
     <div class="card part">
       <h3>Transactions</h3>
-      <div class="sub">How often customers buy (443.2M purchases in Q2)</div>
+      <div class="sub">How often customers buy</div>
       <div class="val num" id="xV">(1.0%)</div>
       <div class="people" id="people"></div>
       <input type="range" id="x" min="-5" max="5" step="0.1" value="-1" aria-label="Transactions change">
@@ -102,7 +102,7 @@
   </section>
 
   <div class="takeaway">Comp shows how the core business grew. Customers spent more per trip (+2.8%) and came in slightly less often (1.0%). Accurate on-hands keep comp-store shelves sellable.</div>
-  <div class="src">Source: Home Depot Q2 FY2026 earnings release: comparable average ticket +2.8% ($92.50 vs $90.01), comparable transactions (1.0%); total transactions 443.2M vs 446.8M, comp +1.7%, US comp +1.3%, GMS contributed $1.4B. Lowe's Q2 2026 release. Ticket and transactions exclude HD Supply and SRS. The sales bridge is rounded and its axis starts at $43B so the steps are visible.</div>
+  <div class="src">Source: Home Depot Q2 FY2026 earnings release: comparable average ticket +2.8%, comparable transactions (1.0%), comp +1.7%, US comp +1.3%, GMS contributed $1.4B. Lowe's Q2 2026 release. The sales bridge is rounded and its axis starts at $43B so the steps are visible.</div>
 </div>
 
 <script src="assets/fx.js"></script>
@@ -123,7 +123,7 @@
     $('tV').textContent = pct(t); $('tV').className = 'val num ' + (t >= 0 ? 'pos' : 'neg');
     $('xV').textContent = pct(x); $('xV').className = 'val num ' + (x >= 0 ? 'pos' : 'neg');
     $('cV').textContent = pct(c); $('cV').className = 'val num ' + (c >= 0 ? 'pos' : 'neg');
-    $('rcpt').textContent = Math.abs(t - 2.8) < 0.05 ? '$92.50' : '$' + (90.01 * (1 + t / 100)).toFixed(2);
+    $('rcpt').textContent = '$' + (100 * (1 + t / 100)).toFixed(2);
     // 50 people = last year; each one is 2% of trips
     const n = Math.round(x / 2);
     [...$('people').children].forEach((el, i) => { el.classList.toggle('gone', n < 0 && i >= 50 + n); el.classList.toggle('extra', n > 0 && i < n); });

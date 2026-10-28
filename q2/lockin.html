@@ -124,7 +124,7 @@
     $('pOld').textContent = money(po); $('pNew').textContent = money(pn);
     $('diff').textContent = (d >= 0 ? '+' : '-') + money(d);
     $('diff').classList.toggle('neg', d < 0);
-    $('yr').textContent = `a month, or ${money(d * 12)} a year${d > 0 ? ` (about ${Math.round(d / 92.5)} Home Depot receipts a month)` : ' saved'}`;
+    $('yr').textContent = `a month, or ${money(d * 12)} a year${d > 0 ? ` (about $${Math.round(d / 30)} a day)` : ' saved'}`;
     const v = d <= 0 ? 'Pack the truck!' : d < 150 ? 'Maybe, for the right house' : d < 400 ? 'Hmm. Let me think.' : d < 800 ? 'Not moving. Ever.' : 'Bolting the doors shut';
     $('verdict').textContent = v;
     $('lock').textContent = d <= 0 ? '🔓' : '🔒';
