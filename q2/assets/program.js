@@ -4,8 +4,10 @@
 window.PROGRAM = [
   {
     id: 'warm', title: 'Warm-Up', sub: 'Guess the Number', deck: 'Start (slides 4 - 5)', color: '#F96302',
-    blurb: 'Four questions. No finance degree required. Speed counts.',
+    blurb: 'One word to warm up, then four questions. No finance degree required. Speed counts.',
     items: [
+      { id: 'h5', type: 'text', mode: 'cloud', tag: 'OPENER', q: 'One word for the economy right now?',
+        fact: 'Bigger words = more people said it. Hold that thought: we will see if the numbers agree.' },
       { id: 'w1', icqa: 'Every one of those sales needs the right product in the right place.', type: 'mc', tag: 'SALES', q: 'How much did Home Depot sell in Q2 (13 weeks)?',
         opts: ['$4.8 billion', '$47.9 billion', '$479 billion'], a: 1,
         fact: 'That is about <b>$6,100 every second</b>, day and night, for 13 straight weeks. Up 5.7% vs last year.' },
@@ -76,8 +78,6 @@ window.PROGRAM = [
       { id: 'h4', type: 'poll', tag: 'CONFESSION', q: 'Which project are you putting off right now?',
         opts: ['Kitchen or bath', 'Paint or flooring', 'Deck, fence or yard', 'Nothing. My house is perfect.'],
         fact: 'Every one of these is a future Home Depot basket. <b>Deferred, not cancelled.</b>' },
-      { id: 'h5', type: 'text', mode: 'cloud', tag: 'ONE WORD', q: 'One word for the economy right now?',
-        fact: 'Bigger words = more people said it.' },
     ],
   },
 ];

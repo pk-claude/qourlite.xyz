@@ -337,9 +337,10 @@
   const SHAPES = ['▲', '◆', '●', '■'];
   function renderQ(it, st, seg, silent) {
     show('vQ');
-    const n = seg.items.indexOf(it);
+    const scoredItems = seg.items.filter(x => x.type !== 'text');
+    const n = scoredItems.indexOf(it);
     $('qTag').textContent = it.tag + (it.double ? '  ·  DOUBLE POINTS' : '') + (it.type === 'poll' ? '  ·  POLL' : '');
-    $('qCount').textContent = it.type === 'poll' ? 'No wrong answers' : `Question ${n + 1} of ${seg.items.length}`;
+    $('qCount').textContent = it.type === 'poll' ? 'No wrong answers' : `Question ${n + 1} of ${scoredItems.length}`;
     $('qText').innerHTML = esc(it.q);
     $('qText').classList.toggle('long', it.q.length > 70);
     const revealed = st.v === 'reveal';
@@ -456,6 +457,7 @@
     Object.entries(box).forEach(([pid, x]) => x.a.forEach(t => entries.push({ pid, t, key: pid + '|' + t })));
     const visible = entries.filter(e => !hidden.has(e.key));
     $('xN').textContent = visible.length;
+    $('xNl').textContent = visible.length === 1 ? 'response' : 'responses';
     $('cloud').classList.toggle('hidden', it.mode !== 'cloud');
     $('wall').classList.toggle('hidden', it.mode === 'cloud');
     if (it.mode === 'cloud') {
