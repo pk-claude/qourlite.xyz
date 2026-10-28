@@ -22,6 +22,7 @@
   let lastStateAt = 0, lastStateVia = '';
   let joined = false;
   let tab = 'play';
+  let pulledFor = null;
   let shownResultFor = null;
 
   // ---------- relay ----------
@@ -80,6 +81,11 @@
     const mine = m.me && m.me[pid];
     if (mine) $('meScore').textContent = mine[1].toLocaleString() + ' pts';
     else if (m.ph === 'lobby' && !(m.pl || []).includes(pid)) $('meScore').textContent = '';
+    // A new question pulls players off the bingo card once, so nobody misses it.
+    if (m.ph === 'q' && m.q && m.q.open && m.q.id !== pulledFor) {
+      pulledFor = m.q.id;
+      if (tab === 'bingo' && myAns[m.q.id] == null) { setTab('play'); if (navigator.vibrate) navigator.vibrate(60); }
+    }
     render();
   }
 
@@ -259,8 +265,13 @@
   };
 
   // ---------- tabs ----------
-  $('tabPlay').onclick = () => { tab = 'play'; $('tabPlay').classList.add('on'); $('tabBingo').classList.remove('on'); shownResultFor = null; render(); };
-  $('tabBingo').onclick = () => { tab = 'bingo'; $('tabBingo').classList.add('on'); $('tabPlay').classList.remove('on'); render(); };
+  function setTab(t) {
+    tab = t;
+    $('tabPlay').classList.toggle('on', t === 'play'); $('tabBingo').classList.toggle('on', t === 'bingo');
+    if (t === 'play') shownResultFor = null;
+  }
+  $('tabPlay').onclick = () => { setTab('play'); render(); };
+  $('tabBingo').onclick = () => { setTab('bingo'); render(); };
 
   // ---------- bingo ----------
   const WORDS = ['Comp sales', 'Basis point', 'Average ticket', 'Transactions', 'The Pro', 'DIY', 'Mortgage rate', 'Lock-in', 'Gross margin', 'SG&A', 'EPS', 'Lowe\'s', 'GMS', 'Tariffs', 'Inventory turns', 'The Fed', 'Inflation', 'Consensus', '"Beat"', 'Guidance', 'Online', 'Housing turnover', 'ROIC', 'Wall Street', 'Big-ticket', 'Express delivery', 'Interest rates', 'Operating margin', 'Year over year', 'Headwind', 'Tailwind', 'Market share', 'GDP', 'Real (inflation-adjusted)', 'Shrink', 'In-stock'];
