@@ -36,6 +36,7 @@
     let ntfySources = {};
     let hostChannels = null; // from the host's state, for players
     let lastLive = 0; // when we last received a fresh host state
+    let bestSt = 0; // start time of the newest presenter screen seen; older ones are ignored
     let lastNtfyStateKey = '';
     let ntfyStateTimer = null;
 
@@ -53,12 +54,15 @@
       if (seenOrder.length > 5000) seen.delete(seenOrder.shift());
       if (topicKey === 'state') {
         msg._stale = !(Date.now() - (msg.t || 0) < STALE_MS);
-        if (!msg._stale) { lastLive = Date.now(); if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
+        // Two presenter screens in one room (e.g. an old tab left open): the most recently opened one wins.
+        if (!msg._stale && (msg.st || 0) > bestSt) bestSt = msg.st || 0;
+        msg._old = !msg._stale && (msg.st || 0) < bestSt;
+        if (!msg._stale && !msg._old) { lastLive = Date.now(); if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
       }
       onMsg && onMsg(topicKey, msg, chId);
     }
 
-    const subs = role === 'host' ? ['up'] : ['state'];
+    const subs = role === 'host' ? ['up', 'state'] : ['state'];
 
     function connectMqtt(ch) {
       if (!window.mqtt) { setStatus(ch.id, 'off'); return; }

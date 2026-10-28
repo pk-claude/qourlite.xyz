@@ -153,6 +153,14 @@
 <!-- big QR overlay (Q) -->
 <div class="overlay hidden" id="qrOverlay"><div class="qr-over-card"><div class="qr-big" id="qrOver"></div><div class="join-url">qourlite.xyz/join</div><div class="muted">Press Q to close</div></div></div>
 
+<!-- another presenter screen took over -->
+<div class="overlay hidden" id="takenOver"><div class="qr-over-card" style="max-width:640px">
+  <div class="kicker">Paused</div>
+  <h1 style="font-size:clamp(2rem,5vw,3.4rem);margin:.3em 0;letter-spacing:-.03em">Another quiz screen is running</h1>
+  <p class="muted" style="font-size:1.15rem">A newer copy of this page was opened (another tab or computer), so this one stepped aside to keep phones in sync. Close this tab, or take control back here.</p>
+  <p style="margin-top:28px"><button class="pill" id="takeBack">Take control back on this screen</button></p>
+</div></div>
+
 <!-- presenter gate -->
 <div class="overlay hidden" id="gate"><div class="qr-over-card" style="max-width:640px">
   <div class="kicker">This is the presenter's big screen</div>

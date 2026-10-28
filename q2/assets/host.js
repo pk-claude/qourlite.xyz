@@ -37,17 +37,26 @@
   if (!H.sid) H = fresh();
   ['players','answers','opened','closed','scored','gained','hidden','prevRank'].forEach(k => (H[k] = H[k] || {}));
   H.bingo = H.bingo || [];
-  const save = () => Live.store.set(KEY, H);
+  // Each open presenter screen has its own id and start time; if a newer one appears, this one steps aside.
+  const HID = Live.rid(6);
+  let ST = 0, passive = false;
+  const save = () => { if (!passive) Live.store.set(KEY, H); };
 
   // ---------- live relay ----------
   let lastSent = 0, sendTimer = null;
   // Only the presenter's screen may act as host: a second host would confuse the phones.
   let live = { publishState() {}, status: () => ({}), channels: [] };
+  function onOtherHost(m) {
+    if (m.hid === HID || m._stale || !(m.st > ST)) return;
+    passive = true;
+    $('takenOver').classList.remove('hidden');
+  }
   function connect() {
+    ST = Date.now();
     live = Live.create({
       room: ROOM, role: 'host',
-      onMsg: (k, m) => k === 'up' && onUp(m),
-      onStatus: renderRelays,
+      onMsg: (k, m) => { if (passive) return; if (k === 'up') onUp(m); else if (k === 'state') onOtherHost(m); },
+      onStatus: st => { renderRelays(st); if (Object.values(st).includes('up')) broadcast(true); },
     });
     renderRelays(live.status());
     broadcast(true);
@@ -67,7 +76,7 @@
     const it = item(st);
     const seg = st.s != null ? PROGRAM[st.s] : null;
     const pl = Object.keys(H.players);
-    const out = { t: Date.now(), sid: H.sid, ph: st.v, n: pl.length, pl };
+    const out = { t: Date.now(), sid: H.sid, hid: HID, st: ST, ph: st.v, n: pl.length, pl };
     if (seg) out.seg = { title: seg.title, sub: seg.sub, color: seg.color };
     if (it) {
       const open = isOpen(it.id);
@@ -89,6 +98,7 @@
     return m;
   }
   function broadcast(force) {
+    if (passive || !ST) return;
     const now = Date.now();
     clearTimeout(sendTimer);
     if (!force && now - lastSent < 350) { sendTimer = setTimeout(() => broadcast(true), 350); return; }
@@ -645,6 +655,7 @@
   renderCount();
   render(true);
   const isPresenter = Live.test || new URLSearchParams(location.search).has('presenter') || Live.store.get('ql-presenter', false);
+  $('takeBack').onclick = () => location.reload();
   if (isPresenter) connect();
   else {
     $('gate').classList.remove('hidden');

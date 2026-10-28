@@ -73,7 +73,10 @@
 
   // ---------- state ----------
   function onState(m, ch) {
-    if (S && m.t < S.t) return;
+    if (m._old) return; // a presenter screen older than the current one
+    if (S && !S._stale && m.hid !== S.hid && (m.st || 0) < (S.st || 0)) return;
+    if (S && m.hid === S.hid && m.t < S.t) return;
+    if (S && !m.hid && S.hid && !S._stale) return;
     if (S && S.sid !== m.sid) { myAns = {}; store.set(ansKey, myAns); shownResultFor = null; }
     S = m; lastStateAt = Date.now(); lastStateVia = ch;
     if (!m._stale && me && Array.isArray(m.pl) && m.pl.includes(pid)) joined = true;
