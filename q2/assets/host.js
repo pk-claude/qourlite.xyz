@@ -66,7 +66,7 @@
       if (open && it.type !== 'text') out.q.left = Math.max(0, (H.opened[it.id] + limitOf(it) * 1000 - Date.now()) / 1000);
       out.ap = Object.keys(H.answers[it.id] || {});
       if (st.v === 'reveal') {
-        out.rv = { a: it.a, dist: dist(it) };
+        out.rv = { a: it.a, dist: dist(it), fact: it.fact.replace(/<[^>]+>/g, '') };
         out.me = meMap(it.id);
       }
     }
@@ -349,7 +349,7 @@
     else if (!silent) revealFx(it, d);
   }
   function factHTML(it) {
-    let s = `<div class="fact-txt">${it.fact}</div>`;
+    let s = `<div class="fact-txt">${it.fact}${it.icqa ? `<div class="icqa"><span>ICQA link</span>${esc(it.icqa)}</div>` : ''}</div>`;
     if (it.type === 'mc' || it.type === 'vs') {
       const box = H.answers[it.id] || {};
       const fast = Object.entries(box).filter(([, x]) => x.a === it.a).sort((a, b) => a[1].ms - b[1].ms)[0];
@@ -552,6 +552,17 @@
   $('menuList').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) { $('menu').classList.add('hidden'); go(+b.dataset.go); } });
   $('btnMenu').onclick = () => toggleMenu(true);
   $('menuClose').onclick = () => toggleMenu(false);
+  $('btnCopy').onclick = () => {
+    const lines = ['Earnings Unpacked: live quiz results', ''];
+    ranking().filter(p => !String(p.pid).startsWith('bot')).slice(0, 10).forEach((p, i) => lines.push(`${i + 1}. ${p.nm}: ${p.score.toLocaleString()} pts`));
+    PROGRAM.forEach(seg => seg.items.forEach(it => {
+      const box = H.answers[it.id]; if (!box || !Object.keys(box).length) return;
+      if (it.type === 'poll') { const d = dist(it); lines.push('', `${it.q}`); it.opts.forEach((o, i) => lines.push(`  ${o}: ${d[i]}`)); }
+      if (it.type === 'text') { lines.push('', it.q); Object.values(box).forEach(x => x.a.forEach(t => lines.push('  - ' + t))); }
+    }));
+    if (H.bingo.length) lines.push('', 'Bingo: ' + H.bingo.map(b => (H.players[b.pid] || {}).nm).join(', '));
+    navigator.clipboard.writeText(lines.join('\n')).then(() => { $('btnCopy').textContent = 'Copied'; setTimeout(() => ($('btnCopy').textContent = 'Copy results summary'), 1500); });
+  };
   $('btnReset').onclick = () => {
     if (!confirm('Reset all players, answers and scores? Phones will need to rejoin.')) return;
     H = fresh(); save(); render(true); broadcast(true); toggleMenu(false);

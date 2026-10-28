@@ -107,6 +107,8 @@ body.host { --seg: #F96302; overflow: hidden; height: 100vh; background:
 .fact { margin-right: 280px; margin-top: 2vh; min-height: 9vh; display: flex; gap: 3vw; align-items: center; opacity: 0; transform: translateY(14px); transition: .5s .6s; }
 .fact.on { opacity: 1; transform: none; }
 .fact-txt { flex: 1; font-size: clamp(1rem, 1.9vw, 1.8rem); color: var(--muted); padding: 1.6vh 1.6vw; border-left: 6px solid var(--seg); background: rgba(255,255,255,.035); border-radius: 10px; }
+.icqa { margin-top: .6vh; font-size: .8em; color: #fff; }
+.icqa span { display: inline-block; margin-right: 10px; padding: 2px 8px; border-radius: 6px; background: var(--orange); font-size: .7em; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; vertical-align: 2px; }
 .fastest { font-size: clamp(1rem, 1.5vw, 1.4rem); white-space: nowrap; }
 .fastest .kicker { display: block; color: var(--yellow); }
 
