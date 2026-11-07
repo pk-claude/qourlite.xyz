@@ -8,47 +8,48 @@ window.MONO = {
   },
 
   // 40 spaces, index 0 = GO, counter-clockwise from the bottom-right corner like the real board.
+  // Themed as a box's trip through a distribution center: yard, receiving, putaway, storage, pick, pack, sort, ship.
   board: [
     { t: 'corner', n: 'GO', sub: 'Collect $200' },
-    { t: 'prop', c: 'brown', n: 'Bucket Boulevard', p: 60 },
+    { t: 'prop', c: 'brown', n: 'Trailer Yard', p: 60 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'brown', n: 'Tape Measure Terrace', p: 60 },
-    { t: 'tax', n: 'Shrink Tax', sub: 'Pay $200' },
-    { t: 'rail', n: 'Forklift Railroad', p: 200 },
-    { t: 'prop', c: 'lightblue', n: 'Paint Aisle Avenue', p: 100 },
+    { t: 'prop', c: 'brown', n: 'Dock Door 12', p: 60 },
+    { t: 'tax', n: 'Damage Claim', sub: 'Pay $200' },
+    { t: 'rail', n: 'Inbound Conveyor', p: 200 },
+    { t: 'prop', c: 'lightblue', n: 'Receiving Lane', p: 100 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'lightblue', n: 'Caulk Court', p: 100 },
-    { t: 'prop', c: 'lightblue', n: 'Grout Street', p: 120 },
-    { t: 'corner', n: 'Jail', sub: 'Just visiting' },
-    { t: 'prop', c: 'pink', n: 'Plumbing Place', p: 140 },
-    { t: 'util', n: 'Electric Aisle', p: 150 },
-    { t: 'prop', c: 'pink', n: 'Pipe Fitting Parkway', p: 140 },
-    { t: 'prop', c: 'pink', n: 'Faucet Avenue', p: 160 },
-    { t: 'rail', n: 'Pallet Jack Railroad', p: 200 },
-    { t: 'prop', c: 'orange', n: 'Orange Apron Avenue', p: 180 },
+    { t: 'prop', c: 'lightblue', n: 'ASN Avenue', p: 100 },
+    { t: 'prop', c: 'lightblue', n: 'Unload Station', p: 120 },
+    { t: 'corner', n: 'Damage Cage', sub: 'Just visiting' },
+    { t: 'prop', c: 'pink', n: 'Putaway Path', p: 140 },
+    { t: 'util', n: 'Forklift Battery Room', p: 150 },
+    { t: 'prop', c: 'pink', n: 'Reach Truck Row', p: 140 },
+    { t: 'prop', c: 'pink', n: 'Slotting Street', p: 160 },
+    { t: 'rail', n: 'Sortation Conveyor', p: 200 },
+    { t: 'prop', c: 'orange', n: 'Pallet Rack Row', p: 180 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'orange', n: 'Lumber Lane', p: 180 },
-    { t: 'prop', c: 'orange', n: 'Plywood Place', p: 200 },
-    { t: 'corner', n: 'Free Parking', sub: 'Pro lot' },
-    { t: 'prop', c: 'red', n: 'Flooring Freeway', p: 220 },
+    { t: 'prop', c: 'orange', n: 'Bulk Storage Bay', p: 180 },
+    { t: 'prop', c: 'orange', n: 'Mezzanine Way', p: 200 },
+    { t: 'corner', n: 'Break Room', sub: 'Free parking' },
+    { t: 'prop', c: 'red', n: 'Pick Path', p: 220 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'red', n: 'Tile Trail', p: 220 },
-    { t: 'prop', c: 'red', n: 'Hardwood Heights', p: 240 },
-    { t: 'rail', n: 'Cycle Count Line', p: 200 },
-    { t: 'prop', c: 'yellow', n: 'Garden Center Gardens', p: 260 },
-    { t: 'prop', c: 'yellow', n: 'Mulch Mile', p: 260 },
-    { t: 'util', n: 'Hose Aisle Water Works', p: 150 },
-    { t: 'prop', c: 'yellow', n: 'Sunflower Street', p: 280 },
-    { t: 'corner', n: 'Go to Jail', sub: 'Unscanned item' },
-    { t: 'prop', c: 'green', n: 'Tool Rental Road', p: 300 },
-    { t: 'prop', c: 'green', n: 'Power Tool Place', p: 300 },
+    { t: 'prop', c: 'red', n: 'Goods-to-Person Grid', p: 220 },
+    { t: 'prop', c: 'red', n: 'Robot Pick Cell', p: 240 },
+    { t: 'rail', n: 'Spiral Conveyor', p: 200 },
+    { t: 'prop', c: 'yellow', n: 'AMR Alley', p: 260 },
+    { t: 'prop', c: 'yellow', n: 'Tote Lane', p: 260 },
+    { t: 'util', n: 'Robot Charging Dock', p: 150 },
+    { t: 'prop', c: 'yellow', n: 'Pack Station', p: 280 },
+    { t: 'corner', n: 'Go to Damage Cage', sub: 'Unscanned pallet' },
+    { t: 'prop', c: 'green', n: 'Sorter Boulevard', p: 300 },
+    { t: 'prop', c: 'green', n: 'Cross-Dock Court', p: 300 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'green', n: 'Drill Bit Drive', p: 320 },
-    { t: 'rail', n: 'Short Line Pallet Express', p: 200 },
+    { t: 'prop', c: 'green', n: 'Load Planning Lane', p: 320 },
+    { t: 'rail', n: 'Outbound Conveyor', p: 200 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'darkblue', n: 'Pro Desk Place', p: 350 },
-    { t: 'tax', n: 'Overstock Tax', sub: 'Pay $100' },
-    { t: 'prop', c: 'darkblue', n: 'Appliance Boardwalk', p: 400 },
+    { t: 'prop', c: 'darkblue', n: 'Outbound Dock', p: 350 },
+    { t: 'tax', n: 'Overtime Tax', sub: 'Pay $100' },
+    { t: 'prop', c: 'darkblue', n: 'Last Mile Boardwalk', p: 400 },
   ],
 
   // Starting cash from the Bank, and what a right answer pays.
@@ -56,6 +57,7 @@ window.MONO = {
   pay: { base: 200, speed: 200 }, // $200 for right, up to +$200 for speed; doubled on double questions
   limit: 20, // seconds per question
   chestDraws: 2, // Community Chest draws after the podium
+  hand: 5, // properties dealt to each player; landing on one you own doubles your rent for that question
 
   // One question per section of the all-hands. Five rolls make one full lap:
   // 8 + 8 + 6 + 9 + 9 = 40 spaces, so the last roll lands back on GO.
@@ -106,5 +108,18 @@ window.MONO = {
     phrase: ['"Let\'s take that offline"', '"Can you see my screen?"', '"You\'re on mute"', '"Quick question"', '"Per my last email"', '"Let\'s circle back"'],
   },
 
-  tokens: ['🎩', '🏎️', '🐕', '🐈', '🚢', '👢', '🦖', '🦆', '🐧', '🧵', '🛞', '💰', '🏠', '🏨', '🔨', '🎲'],
+  // Game pieces, distribution-center style: robots, trucks, totes, safety gear.
+  tokens: ['🤖', '📦', '🚚', '🚛', '🦺', '⛑️', '🔋', '🛒', '🏷️', '📋', '🔧', '🪜', '🧤', '🚧', '🧯', '🎲'],
+};
+
+// Each player's hand of properties, dealt from their player id. The phone and the big screen
+// compute the same hand on their own, so nothing extra has to travel between them.
+window.MONO.ownable = window.MONO.board.map((sp, i) => (['prop', 'rail', 'util'].includes(sp.t) ? i : -1)).filter(i => i > -1);
+window.MONO.handFor = function (pid) {
+  let h = 2166136261;
+  for (const ch of 'hand:' + pid) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  const rnd = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  const deck = window.MONO.ownable.slice();
+  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  return deck.slice(0, window.MONO.hand).sort((a, b) => a - b);
 };

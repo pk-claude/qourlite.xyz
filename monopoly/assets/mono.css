@@ -1,12 +1,12 @@
 /* Monopoly all-hands: shared look for the big screen and the phones. */
 :root {
-  --felt: #0b3b2c;
-  --felt2: #072a1f;
+  --felt: #262b30;
+  --felt2: #16191c;
   --board: #f3ecd7;
   --board2: #e7dfc4;
   --ink: #fffaf0;
   --dark: #13110d;
-  --muted: #b7c9bf;
+  --muted: #b9c0c7;
   --line: rgba(255,255,255,.14);
   --panel: rgba(0,0,0,.28);
   --red: #e2231a;
@@ -22,7 +22,11 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
-  background: radial-gradient(ellipse at 50% 20%, #145a43 0%, var(--felt) 45%, var(--felt2) 100%) fixed;
+  /* a distribution-center floor: polished concrete with a faint slab grid */
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.028) 0 1px, transparent 1px 96px),
+    radial-gradient(ellipse at 50% 15%, #3b4248 0%, var(--felt) 50%, var(--felt2) 100%) fixed;
   color: var(--ink); font-family: var(--font); line-height: 1.35; -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; }
@@ -345,3 +349,36 @@ body.phone { min-height: 100dvh; overscroll-behavior: none; }
 .lot .lh { background: var(--red); color: #fff; border: 2px solid #111; padding: 10px; font-family: var(--disp); font-size: 1.5rem; text-transform: uppercase; line-height: 1.05; }
 .lot .lb { padding: 12px 6px 4px; font-weight: 800; }
 .big-sub { font-size: clamp(1.1rem, 1.8vw, 2rem); color: var(--muted); margin: 0; max-width: 1100px; }
+
+/* who owns the space the token landed on */
+.owners { align-self: center; width: 300px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-weight: 700; }
+.owners b.num { font-size: 2rem; color: var(--gold); }
+.owners span { color: var(--muted); }
+.own-faces { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 8px; font-size: 1.3rem; }
+.props { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 340px; }
+.props .pc { background: #fff; color: #111; border-radius: 4px; padding: 3px; text-align: center; font-size: .62rem; font-weight: 800; line-height: 1.1; min-height: 64px; display: flex; flex-direction: column; }
+.props .pc i { display: block; height: 14px; background: var(--c); border: 1px solid #111; margin-bottom: 4px; }
+.props .pc.hot { outline: 3px solid var(--gold); transform: scale(1.06); }
+.own-banner { background: var(--gold); color: #111; font-weight: 900; text-align: center; padding: 10px 12px; border-radius: 12px; animation: pulse 1s infinite; }
+
+/* ---------- distribution-center theme ---------- */
+.hud::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: repeating-linear-gradient(-45deg, #f6c544 0 12px, #111 12px 24px); opacity: .85; }
+body.phone::before { content: ''; display: block; height: 6px; background: repeating-linear-gradient(-45deg, #f6c544 0 12px, #111 12px 24px); }
+.sound-pill { background: var(--gold) !important; color: #111 !important; border-color: var(--gold) !important; animation: pulse 1.2s infinite; }
+.walker { width: 7.5%; }
+.walker svg { width: 100%; height: auto; display: block; }
+.walker.flip svg { transform: scaleX(-1); }
+/* conveyor along the bottom of the board centre, boxes riding left to right */
+.belt { position: absolute; left: 3%; right: 3%; bottom: 2.5%; height: 5.5%; border-radius: 99px; border: 2px solid #333; overflow: hidden;
+  background: repeating-linear-gradient(90deg, #6b6b6b 0 10px, #4a4a4a 10px 20px); animation: rollers .6s linear infinite; }
+@keyframes rollers { to { background-position: 20px 0; } }
+.belt span { position: absolute; top: -18%; font-size: clamp(14px, 1.7vw, 30px); animation: ride 9s linear infinite; left: -10%; }
+.belt span:nth-child(2) { animation-delay: -1.8s; } .belt span:nth-child(3) { animation-delay: -3.6s; }
+.belt span:nth-child(4) { animation-delay: -5.4s; } .belt span:nth-child(5) { animation-delay: -7.2s; }
+@keyframes ride { to { left: 105%; } }
+/* a fulfillment robot shuttling a tote along a taped floor lane at the top */
+.amr-lane { position: absolute; left: 3%; right: 3%; top: 2.5%; height: 5.5%; border-top: 3px dashed #d4a017; border-bottom: 3px dashed #d4a017; }
+.amr { position: absolute; top: 50%; transform: translate(0, -50%); font-size: clamp(16px, 1.9vw, 34px); animation: shuttle 12s ease-in-out infinite; left: 0; }
+.amr i { font-style: normal; position: absolute; left: 22%; top: -58%; font-size: .7em; }
+@keyframes shuttle { 0%, 8% { left: 0; } 45%, 55% { left: calc(100% - 1.4em); } 92%, 100% { left: 0; } }
+@media (prefers-reduced-motion: reduce) { .belt, .belt span, .amr { animation: none; } }

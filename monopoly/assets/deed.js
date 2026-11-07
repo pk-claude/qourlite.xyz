@@ -30,7 +30,7 @@
     const snack = cap(ans.snack, 30) || pick(I.snack);
     const phrase = cap(ans.phrase, 40) || pick(I.phrase);
     const word = (power.match(/[A-Za-z]{4,}/g) || ['Hustle']).sort((a, b) => b.length - a.length)[0];
-    const street = word[0].toUpperCase() + word.slice(1).toLowerCase() + ' ' + pick(['Place', 'Avenue', 'Boulevard', 'Lane', 'Terrace', 'Heights', 'Parkway']);
+    const street = word[0].toUpperCase() + word.slice(1).toLowerCase() + ' ' + pick(['Pick Face', 'Dock Door', 'Mezzanine', 'Conveyor', 'Pallet Bay', 'Aisle', 'Cross-Dock']);
     return {
       prop: street, color: pick(GROUPS), price: 100 + 20 * Math.floor(Math.random() * 15),
       tag: `Home of ${cap(nm, 18)}, known for: ${power.toLowerCase()}.`,

@@ -10,7 +10,7 @@ const SCHEMA = {
   additionalProperties: false,
   required: ['prop', 'color', 'price', 'tag', 'rent', 'chance'],
   properties: {
-    prop: { type: 'string', description: 'Parody street name for this person, 2-4 words, max 30 characters, ending in Avenue/Place/Lane/Boulevard/etc.' },
+    prop: { type: 'string', description: 'Parody distribution-center location named after this person, 2-4 words, max 30 characters, e.g. "Spreadsheet Pick Face", "Cold Brew Dock Door", "Inbox Zero Mezzanine"' },
     color: { type: 'string', enum: GROUPS },
     price: { type: 'integer', description: 'Purchase price in Monopoly dollars, 60-400' },
     tag: { type: 'string', description: 'One-line description of the property, max 80 characters' },
@@ -19,9 +19,9 @@ const SCHEMA = {
   },
 };
 
-const SYSTEM = `You write personalised Monopoly title deeds for a company all-hands game at The Home Depot. About 140 colleagues play on their phones; every deed is shown on the big screen in front of everyone.
+const SYSTEM = `You write personalised Monopoly title deeds for a company all-hands game at The Home Depot. The board is a supply chain distribution center: docks, conveyors, pallet racks, pick paths, fulfillment robots, forklifts. About 140 colleagues play on their phones; every deed is shown on the big screen in front of everyone.
 
-Each player gives a name, a game token and three short answers (work superpower, favourite snack, most-used meeting phrase). Write a deed that is clearly about them: a parody street name built from their answers, rent lines that escalate in silliness from "Rent" to "With a hotel", a tagline and a Chance card in the classic voice ("Advance to...", "Bank error in your favour...", "Go directly to...").
+Each player gives a name, a game token and three short answers (work superpower, favourite snack, most-used meeting phrase). Write a deed that is clearly about them: a parody DC location (dock door, aisle, pick face, conveyor, mezzanine...) built from their answers, rent lines that escalate in silliness from "Rent" to "With a hotel", a tagline and a Chance card in the classic voice ("Advance to...", "Bank error in your favour...", "Go directly to...").
 
 Rules:
 - Warm, playful teasing only. Everyone should be happy to see their deed on the big screen with their manager in the room.

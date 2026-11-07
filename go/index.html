@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0b3b2c">
+<meta name="theme-color" content="#262b30">
 <title>Play Monopoly: All-Hands Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
 
   <!-- join -->
   <section class="screen" id="sJoin">
-    <div class="logo" style="font-size:42px;align-self:center;transform:rotate(-4deg);margin:8px 0 6px"><span class="logo-bar">MONOPOLY</span><span class="logo-sub" style="color:var(--gold)">All-Hands Edition</span></div>
+    <div class="logo" style="font-size:42px;align-self:center;transform:rotate(-4deg);margin:8px 0 6px"><span class="logo-bar">MONOPOLY</span><span class="logo-sub" style="color:var(--gold)">Distribution Center Edition</span></div>
     <label for="nm">Your name (or a tycoon name)</label>
     <div class="row"><input type="text" id="nm" maxlength="18" autocomplete="off" placeholder="e.g. Rich Uncle Pete"><button class="sq" id="dice" aria-label="Random name">🎲</button></div>
     <label>Pick your token</label>
@@ -46,7 +46,6 @@
 
   <!-- my deed -->
   <section class="screen" id="sDeed">
-    <div class="kicker">You now own</div>
     <div class="deed-wrap" id="myDeed"></div>
     <button class="go" id="deedOk">Love it. Take me to the game</button>
     <button class="linkish" id="redoDeed">Change my answers</button>
@@ -54,12 +53,13 @@
 
   <!-- waiting -->
   <section class="screen" id="sWait">
-    <div class="wait"><div class="bigav" id="wAv"></div><h2 id="wHead"></h2><p class="muted" id="wSub"></p><button class="linkish" id="editMe">Change name or token</button></div>
+    <div class="wait"><div class="bigav" id="wAv"></div><h2 id="wHead"></h2><p class="muted" id="wSub"></p><div id="wExtra" style="display:flex;flex-direction:column;align-items:center;gap:8px"></div><button class="linkish" id="editMe">Change name or token</button></div>
   </section>
 
   <!-- question -->
   <section class="screen" id="sQ">
     <div class="ptag" id="qTag"></div>
+    <div class="own-banner hidden" id="qOwn">You own this property: double rent if you get it right!</div>
     <div class="qtext" id="qText"></div>
     <div class="bar"><i id="qBar"></i></div>
     <div class="answers" id="answers"></div>

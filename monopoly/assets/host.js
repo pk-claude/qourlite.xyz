@@ -76,7 +76,7 @@
     });
     if (it) {
       const sp = M.board[it.at];
-      out.q = { id: it.id, i: st.i, of: M.quiz.length, tag: it.tag, sp: sp.n, c: sp.c ? M.colors[sp.c] : '', dbl: !!it.double };
+      out.q = { id: it.id, i: st.i, of: M.quiz.length, at: it.at, tag: it.tag, sp: sp.n, c: sp.c ? M.colors[sp.c] : '', dbl: !!it.double };
       if (st.v !== 'roll') {
         const open = isOpen(it.id);
         Object.assign(out.q, { q: it.q, opts: it.opts, open });
@@ -213,11 +213,15 @@
       if (!ans || ans.a !== it.a) return;
       let pts = Math.round((M.pay.base + M.pay.speed * Math.max(0, 1 - ans.ms / lim)) / 10) * 10;
       if (it.double) pts *= 2;
+      if (owns(pid, it)) pts *= 2; // the token landed on a property this player owns
       H.players[pid].cash += pts; g[pid] = pts;
       H.players[pid].tms = (H.players[pid].tms || 0) + ans.ms; // total time on right answers: the tie-breaker
     });
     save();
   }
+  const hands = {};
+  const owns = (pid, it) => (hands[pid] = hands[pid] || M.handFor(pid)).includes(it.at);
+  const ownersOf = it => Object.keys(H.players).filter(pid => owns(pid, it));
   // Ties on cash go to whoever was faster in total on their right answers, then to whoever joined first.
   const ranking = () => Object.entries(H.players).map(([pid, p]) => ({ pid, ...p }))
     .sort((a, b) => b.cash - a.cash || (a.tms || 0) - (b.tms || 0) || a.j - b.j);
@@ -253,8 +257,13 @@
   }
 
   // ---------- board ----------
-  const ICON = { chest: '📦', chance: '❓', rail: '🚂', util: '⚡', tax: '💸' };
-  const CORNER_ICON = ['➡️', '🚔', '🅿️', '👮'];
+  // Board icons, distribution-center style. Rails are conveyors; utilities are chargers.
+  const CONVEYOR = '<svg viewBox="0 0 40 20" width="2.2em" aria-hidden="true"><rect x="1" y="5" width="38" height="7" rx="3.5" fill="#555"/><g fill="#bbb"><circle cx="6" cy="8.5" r="2.4"/><circle cx="14" cy="8.5" r="2.4"/><circle cx="22" cy="8.5" r="2.4"/><circle cx="30" cy="8.5" r="2.4"/><circle cx="35" cy="8.5" r="2.4"/></g><rect x="10" y="0" width="9" height="5" fill="#c8955a" stroke="#7a5230" stroke-width=".8"/><rect x="5" y="12" width="3" height="7" fill="#777"/><rect x="32" y="12" width="3" height="7" fill="#777"/></svg>';
+  const ICON = { chest: '📦', chance: '❓', rail: CONVEYOR, tax: '💸' };
+  const SPACE_ICON = { 12: '🔋', 28: '🤖' };
+  const CORNER_ICON = ['➡️', '🚧', '☕', '👷'];
+  // The token: an orange forklift carrying a pallet. Drawn facing left; flipped on the top row.
+  const FORKLIFT = '<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="2" y="12" width="18" height="16" fill="#c8955a" stroke="#7a5230" stroke-width="1"/><path d="M2 18h18" stroke="#e8d3a8" stroke-width="2"/><rect x="0" y="29" width="22" height="4" fill="#8b5a2b"/><rect x="0" y="33" width="25" height="2.6" fill="#333"/><rect x="22" y="3" width="4" height="35" fill="#444"/><path d="M30 20V6h19v14" fill="none" stroke="#333" stroke-width="2.2"/><rect x="26" y="20" width="27" height="16" rx="3" fill="#F96302"/><rect x="50" y="17" width="11" height="19" rx="2" fill="#c24e00"/><circle cx="40" cy="14" r="3.6" fill="#f2c9a0"/><path d="M36 13a4 4 0 0 1 8 0z" fill="#fdd835"/><circle cx="33" cy="39" r="6.5" fill="#222"/><circle cx="33" cy="39" r="2.5" fill="#999"/><circle cx="53" cy="40" r="5.5" fill="#222"/><circle cx="53" cy="40" r="2.2" fill="#999"/></svg>';
   function gridPos(p) {
     if (p <= 10) return { r: 11, c: 11 - p, side: 'b' };
     if (p < 20) return { r: 11 - (p - 10), c: 1, side: 'l' };
@@ -270,7 +279,7 @@
       d.id = 'sp' + p;
       d.style.gridRow = g.r; d.style.gridColumn = g.c;
       if (s.c) d.style.setProperty('--c', M.colors[s.c]);
-      const icon = s.t === 'corner' ? CORNER_ICON[p / 10] : ICON[s.t] || '';
+      const icon = s.t === 'corner' ? CORNER_ICON[p / 10] : SPACE_ICON[p] || ICON[s.t] || '';
       d.innerHTML = `${s.c ? '<span class="band"></span>' : ''}<span class="lbl">${icon ? `<span class="ic">${icon}</span>` : ''}<span>${esc(s.n)}</span>${s.sub ? `<span class="pr">${esc(s.sub)}</span>` : s.p ? `<span class="pr">$${s.p}</span>` : ''}</span>`;
       b.appendChild(d);
     });
@@ -278,6 +287,7 @@
   function placeWalker(p) {
     const el = $('sp' + p), w = $('walker');
     if (!el) return;
+    w.classList.toggle('flip', p > 20 && p <= 30); // drive forks-first along the top row too
     w.style.left = (el.offsetLeft + el.offsetWidth / 2 + 3) + 'px';
     w.style.top = (el.offsetTop + el.offsetHeight / 2 + 3) + 'px';
   }
@@ -306,11 +316,21 @@
     $('miniJoin').classList.toggle('hidden', id === 'vPodium' || (id === 'vStage' && steps[H.pos].v === 'lobby'));
   }
   function pane(group, id) { document.querySelectorAll(group).forEach(e => e.classList.toggle('on', e.id === id)); }
+  // Lobby music between questions; a ticking bed while a question is open; quiet for dice and reveals.
+  function music(st, it) {
+    clearTimeout(musicTimer);
+    if (st.v === 'q' && it && !H.closed[it.id]) MUSIC.play('think');
+    else if (st.v === 'roll' || st.v === 'podium' || st.v === 'chest') MUSIC.stop(0.4);
+    else if (st.v === 'reveal') { MUSIC.stop(0.3); musicTimer = setTimeout(() => MUSIC.play('lobby'), 4500); }
+    else MUSIC.play('lobby');
+  }
+  let musicTimer = null;
   function render(silent) {
     clearInterval(tickTimer);
     clearInterval(spotTimer);
     const st = steps[H.pos];
     const it = qOf(st);
+    music(st, it);
     $('hudSeg').textContent = it ? `Roll ${st.i + 1} of ${M.quiz.length} · ${it.section}: ${M.board[it.at].n}` : 'Monopoly: All-Hands Edition';
     if (st.v === 'lobby' || st.v === 'rules' || st.v === 'roll') {
       show('vStage'); markDone();
@@ -401,7 +421,7 @@
       if (me !== busy) return;
       placeWalker((from + s) % 40);
       w.classList.remove('hop'); void w.offsetWidth; w.classList.add('hop');
-      sound.play('tick');
+      MUSIC.beep();
       await sleep(190);
     }
     if (me !== busy) return;
@@ -413,8 +433,11 @@
     const sp = M.board[it.at];
     if (it.at === 0) return `<div class="prop-card special"><div class="ph">GO</div><div class="pb">You made it all the way around the board.<br><b>Final question pays DOUBLE</b></div></div>`;
     if (sp.t === 'chance') return `<div class="chance-card" style="max-width:320px"><div class="cc-q">?</div><div><div class="cc-k">Chance</div><div class="cc-t">Bank error in your favour. This question pays DOUBLE rent.</div></div></div>`;
-    const dark = ['yellow', 'lightblue'].includes(sp.c);
-    return `<div class="prop-card" style="--c:${M.colors[sp.c]};--t:${dark ? '#111' : '#fff'}"><div class="ph">${esc(sp.n)}</div><div class="pb">${it.double ? 'The priciest street on the board.<br><b>DOUBLE RENT</b>' : `Rent: up to $${M.pay.base + M.pay.speed}<br><span style="font-weight:600">Answer right, answer fast.</span>`}</div></div>`;
+    const own = ownersOf(it);
+    const col = sp.c ? M.colors[sp.c] : '#fff', dark = !sp.c || ['yellow', 'lightblue'].includes(sp.c);
+    return `<div class="prop-card" style="--c:${col};--t:${dark ? '#111' : '#fff'}"><div class="ph">${esc(sp.n)}</div><div class="pb">Rent: up to $${M.pay.base + M.pay.speed}<br><span style="font-weight:600">Answer right, answer fast.</span></div></div>
+      <div class="owners"><b class="num">${own.length}</b> ${own.length === 1 ? 'player owns' : 'players own'} this property<br><span>Their right answer pays <b>DOUBLE</b></span>
+      <div class="own-faces">${own.slice(0, 40).map(pid => `<span title="${esc(H.players[pid].nm)}">${H.players[pid].av}</span>`).join('')}</div></div>`;
   }
 
   // question
@@ -423,7 +446,8 @@
     const sp = M.board[it.at];
     $('qSpace').style.setProperty('--c', sp.c ? M.colors[sp.c] : '#fff');
     $('qSpace').querySelector('.qs-n').textContent = sp.n;
-    $('qTag').textContent = it.double ? `${it.tag}: DOUBLE RENT` : it.tag;
+    const nOwn = M.ownable.includes(it.at) ? ownersOf(it).length : 0;
+    $('qTag').textContent = it.double ? `${it.tag}: DOUBLE RENT` : nOwn ? `${it.tag} · ${nOwn} OWNERS: DOUBLE RENT` : it.tag;
     $('qTag').className = 'q-tag' + (it.double ? ' dbl' : '');
     $('qCount').textContent = `${it.section} · Question ${st.i + 1} of ${M.quiz.length}`;
     $('qText').textContent = it.q;
@@ -450,6 +474,7 @@
     const fp = fast && H.players[fast[0]];
     $('fact').innerHTML = `<div class="fact-t">${esc(it.fact)}</div>
       ${fp ? `<div class="fast"><div class="kicker" style="color:#8a6d00">Fastest finger</div>${fp.av} ${esc(fp.nm)} <span class="num">${(fast[1].ms / 1000).toFixed(1)}s</span></div>` : ''}
+      ${M.ownable.includes(it.at) ? `<div class="fast"><div class="kicker" style="color:#8a6d00">Owners cashed in</div>${Object.keys(g).filter(pid => owns(pid, it)).length} of ${ownersOf(it).length}</div>` : ''}
       <div class="rent"><span class="kicker" style="color:#555">Rent paid out</span><span class="num" id="paid">$0</span>${Object.keys(g).length} players</div>`;
     if (silent) { $('paid').textContent = fmt(paid); return; }
     countUp($('paid'), paid, { dur: 1400, fmt });
@@ -619,9 +644,15 @@
     const pin = H.pin;
     H = fresh(); H.pin = pin; save(); toggleMenu(false); go(0, { silent: true });
   };
-  const muteLabel = () => ($('btnMute').textContent = sound.muted ? 'Sound off' : 'Sound on');
+  const muteLabel = () => {
+    $('btnMute').textContent = sound.muted ? 'Sound off' : 'Sound on';
+    $('btnMusic').textContent = MUSIC.on ? 'Music on' : 'Music off';
+  };
   $('btnMute').onclick = () => { sound.toggle(); muteLabel(); };
+  $('btnMusic').onclick = () => { MUSIC.toggle(); muteLabel(); };
   muteLabel();
+  // Browsers keep sound off until someone clicks the page. Say so, so the room is not silent by accident.
+  setInterval(() => $('soundPill').classList.toggle('hidden', !MUSIC.suspended || sound.muted), 700);
 
   // rehearsal bots (local only, nothing is sent)
   const BOT_NAMES = ['Rich Uncle Pete', 'Boardwalk Betty', 'Free Parking Fran', 'Jail Bird Jim', 'Hotel Hannah', 'Railroad Ray', 'Chance Chaz', 'Utility Ursula', 'Go Gary', 'Mortgage Mo', 'Thimble Tina', 'Dice Dan'];
@@ -657,6 +688,7 @@
     else if (kl === 'g' || kl === 'm') toggleMenu($('menu').classList.contains('hidden'));
     else if (kl === 'q') $('qrOverlay').classList.toggle('hidden');
     else if (kl === 's') { sound.toggle(); muteLabel(); }
+    else if (kl === 'b') { MUSIC.toggle(); muteLabel(); }
     else if (kl === 'f') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
     else if (kl === 't') addTime();
   });
@@ -665,6 +697,7 @@
 
   // ---------- boot ----------
   buildBoard();
+  $('walker').innerHTML = FORKLIFT;
   [$('die1'), $('die2')].forEach(buildDie);
   $('qrBig').innerHTML = qrSVG(JOIN_URL);
   $('qrMini').innerHTML = qrSVG(JOIN_URL);

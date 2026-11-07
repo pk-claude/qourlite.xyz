@@ -41,6 +41,15 @@
   const sendJoin = () => { joinTries++; send({ k: 'join' }); };
   const sendDeed = () => { if (deed) send({ k: 'deed', d: deed }); };
   const mine = () => (S && !S._stale && S.me && S.me[pid]) || null; // [cash/10, rank, gain/10, flags]
+  // My dealt properties: the big screen deals the same hand from the same player id.
+  const HAND = M.handFor(pid);
+  const ownsQ = q => q && HAND.includes(q.at);
+  function handHTML(hot) {
+    return `<div class="props">${HAND.map(i => {
+      const sp = M.board[i];
+      return `<div class="pc ${i === hot ? 'hot' : ''}" style="--c:${sp.c ? M.colors[sp.c] : '#ddd'}"><i></i>${esc(sp.n)}</div>`;
+    }).join('')}</div>`;
+  }
   setInterval(() => {
     if (!me) return;
     if (!joined) { if (live.anyUp() || joinTries < 3) sendJoin(); return; }
@@ -123,15 +132,32 @@
     if (printing) return showScreen('sPrint');
     const early = !S || S._stale || S.ph === 'lobby' || S.ph === 'rules';
     if (editingDeed || (tab === 'deed' && !deed) || (!deed && !deedSkipped && early)) return showScreen('sDeedQ');
-    if (tab === 'deed') { $('myDeed').innerHTML = `<div class="flip-in" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px">${DEED.html(deed, { owner: me.nm, tok: me.av })}${DEED.chanceHTML(deed)}</div>`; return showScreen('sDeed'); }
+    if (tab === 'deed') {
+      $('myDeed').innerHTML = `<div class="flip-in" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div class="kicker" style="align-self:flex-start">Your ${HAND.length} properties</div>${handHTML()}
+        <p class="muted small" style="margin:0">Token lands on one of these? Your right answer pays double rent.</p>
+        <div class="kicker" style="align-self:flex-start;margin-top:8px">Your AI title deed (just for fun)</div>
+        ${DEED.html(deed, { owner: me.nm, tok: me.av })}${DEED.chanceHTML(deed)}</div>`;
+      return showScreen('sDeed');
+    }
     if (!S || S._stale) {
       if (live.anyUp()) return wait(`You're in, ${esc(me.nm)}!`, 'Waiting for the presenter to start. Questions pop up here on their own, so keep this page open.');
       return wait('Connecting to the board...', 'Hang tight. On work wifi and stuck here? Switch your phone to cellular data.');
     }
     const my = mine();
-    if (S.ph === 'lobby' || S.ph === 'rules') return wait(joined ? `You're in, ${esc(me.nm)}!` : 'Joining...', `${fmt(my ? my[0] * 10 : M.start)} in the bank. Questions pop up here on their own during the meeting.`);
+    if (S.ph === 'lobby' || S.ph === 'rules') return wait(joined ? `You're in, ${esc(me.nm)}!` : 'Joining...', `${fmt(my ? my[0] * 10 : M.start)} in the bank, and you own these ${HAND.length} properties:`, `${handHTML()}<p class="muted small">If the token lands on one, your right answer pays double rent. Questions pop up here on their own.</p>`);
     const q = S.q;
-    if (S.ph === 'roll' && q) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. The question pops up here in a moment.`);
+    if (S.ph === 'roll' && q) {
+      // wait for the token to finish walking on the big screen before saying where it landed
+      const key = 'roll' + q.id;
+      if (!celebrated[key]) { celebrated[key] = Date.now(); setTimeout(render, 4000); }
+      if (Date.now() - celebrated[key] < 3800) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. Watch the big screen.`, handHTML());
+      if (ownsQ(q)) {
+        if (!celebrated[key + 'own']) { celebrated[key + 'own'] = 1; sound.play('fanfare'); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
+        return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at));
+      }
+      return wait(`Landed on ${esc(q.sp)}`, 'Not one of yours this time. The question pops up here in a moment.', handHTML());
+    }
     if (S.ph === 'q' && q) {
       if (myAns[q.id] != null) return locked(q, my);
       if (q.open) return question(q);
@@ -142,8 +168,9 @@
     if (S.ph === 'podium' || S.ph === 'chest' || S.ph === 'end') return prizes(my);
     wait('Stand by', '');
   }
-  function wait(h, sub) {
+  function wait(h, sub, extra) {
     $('wAv').textContent = me.av; $('wHead').innerHTML = h; $('wSub').innerHTML = sub;
+    $('wExtra').innerHTML = extra || '';
     $('editMe').classList.toggle('hidden', !!S && !S._stale && S.ph !== 'lobby' && S.ph !== 'rules');
     showScreen('sWait');
   }
@@ -157,6 +184,7 @@
     $('qTag').className = 'ptag' + (q.dbl ? ' dbl' : '');
     $('qTag').style.background = !q.dbl && q.c ? q.c : '';
     $('qText').textContent = q.q;
+    $('qOwn').classList.toggle('hidden', !ownsQ(q));
     $('answers').innerHTML = q.opts.map((o, i) => `<button class="ans c${i}" data-a="${i}"><span class="l">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('');
     clearInterval(barTimer);
     const total = M.limit * 1000;
@@ -196,7 +224,7 @@
     const el = $('res');
     el.className = 'result ' + (a == null ? '' : right ? 'good' : 'bad');
     el.innerHTML = `<div class="r-head">${a == null ? 'No answer' : right ? 'Right!' : 'Not quite'}</div>
-      ${right ? `<div class="r-pts">+${fmt(gain)}</div>` : ''}
+      ${right ? `<div class="r-pts">+${fmt(gain)}</div>${ownsQ(q) ? '<div class="r-line"><b>Double rent: you own this property!</b></div>' : ''}` : ''}
       <div class="r-line">${late ? 'Your answer reached the Bank after time was up.' : a == null ? 'Too slow for the Bank this time.' : right ? pick(RIGHT) : `${pick(WRONG)} It was ${esc(q.opts[S.rv.a])}.`}</div>
       ${my ? `<div style="margin-top:12px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n}</div>` : ''}
       <div class="r-fact">${esc(S.rv.fact)}</div>`;
