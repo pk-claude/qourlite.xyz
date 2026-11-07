@@ -1,12 +1,12 @@
 /* Monopoly all-hands: shared look for the big screen and the phones. */
 :root {
-  --felt: #0b3b2c;
-  --felt2: #072a1f;
+  --felt: #262b30;
+  --felt2: #16191c;
   --board: #f3ecd7;
   --board2: #e7dfc4;
   --ink: #fffaf0;
   --dark: #13110d;
-  --muted: #b7c9bf;
+  --muted: #b9c0c7;
   --line: rgba(255,255,255,.14);
   --panel: rgba(0,0,0,.28);
   --red: #e2231a;
@@ -22,7 +22,11 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
-  background: radial-gradient(ellipse at 50% 20%, #145a43 0%, var(--felt) 45%, var(--felt2) 100%) fixed;
+  /* a distribution-center floor: polished concrete with a faint slab grid */
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.028) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.028) 0 1px, transparent 1px 96px),
+    radial-gradient(ellipse at 50% 15%, #3b4248 0%, var(--felt) 50%, var(--felt2) 100%) fixed;
   color: var(--ink); font-family: var(--font); line-height: 1.35; -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; }
@@ -223,31 +227,6 @@ body.host { overflow: hidden; height: 100vh; }
 .pod-block { width: 100%; background: var(--board); color: #111; font-family: var(--disp); font-size: 4rem; display: grid; place-items: center; border: 3px solid #111; border-bottom: 0; }
 .p1 .pod-block { height: 34vh; background: var(--gold); } .p2 .pod-block { height: 24vh; } .p3 .pod-block { height: 16vh; }
 
-/* auction */
-#vAuction { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
-.big-title { font-family: var(--disp); font-size: clamp(2.6rem, 6vw, 6rem); margin: 0; line-height: 1; letter-spacing: .02em; }
-.big-sub { font-size: clamp(1.1rem, 1.8vw, 2rem); color: var(--muted); margin: 0; max-width: 1100px; }
-.lots { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; }
-.lot { width: 280px; background: #fff; color: #111; border-radius: 6px; padding: 10px; box-shadow: 0 18px 50px rgba(0,0,0,.45); animation: flipIn .9s both; animation-delay: calc(var(--i) * .2s); }
-.lot .lh { background: var(--red); color: #fff; border: 2px solid #111; padding: 10px; font-family: var(--disp); font-size: 1.5rem; text-transform: uppercase; line-height: 1.05; }
-.lot .lb { padding: 12px 6px 4px; font-weight: 800; }
-.lot.sold { position: relative; }
-.lot.sold::after { content: 'SOLD'; position: absolute; top: -16px; right: -18px; transform: rotate(14deg); font-family: var(--disp); font-size: 1.5rem; padding: 0 10px; color: var(--red); border: 4px solid var(--red); background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
-.lot-big { transform: scale(1.35); margin: 4vh 0; }
-.bid-meter { display: flex; align-items: center; gap: 30px; font-size: 1.4rem; font-weight: 800; }
-.bid-meter b { font-size: 3rem; display: block; color: #fff; }
-.bid-faces { display: flex; gap: 2px; font-size: 1.6rem; flex-wrap: wrap; max-width: 60vw; justify-content: center; min-height: 2em; }
-.reveal-bids { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column-reverse; gap: 8px; width: min(700px, 90%); }
-.reveal-bids li { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); padding: 10px 16px; border-radius: 12px; font-size: 1.4rem; font-weight: 800; opacity: 0; transform: translateX(-40px); transition: all .5s; }
-.reveal-bids li.on { opacity: 1; transform: none; }
-.reveal-bids li .amt { margin-left: auto; color: var(--cash); }
-.reveal-bids li.win { background: var(--gold); color: #111; border-color: #fff; transform: scale(1.06); }
-.reveal-bids li.win .amt { color: #1f4d1a; }
-.going { font-family: var(--disp); font-size: clamp(2rem, 4vw, 4rem); color: var(--gold); min-height: 1.2em; }
-.gavel { display: inline-block; font-size: 1em; transform-origin: 80% 80%; }
-.gavel.bang { animation: bang .35s; }
-@keyframes bang { 40% { transform: rotate(-45deg); } }
-
 /* community chest */
 #vChest { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
 .chest-card { width: min(760px, 90%); background: #fdf2d0; color: #111; border: 4px solid #111; border-radius: 14px; padding: 30px; box-shadow: 0 30px 70px rgba(0,0,0,.5); }
@@ -259,6 +238,7 @@ body.host { overflow: hidden; height: 100vh; }
 
 /* end */
 #vEnd { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
+#vEnd .logo { margin-bottom: 4vh; }
 
 /* corner join, reactions, toasts, overlays */
 .mini-join { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,.55); padding: 8px 12px 8px 8px; border-radius: 12px; z-index: 15; font-size: .9rem; }
@@ -286,8 +266,8 @@ kbd { background: rgba(255,255,255,.12); padding: 1px 6px; border-radius: 4px; f
 .menu-actions button, .btn { padding: 9px 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 700; }
 .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
 .btn.danger { border-color: #ef4444; color: #fca5a5; }
-.prize-edit { display: grid; gap: 6px; margin: 10px 0; }
-.prize-edit input { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,.3); color: #fff; }
+.remote-box { display: flex; gap: 14px; align-items: center; margin: 14px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.tie-note { margin-top: 18px; font-size: 1.15rem; font-weight: 700; color: var(--gold); text-align: center; min-height: 1.4em; }
 .small { font-size: .82rem; }
 .fine { position: fixed; left: 50%; bottom: 4px; transform: translateX(-50%); font-size: .68rem; color: rgba(255,255,255,.35); z-index: 1; white-space: nowrap; }
 
@@ -359,15 +339,139 @@ body.phone { min-height: 100dvh; overscroll-behavior: none; }
 .reacts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .reacts button { font-size: 1.45rem; padding: 6px 0; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.3); cursor: pointer; }
 .reacts button:active { transform: scale(1.25); }
-.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: rgba(0,0,0,.3); padding: 5px; border-radius: 14px; border: 1px solid var(--line); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(0,0,0,.3); padding: 5px; border-radius: 14px; border: 1px solid var(--line); }
 .tabs button { font-weight: 800; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { background: var(--red); color: #fff; }
 
-/* bingo */
-.bingo { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: #111; padding: 4px; border-radius: 8px; }
-.bingo button { min-height: 66px; border-radius: 4px; border: 0; background: var(--board); color: #111; font-size: .64rem; font-weight: 800; line-height: 1.1; padding: 3px; cursor: pointer; overflow-wrap: anywhere; position: relative; }
-.bingo button.mine { background: #fff3c4; }
-.bingo button.on { background: var(--red); color: #fff; transform: rotate(-3deg) scale(.95); }
-.bingo button.free { background: var(--gold); color: #111; font-family: var(--disp); font-size: .8rem; }
-.bingo button.line { box-shadow: 0 0 0 3px var(--gold); }
-.bingo-call { font-size: 2rem; animation: pulse 1s infinite; }
+/* end screen: prize pick order cards */
+.lots { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; }
+.lot { width: 280px; background: #fff; color: #111; border-radius: 6px; padding: 10px; box-shadow: 0 18px 50px rgba(0,0,0,.45); animation: flipIn .9s both; animation-delay: calc(var(--i) * .2s); }
+.lot .lh { background: var(--red); color: #fff; border: 2px solid #111; padding: 10px; font-family: var(--disp); font-size: 1.5rem; text-transform: uppercase; line-height: 1.05; }
+.lot .lb { padding: 12px 6px 4px; font-weight: 800; }
+.big-sub { font-size: clamp(1.1rem, 1.8vw, 2rem); color: var(--muted); margin: 0; max-width: 1100px; }
+
+/* who owns the space the token landed on */
+.owners { align-self: center; width: 300px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-weight: 700; }
+.owners b.num { font-size: 2rem; color: var(--gold); }
+.owners span { color: var(--muted); }
+.own-faces { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 8px; font-size: 1.3rem; }
+.props { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 340px; }
+.props .pc { background: #fff; color: #111; border-radius: 4px; padding: 3px; text-align: center; font-size: .62rem; font-weight: 800; line-height: 1.1; min-height: 64px; display: flex; flex-direction: column; }
+.props .pc i { display: block; height: 14px; background: var(--c); border: 1px solid #111; margin-bottom: 4px; }
+.props .pc.hot { outline: 3px solid var(--gold); transform: scale(1.06); }
+.own-banner { background: var(--gold); color: #111; font-weight: 900; text-align: center; padding: 10px 12px; border-radius: 12px; animation: pulse 1s infinite; }
+
+/* ---------- distribution-center theme ---------- */
+.hud::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: repeating-linear-gradient(-45deg, #f6c544 0 12px, #111 12px 24px); opacity: .85; }
+body.phone::before { content: ''; display: block; height: 6px; background: repeating-linear-gradient(-45deg, #f6c544 0 12px, #111 12px 24px); }
+.sound-pill { background: var(--gold) !important; color: #111 !important; border-color: var(--gold) !important; animation: pulse 1.2s infinite; }
+.walker { width: 7.5%; }
+.walker svg { width: 100%; height: auto; display: block; }
+.walker.flip svg { transform: scaleX(-1); }
+/* conveyor along the bottom of the board centre, boxes riding left to right */
+.belt { position: absolute; left: 3%; right: 3%; bottom: 2.5%; height: 5.5%; border-radius: 99px; border: 2px solid #333; overflow: hidden;
+  background: repeating-linear-gradient(90deg, #6b6b6b 0 10px, #4a4a4a 10px 20px); animation: rollers .6s linear infinite; }
+@keyframes rollers { to { background-position: 20px 0; } }
+.belt span { position: absolute; top: -18%; font-size: clamp(14px, 1.7vw, 30px); animation: ride 9s linear infinite; left: -10%; }
+.belt span:nth-child(2) { animation-delay: -1.8s; } .belt span:nth-child(3) { animation-delay: -3.6s; }
+.belt span:nth-child(4) { animation-delay: -5.4s; } .belt span:nth-child(5) { animation-delay: -7.2s; }
+@keyframes ride { to { left: 105%; } }
+/* a fulfillment robot shuttling a tote along a taped floor lane at the top */
+.amr-lane { position: absolute; left: 3%; right: 3%; top: 2.5%; height: 5.5%; border-top: 3px dashed #d4a017; border-bottom: 3px dashed #d4a017; }
+.amr { position: absolute; top: 50%; transform: translate(0, -50%); font-size: clamp(16px, 1.9vw, 34px); animation: shuttle 12s ease-in-out infinite; left: 0; }
+.amr i { font-style: normal; position: absolute; left: 22%; top: -58%; font-size: .7em; }
+@keyframes shuttle { 0%, 8% { left: 0; } 45%, 55% { left: calc(100% - 1.4em); } 92%, 100% { left: 0; } }
+@media (prefers-reduced-motion: reduce) { .belt, .belt span, .amr { animation: none; } }
+
+/* ================= NOVEMBER AHM DECK STYLE =================
+   Matches the all-hands deck: a vintage Monopoly board on a warm wooden table,
+   cream cards with coloured header bands, Monopoly red titles, Home Depot orange,
+   condensed caps headlines and slab-serif card titles. Later rules win, so this block
+   restyles the screens above without touching their layout. */
+:root {
+  --felt: #3a2618; --felt2: #1c120b;
+  --board: #ece3c8; --board2: #dfd3b1; --mint: #b9d1b5;
+  --cream: #fbf5e3; --cream-ink: #2b2118;
+  --red: #c8102e; --orange: #f96302; --hdgreen: #1f5135;
+  --muted: #d7c8ae; --line: rgba(255,240,210,.18); --panel: rgba(30,18,10,.55);
+  --disp: 'Oswald', 'Archivo', system-ui, sans-serif;
+  --slab: 'Roboto Slab', Georgia, serif;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,190,120,.16), transparent 60%),
+    repeating-linear-gradient(92deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.025) 9px 11px, transparent 11px 23px),
+    linear-gradient(180deg, #4a2f1d 0%, var(--felt) 45%, var(--felt2) 100%) fixed;
+}
+/* the deck's property-colour border band replaces the hazard stripes */
+.hud::after, body.phone::before {
+  background: linear-gradient(90deg, #8b4f2b 0 12.5%, #9fd4f2 12.5% 25%, #d63c96 25% 37.5%, #f7941d 37.5% 50%, #e2231a 50% 62.5%, #fef200 62.5% 75%, #1fb25a 75% 87.5%, #0072bb 87.5% 100%);
+  height: 6px; opacity: 1;
+}
+.kicker { color: #ffcf73; font-family: var(--disp); font-weight: 600; letter-spacing: .16em; }
+.logo-bar { font-family: var(--disp); font-weight: 700; letter-spacing: .08em; background: var(--red); }
+.hud .pill { background: rgba(251,245,227,.12); border-color: rgba(251,245,227,.25); }
+
+/* board: cream spaces around a mint centre, like the deck's board */
+.board { background: var(--board); border: 4px solid #2b2118; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 12px #2b2118, 0 0 0 14px #c9a46a; }
+.sp { background: var(--board); border-color: #3a2e22; font-family: var(--disp); font-weight: 600; letter-spacing: .02em; }
+.board-center { background: var(--mint); box-shadow: inset 0 0 40px rgba(0,0,0,.18); }
+.c-url, .rule, .roll-total { color: var(--cream-ink); }
+.rules .rule small { color: #3d4a3b; }
+.c-sub { color: #33402f; }
+.roll-total { font-family: var(--disp); font-weight: 700; }
+.roll-land { font-family: var(--disp); color: var(--red); }
+
+/* side cards and panels: cream cards with coloured header bands */
+body.host .stat, body.host .owners, body.host .spot-empty, body.host .ranks li, body.host .over-card, body.host .toast {
+  background: var(--cream); color: var(--cream-ink); border: 2px solid #2b2118; box-shadow: 0 8px 0 rgba(0,0,0,.35);
+}
+body.host .stat { border-top: 10px solid var(--orange); border-radius: 10px; }
+body.host .stat b { color: var(--cream-ink); font-family: var(--disp); }
+body.host .stat span, body.host .owners span { color: #6b5a44; }
+body.host .owners { border-top: 10px solid #2d6aa3; }
+body.host .owners b.num { color: var(--red); }
+body.host .over-card { color: var(--cream-ink); }
+body.host .over-card .muted, body.host .over-card .small { color: #5d4d39; }
+body.host .menu-list button, body.host .menu-actions button, body.host .btn { background: #fff; color: var(--cream-ink); border-color: #2b2118; }
+body.host .menu-list button.cur { border-color: var(--red); outline: 2px solid var(--red); }
+body.host .remote-box { border-color: #2b2118; }
+body.host .ai-badge { background: var(--hdgreen); }
+body.host .chip { background: rgba(251,245,227,.9); color: var(--cream-ink); }
+
+/* question screen: the question sits on a title-deed style card */
+#vQ .q-text { background: var(--cream); color: var(--cream-ink); border: 3px solid #2b2118; border-top: 14px solid var(--red); border-radius: 12px; padding: 18px 24px; font-family: var(--slab); font-weight: 800; letter-spacing: -.01em; box-shadow: 0 10px 0 rgba(0,0,0,.35); }
+.q-tag { font-family: var(--disp); font-weight: 600; background: var(--red); }
+.q-count { color: #ffcf73; font-family: var(--disp); letter-spacing: .06em; }
+.answered { color: var(--muted); }
+.opt { font-family: var(--disp); font-weight: 600; letter-spacing: .01em; border: 3px solid #2b2118; }
+.fact { background: var(--cream); border-color: #2b2118; }
+
+/* standings, podium, chest, end: big condensed headlines like the deck */
+.board-title, .big-title { font-family: var(--disp); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+body.host .ranks .rk { color: var(--red); }
+body.host .ranks .nm { color: var(--cream-ink); }
+body.host .ranks .sc { color: #1f6b1a; }
+body.host .ranks li.lead { background: #fff4c9; border-color: var(--red); }
+.pod-block { font-family: var(--disp); background: var(--cream); color: var(--cream-ink); border-color: #2b2118; }
+.p1 .pod-block { background: #ffcf73; }
+.chest-card .ck { font-family: var(--disp); font-weight: 700; color: #2d6aa3; }
+.lot .lh { font-family: var(--disp); font-weight: 700; }
+.tie-note { color: #ffcf73; }
+
+/* phones: same table, cream answer cards */
+body.phone .result { background: var(--cream); color: var(--cream-ink); border-color: #2b2118; }
+body.phone .result .r-line, body.phone .result .r-fact { color: #4d3f2e; }
+body.phone .result .r-fact { background: rgba(0,0,0,.06); }
+body.phone .result .r-pts { color: #1f6b1a; }
+body.phone .result.good { border-top: 12px solid #1fb25a; }
+body.phone .result.bad { border-top: 12px solid var(--red); }
+body.phone .qtext { font-family: var(--slab); font-weight: 800; }
+body.phone .ans { font-family: var(--disp); font-weight: 600; border: 2px solid #2b2118; }
+body.phone h1, body.phone h2 { font-family: var(--disp); font-weight: 700; letter-spacing: .01em; }
+/* five rules must clear the conveyor and the robot lane */
+#cRules { padding: 7% 2% 8%; gap: 1.2vh; }
+#cRules .rules { gap: .9vh; }
+#cRules .rule { font-size: clamp(11px, 1.15vw, 21px); }
+#cRules .rule .ri { font-size: 1.7em; }
+#cRules .logo { margin-bottom: 1.2vh; }

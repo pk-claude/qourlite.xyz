@@ -7,7 +7,7 @@
 <title>Monopoly: All-Hands Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=Lilita+One&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=Lilita+One&family=Oswald:wght@500;600;700&family=Roboto+Slab:ital,wght@0,700;0,800;1,800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/mono.css">
 </head>
 <body class="host">
@@ -17,7 +17,9 @@
   <div class="hud-r">
     <span class="pill" title="Players in the game"><b id="hudCount">0</b> players</span>
     <span class="pill" title="Live relays: green = connected" id="hudRelays"></span>
-    <button class="pill" id="btnMute">Sound on</button>
+    <button class="pill sound-pill hidden" id="soundPill" title="Browsers keep sound off until the page is clicked">Click anywhere for sound</button>
+    <button class="pill" id="btnMusic" title="Music (B)">Music on</button>
+    <button class="pill" id="btnMute" title="All sound (S)">Sound on</button>
     <button class="pill" id="btnMenu">Menu</button>
   </div>
 </header>
@@ -28,8 +30,10 @@
     <div class="board-wrap">
       <div class="board" id="board">
         <div class="board-center">
+          <div class="amr-lane" aria-hidden="true"><span class="amr">🤖<i>📦</i></span></div>
+          <div class="belt" aria-hidden="true"><span>📦</span><span>📦</span><span>📦</span><span>📦</span><span>📦</span></div>
           <div class="center-pane" id="cLobby">
-            <div class="logo c-logo"><span class="logo-bar">MONOPOLY</span><span class="logo-sub">All-Hands Edition</span></div>
+            <div class="logo c-logo"><span class="logo-bar">MONOPOLY</span><span class="logo-sub">All-Hands Meeting · November 2026</span></div>
             <div class="c-qr" id="qrBig"></div>
             <div class="c-url">Scan or go to <b id="joinText">qourlite.xyz/go</b></div>
             <div class="c-sub">The Bank gives every player $500 to start.</div>
@@ -37,11 +41,11 @@
           <div class="center-pane" id="cRules">
             <div class="logo c-logo" style="font-size:clamp(22px,2.6vw,48px)"><span class="logo-bar">HOW TO WIN</span></div>
             <div class="rules">
-              <div class="rule"><span class="ri">🎲</span><div>We roll. The token lands on a space.<small>Every space is a question. Six of them.</small></div></div>
-              <div class="rule"><span class="ri">💵</span><div>Right answer = you collect rent<small>$200, plus up to $200 more for speed. Chance and Boardwalk pay double.</small></div></div>
-              <div class="rule"><span class="ri">🔨</span><div>Spend your cash at the Prize Auction<small>Sealed bids from your phone. Highest bid wins. One prize per person.</small></div></div>
-              <div class="rule"><span class="ri">🎁</span><div>Community Chest<small>A random draw at the end. Anyone can win, remote included.</small></div></div>
-              <div class="rule"><span class="ri">🟨</span><div>Bingo, all meeting long<small>Your phone has your own card. A bingo earns a second Community Chest ticket.</small></div></div>
+              <div class="rule"><span class="ri">🎲</span><div>One roll per section of today's meeting<small>Six rolls take the forklift once around the board, back to GO.</small></div></div>
+              <div class="rule"><span class="ri">💵</span><div>Right answer = you collect rent<small>$200, plus up to $200 more for speed. Chance and the final GO question pay double.</small></div></div>
+              <div class="rule"><span class="ri">🏠</span><div>You own 5 random properties<small>Token lands on one of yours? Your right answer pays double rent. Check your phone.</small></div></div>
+              <div class="rule"><span class="ri">🏆</span><div>Most cash wins<small>A tie on cash goes to whoever was faster in total on their right answers.</small></div></div>
+              <div class="rule"><span class="ri">🎁</span><div>Prizes: top 3, then Community Chest<small>Random draws among everyone else, remote included. Winners pick prizes in that order.</small></div></div>
             </div>
           </div>
           <div class="center-pane" id="cRoll">
@@ -52,14 +56,13 @@
           </div>
         </div>
       </div>
-      <div class="walker" id="walker">🎩</div>
+      <div class="walker" id="walker"></div>
     </div>
     <aside class="side">
       <div class="side-pane" id="sLobby">
         <div class="stat-row">
           <div class="stat"><b class="num" id="stPlayers">0</b><span>Players</span></div>
-          <div class="stat"><b class="num" id="stDeeds">0</b><span>AI deeds</span></div>
-          <div class="stat"><b class="num" id="stBingo">0</b><span>Bingos</span></div>
+          <div class="stat"><b class="num" id="stDeeds">0</b><span>Deeds written by AI</span></div>
         </div>
         <span class="ai-badge"><span class="dot"></span>Claude is writing everyone a personal title deed</span>
         <div class="spot" id="spot"><div class="spot-empty">Join on your phone, answer 3 silly questions,<br>and the AI Banker writes you a property deed. It shows up here.</div></div>
@@ -104,19 +107,7 @@
       <div class="pod p1"><div class="pod-av" id="pAv1"></div><div class="pod-nm" id="pNm1"></div><div class="pod-sc num" id="pSc1"></div><div class="pod-block">1</div></div>
       <div class="pod p3"><div class="pod-av" id="pAv3"></div><div class="pod-nm" id="pNm3"></div><div class="pod-sc num" id="pSc3"></div><div class="pod-block">3</div></div>
     </div>
-  </section>
-
-  <!-- AUCTION (intro, lot, sold) -->
-  <section class="view" id="vAuction">
-    <div class="kicker" id="aKick">The Prize Auction</div>
-    <h1 class="big-title" id="aTitle">Going, going...</h1>
-    <p class="big-sub" id="aSub"></p>
-    <div class="lots" id="lots"></div>
-    <div class="timer hidden" id="aTimer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="t-bg"/><circle cx="50" cy="50" r="44" class="t-fg" id="aTimerArc"/></svg><span class="num" id="aTimerNum">25</span></div>
-    <div class="bid-meter hidden" id="bidMeter"><div><b class="num" id="bidN">0</b>sealed bids</div></div>
-    <div class="bid-faces" id="bidFaces"></div>
-    <ol class="reveal-bids" id="revealBids"></ol>
-    <div class="going" id="going"></div>
+    <div class="tie-note" id="tieNote"></div>
   </section>
 
   <!-- COMMUNITY CHEST -->
@@ -133,7 +124,7 @@
   <!-- END -->
   <section class="view" id="vEnd">
     <div class="logo" style="font-size:clamp(40px,7vw,120px);transform:rotate(-6deg)"><span class="logo-bar">GAME OVER</span></div>
-    <p class="big-sub">Thanks for playing. Prize winners: see the host after the meeting.<br>You may now flip the board.</p>
+    <p class="big-sub">Prize pick order. Winners: see the host after the meeting.<br>Everyone else: you may now flip the board.</p>
     <div class="lots" id="endLots"></div>
   </section>
 </main>
@@ -153,6 +144,11 @@
   <p style="margin-top:36px"><button class="btn" id="gateYes">I'm the presenter. Run the game from this screen.</button></p>
 </div></div>
 
+<div class="overlay hidden" id="takenOver"><div class="over-card" style="max-width:640px">
+  <h1 style="font-family:var(--disp);margin:.2em 0">Another screen took over</h1>
+  <p class="muted" style="font-size:1.15rem">A newer presenter screen opened in this room, so this one stepped aside. Close this tab, or reload it to take control back.</p>
+</div></div>
+
 <div class="overlay hidden" id="menu"><div class="over-card menu-card">
   <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Jump to</h2><button class="btn" id="menuClose">Close</button></div>
   <div class="menu-list" id="menuList"></div>
@@ -161,12 +157,17 @@
     <span><kbd>&larr;</kbd> <kbd>PgUp</kbd> back</span>
     <span><kbd>T</kbd> +10 sec</span>
     <span><kbd>Q</kbd> big QR</span>
-    <span><kbd>S</kbd> sound</span>
+    <span><kbd>S</kbd> all sound</span>
+    <span><kbd>B</kbd> music</span>
     <span><kbd>F</kbd> full screen</span>
     <span><kbd>G</kbd> this menu</span>
   </div>
-  <h3 style="margin:14px 0 4px">Prizes (shown on the auction cards)</h3>
-  <div class="prize-edit" id="prizeEdit"></div>
+  <div class="remote-box">
+    <div class="mini-qr" id="remoteQr"></div>
+    <div><h3 style="margin:0 0 4px">Run it from your phone</h3>
+      <div class="small">Scan, or open <b id="remoteUrl"></b>, and enter PIN <b class="num" id="remotePin" style="font-size:1.3rem;color:var(--gold)"></b>. Keep this screen private: the PIN is only shown here.</div>
+      <div class="small muted" id="aiStatus" style="margin-top:6px"></div></div>
+  </div>
   <div class="menu-actions">
     <button id="btnCopy">Copy results summary</button>
     <button id="btnSim" title="Adds 12 pretend players so you can rehearse">Rehearse with bots</button>
@@ -175,7 +176,9 @@
   <div class="muted small" id="relayDetail"></div>
 </div></div>
 
-<script>window.LIVE_ROOM = 'mono-dec4';</script>
+<script src="assets/clock.js"></script>
+<script src="assets/music.js"></script>
+<script>window.LIVE_ROOM = 'mono-allhands';</script>
 <script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
 <script src="/q2/vendor/qrcode-generator-1.4.4.js"></script>
 <script src="/q2/assets/fx.js"></script>

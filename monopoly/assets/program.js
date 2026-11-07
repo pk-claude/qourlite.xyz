@@ -8,97 +8,99 @@ window.MONO = {
   },
 
   // 40 spaces, index 0 = GO, counter-clockwise from the bottom-right corner like the real board.
+  // Themed as a box's trip through a distribution center: yard, receiving, putaway, storage, pick, pack, sort, ship.
   board: [
     { t: 'corner', n: 'GO', sub: 'Collect $200' },
-    { t: 'prop', c: 'brown', n: 'Bucket Boulevard', p: 60 },
+    { t: 'prop', c: 'brown', n: 'Trailer Yard', p: 60 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'brown', n: 'Tape Measure Terrace', p: 60 },
-    { t: 'tax', n: 'Shrink Tax', sub: 'Pay $200' },
-    { t: 'rail', n: 'Forklift Railroad', p: 200 },
-    { t: 'prop', c: 'lightblue', n: 'Paint Aisle Avenue', p: 100 },
+    { t: 'prop', c: 'brown', n: 'Dock Door 12', p: 60 },
+    { t: 'tax', n: 'Damage Claim', sub: 'Pay $200' },
+    { t: 'rail', n: 'Inbound Conveyor', p: 200 },
+    { t: 'prop', c: 'lightblue', n: 'Receiving Lane', p: 100 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'lightblue', n: 'Caulk Court', p: 100 },
-    { t: 'prop', c: 'lightblue', n: 'Grout Street', p: 120 },
-    { t: 'corner', n: 'Jail', sub: 'Just visiting' },
-    { t: 'prop', c: 'pink', n: 'Plumbing Place', p: 140 },
-    { t: 'util', n: 'Electric Aisle', p: 150 },
-    { t: 'prop', c: 'pink', n: 'Pipe Fitting Parkway', p: 140 },
-    { t: 'prop', c: 'pink', n: 'Faucet Avenue', p: 160 },
-    { t: 'rail', n: 'Pallet Jack Railroad', p: 200 },
-    { t: 'prop', c: 'orange', n: 'Orange Apron Avenue', p: 180 },
+    { t: 'prop', c: 'lightblue', n: 'ASN Avenue', p: 100 },
+    { t: 'prop', c: 'lightblue', n: 'Unload Station', p: 120 },
+    { t: 'corner', n: 'Damage Cage', sub: 'Just visiting' },
+    { t: 'prop', c: 'pink', n: 'Putaway Path', p: 140 },
+    { t: 'util', n: 'Forklift Battery Room', p: 150 },
+    { t: 'prop', c: 'pink', n: 'Reach Truck Row', p: 140 },
+    { t: 'prop', c: 'pink', n: 'Slotting Street', p: 160 },
+    { t: 'rail', n: 'Sortation Conveyor', p: 200 },
+    { t: 'prop', c: 'orange', n: 'Pallet Rack Row', p: 180 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'orange', n: 'Lumber Lane', p: 180 },
-    { t: 'prop', c: 'orange', n: 'Plywood Place', p: 200 },
-    { t: 'corner', n: 'Free Parking', sub: 'Pro lot' },
-    { t: 'prop', c: 'red', n: 'Flooring Freeway', p: 220 },
+    { t: 'prop', c: 'orange', n: 'Bulk Storage Bay', p: 180 },
+    { t: 'prop', c: 'orange', n: 'Mezzanine Way', p: 200 },
+    { t: 'corner', n: 'Break Room', sub: 'Free parking' },
+    { t: 'prop', c: 'red', n: 'Pick Path', p: 220 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'red', n: 'Tile Trail', p: 220 },
-    { t: 'prop', c: 'red', n: 'Hardwood Heights', p: 240 },
-    { t: 'rail', n: 'Cycle Count Line', p: 200 },
-    { t: 'prop', c: 'yellow', n: 'Garden Center Gardens', p: 260 },
-    { t: 'prop', c: 'yellow', n: 'Mulch Mile', p: 260 },
-    { t: 'util', n: 'Hose Aisle Water Works', p: 150 },
-    { t: 'prop', c: 'yellow', n: 'Sunflower Street', p: 280 },
-    { t: 'corner', n: 'Go to Jail', sub: 'Unscanned item' },
-    { t: 'prop', c: 'green', n: 'Tool Rental Road', p: 300 },
-    { t: 'prop', c: 'green', n: 'Power Tool Place', p: 300 },
+    { t: 'prop', c: 'red', n: 'Goods-to-Person Grid', p: 220 },
+    { t: 'prop', c: 'red', n: 'Robot Pick Cell', p: 240 },
+    { t: 'rail', n: 'Spiral Conveyor', p: 200 },
+    { t: 'prop', c: 'yellow', n: 'Yard Truck Row', p: 260 },
+    { t: 'prop', c: 'yellow', n: 'AMR Alley', p: 260 },
+    { t: 'util', n: 'Robot Charging Dock', p: 150 },
+    { t: 'prop', c: 'yellow', n: 'Pack Station', p: 280 },
+    { t: 'corner', n: 'Go to Damage Cage', sub: 'Unscanned pallet' },
+    { t: 'prop', c: 'green', n: 'Recycling Boulevard', p: 300 },
+    { t: 'prop', c: 'green', n: 'Cross-Dock Court', p: 300 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'green', n: 'Drill Bit Drive', p: 320 },
-    { t: 'rail', n: 'Short Line Pallet Express', p: 200 },
+    { t: 'prop', c: 'green', n: 'Load Planning Lane', p: 320 },
+    { t: 'rail', n: 'Outbound Conveyor', p: 200 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'darkblue', n: 'Pro Desk Place', p: 350 },
-    { t: 'tax', n: 'Overstock Tax', sub: 'Pay $100' },
-    { t: 'prop', c: 'darkblue', n: 'Appliance Boardwalk', p: 400 },
+    { t: 'prop', c: 'darkblue', n: 'Outbound Dock', p: 350 },
+    { t: 'tax', n: 'Overtime Tax', sub: 'Pay $100' },
+    { t: 'prop', c: 'darkblue', n: 'Last Mile Boardwalk', p: 400 },
   ],
 
   // Starting cash from the Bank, and what a right answer pays.
   start: 500,
   pay: { base: 200, speed: 200 }, // $200 for right, up to +$200 for speed; doubled on double questions
   limit: 20, // seconds per question
+  chestDraws: 2, // Community Chest draws after the podium
+  hand: 5, // properties dealt to each player; landing on one you own doubles your rent for that question
 
-  // a = index of the right answer. Facts are from public sources; review before the event.
+  // One question per section of the November 2026 all-hands, asked as the transition into that section.
+  // Six rolls make one full lap: 8 + 8 + 6 + 4 + 5 + 9 = 40 spaces, so the last roll lands back on GO.
+  // `at` is the space the token lands on, `dice` the two dice shown. a = index of the right answer.
+  // Facts come from the November 2026 AHM deck.
   quiz: [
     {
-      id: 'q1', at: 6, tag: 'WARM-UP',
-      q: 'You pass GO. How much does the Bank pay you?',
-      opts: ['$100', '$200', '$400', 'A firm handshake'], a: 1,
-      fact: '$200 a lap since 1935. Today, every right answer pays you rent, and rent buys prizes at the end.',
+      id: 'q1', section: 'HR Update', at: 8, dice: [3, 5], tag: 'HR UPDATE',
+      q: '2027 benefits enrollment is open now. What is happening to medical rates for 2027?',
+      opts: ['Up about 5%', 'Staying flat', 'Down about 3%', 'Paid in Monopoly money'], a: 1,
+      fact: 'Medical rates stay flat for 2027. Enroll Nov. 5-19 at livetheorangelife.com; benefits start Jan. 1.',
     },
     {
-      id: 'q2', at: 13, tag: 'LOOK CLOSER',
-      q: 'Mr. Monopoly has NEVER had one of these. Which one?',
-      opts: ['Top hat', 'Mustache', 'Cane', 'Monocle'], a: 3,
-      fact: 'No monocle, ever. Millions of people remember one anyway, a famous "Mandela effect". (You may be thinking of Mr. Peanut.)',
+      id: 'q2', section: 'VOA Update', at: 16, dice: [4, 4], tag: 'VOA UPDATE',
+      q: 'How many events has our SC Ops VOA team facilitated?',
+      opts: ['5+', '12+', '30+', '100+'], a: 2,
+      fact: '30+ events, and 1,850 student readiness kits packed. Next up: Factor II: Results (Nov 18) and Fall Trivia (Nov 24).',
     },
     {
-      id: 'q3', at: 22, tag: 'CHANCE', double: true,
-      q: 'In 2017, fans voted a classic token off the board. Which one?',
-      opts: ['Thimble', 'Top hat', 'Race car', 'Scottie dog'], a: 0,
-      fact: 'The thimble went (with the boot and the wheelbarrow). In came the T-rex, the rubber duck and the penguin.',
+      id: 'q3', section: 'Guest Speaker: SBD', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
+      q: 'Our guest speaker, Stephen Frankiewicz, leads SBD. What does SBD stand for?',
+      opts: ['Strategic Business Development', 'Supply-chain Big Data', 'Store Bulk Delivery', 'Shipping, Boxing & Distribution'], a: 0,
+      fact: 'Strategic Business Development. Over to Stephen Frankiewicz, Sr. Manager.',
     },
     {
-      id: 'q4', at: 31, tag: 'ORANGE HISTORY',
-      q: 'The Home Depot opened its first two stores, in Atlanta, in which year?',
-      opts: ['1969', '1979', '1989', '1999'], a: 1,
-      fact: '1979. Bernie Marcus and Arthur Blank (with Ken Langone and Pat Farrah) started with 2 stores. Today: 2,300+.',
+      id: 'q4', section: 'HD Yard Driver & EV', at: 26, dice: [1, 3], tag: 'YARD DRIVER & EV',
+      q: 'Our electric yard-truck pilot at the Ontario and Redlands RDCs: projected savings vs. diesel over 7 years?',
+      opts: ['$900K', '$3.5 million', '$9.0 million', '$25 million'], a: 2,
+      fact: '$9.0M projected over 7 years at both sites. All 3 vendors passed (Kalmar Ottawa, Tesla Semi, Orange EV). Next: Sacramento FDC.',
     },
     {
-      id: 'q5', at: 37, tag: 'REAL ESTATE',
-      q: 'About how big is an average Home Depot store, not counting the garden center?',
-      opts: ['35,000 sq ft', '105,000 sq ft', '250,000 sq ft', '1,000,000 sq ft'], a: 1,
-      fact: 'About 104,000 sq ft indoors, plus roughly 24,000 sq ft of garden. That is a lot of hotels.',
+      id: 'q5', section: 'Drywall Recycling', at: 31, dice: [2, 3], tag: 'RECYCLING',
+      q: 'In 2025, how many pounds of material did The Home Depot recycle?',
+      opts: ['4.5 million', '45 million', '454 million', '4.5 billion'], a: 2,
+      fact: '454M lbs across 164 locations: 36,750 truckloads worth $63M. The FDC drywall pilot in Baltimore cut waste 27%.',
     },
     {
-      id: 'q6', at: 39, tag: 'BOARDWALK', double: true,
-      q: 'Monopoly began as "The Landlord\'s Game" (Lizzie Magie, 1904). What was it designed to do?',
-      opts: ['Teach kids to save money', 'Show how land monopolies hurt tenants', 'Train real estate agents', 'Advertise Atlantic City hotels'], a: 1,
-      fact: 'Magie built it as a warning about landlords hoarding land. Players loved bankrupting each other anyway.',
+      id: 'q6', section: 'Final Thoughts', at: 0, dice: [6, 3], tag: 'BACK TO GO', double: true,
+      q: 'Fill in our team mission: "Run Today. ______ Tomorrow."',
+      opts: ['Win', 'Reinvent', 'Own', 'Rest'], a: 1,
+      fact: '"Our job is to run today while reinventing tomorrow." - Joanna Kronberg',
     },
   ],
-
-  // Prize lots for the auction. The presenter can rename them in the Menu on the day.
-  prizes: ['Mystery Prize #1', 'Mystery Prize #2', 'Mystery Prize #3'],
-  bidSeconds: 25,
 
   // Phone questions that feed the AI property deed.
   deedQs: [
@@ -112,17 +114,18 @@ window.MONO = {
     phrase: ['"Let\'s take that offline"', '"Can you see my screen?"', '"You\'re on mute"', '"Quick question"', '"Per my last email"', '"Let\'s circle back"'],
   },
 
-  // Bingo squares. Each phone gets its own shuffle of these, plus two squares
-  // built from the player's own deed answers. Centre square is Free Parking.
-  bingo: [
-    '"Synergy"', '"Can you see my screen?"', '"You\'re on mute"', 'A pet or kid cameo on Teams', 'Slide with way too much text',
-    '"Let\'s circle back"', 'Applause for a promotion', 'Mic feedback squeal', '"Next slide, please"', 'Someone joins late',
-    'Chart with an arrow going up', '"Let\'s take it offline"', 'Acronym nobody explains', '"Headwinds"', 'Token lands on Chance',
-    'Most of the room misses a question', 'Sad trombone plays', 'Confetti on the big screen', '"Orange-blooded"', '"Quick update"',
-    'Meeting runs over time', '"Double-click on that"', 'Someone thanks the team', 'Free food is mentioned', 'A bid over $1,000',
-    '"Low-hanging fruit"', '"Move the needle"', 'Someone says "Q4"', 'A pun gets a groan', 'Tech issue with the screen share',
-    'Someone shouts "Bingo!" (not you)', '"Customer first"',
-  ],
+  // Game pieces, distribution-center style: robots, trucks, totes, safety gear.
+  tokens: ['🤖', '📦', '🚚', '🚛', '🦺', '⛑️', '🔋', '🛒', '🏷️', '📋', '🔧', '🪜', '🧤', '🚧', '🧯', '🎲'],
+};
 
-  tokens: ['🎩', '🏎️', '🐕', '🐈', '🚢', '👢', '🦖', '🦆', '🐧', '🧵', '🛞', '💰', '🏠', '🏨', '🔨', '🎲'],
+// Each player's hand of properties, dealt from their player id. The phone and the big screen
+// compute the same hand on their own, so nothing extra has to travel between them.
+window.MONO.ownable = window.MONO.board.map((sp, i) => (['prop', 'rail', 'util'].includes(sp.t) ? i : -1)).filter(i => i > -1);
+window.MONO.handFor = function (pid) {
+  let h = 2166136261;
+  for (const ch of 'hand:' + pid) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  const rnd = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  const deck = window.MONO.ownable.slice();
+  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  return deck.slice(0, window.MONO.hand).sort((a, b) => a - b);
 };
