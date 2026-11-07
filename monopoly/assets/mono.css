@@ -223,31 +223,6 @@ body.host { overflow: hidden; height: 100vh; }
 .pod-block { width: 100%; background: var(--board); color: #111; font-family: var(--disp); font-size: 4rem; display: grid; place-items: center; border: 3px solid #111; border-bottom: 0; }
 .p1 .pod-block { height: 34vh; background: var(--gold); } .p2 .pod-block { height: 24vh; } .p3 .pod-block { height: 16vh; }
 
-/* auction */
-#vAuction { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
-.big-title { font-family: var(--disp); font-size: clamp(2.6rem, 6vw, 6rem); margin: 0; line-height: 1; letter-spacing: .02em; }
-.big-sub { font-size: clamp(1.1rem, 1.8vw, 2rem); color: var(--muted); margin: 0; max-width: 1100px; }
-.lots { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; }
-.lot { width: 280px; background: #fff; color: #111; border-radius: 6px; padding: 10px; box-shadow: 0 18px 50px rgba(0,0,0,.45); animation: flipIn .9s both; animation-delay: calc(var(--i) * .2s); }
-.lot .lh { background: var(--red); color: #fff; border: 2px solid #111; padding: 10px; font-family: var(--disp); font-size: 1.5rem; text-transform: uppercase; line-height: 1.05; }
-.lot .lb { padding: 12px 6px 4px; font-weight: 800; }
-.lot.sold { position: relative; }
-.lot.sold::after { content: 'SOLD'; position: absolute; top: -16px; right: -18px; transform: rotate(14deg); font-family: var(--disp); font-size: 1.5rem; padding: 0 10px; color: var(--red); border: 4px solid var(--red); background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
-.lot-big { transform: scale(1.35); margin: 4vh 0; }
-.bid-meter { display: flex; align-items: center; gap: 30px; font-size: 1.4rem; font-weight: 800; }
-.bid-meter b { font-size: 3rem; display: block; color: #fff; }
-.bid-faces { display: flex; gap: 2px; font-size: 1.6rem; flex-wrap: wrap; max-width: 60vw; justify-content: center; min-height: 2em; }
-.reveal-bids { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column-reverse; gap: 8px; width: min(700px, 90%); }
-.reveal-bids li { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); padding: 10px 16px; border-radius: 12px; font-size: 1.4rem; font-weight: 800; opacity: 0; transform: translateX(-40px); transition: all .5s; }
-.reveal-bids li.on { opacity: 1; transform: none; }
-.reveal-bids li .amt { margin-left: auto; color: var(--cash); }
-.reveal-bids li.win { background: var(--gold); color: #111; border-color: #fff; transform: scale(1.06); }
-.reveal-bids li.win .amt { color: #1f4d1a; }
-.going { font-family: var(--disp); font-size: clamp(2rem, 4vw, 4rem); color: var(--gold); min-height: 1.2em; }
-.gavel { display: inline-block; font-size: 1em; transform-origin: 80% 80%; }
-.gavel.bang { animation: bang .35s; }
-@keyframes bang { 40% { transform: rotate(-45deg); } }
-
 /* community chest */
 #vChest { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
 .chest-card { width: min(760px, 90%); background: #fdf2d0; color: #111; border: 4px solid #111; border-radius: 14px; padding: 30px; box-shadow: 0 30px 70px rgba(0,0,0,.5); }
@@ -259,6 +234,7 @@ body.host { overflow: hidden; height: 100vh; }
 
 /* end */
 #vEnd { flex-direction: column; align-items: center; justify-content: center; gap: 3vh; text-align: center; }
+#vEnd .logo { margin-bottom: 4vh; }
 
 /* corner join, reactions, toasts, overlays */
 .mini-join { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,.55); padding: 8px 12px 8px 8px; border-radius: 12px; z-index: 15; font-size: .9rem; }
@@ -286,8 +262,8 @@ kbd { background: rgba(255,255,255,.12); padding: 1px 6px; border-radius: 4px; f
 .menu-actions button, .btn { padding: 9px 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 700; }
 .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
 .btn.danger { border-color: #ef4444; color: #fca5a5; }
-.prize-edit { display: grid; gap: 6px; margin: 10px 0; }
-.prize-edit input { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: rgba(0,0,0,.3); color: #fff; }
+.remote-box { display: flex; gap: 14px; align-items: center; margin: 14px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.tie-note { margin-top: 18px; font-size: 1.15rem; font-weight: 700; color: var(--gold); text-align: center; min-height: 1.4em; }
 .small { font-size: .82rem; }
 .fine { position: fixed; left: 50%; bottom: 4px; transform: translateX(-50%); font-size: .68rem; color: rgba(255,255,255,.35); z-index: 1; white-space: nowrap; }
 
@@ -359,15 +335,13 @@ body.phone { min-height: 100dvh; overscroll-behavior: none; }
 .reacts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .reacts button { font-size: 1.45rem; padding: 6px 0; border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.3); cursor: pointer; }
 .reacts button:active { transform: scale(1.25); }
-.tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; background: rgba(0,0,0,.3); padding: 5px; border-radius: 14px; border: 1px solid var(--line); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(0,0,0,.3); padding: 5px; border-radius: 14px; border: 1px solid var(--line); }
 .tabs button { font-weight: 800; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
 .tabs button.on { background: var(--red); color: #fff; }
 
-/* bingo */
-.bingo { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: #111; padding: 4px; border-radius: 8px; }
-.bingo button { min-height: 66px; border-radius: 4px; border: 0; background: var(--board); color: #111; font-size: .64rem; font-weight: 800; line-height: 1.1; padding: 3px; cursor: pointer; overflow-wrap: anywhere; position: relative; }
-.bingo button.mine { background: #fff3c4; }
-.bingo button.on { background: var(--red); color: #fff; transform: rotate(-3deg) scale(.95); }
-.bingo button.free { background: var(--gold); color: #111; font-family: var(--disp); font-size: .8rem; }
-.bingo button.line { box-shadow: 0 0 0 3px var(--gold); }
-.bingo-call { font-size: 2rem; animation: pulse 1s infinite; }
+/* end screen: prize pick order cards */
+.lots { display: flex; gap: 26px; justify-content: center; flex-wrap: wrap; }
+.lot { width: 280px; background: #fff; color: #111; border-radius: 6px; padding: 10px; box-shadow: 0 18px 50px rgba(0,0,0,.45); animation: flipIn .9s both; animation-delay: calc(var(--i) * .2s); }
+.lot .lh { background: var(--red); color: #fff; border: 2px solid #111; padding: 10px; font-family: var(--disp); font-size: 1.5rem; text-transform: uppercase; line-height: 1.05; }
+.lot .lb { padding: 12px 6px 4px; font-weight: 800; }
+.big-sub { font-size: clamp(1.1rem, 1.8vw, 2rem); color: var(--muted); margin: 0; max-width: 1100px; }

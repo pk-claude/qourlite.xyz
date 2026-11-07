@@ -76,37 +76,14 @@
   <!-- rank -->
   <section class="screen" id="sRank"><div class="bigrank"><p class="muted" id="rkLead"></p><div class="rk" id="rkN"></div><h2 id="rkOf"></h2><p class="muted" id="rkLine"></p></div></section>
 
-  <!-- bingo -->
-  <section class="screen" id="sBingo">
-    <div class="kicker">Monopoly Bingo</div>
-    <h2>Your card. Nobody else has this one.</h2>
-    <p class="muted" style="margin:0;font-size:.9rem">Tap a square when it happens during the all-hands. Five in a row (any direction) lights up BINGO. Bingo winners get a second ticket in the Community Chest draw.</p>
-    <div class="bingo" id="bingo"></div>
-    <button class="go gold bingo-call hidden" id="bingoBtn">BINGO!</button>
-    <p class="center" id="bingoMsg"></p>
-  </section>
-
-  <!-- auction -->
-  <section class="screen" id="sBid">
-    <div class="kicker" id="bKick">Lot 1</div>
-    <div class="lotcard"><div class="lh" id="bName"></div><div class="lb" id="bLeft"></div></div>
-    <div class="bar"><i id="bBar"></i></div>
-    <div class="bidbox" id="bidBox">
-      <label for="bidIn">Your sealed bid (you have <span id="bCash"></span>)</label>
-      <input type="number" id="bidIn" inputmode="numeric" min="10" step="10" placeholder="e.g. 750">
-      <div class="quick" id="quick"><button data-f=".25">25%</button><button data-f=".5">Half</button><button data-f=".75">75%</button><button data-f="1">All in</button></div>
-      <button class="go gold" id="bidBtn">Place sealed bid</button>
-    </div>
-    <p class="center" id="bidMsg"></p>
-  </section>
 </div>
 
 <div class="dock" id="dock"><div class="dock-in">
   <div class="reacts" id="reacts"></div>
-  <div class="tabs"><button class="on" id="tabPlay">Play</button><button id="tabBingo">Bingo</button><button id="tabDeed">My deed</button></div>
+  <div class="tabs"><button class="on" id="tabPlay">Play</button><button id="tabDeed">My deed</button></div>
 </div></div>
 
-<script>window.LIVE_ROOM = 'mono-dec4';</script>
+<script>window.LIVE_ROOM = 'mono-allhands';</script>
 <script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
 <script src="/q2/assets/fx.js"></script>
 <script src="/q2/assets/live.js"></script>

@@ -55,50 +55,44 @@ window.MONO = {
   start: 500,
   pay: { base: 200, speed: 200 }, // $200 for right, up to +$200 for speed; doubled on double questions
   limit: 20, // seconds per question
+  chestDraws: 2, // Community Chest draws after the podium
 
-  // a = index of the right answer. Facts are from public sources; review before the event.
+  // One question per section of the all-hands. Five rolls make one full lap:
+  // 8 + 8 + 6 + 9 + 9 = 40 spaces, so the last roll lands back on GO.
+  // `at` is the space the token lands on, `dice` the two dice shown for that roll.
+  // a = index of the right answer. PLACEHOLDER questions: swap in the real section topics.
   quiz: [
     {
-      id: 'q1', at: 6, tag: 'WARM-UP',
+      id: 'q1', section: 'Section 1', at: 8, dice: [3, 5], tag: 'WARM-UP',
       q: 'You pass GO. How much does the Bank pay you?',
       opts: ['$100', '$200', '$400', 'A firm handshake'], a: 1,
-      fact: '$200 a lap since 1935. Today, every right answer pays you rent, and rent buys prizes at the end.',
+      fact: '$200 a lap since 1935. Today, every right answer pays you rent.',
     },
     {
-      id: 'q2', at: 13, tag: 'LOOK CLOSER',
+      id: 'q2', section: 'Section 2', at: 16, dice: [4, 4], tag: 'LOOK CLOSER',
       q: 'Mr. Monopoly has NEVER had one of these. Which one?',
       opts: ['Top hat', 'Mustache', 'Cane', 'Monocle'], a: 3,
-      fact: 'No monocle, ever. Millions of people remember one anyway, a famous "Mandela effect". (You may be thinking of Mr. Peanut.)',
+      fact: 'No monocle, ever. Millions of people remember one anyway, a famous "Mandela effect".',
     },
     {
-      id: 'q3', at: 22, tag: 'CHANCE', double: true,
+      id: 'q3', section: 'Section 3', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
       q: 'In 2017, fans voted a classic token off the board. Which one?',
       opts: ['Thimble', 'Top hat', 'Race car', 'Scottie dog'], a: 0,
       fact: 'The thimble went (with the boot and the wheelbarrow). In came the T-rex, the rubber duck and the penguin.',
     },
     {
-      id: 'q4', at: 31, tag: 'ORANGE HISTORY',
+      id: 'q4', section: 'Section 4', at: 31, dice: [4, 5], tag: 'ORANGE HISTORY',
       q: 'The Home Depot opened its first two stores, in Atlanta, in which year?',
       opts: ['1969', '1979', '1989', '1999'], a: 1,
       fact: '1979. Bernie Marcus and Arthur Blank (with Ken Langone and Pat Farrah) started with 2 stores. Today: 2,300+.',
     },
     {
-      id: 'q5', at: 37, tag: 'REAL ESTATE',
-      q: 'About how big is an average Home Depot store, not counting the garden center?',
-      opts: ['35,000 sq ft', '105,000 sq ft', '250,000 sq ft', '1,000,000 sq ft'], a: 1,
-      fact: 'About 104,000 sq ft indoors, plus roughly 24,000 sq ft of garden. That is a lot of hotels.',
-    },
-    {
-      id: 'q6', at: 39, tag: 'BOARDWALK', double: true,
+      id: 'q5', section: 'Section 5', at: 0, dice: [6, 3], tag: 'BACK TO GO', double: true,
       q: 'Monopoly began as "The Landlord\'s Game" (Lizzie Magie, 1904). What was it designed to do?',
       opts: ['Teach kids to save money', 'Show how land monopolies hurt tenants', 'Train real estate agents', 'Advertise Atlantic City hotels'], a: 1,
       fact: 'Magie built it as a warning about landlords hoarding land. Players loved bankrupting each other anyway.',
     },
   ],
-
-  // Prize lots for the auction. The presenter can rename them in the Menu on the day.
-  prizes: ['Mystery Prize #1', 'Mystery Prize #2', 'Mystery Prize #3'],
-  bidSeconds: 25,
 
   // Phone questions that feed the AI property deed.
   deedQs: [
@@ -111,18 +105,6 @@ window.MONO = {
     snack: ['Hot Cheetos', 'The last cold brew', 'Office donuts', 'Gummy bears', 'Popcorn from the break room', 'Dark chocolate, obviously'],
     phrase: ['"Let\'s take that offline"', '"Can you see my screen?"', '"You\'re on mute"', '"Quick question"', '"Per my last email"', '"Let\'s circle back"'],
   },
-
-  // Bingo squares. Each phone gets its own shuffle of these, plus two squares
-  // built from the player's own deed answers. Centre square is Free Parking.
-  bingo: [
-    '"Synergy"', '"Can you see my screen?"', '"You\'re on mute"', 'A pet or kid cameo on Teams', 'Slide with way too much text',
-    '"Let\'s circle back"', 'Applause for a promotion', 'Mic feedback squeal', '"Next slide, please"', 'Someone joins late',
-    'Chart with an arrow going up', '"Let\'s take it offline"', 'Acronym nobody explains', '"Headwinds"', 'Token lands on Chance',
-    'Most of the room misses a question', 'Sad trombone plays', 'Confetti on the big screen', '"Orange-blooded"', '"Quick update"',
-    'Meeting runs over time', '"Double-click on that"', 'Someone thanks the team', 'Free food is mentioned', 'A bid over $1,000',
-    '"Low-hanging fruit"', '"Move the needle"', 'Someone says "Q4"', 'A pun gets a groan', 'Tech issue with the screen share',
-    'Someone shouts "Bingo!" (not you)', '"Customer first"',
-  ],
 
   tokens: ['🎩', '🏎️', '🐕', '🐈', '🚢', '👢', '🦖', '🦆', '🐧', '🧵', '🛞', '💰', '🏠', '🏨', '🔨', '🎲'],
 };

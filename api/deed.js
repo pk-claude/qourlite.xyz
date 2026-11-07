@@ -33,6 +33,8 @@ let client = null;
 const cap = (s, n) => String(s || '').replace(/[\u0000-\u001f]+/g, ' ').trim().slice(0, n);
 
 export default async function handler(req, res) {
+  // GET tells the presenter screen whether live AI deeds are switched on.
+  if (req.method === 'GET') return res.status(200).json({ ai: !!process.env.ANTHROPIC_API_KEY });
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'AI not configured' });
   // Only our own pages may spend the key.
