@@ -382,3 +382,96 @@ body.phone::before { content: ''; display: block; height: 6px; background: repea
 .amr i { font-style: normal; position: absolute; left: 22%; top: -58%; font-size: .7em; }
 @keyframes shuttle { 0%, 8% { left: 0; } 45%, 55% { left: calc(100% - 1.4em); } 92%, 100% { left: 0; } }
 @media (prefers-reduced-motion: reduce) { .belt, .belt span, .amr { animation: none; } }
+
+/* ================= NOVEMBER AHM DECK STYLE =================
+   Matches the all-hands deck: a vintage Monopoly board on a warm wooden table,
+   cream cards with coloured header bands, Monopoly red titles, Home Depot orange,
+   condensed caps headlines and slab-serif card titles. Later rules win, so this block
+   restyles the screens above without touching their layout. */
+:root {
+  --felt: #3a2618; --felt2: #1c120b;
+  --board: #ece3c8; --board2: #dfd3b1; --mint: #b9d1b5;
+  --cream: #fbf5e3; --cream-ink: #2b2118;
+  --red: #c8102e; --orange: #f96302; --hdgreen: #1f5135;
+  --muted: #d7c8ae; --line: rgba(255,240,210,.18); --panel: rgba(30,18,10,.55);
+  --disp: 'Oswald', 'Archivo', system-ui, sans-serif;
+  --slab: 'Roboto Slab', Georgia, serif;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,190,120,.16), transparent 60%),
+    repeating-linear-gradient(92deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.025) 9px 11px, transparent 11px 23px),
+    linear-gradient(180deg, #4a2f1d 0%, var(--felt) 45%, var(--felt2) 100%) fixed;
+}
+/* the deck's property-colour border band replaces the hazard stripes */
+.hud::after, body.phone::before {
+  background: linear-gradient(90deg, #8b4f2b 0 12.5%, #9fd4f2 12.5% 25%, #d63c96 25% 37.5%, #f7941d 37.5% 50%, #e2231a 50% 62.5%, #fef200 62.5% 75%, #1fb25a 75% 87.5%, #0072bb 87.5% 100%);
+  height: 6px; opacity: 1;
+}
+.kicker { color: #ffcf73; font-family: var(--disp); font-weight: 600; letter-spacing: .16em; }
+.logo-bar { font-family: var(--disp); font-weight: 700; letter-spacing: .08em; background: var(--red); }
+.hud .pill { background: rgba(251,245,227,.12); border-color: rgba(251,245,227,.25); }
+
+/* board: cream spaces around a mint centre, like the deck's board */
+.board { background: var(--board); border: 4px solid #2b2118; box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 12px #2b2118, 0 0 0 14px #c9a46a; }
+.sp { background: var(--board); border-color: #3a2e22; font-family: var(--disp); font-weight: 600; letter-spacing: .02em; }
+.board-center { background: var(--mint); box-shadow: inset 0 0 40px rgba(0,0,0,.18); }
+.c-url, .rule, .roll-total { color: var(--cream-ink); }
+.rules .rule small { color: #3d4a3b; }
+.c-sub { color: #33402f; }
+.roll-total { font-family: var(--disp); font-weight: 700; }
+.roll-land { font-family: var(--disp); color: var(--red); }
+
+/* side cards and panels: cream cards with coloured header bands */
+body.host .stat, body.host .owners, body.host .spot-empty, body.host .ranks li, body.host .over-card, body.host .toast {
+  background: var(--cream); color: var(--cream-ink); border: 2px solid #2b2118; box-shadow: 0 8px 0 rgba(0,0,0,.35);
+}
+body.host .stat { border-top: 10px solid var(--orange); border-radius: 10px; }
+body.host .stat b { color: var(--cream-ink); font-family: var(--disp); }
+body.host .stat span, body.host .owners span { color: #6b5a44; }
+body.host .owners { border-top: 10px solid #2d6aa3; }
+body.host .owners b.num { color: var(--red); }
+body.host .over-card { color: var(--cream-ink); }
+body.host .over-card .muted, body.host .over-card .small { color: #5d4d39; }
+body.host .menu-list button, body.host .menu-actions button, body.host .btn { background: #fff; color: var(--cream-ink); border-color: #2b2118; }
+body.host .menu-list button.cur { border-color: var(--red); outline: 2px solid var(--red); }
+body.host .remote-box { border-color: #2b2118; }
+body.host .ai-badge { background: var(--hdgreen); }
+body.host .chip { background: rgba(251,245,227,.9); color: var(--cream-ink); }
+
+/* question screen: the question sits on a title-deed style card */
+#vQ .q-text { background: var(--cream); color: var(--cream-ink); border: 3px solid #2b2118; border-top: 14px solid var(--red); border-radius: 12px; padding: 18px 24px; font-family: var(--slab); font-weight: 800; letter-spacing: -.01em; box-shadow: 0 10px 0 rgba(0,0,0,.35); }
+.q-tag { font-family: var(--disp); font-weight: 600; background: var(--red); }
+.q-count { color: #ffcf73; font-family: var(--disp); letter-spacing: .06em; }
+.answered { color: var(--muted); }
+.opt { font-family: var(--disp); font-weight: 600; letter-spacing: .01em; border: 3px solid #2b2118; }
+.fact { background: var(--cream); border-color: #2b2118; }
+
+/* standings, podium, chest, end: big condensed headlines like the deck */
+.board-title, .big-title { font-family: var(--disp); font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+body.host .ranks .rk { color: var(--red); }
+body.host .ranks .nm { color: var(--cream-ink); }
+body.host .ranks .sc { color: #1f6b1a; }
+body.host .ranks li.lead { background: #fff4c9; border-color: var(--red); }
+.pod-block { font-family: var(--disp); background: var(--cream); color: var(--cream-ink); border-color: #2b2118; }
+.p1 .pod-block { background: #ffcf73; }
+.chest-card .ck { font-family: var(--disp); font-weight: 700; color: #2d6aa3; }
+.lot .lh { font-family: var(--disp); font-weight: 700; }
+.tie-note { color: #ffcf73; }
+
+/* phones: same table, cream answer cards */
+body.phone .result { background: var(--cream); color: var(--cream-ink); border-color: #2b2118; }
+body.phone .result .r-line, body.phone .result .r-fact { color: #4d3f2e; }
+body.phone .result .r-fact { background: rgba(0,0,0,.06); }
+body.phone .result .r-pts { color: #1f6b1a; }
+body.phone .result.good { border-top: 12px solid #1fb25a; }
+body.phone .result.bad { border-top: 12px solid var(--red); }
+body.phone .qtext { font-family: var(--slab); font-weight: 800; }
+body.phone .ans { font-family: var(--disp); font-weight: 600; border: 2px solid #2b2118; }
+body.phone h1, body.phone h2 { font-family: var(--disp); font-weight: 700; letter-spacing: .01em; }
+/* five rules must clear the conveyor and the robot lane */
+#cRules { padding: 7% 2% 8%; gap: 1.2vh; }
+#cRules .rules { gap: .9vh; }
+#cRules .rule { font-size: clamp(11px, 1.15vw, 21px); }
+#cRules .rule .ri { font-size: 1.7em; }
+#cRules .logo { margin-bottom: 1.2vh; }

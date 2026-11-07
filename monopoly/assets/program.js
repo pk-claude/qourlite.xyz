@@ -36,12 +36,12 @@ window.MONO = {
     { t: 'prop', c: 'red', n: 'Goods-to-Person Grid', p: 220 },
     { t: 'prop', c: 'red', n: 'Robot Pick Cell', p: 240 },
     { t: 'rail', n: 'Spiral Conveyor', p: 200 },
+    { t: 'prop', c: 'yellow', n: 'Yard Truck Row', p: 260 },
     { t: 'prop', c: 'yellow', n: 'AMR Alley', p: 260 },
-    { t: 'prop', c: 'yellow', n: 'Tote Lane', p: 260 },
     { t: 'util', n: 'Robot Charging Dock', p: 150 },
     { t: 'prop', c: 'yellow', n: 'Pack Station', p: 280 },
     { t: 'corner', n: 'Go to Damage Cage', sub: 'Unscanned pallet' },
-    { t: 'prop', c: 'green', n: 'Sorter Boulevard', p: 300 },
+    { t: 'prop', c: 'green', n: 'Recycling Boulevard', p: 300 },
     { t: 'prop', c: 'green', n: 'Cross-Dock Court', p: 300 },
     { t: 'chest', n: 'Community Chest' },
     { t: 'prop', c: 'green', n: 'Load Planning Lane', p: 320 },
@@ -59,40 +59,46 @@ window.MONO = {
   chestDraws: 2, // Community Chest draws after the podium
   hand: 5, // properties dealt to each player; landing on one you own doubles your rent for that question
 
-  // One question per section of the all-hands. Five rolls make one full lap:
-  // 8 + 8 + 6 + 9 + 9 = 40 spaces, so the last roll lands back on GO.
-  // `at` is the space the token lands on, `dice` the two dice shown for that roll.
-  // a = index of the right answer. PLACEHOLDER questions: swap in the real section topics.
+  // One question per section of the November 2026 all-hands, asked as the transition into that section.
+  // Six rolls make one full lap: 8 + 8 + 6 + 4 + 5 + 9 = 40 spaces, so the last roll lands back on GO.
+  // `at` is the space the token lands on, `dice` the two dice shown. a = index of the right answer.
+  // Facts come from the November 2026 AHM deck.
   quiz: [
     {
-      id: 'q1', section: 'Section 1', at: 8, dice: [3, 5], tag: 'WARM-UP',
-      q: 'You pass GO. How much does the Bank pay you?',
-      opts: ['$100', '$200', '$400', 'A firm handshake'], a: 1,
-      fact: '$200 a lap since 1935. Today, every right answer pays you rent.',
+      id: 'q1', section: 'HR Update', at: 8, dice: [3, 5], tag: 'HR UPDATE',
+      q: '2027 benefits enrollment is open now. What is happening to medical rates for 2027?',
+      opts: ['Up about 5%', 'Staying flat', 'Down about 3%', 'Paid in Monopoly money'], a: 1,
+      fact: 'Medical rates stay flat for 2027. Enroll Nov. 5-19 at livetheorangelife.com; benefits start Jan. 1.',
     },
     {
-      id: 'q2', section: 'Section 2', at: 16, dice: [4, 4], tag: 'LOOK CLOSER',
-      q: 'Mr. Monopoly has NEVER had one of these. Which one?',
-      opts: ['Top hat', 'Mustache', 'Cane', 'Monocle'], a: 3,
-      fact: 'No monocle, ever. Millions of people remember one anyway, a famous "Mandela effect".',
+      id: 'q2', section: 'VOA Update', at: 16, dice: [4, 4], tag: 'VOA UPDATE',
+      q: 'How many events has our SC Ops VOA team facilitated?',
+      opts: ['5+', '12+', '30+', '100+'], a: 2,
+      fact: '30+ events, and 1,850 student readiness kits packed. Next up: Factor II: Results (Nov 18) and Fall Trivia (Nov 24).',
     },
     {
-      id: 'q3', section: 'Section 3', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
-      q: 'In 2017, fans voted a classic token off the board. Which one?',
-      opts: ['Thimble', 'Top hat', 'Race car', 'Scottie dog'], a: 0,
-      fact: 'The thimble went (with the boot and the wheelbarrow). In came the T-rex, the rubber duck and the penguin.',
+      id: 'q3', section: 'Guest Speaker: SBD', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
+      q: 'Our guest speaker, Stephen Frankiewicz, leads SBD. What does SBD stand for?',
+      opts: ['Strategic Business Development', 'Supply-chain Big Data', 'Store Bulk Delivery', 'Shipping, Boxing & Distribution'], a: 0,
+      fact: 'Strategic Business Development. Over to Stephen Frankiewicz, Sr. Manager.',
     },
     {
-      id: 'q4', section: 'Section 4', at: 31, dice: [4, 5], tag: 'ORANGE HISTORY',
-      q: 'The Home Depot opened its first two stores, in Atlanta, in which year?',
-      opts: ['1969', '1979', '1989', '1999'], a: 1,
-      fact: '1979. Bernie Marcus and Arthur Blank (with Ken Langone and Pat Farrah) started with 2 stores. Today: 2,300+.',
+      id: 'q4', section: 'HD Yard Driver & EV', at: 26, dice: [1, 3], tag: 'YARD DRIVER & EV',
+      q: 'Our electric yard-truck pilot at the Ontario and Redlands RDCs: projected savings vs. diesel over 7 years?',
+      opts: ['$900K', '$3.5 million', '$9.0 million', '$25 million'], a: 2,
+      fact: '$9.0M projected over 7 years at both sites. All 3 vendors passed (Kalmar Ottawa, Tesla Semi, Orange EV). Next: Sacramento FDC.',
     },
     {
-      id: 'q5', section: 'Section 5', at: 0, dice: [6, 3], tag: 'BACK TO GO', double: true,
-      q: 'Monopoly began as "The Landlord\'s Game" (Lizzie Magie, 1904). What was it designed to do?',
-      opts: ['Teach kids to save money', 'Show how land monopolies hurt tenants', 'Train real estate agents', 'Advertise Atlantic City hotels'], a: 1,
-      fact: 'Magie built it as a warning about landlords hoarding land. Players loved bankrupting each other anyway.',
+      id: 'q5', section: 'Drywall Recycling', at: 31, dice: [2, 3], tag: 'RECYCLING',
+      q: 'In 2025, how many pounds of material did The Home Depot recycle?',
+      opts: ['4.5 million', '45 million', '454 million', '4.5 billion'], a: 2,
+      fact: '454M lbs across 164 locations: 36,750 truckloads worth $63M. The FDC drywall pilot in Baltimore cut waste 27%.',
+    },
+    {
+      id: 'q6', section: 'Final Thoughts', at: 0, dice: [6, 3], tag: 'BACK TO GO', double: true,
+      q: 'Fill in our team mission: "Run Today. ______ Tomorrow."',
+      opts: ['Win', 'Reinvent', 'Own', 'Rest'], a: 1,
+      fact: '"Our job is to run today while reinventing tomorrow." - Joanna Kronberg',
     },
   ],
 
