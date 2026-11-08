@@ -62,7 +62,7 @@ window.MONO = {
   chestDraws: 1, // one Community Chest draw after the podium: the second winner
   hand: 5, // DCs dealt to each player; landing on one you own doubles your rent for that question
 
-  // One question per section of the November 2026 all-hands, asked as the transition into that section.
+  // One question per section of the November 2026 all-hands, asked right after that section: did you catch it?
   // Six rolls make one full lap: 8 + 8 + 6 + 4 + 5 + 9 = 40 spaces, so the last roll lands back on GO.
   // `at` is the space the token lands on, `dice` the two dice shown. a = index of the right answer.
   // Facts come from the November 2026 AHM deck.
@@ -77,13 +77,13 @@ window.MONO = {
       id: 'q2', section: 'VOA Update', at: 16, dice: [4, 4], tag: 'VOA UPDATE',
       q: 'How many events has our SC Ops VOA team facilitated?',
       opts: ['5+', '12+', '30+', '100+'], a: 2,
-      fact: '30+ events, and 1,850 student readiness kits packed. Next up: Factor II: Results (Nov 18) and Fall Trivia (Nov 24).',
+      fact: '30+ events, and 1,850 student readiness kits packed. Coming up: Factor II: Results (Nov 18) and Fall Trivia (Nov 24).',
     },
     {
       id: 'q3', section: 'Guest Speaker: SBD', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
       q: 'What was the largest acquisition in Home Depot\'s history?',
       opts: ['SRS Distribution (2024)', 'GMS Inc. (2025)', 'Hughes Supply (2006)', 'Interline Brands (2015)'], a: 0,
-      fact: 'SRS Distribution, bought in 2024. Over to Stephen Frankiewicz and Strategic Business Development.',
+      fact: 'SRS Distribution, bought in 2024. Thanks to Stephen Frankiewicz and Strategic Business Development.',
     },
     {
       id: 'q4', section: 'HD Yard Driver & EV', at: 26, dice: [1, 3], tag: 'YARD DRIVER & EV',
