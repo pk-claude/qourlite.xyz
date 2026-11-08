@@ -60,7 +60,7 @@
               <div class="rule"><span class="ri">🧰</span><div>Pros buy into the ecosystem: right answers collect rent<small>$200, plus up to $200 more for speed. Faster answers, bigger tickets.</small></div></div>
               <div class="rule"><span class="ri">🏭</span><div>You own 5 Home Depot DCs<small>Land on one of yours and your right answer pays double. Los Angeles DFC is prime real estate; West Columbia RDC is a bargain.</small></div></div>
               <div class="rule"><span class="ri">🚚</span><div>Free delivery drives value: Chance and GO pay double<small>Those two rolls deliver double rent to everyone who gets them right.</small></div></div>
-              <div class="rule"><span class="ri">🏆</span><div>Two winners<small>1st place in cash (a tie goes to the faster total answer time), plus one Community Chest draw for everyone else, remote included.</small></div></div>
+              <div class="rule"><span class="ri">🏆</span><div>Two winners: 1st place, plus a Community Chest draw<small>Every question you answer, right or wrong, puts a ticket in the Community Chest. Answer all 6 for 6 chances.</small></div></div>
             </div>
           </div>
           <div class="center-pane" id="cRoll">
@@ -77,7 +77,7 @@
       <div class="side-pane" id="sLobby">
         <div class="stat big-stat"><b class="num" id="stPlayers">0</b><span>Players in the game</span></div>
         <div class="tag-card"><div class="kicker">The Home Depot</div><div class="tagline" id="tagline">How doers get more done.</div></div>
-        <div class="deal-note">Every player is dealt <b>5 real Home Depot DCs</b>. Check your phone to see yours.</div>
+        <div class="deal-note">Every player is dealt <b>5 real Home Depot DCs</b>. Every answer earns a <b>Community Chest ticket</b>.</div>
         <div class="crowd" id="crowd"></div>
       </div>
       <div class="side-pane" id="sRoll">
@@ -97,7 +97,8 @@
     <h1 class="q-text" id="qText"></h1>
     <div class="q-mid">
       <div class="timer" id="timer"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="t-bg"/><circle cx="50" cy="50" r="44" class="t-fg" id="timerArc"/></svg><span class="num" id="timerNum">20</span></div>
-      <div class="answered"><b class="num" id="ansN">0</b><span>answers</span><div class="ans-faces" id="ansFaces"></div></div>
+      <div class="answered"><b class="num" id="ansN">0</b><span id="ansOf">answered</span><div class="ans-faces" id="ansFaces"></div></div>
+      <div class="particip hidden" id="particip"></div>
     </div>
     <div class="opts" id="opts"></div>
     <div class="fact" id="fact"></div>
@@ -137,6 +138,7 @@
   <section class="view" id="vEnd">
     <div class="logo" style="font-size:clamp(40px,7vw,120px);transform:rotate(-6deg)"><span class="logo-bar">GAME OVER</span></div>
     <p class="big-sub">Our two winners: see the host after the meeting.<br>Everyone else: you may now flip the board.</p>
+    <div class="end-stats" id="endStats"></div>
     <div class="lots" id="endLots"></div>
   </section>
 </main>
@@ -181,6 +183,9 @@
       <div class="small">Scan, or open <b id="remoteUrl"></b>, and enter PIN <b class="num" id="remotePin" style="font-size:1.3rem;color:var(--gold)"></b>. Keep this screen private: the PIN is only shown here.</div>
 </div>
   </div>
+  <h3 style="margin:14px 0 6px">Players</h3>
+  <div class="pl-tools"><input id="plFind" placeholder="Find a name" autocomplete="off"><label>Attendees in the meeting <input id="attIn" type="number" min="0" placeholder="e.g. 150"></label></div>
+  <div class="pl-list" id="plList"></div>
   <div class="menu-actions">
     <button id="btnCopy">Copy results summary</button>
     <button id="btnSim" title="Adds 12 pretend players so you can rehearse">Rehearse with bots</button>

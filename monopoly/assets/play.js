@@ -113,6 +113,8 @@
     const my = mine();
     if (S.ph === 'lobby' || S.ph === 'rules') return wait(joined ? `You're in, ${esc(me.nm)}!` : 'Joining...', `${fmt(my ? my[0] * 10 : M.start)} in the bank, and you own these ${HAND.length} properties:`, `${handHTML()}<p class="muted small">If the token lands on one, your right answer pays double rent. Questions pop up here on their own.</p>`);
     const q = S.q;
+    const tk = my ? my[4] || 0 : 0;
+    const tkLine = `<p class="tk-line">🎟️ <b>${tk}</b> Community Chest ticket${tk === 1 ? '' : 's'}. Every answer adds one.</p>`;
     if (S.ph === 'roll' && q) {
       // wait for the token to finish walking on the big screen before saying where it landed
       const key = 'roll' + q.id;
@@ -120,9 +122,9 @@
       if (Date.now() - celebrated[key] < 3800) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. Watch the big screen.`, handHTML());
       if (ownsQ(q)) {
         if (!celebrated[key + 'own']) { celebrated[key + 'own'] = 1; sound.play('fanfare'); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
-        return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at));
+        return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at) + tkLine);
       }
-      return wait(`Landed on ${esc(q.sp)}`, 'Not one of yours this time. The question pops up here in a moment.', handHTML());
+      return wait(`Landed on ${esc(q.sp)}`, 'Not one of yours this time. The question pops up here in a moment.', handHTML() + tkLine);
     }
     if (S.ph === 'q' && q) {
       if (myAns[q.id] != null) return locked(q, my);
@@ -192,7 +194,7 @@
     el.innerHTML = `<div class="r-head">${a == null ? 'No answer' : right ? 'Right!' : 'Not quite'}</div>
       ${right ? `<div class="r-pts">+${fmt(gain)}</div>${ownsQ(q) ? '<div class="r-line"><b>Double rent: you own this property!</b></div>' : ''}` : ''}
       <div class="r-line">${late ? 'Your answer reached the Bank after time was up.' : a == null ? 'Too slow for the Bank this time.' : right ? pick(RIGHT) : `${pick(WRONG)} It was ${esc(q.opts[S.rv.a])}.`}</div>
-      ${my ? `<div style="margin-top:12px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n}</div>` : ''}
+      ${my ? `<div style="margin-top:10px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n} &middot; 🎟️ ${my[4] || 0} Community Chest ticket${my[4] === 1 ? '' : 's'}</div>` : ''}
       <div class="r-fact">${esc(S.rv.fact)}</div>`;
     if (right && !celebrated[q.id]) { celebrated[q.id] = 1; sound.play('cash'); confetti({ count: 80, colors: MONEY }); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
   }

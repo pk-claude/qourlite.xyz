@@ -64,7 +64,7 @@
   }
 
   // Kept small: one update must stay under the site relay's size limit with 150 players.
-  // me[pid] = [cash / 10, rank, rent this question / 10, flags]; flags: 1 = answered this question.
+  // me[pid] = [cash / 10, rank, rent this question / 10, flags, Community Chest tickets]; flags: 1 = answered this question.
   function stateForPhones() {
     const st = steps[H.pos];
     const out = { t: Date.now(), sid: H.sid, hid: HID, st: ST, ph: st.v, pos: H.pos, n: Object.keys(H.players).length, lbl: LABEL(st), nx: steps[H.pos + 1] ? LABEL(steps[H.pos + 1]) : '' };
@@ -72,7 +72,7 @@
     const box = it ? H.answers[it.id] || {} : {};
     out.me = {};
     ranking().forEach((p, idx) => {
-      out.me[p.pid] = [p.cash / 10, idx + 1, it ? ((H.gained[it.id] || {})[p.pid] || 0) / 10 : 0, box[p.pid] ? 1 : 0];
+      out.me[p.pid] = [p.cash / 10, idx + 1, it ? ((H.gained[it.id] || {})[p.pid] || 0) / 10 : 0, box[p.pid] ? 1 : 0, tickets(p.pid)];
     });
     if (it) {
       const sp = M.board[it.at];
@@ -113,8 +113,9 @@
     if (!p) {
       H.players[pid] = { nm, av, cash: M.start, j: Date.now() };
       save(); onJoinVisual(pid); broadcast();
-    } else if (p.nm !== nm || p.av !== av) {
-      p.nm = nm; p.av = av; save(); if (steps[H.pos].v === 'lobby') renderCrowd();
+    } else if ((p.nm !== nm && !p.lock) || p.av !== av) {
+      if (!p.lock) p.nm = nm;
+      p.av = av; save(); if (steps[H.pos].v === 'lobby') renderCrowd();
     }
     return pid;
   }
@@ -216,7 +217,7 @@
   // The winners: 1st place, then each Community Chest draw.
   function picks() {
     const r = ranking().slice(0, 1).map(p => ({ pid: p.pid, why: '1st place' }));
-    H.chest.forEach((pid, k) => { if (pid && H.players[pid]) r.push({ pid, why: `Community Chest #${k + 1}` }); });
+    H.chest.forEach((pid, k) => { if (pid && H.players[pid]) r.push({ pid, why: CHEST_DRAWS > 1 ? `Community Chest draw ${k + 1}` : "Community Chest draw" }); });
     return r;
   }
   const fmt = v => '$' + Math.round(v).toLocaleString();
@@ -449,6 +450,7 @@
       <span class="opt-n num">${revealed ? `${d[i]} <small>${Math.round((d[i] / tot) * 100)}%</small>` : ''}</span></div>`).join('');
     $('timer').classList.toggle('hidden', revealed);
     $('fact').classList.toggle('on', revealed);
+    $('particip').classList.toggle('hidden', !revealed);
     renderAnswered(it);
     if (!revealed) {
       runTimer('timerArc', 'timerNum', H.opened[it.id], () => limitOf(it), () => { if (isOpen(it.id)) timeUp(it); });
@@ -471,7 +473,10 @@
   }
   function renderAnswered(it, popNew) {
     const box = H.answers[it.id] || {};
-    $('ansN').textContent = Object.keys(box).length;
+    const n = Object.keys(box).length, of = Object.keys(H.players).length;
+    $('ansN').textContent = n;
+    $('ansOf').textContent = `of ${of} answered`;
+    $('particip').innerHTML = `<b class="num">${n}</b> of <b class="num">${of}</b> players answered <span>${of ? Math.round((n / of) * 100) : 0}%</span>`;
     $('ansFaces').innerHTML = Object.keys(box).slice(-30).map(pid => `<span>${H.players[pid] ? H.players[pid].av : ''}</span>`).join('');
     if (popNew) { const f = $('ansFaces').lastElementChild; if (f) f.classList.add('pop'); sound.play('lock'); }
   }
@@ -534,10 +539,12 @@
   }
 
   // community chest
+  // One Community Chest ticket per question answered, right or wrong: taking part is what counts.
+  const tickets = pid => M.quiz.filter(it => (H.answers[it.id] || {})[pid]).length;
   function drawChest(k) {
     if (H.chest[k] !== undefined) return;
     const won = new Set([...ranking().slice(0, 1).map(p => p.pid), ...H.chest]);
-    const pool = Object.keys(H.players).filter(pid => !won.has(pid));
+    const pool = Object.keys(H.players).filter(pid => !won.has(pid)).flatMap(pid => Array(tickets(pid)).fill(pid));
     H.chest[k] = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
     save();
   }
@@ -546,7 +553,8 @@
     drawChest(k); broadcast(true);
     const pid = H.chest[k];
     $('chestPast').innerHTML = H.chest.slice(0, k).filter(Boolean).map(x => `<span class="chip">${H.players[x].av} ${esc(H.players[x].nm)}</span>`).join('');
-    $('chestSub').textContent = CHEST_DRAWS > 1 ? `Draw ${k + 1} of ${CHEST_DRAWS}. Everyone who played is in, except 1st place.` : 'One random draw. Everyone who played is in, remote included, except 1st place.';
+    const nT = Object.keys(H.players).filter(x => !ranking().slice(0, 1).some(r => r.pid === x)).reduce((a, x) => a + tickets(x), 0);
+    $('chestSub').textContent = `One ticket per question answered: ${nT.toLocaleString()} tickets in the chest. Everyone except 1st place is in, remote included.`;
     if (!pid) { $('slotIn').innerHTML = '<div>No one left to draw</div>'; $('slotIn').style.transform = 'none'; $('chestMsg').textContent = ''; return; }
     const w = H.players[pid];
     const others = Object.values(H.players);
@@ -554,7 +562,7 @@
     $('slotIn').innerHTML = reel.map(p => `<div><span>${p.av}</span><span>${esc(p.nm)}</span></div>`).join('');
     const rowH = $('slotIn').firstElementChild.offsetHeight;
     const end = `translateY(${-(reel.length - 1) * rowH}px)`;
-    const win = () => { $('chestMsg').innerHTML = `Advance to the prize table. <b>${w.av} ${esc(w.nm)}</b> collects a prize!`; };
+    const win = () => { $('chestMsg').innerHTML = `Advance to the prize table. <b>${w.av} ${esc(w.nm)}</b> collects a prize! (${tickets(pid)} ticket${tickets(pid) === 1 ? '' : 's'})`; };
     if (silent) { $('slotIn').style.transition = 'none'; $('slotIn').style.transform = end; win(); return; }
     $('chestMsg').textContent = 'Shuffling the Community Chest...';
     $('slotIn').style.transition = 'none'; $('slotIn').style.transform = 'translateY(0)';
@@ -570,6 +578,9 @@
 
   function renderEnd(silent) {
     show('vEnd');
+    const S2 = stats(), att = +H.attendees || 0;
+    const avg = S2.asked.length ? S2.asked.reduce((a, q) => a + q.ans, 0) / S2.asked.length : 0;
+    $('endStats').innerHTML = `<b class="num">${S2.n}</b> played${att ? ` (${pct(S2.n, att)} of the room)` : ''} · <b class="num">${pct(avg, S2.n)}</b> average answer rate · <b class="num">${S2.allIn}</b> answered every question`;
     $('endLots').innerHTML = picks().map((x, n) => `<div class="lot win-card" style="--i:${n}"><div class="lh" ${x.why.startsWith('Community') ? 'style="background:#2d6aa3"' : ''}>${x.why.startsWith('Community') ? 'Community Chest' : 'Monopoly Champion'}</div><div class="lb"><span class="wc-av">${H.players[x.pid].av}</span>${esc(H.players[x.pid].nm)}<br><span style="font-weight:600">${x.why}${x.why === '1st place' ? ' · ' + fmt(H.players[x.pid].cash) : ''}</span></div></div>`).join('');
     if (!silent) { sound.play('fanfare'); confetti({ count: 200, colors: MONEY }); }
   }
@@ -603,6 +614,8 @@
   function buildMenu() {
     $('menuList').innerHTML = steps.map((st, i) => st.v === 'reveal' ? '' : `<button data-go="${i}" class="${i === H.pos ? 'cur' : ''}">${esc(LABEL(st))}</button>`).join('');
     $('remotePin').textContent = H.pin;
+    $('attIn').value = H.attendees || '';
+    renderPlayerList();
     $('remoteQr').innerHTML = qrSVG(REMOTE_URL);
     $('remoteUrl').textContent = REMOTE_URL.replace(/^https?:\/\//, '');
   }
@@ -615,11 +628,51 @@
     if (st.v === 'q' && H.closed[qOf(st).id]) go(i + 1, { silent: true });
     else go(i);
   });
+  $('attIn').addEventListener('input', () => { H.attendees = Math.max(0, Math.floor(+$('attIn').value || 0)); save(); });
+  // players: rename or hide a name from the big screen
+  function renderPlayerList() {
+    const f = $('plFind').value.trim().toLowerCase();
+    const list = Object.entries(H.players).filter(([, p]) => !f || p.nm.toLowerCase().includes(f)).sort((a, b) => b[1].j - a[1].j).slice(0, 40);
+    $('plList').innerHTML = list.map(([pid, p]) => `<div class="pl-row"><span>${p.av} ${esc(p.nm)}${p.lock ? ' <small>(edited)</small>' : ''}</span>
+      <button data-ren="${pid}">Rename</button><button data-hide="${pid}">Hide name</button></div>`).join('') || '<div class="muted small">No players match.</div>';
+  }
+  $('plFind').addEventListener('input', renderPlayerList);
+  $('plList').addEventListener('click', e => {
+    const r = e.target.closest('[data-ren]'), h = e.target.closest('[data-hide]');
+    const pid = (r || h) && (r ? r.dataset.ren : h.dataset.hide);
+    if (!pid || !H.players[pid]) return;
+    const p = H.players[pid];
+    const nm = r ? prompt('New name for this player (max 18 characters):', p.nm) : 'Mystery Player';
+    if (!nm || !nm.trim()) return;
+    p.nm = clean(nm.trim().slice(0, 18)); p.lock = true; save();
+    renderPlayerList(); renderCount(); render(true); broadcast(true);
+  });
   $('btnMenu').onclick = () => toggleMenu(true);
   $('menuClose').onclick = () => toggleMenu(false);
+  // Participation numbers for the follow-up email: who joined, who answered, who stayed to the end.
+  function stats() {
+    const ids = Object.keys(H.players).filter(x => !x.startsWith('bot')), n = ids.length;
+    const per = M.quiz.map(it => {
+      const box = H.answers[it.id] || {}, ans = ids.filter(x => box[x]);
+      return { it, ans: ans.length, right: ans.filter(x => box[x].a === it.a).length, asked: !!H.opened[it.id] };
+    });
+    const asked = per.filter(q => q.asked);
+    const allIn = ids.filter(x => asked.length && asked.every(q => (H.answers[q.it.id] || {})[x])).length;
+    return { n, per, asked, allIn };
+  }
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0) + '%';
   $('btnCopy').onclick = () => {
+    const S2 = stats(), att = +H.attendees || 0;
     const lines = ['Monopoly: All-Hands Edition results', ''];
-    lines.push('Winners:');
+    lines.push('Participation:');
+    lines.push(`- Players joined: ${S2.n}${att ? ` of ${att} attendees (${pct(S2.n, att)})` : ''}`);
+    S2.per.forEach((q, i) => { if (q.asked) lines.push(`- Q${i + 1} ${q.it.section}: ${q.ans} answered (${pct(q.ans, S2.n)} of players), ${pct(q.right, q.ans)} got it right`); });
+    if (S2.asked.length > 1) {
+      const a = S2.asked[0].ans, b = S2.asked[S2.asked.length - 1].ans;
+      lines.push(`- Drop-off from the first to the last question: ${a} to ${b} answering (${a ? (b >= a ? '+' : '-') + Math.abs(Math.round(((b - a) / a) * 100)) + '%' : 'n/a'})`);
+      lines.push(`- Answered every question: ${S2.allIn} players (${pct(S2.allIn, S2.n)})`);
+    }
+    lines.push('', 'Winners:');
     picks().forEach((x, n) => lines.push(`${n + 1}. ${H.players[x.pid].nm} (${x.why})`));
     lines.push('', 'Richest tycoons:');
     ranking().filter(p => !p.pid.startsWith('bot')).slice(0, 10).forEach((p, i) => lines.push(`${i + 1}. ${p.nm}: ${fmt(p.cash)}`));
