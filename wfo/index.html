@@ -16,6 +16,9 @@
   .dot i { width: 9px; height: 9px; border-radius: 50%; background: #fde68a; }
   .dot.up i { background: #bbf7d0; box-shadow: 0 0 0 3px rgba(255,255,255,.25); }
   .dot.down i { background: #fecaca; }
+  .flag { height: 8px; background: repeating-conic-gradient(#1d1d1f 0 25%, #fff 0 50%) 0 0 / 8px 8px; }
+  .opt .rc { flex: none; width: 44px; position: relative; } .opt .rc svg { width: 100%; height: auto; display: block; }
+  .place { font-size: .72rem; font-weight: 800; color: var(--or); position: relative; }
   main { max-width: 560px; margin: 0 auto; padding: 16px 16px 60px; display: grid; gap: 16px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
   .kick { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--or); margin: 0 0 6px; }
@@ -52,17 +55,20 @@
   @keyframes p { 50% { transform: scale(1.6); opacity: .35; } }
   .film { background: #111; color: #fff; border: 0; text-align: center; padding: 40px 18px; }
   .film .big { font-size: 1.35rem; font-weight: 700; }
+  .pres { display: inline-block; margin-top: 12px; color: var(--mut); font-weight: 700; border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; text-decoration: none; }
   footer { text-align: center; color: var(--mut); font-size: .78rem; padding: 0 16px 30px; line-height: 1.4; }
 </style>
 </head>
 <body>
-<header><b>WFO All Hands</b><span class="dot" id="conn"><i></i><span id="connT">Connecting</span></span></header>
+<header><b>WFO All Hands <span style="font-weight:400;opacity:.9">| Race to Peak</span></b><span class="dot" id="conn"><i></i><span id="connT">Connecting</span></span></header>
+<div class="flag"></div>
 <main id="main"></main>
-<footer>No sign-in and no name. Votes and answers go only to the presenter screen in this meeting.</footer>
+<footer>No sign-in and no name. Votes and answers go only to the presenter screen in this meeting.<br><a class="pres" href="/wfo/host.html">Presenter screen</a></footer>
 <script src="/wfo/program.js"></script>
 <script>window.LIVE_ROOM = WFO.room;</script>
 <script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
 <script src="/q2/assets/live.js"></script>
+<script src="/wfo/racers.js"></script>
 <script src="/wfo/phone.js"></script>
 </body>
 </html>
