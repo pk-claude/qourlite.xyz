@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>WFO All Hands: Presenter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/wfo/host.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><b>WFO All Hands</b><span>|</span>Live</div>
+  <nav class="tabs" id="tabs"><button data-v="run" class="on">Run</button><button data-v="vis">Visions</button><button data-v="story">Story</button></nav>
+  <div class="meta"><span id="nPhones">0 phones</span><span class="relays" id="relays" title=""></span><span class="url" id="shortUrl"></span></div>
+</header>
+<div class="banner hidden" id="takenOver">Another presenter screen opened this room more recently. This one is paused. Close this tab, or reload it to take over again.</div>
+
+<!-- RUN -->
+<section class="view on" id="vRun">
+  <aside class="acts" id="acts"></aside>
+  <div class="stage" id="stage"></div>
+  <div class="join">
+    <div class="qr" id="qr"></div>
+    <div class="jurl" id="jurl"></div>
+    <p>Scan or type the link.<br>No sign-in. No name.</p>
+  </div>
+  <div class="foot">
+    <label><input type="checkbox" id="manualOn"> Add votes by hand</label>
+    <span id="relayDetail" class="muted"></span>
+    <button class="ghost" id="resetBtn">Clear all votes and answers</button>
+  </div>
+</section>
+
+<!-- VISIONS -->
+<section class="view" id="vVis">
+  <div class="col">
+    <div class="private">Private view. Do not share this tab with the room.</div>
+    <h2>2027 answers <span id="visCount" class="muted"></span></h2>
+    <p class="muted">Hide anything with a name, anything confidential, or anything off topic. Hidden answers stay out of the themes and the story.</p>
+    <ol class="vislist" id="visList"></ol>
+  </div>
+  <div class="col side">
+    <h3>Add answers by hand</h3>
+    <p class="muted">From a Microsoft Form export or the Teams chat. One answer per line.</p>
+    <textarea id="pasteBox" rows="8" placeholder="We trained every new analyst in their first month..."></textarea>
+    <button class="btn" id="pasteBtn">Add these answers</button>
+    <h3>Keep a copy</h3>
+    <button class="btn ghost" id="copyBtn">Copy all visible answers</button>
+    <span class="muted" id="copyMsg"></span>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="view" id="vStory">
+  <div class="col">
+    <div class="private">Private view until you open the stage.</div>
+    <div class="status" id="aiStatus"></div>
+    <div class="step"><span class="n">1</span><div><h3>Find themes</h3><p class="muted" id="ansReady"></p><button class="btn" id="themesBtn">Find themes</button><span class="msg" id="themesMsg"></span></div></div>
+    <div class="themes" id="themesOut"></div>
+    <div class="step"><span class="n">2</span><div><h3>Write the story</h3><p class="muted">Claude writes about two minutes of narration from the themes and your team's own words. Read it. Edit anything in the box.</p><button class="btn" id="storyBtn">Write the story</button><span class="msg" id="storyMsg"></span></div></div>
+    <textarea id="storyText" rows="16" spellcheck="true" placeholder="# Title&#10;## Chapter heading&#10;Narration...&#10;&#10;Closing lines..."></textarea>
+  </div>
+  <div class="col side">
+    <div class="step"><span class="n">3</span><div><h3>Voice and stage</h3>
+      <label class="muted" for="voiceSel">Narrator voice</label>
+      <select id="voiceSel"></select>
+      <div class="row2"><button class="btn ghost" id="testVoice">Test voice</button><span class="msg" id="voiceMsg"></span></div>
+      <p class="muted small" id="voiceHint"></p>
+      <button class="btn big" id="stageBtn">Open the stage</button>
+      <p class="muted small">Teams: share this browser window and switch on "Include computer sound". Keys on the stage: Space pause, R restart, C captions only, M music, Esc close.</p>
+    </div></div>
+    <div class="step"><span class="n">4</span><div><h3>Send themes to the room</h3><p class="muted">Opens the "Make it real" vote on every phone. The stage does this on its own at the end of the film.</p><button class="btn ghost" id="sendThemes">Send themes to the room</button><span class="msg" id="sendMsg"></span></div></div>
+  </div>
+</section>
+
+<div id="film" class="hidden"></div>
+
+<script src="/wfo/program.js"></script>
+<script>window.LIVE_ROOM = WFO.room;</script>
+<script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
+<script src="/q2/vendor/qrcode-generator-1.4.4.js"></script>
+<script src="/q2/assets/fx.js"></script>
+<script src="/q2/assets/live.js"></script>
+<script src="/wfo/voice.js"></script>
+<script src="/wfo/film.js"></script>
+<script src="/wfo/host.js"></script>
+</body>
+</html>
