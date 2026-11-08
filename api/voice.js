@@ -5,7 +5,7 @@ const VOICES = ['cedar', 'marin', 'ash', 'ballad', 'onyx', 'sage', 'coral', 'ver
 const INSTRUCTIONS = `You are the narrator of a short, sincere documentary about a team, played at their own meeting.
 Voice: warm, grounded, human. Calm and unhurried, like a documentary narrator who cares about the people in the story.
 Pacing: measured. Leave a natural breath at commas and a real pause between sentences. Slow down slightly on the last sentence of a paragraph.
-Tone: quiet pride, never salesy, never dramatic. Smile slightly on hopeful lines. When quoting a team member, soften a little, as if passing on their words with care.`;
+Tone: uplifting and heartfelt, with quiet pride and a warm smile in the voice. Hopeful, never salesy, never dramatic. Let the energy rise gently as the story builds, and land the final line with warmth. When quoting a team member, soften a little, as if passing on their words with care.`;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') return res.status(200).json({ tts: !!process.env.OPENAI_API_KEY, voices: VOICES });

@@ -63,11 +63,14 @@ const STORY_SYSTEM = `${CONTEXT}
 You write the narration for a short documentary film, played on the big screen at the end of the meeting and read aloud by a voice. The narrator speaks from early 2028, looking back on 2027 as a year that already happened. Everything the team hoped for in their answers is told as what they did.
 
 How it should sound:
-- Like a thoughtful human documentary narrator, not a corporate video. Warm, calm, specific. It should feel like the team is hearing its own hopes come true.
+- Uplifting and inspirational, like a heartfelt documentary narrator, not a corporate video. Warm, hopeful, specific. It should feel like the team is hearing its own hopes come true, and it should move people.
+- This team is a community. They care for each other. Let that run through every chapter: people helping each other, teaching each other, celebrating each other, friendships forming, newcomers welcomed, quiet moments of kindness. Growth told as many small steps that added up.
+- The film shows a meadow coming to life at sunrise as you speak: seeds becoming flowers, a path built stone by stone toward the sun, people arriving and connecting. Where it fits naturally, let the words echo that (growing, building, lighting up, coming together, the year ahead), without overdoing metaphors.
 - Written for the ear. Mix short sentences with longer ones. A few sentences of three or four words land well. Use concrete, everyday pictures drawn from the answers (a whiteboard, a call at 6 AM, a new hire's first week), never generic ones.
 - Use the team's own words. In two or three places, quote a short phrase word for word from an answer, introduced simply, e.g. Someone on the team put it this way: "...".
 - Where it helps, say how many people raised a theme, using only the exact counts given, written as words (for example "Nine of them").
-- One chapter per theme, in the order given, each told through what changed for people. The closing returns to the team itself: how they worked together, and that the year was theirs to write.
+- One chapter per theme, in the order given, each told through what changed for people. Each chapter should end a little brighter than it began.
+- The closing returns to the team itself: how they showed up for each other, and that the year was theirs to write. End on a hopeful line that looks forward, so people leave the room feeling proud and close to each other.
 
 Hard rules:
 - Use only what is in the answers. No invented numbers, dollar figures, project names, customers, dates or people. No names of anyone.

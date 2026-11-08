@@ -298,12 +298,15 @@
   $('sndBtn').textContent = FX.sound.muted ? 'Sound off' : 'Sound on';
   $('acts').onclick = e => {
     const tg = e.target.closest('[data-tg]');
+    const wasOpen = H.order.includes('vision'), wasShow = H.show;
     if (tg) {
       const id = tg.dataset.tg;
       H.order = H.order.includes(id) ? H.order.filter(x => x !== id) : [id, ...H.order];
       H.show = id;
     } else { const c = e.target.closest('[data-show]'); if (!c) return; H.show = c.dataset.show; }
     save(); broadcast(true); render();
+    if (wasOpen && !H.order.includes('vision')) autoStory('question closed');
+    else if (wasShow === 'vision' && H.show !== 'vision') autoStory('moved on');
   };
   $('stage').onclick = e => {
     const b = e.target.closest('[data-m]'); if (!b) return;
@@ -358,36 +361,79 @@
     return j;
   }
   function busy(btn, msgEl, txt) { btn.disabled = true; msgEl.className = 'msg'; let s = 0; msgEl.textContent = txt; const iv = setInterval(() => (msgEl.textContent = `${txt} ${++s}s`), 1000); return () => { clearInterval(iv); btn.disabled = false; }; }
+  // Themes and story: one pipeline, run by the buttons or on its own in the background.
+  const snapOf = v => v.map(a => ({ t: a.t, c: a.c, p: a.p }));
+  async function runThemes(v) {
+    const snap = snapOf(v);
+    const j = await post({ step: 'themes', answers: snap });
+    H.snap = snap; H.themes = j.themes; save();
+    renderThemes(); renderStoryCounts();
+    return j;
+  }
+  async function runStory() {
+    const snap = H.snap || snapOf(visible());
+    const j = await post({ step: 'story', answers: snap, themes: H.themes || [] });
+    H.story = j; H.edited = false;
+    H.storyText = `# ${j.title}\n\n` + j.chapters.map(c => `## ${c.heading}\n${c.text}`).join('\n\n') + (j.closing ? `\n\n${j.closing}` : '');
+    save();
+    $('storyText').value = H.storyText;
+    prepareVoice();
+    return j;
+  }
   $('themesBtn').onclick = async () => {
     const v = visible();
     if (!v.length) { $('themesMsg').className = 'msg err'; $('themesMsg').textContent = 'No answers yet.'; return; }
     const done = busy($('themesBtn'), $('themesMsg'), `Claude is reading ${v.length} answers...`);
     try {
-      const snap = v.map(a => ({ t: a.t, c: a.c, p: a.p }));
-      const j = await post({ step: 'themes', answers: snap });
-      H.snap = snap; H.themes = j.themes; save();
+      const j = await runThemes(v);
       $('themesMsg').className = 'msg ok'; $('themesMsg').textContent = `${j.themes.length} themes${j.skipped && j.skipped.length ? `. ${j.skipped.length} left out (off topic or identifying).` : '.'}`;
-      renderThemes(); renderStoryCounts();
     } catch (e) { $('themesMsg').className = 'msg err'; $('themesMsg').textContent = `Claude did not answer (${e.message}). Try again.`; }
     done();
   };
   $('storyBtn').onclick = async () => {
-    const snap = H.snap || visible().map(a => ({ t: a.t, c: a.c, p: a.p }));
-    if (!snap.length) { $('storyMsg').className = 'msg err'; $('storyMsg').textContent = 'No answers yet.'; return; }
+    if (!(H.snap || visible()).length) { $('storyMsg').className = 'msg err'; $('storyMsg').textContent = 'No answers yet.'; return; }
     const done = busy($('storyBtn'), $('storyMsg'), 'Claude is writing...');
     try {
-      const j = await post({ step: 'story', answers: snap, themes: H.themes || [] });
-      H.story = j;
-      H.storyText = `# ${j.title}\n\n` + j.chapters.map(c => `## ${c.heading}\n${c.text}`).join('\n\n') + (j.closing ? `\n\n${j.closing}` : '');
-      save();
-      $('storyText').value = H.storyText;
+      await runStory();
       $('storyMsg').className = 'msg ok'; $('storyMsg').textContent = `Done: about ${H.storyText.split(/\s+/).length} words. Read it, edit if needed.`;
-      prepareVoice();
     } catch (e) { $('storyMsg').className = 'msg err'; $('storyMsg').textContent = `Claude did not answer (${e.message}). Try again, or paste a story into the box.`; }
     done();
   };
+
+  // ---------- automatic: themes and story write themselves ----------
+  // Runs when the 2027 question is closed or the presenter moves on from it, and refreshes every
+  // few minutes while new answers keep arriving. A story you edited by hand is never overwritten.
+  let autoBusy = false, autoAgain = false, autoLast = 0;
+  const sameAnswers = v => H.snap && H.storyText && H.snap.length === v.length && H.snap.every((a, i) => a.t === v[i].t);
+  function autoPill(txt, cls) { const el = $('autoPill'); el.textContent = txt; el.className = 'autopill ' + (cls || ''); el.classList.toggle('hidden', !txt); }
+  async function autoStory(why) {
+    if (passive || aiOn === false) return;
+    const v = visible();
+    if (v.length < 2 || sameAnswers(v)) return;
+    if (H.edited) { autoPill('Story edited by hand: auto-update paused', 'warn'); return; }
+    if (autoBusy) { autoAgain = true; return; }
+    autoBusy = true; autoLast = Date.now();
+    try {
+      autoPill(`Claude is reading ${v.length} answers...`, 'busy');
+      $('themesMsg').className = 'msg'; $('themesMsg').textContent = `Running on its own (${why})...`;
+      const j = await runThemes(v);
+      $('themesMsg').className = 'msg ok'; $('themesMsg').textContent = `${j.themes.length} themes, found automatically.`;
+      autoPill('Claude is writing the story...', 'busy');
+      await runStory();
+      $('storyMsg').className = 'msg ok'; $('storyMsg').textContent = `Written automatically from ${v.length} answers at ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`;
+      autoPill(`Story ready: ${v.length} answers`, 'ok');
+    } catch (e) {
+      autoPill('Story: Claude did not answer, retrying soon', 'warn');
+      autoLast = Date.now() - 120000; // try again in about a minute
+    }
+    autoBusy = false;
+    if (autoAgain) { autoAgain = false; autoStory('new answers'); }
+  }
+  // Background refresh while answers keep coming in.
+  setInterval(() => { if (H.order.includes('vision') || H.show !== 'vision') if (Date.now() - autoLast > 180000) autoStory('refresh'); }, 20000);
+  if (H.storyText) autoPill(`Story ready: ${(H.snap || []).length} answers`, 'ok');
   let editT = 0;
-  $('storyText').oninput = () => { H.storyText = $('storyText').value; save(); clearTimeout(editT); editT = setTimeout(prepareVoice, 2000); };
+  $('storyText').oninput = () => { H.storyText = $('storyText').value; H.edited = true; save(); clearTimeout(editT); editT = setTimeout(prepareVoice, 2000); };
 
   // The box format: "# Title", "## Chapter heading" then its narration; text after a blank line with no heading is the closing.
   function parse(txt) {
