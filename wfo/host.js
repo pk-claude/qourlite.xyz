@@ -114,7 +114,40 @@
     render();
   };
 
+  // ---------- Run: the Peak Season Grand Prix ----------
+  let trackKey = '', prevLead = {}, prevTot = {}, ticker = [], beats = [], leadChanges = 0;
+  const POS = ['P1', 'P2', 'P3', 'P4', 'P5'];
+  function tracksOf(a, T) {
+    if (a.kind === 'multi') return a.qs.map((q, qi) => ({ key: 'debate.' + qi, q: q.q, opts: q.opts, t: T.debate[qi], mq: qi }));
+    if (a.kind === 'single') return [{ key: a.id, q: '', opts: optsOf(a.id), t: T[a.id], mq: 0 }];
+    return [];
+  }
+  let sayAct = '';
+  function say(msg, racer) { ticker.unshift({ msg, racer, act: sayAct, at: Date.now() }); ticker = ticker.slice(0, 30); }
+  // Commentary: compare every track with what it showed last time.
+  let primed = false;
+  function commentate() {
+    const T = tallies();
+    const quiet = !primed; primed = true; // the first pass only records where everyone stands
+    WFO.acts.forEach(a => tracksOf(a, T).forEach(tr => {
+      sayAct = a.id;
+      const tot = tr.t.reduce((s, n) => s + n, 0), was = prevTot[tr.key] || 0;
+      if (tot > was && !quiet) for (let k = was; k < tot; k++) beats.push(Date.now());
+      const max = Math.max(...tr.t), leaders = tr.t.map((v, i) => (v === max && max > 0 ? i : -1)).filter(i => i >= 0);
+      const lead = leaders.length === 1 ? leaders[0] : null, old = prevLead[tr.key];
+      const live = H.order.includes(a.id) && !quiet;
+      if (live && was === 0 && tot > 0) say(`And they're off! ${tr.opts[tr.t.findIndex(v => v > 0)]} takes the first vote.`, tr.t.findIndex(v => v > 0));
+      else if (live && lead != null && old != null && old !== 'tie' && lead !== old) { say(`${tr.opts[lead]} overtakes ${tr.opts[old]}!`, lead); leadChanges++; }
+      else if (live && lead == null && leaders.length > 1 && old !== 'tie' && tot > 1) say(`Neck and neck: ${leaders.map(i => tr.opts[i]).join(' and ')}.`, leaders[0]);
+      if (live && tot > was && [10, 20, 30, 40, 50, 75, 100].some(m => was < m && tot >= m)) say(`${tot} votes in. The pit crew is busy.`, lead == null ? 0 : lead);
+      prevLead[tr.key] = lead != null ? lead : leaders.length ? 'tie' : null;
+      prevTot[tr.key] = tot;
+    }));
+    beats = beats.filter(t => Date.now() - t < 600000);
+  }
+
   function renderRun() {
+    commentate();
     $('acts').innerHTML = WFO.acts.map(a => {
       const open = H.order.includes(a.id);
       const can = a.id !== 'real' || H.realOpts.length;
@@ -122,32 +155,73 @@
         <div class="st ${open ? 'open' : ''}"><span>${open ? 'Open on phones' : can ? 'Closed' : 'After the story'}</span>${can ? `<button class="tg" data-tg="${a.id}">${open ? 'Close' : 'Open'}</button>` : ''}</div></div>`;
     }).join('') + `<p class="note">Click a card to show it here. Open puts it on every phone. The 2027 answer can stay open while other votes run.</p>`;
     const a = ACTS[H.show], T = tallies(), open = H.order.includes(a.id);
-    const head = `<p class="kick">${esc(a.label)}<span class="state ${open ? 'open' : ''}">${open ? 'Open' : 'Closed'}</span></p>`;
-    const bars = (opts, t, id, q) => {
-      const tot = t.reduce((s, n) => s + n, 0), max = Math.max(...t);
-      return `<div class="bars">${opts.map((o, i) => `<div class="brow ${tot && t[i] === max ? 'lead' : ''}"><span class="lb">${esc(o)}</span>
-        <span class="vl"><span class="man"><button data-m="${id}" data-q="${q}" data-i="${i}" data-d="-1">-</button><button data-m="${id}" data-q="${q}" data-i="${i}" data-d="1">+</button></span> ${t[i]}${tot ? ` | ${Math.round(100 * t[i] / tot)}%` : ''}</span>
-        <span class="tr"><i style="width:${tot ? (100 * t[i] / tot).toFixed(1) : 0}%"></i></span></div>`).join('')}</div>`;
-    };
-    let html;
-    if (a.kind === 'multi') {
-      const voters = Object.values(H.phones).filter(r => r.votes.debate.some(v => v != null)).length;
-      html = `${head}<h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p><div class="qcols">${a.qs.map((q, qi) => `<div class="qcol"><h2>${esc(q.q)}</h2>${bars(q.opts, T.debate[qi], 'debate', qi)}</div>`).join('')}</div><p class="total">${voters} people voted</p>`;
-    } else if (a.kind === 'single') {
-      const t = T[a.id], tot = t.reduce((s, n) => s + n, 0);
-      html = a.id === 'real' && !H.realOpts.length
-        ? `${head}<h1>${esc(a.title)}</h1><p class="sub">The options come from the themes. Run the Story tab first, then press "Send themes to the room".</p>`
-        : `${head}<div class="single"><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p>${bars(optsOf(a.id), t, a.id, 0)}<p class="total">${tot} votes</p></div>`;
-    } else {
-      const all = answers(), people = new Set(all.filter(x => x.p).map(x => x.p)).size;
-      const byCat = a.cats.map(c => [c, all.filter(x => x.c === c).length]);
-      html = `${head}<div class="visbig"><div><div class="num">${all.length}</div><div class="lbl">answers${people ? ` from ${people} ${people === 1 ? 'person' : 'people'}` : ''}</div>
-        <p class="q">${esc(a.title)} ${esc(a.q)}</p><div class="catrow">${byCat.map(([c, n]) => `<span>${esc(c)}<b>${n}</b></span>`).join('')}</div>
-        <p class="muted" style="margin-top:18px">Anonymous. Stays open until the story at the end.</p></div></div>`;
+    const nPh = Object.keys(H.phones).length;
+    const trs = tracksOf(a, T);
+    const key = H.show + '|' + trs.map(t => t.opts.join(',')).join('/');
+    if (key !== trackKey) {
+      trackKey = key;
+      const head = `<div class="gp-head"><div><p class="kick">${esc(a.label)} <span class="state" id="stState"></span></p><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p></div></div>`;
+      if (a.kind === 'text') $('stage').innerHTML = head + `<div class="visbig"><div><div class="num" id="visNum">0</div><div class="lbl" id="visLbl">answers</div>
+        <p class="q">${esc(a.q)}</p><div class="catrow" id="visCats"></div><p class="muted" style="margin-top:18px">Anonymous. Stays open until the story at the end.</p></div></div>`;
+      else if (a.id === 'real' && !H.realOpts.length) $('stage').innerHTML = head + `<p class="sub">The racers come from the themes. Run the Story tab first, then press "Send themes to the room".</p>`;
+      else $('stage').innerHTML = head + `<div class="tracks ${trs.length > 1 ? 'multi' : 'single'}">${trs.map(tr => `<div class="track" data-k="${tr.key}">
+          ${tr.q ? `<div class="tq">${esc(tr.q)}</div>` : ''}
+          ${tr.opts.map((o, i) => `<div class="lane" data-i="${i}"><div class="lname"><i style="background:${Racers.color(i)}"></i>${esc(o)}</div>
+            <div class="road"><div class="finish"></div><div class="car" style="left:0%">${Racers.svg(i)}<b class="pos"></b></div></div>
+            <div class="lv"><span class="man"><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="-1">-</button><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="1">+</button></span><b class="cnt">0</b><small class="pct"></small></div></div>`).join('')}
+        </div>`).join('')}</div><div class="ticker" id="ticker"></div>`;
     }
-    $('stage').innerHTML = html;
+    const st = $('stState'); if (st) { st.textContent = open ? 'Open' : 'Closed'; st.className = 'state ' + (open ? 'open' : ''); }
+    if (a.kind === 'text') {
+      const all = answers(), people = new Set(all.filter(x => x.p).map(x => x.p)).size;
+      $('visNum').textContent = all.length;
+      $('visLbl').textContent = `answers${people ? ` from ${people} ${people === 1 ? 'person' : 'people'}` : ''}`;
+      $('visCats').innerHTML = a.cats.map(c => `<span>${esc(c)}<b>${all.filter(x => x.c === c).length}</b></span>`).join('');
+    }
+    trs.forEach(tr => {
+      const el = $('stage').querySelector(`.track[data-k="${tr.key}"]`); if (!el) return;
+      const tot = tr.t.reduce((s, n) => s + n, 0), max = Math.max(...tr.t);
+      const finish = Math.max(max, Math.ceil(nPh * 0.6), 4);
+      const order = tr.t.map((v, i) => [v, i]).sort((x, y) => y[0] - x[0]);
+      el.querySelectorAll('.lane').forEach(lane => {
+        const i = +lane.dataset.i, v = tr.t[i] || 0;
+        lane.querySelector('.car').style.left = (82 * v / finish).toFixed(1) + '%';
+        const rank = order.findIndex(o => o[1] === i);
+        const tied = order.filter(o => o[0] === v).length > 1;
+        lane.classList.toggle('lead', v > 0 && v === max);
+        lane.classList.toggle('moving', v > 0);
+        lane.querySelector('.pos').textContent = v > 0 ? (v === max ? (tied ? 'TIE' : 'P1') : POS[rank]) : '';
+        lane.querySelector('.cnt').textContent = v;
+        lane.querySelector('.pct').textContent = tot ? Math.round(100 * v / tot) + '%' : '';
+      });
+    });
+    const tk = $('ticker');
+    const mine = ticker.filter(m => m.act === a.id).slice(0, a.kind === 'multi' ? 2 : 4);
+    if (tk) tk.innerHTML = mine.length ? mine.map((m, k) => `<div class="tick ${k === 0 && Date.now() - m.at < 6000 ? 'fresh' : ''}"><span class="ti">${Racers.svg(m.racer || 0)}</span>${esc(m.msg)}</div>`).join('') : '<div class="tick idle">Engines warming up. Scan the code to vote.</div>';
+    renderPit(a, T, nPh);
     $('stage').classList.toggle('manual', $('manualOn').checked);
   }
+  // Pit wall: the numbers beside the QR code.
+  function renderPit(a, T, nPh) {
+    let voted = 0;
+    if (a.kind === 'multi') voted = Object.values(H.phones).filter(r => r.votes.debate.some(v => v != null)).length;
+    else if (a.kind === 'single') voted = Object.values(H.phones).filter(r => r.votes[a.id] != null).length;
+    else voted = Object.values(H.phones).filter(r => r.vis.length).length;
+    const pct = nPh ? Math.round(100 * voted / nPh) : 0;
+    const now = Date.now(), B = 10, W = 30000;
+    const buckets = Array.from({ length: B }, (_, k) => beats.filter(t => t > now - (B - k) * W && t <= now - (B - k - 1) * W).length);
+    const bmax = Math.max(1, ...buckets);
+    const lastMin = beats.filter(t => now - t < 60000).length;
+    let close = '';
+    if (a.kind === 'multi') {
+      const gaps = T.debate.map((t, qi) => { const s = t.slice().sort((x, y) => y - x); return [s[0] - s[1], qi, s[0]]; }).filter(g => g[2] > 0).sort((x, y) => x[0] - y[0]);
+      if (gaps.length) close = `Q${gaps[0][1] + 1}, ${gaps[0][0] === 0 ? 'dead heat' : `${gaps[0][0]} vote${gaps[0][0] === 1 ? '' : 's'} apart`}`;
+    }
+    $('pit').innerHTML = `<div class="pitrow"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><b>${voted} of ${nPh}</b><span>phones in this race</span></div></div>
+      <div class="pitrow col"><span>Votes, last 5 minutes</span><div class="spark">${buckets.map(n => `<i style="height:${Math.max(4, 100 * n / bmax)}%"></i>`).join('')}</div><span><b>${lastMin}</b> in the last minute</span></div>
+      <div class="pitgrid"><div><b>${leadChanges}</b><span>lead changes</span></div><div><b>${close || 'none yet'}</b><span>closest race</span></div></div>`;
+  }
+  setInterval(() => { if (view === 'run') renderPit(ACTS[H.show], tallies(), Object.keys(H.phones).length); }, 5000);
   $('acts').onclick = e => {
     const tg = e.target.closest('[data-tg]');
     if (tg) {
@@ -166,7 +240,7 @@
   $('manualOn').onchange = () => $('stage').classList.toggle('manual', $('manualOn').checked);
   $('resetBtn').onclick = () => {
     if (!confirm('Clear every vote, every 2027 answer, the themes and the story? Phones are cleared too. Use this after a rehearsal.')) return;
-    H = fresh(Date.now()); save(); broadcast(true); render(); renderStory();
+    H = fresh(Date.now()); trackKey = ''; ticker = []; beats = []; leadChanges = 0; save(); broadcast(true); render(); renderStory();
   };
 
   // ---------- visions ----------
@@ -344,6 +418,19 @@
   $('jurl').textContent = SHORT;
   $('qr').innerHTML = FX.qrSVG(JOIN);
   Voice.init().then(() => { renderStatus(); fillVoices(); if (H.storyText) prepareVoice(); });
-  connect();
+  // Someone may already be presenting (another tab, or a teammate who tapped "Presenter" on the phone page).
+  // Listen first; take over only when the person at this screen says so.
+  function probe() {
+    let found = null;
+    Live.create({ room: ROOM, role: 'player', onMsg: (k, m) => { if (k === 'state' && m.hid && !m._stale) found = m; } });
+    setTimeout(() => {
+      if (!found) return connect();
+      $('guard').classList.remove('hidden');
+      $('guardWhen').textContent = new Date(found.st || found.t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }, 4500);
+  }
+  $('guardGo').onclick = () => { $('guard').classList.add('hidden'); connect(); };
+  $('guardNo').onclick = () => { location.href = '/wfo/'; };
+  probe();
   render();
 })();

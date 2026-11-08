@@ -12,10 +12,11 @@
 </head>
 <body>
 <header class="bar">
-  <div class="brand"><b>WFO All Hands</b><span>|</span>Live</div>
+  <div class="brand"><b>WFO All Hands</b><span>|</span>Race to Peak</div>
   <nav class="tabs" id="tabs"><button data-v="run" class="on">Run</button><button data-v="vis">Visions</button><button data-v="story">Story</button></nav>
   <div class="meta"><span id="nPhones">0 phones</span><span class="relays" id="relays" title=""></span><span class="url" id="shortUrl"></span></div>
 </header>
+<div class="flagline"></div>
 <div class="banner hidden" id="takenOver">Another presenter screen opened this room more recently. This one is paused. Close this tab, or reload it to take over again.</div>
 
 <!-- RUN -->
@@ -26,6 +27,7 @@
     <div class="qr" id="qr"></div>
     <div class="jurl" id="jurl"></div>
     <p>Scan or type the link.<br>No sign-in. No name.</p>
+    <div class="pit" id="pit"></div>
   </div>
   <div class="foot">
     <label><input type="checkbox" id="manualOn"> Add votes by hand</label>
@@ -76,6 +78,7 @@
   </div>
 </section>
 
+<div id="guard" class="guard hidden"><div><h2>A presenter screen is already running</h2><p>It started at <b id="guardWhen"></b>, in another tab or on another computer. Only one screen can run the room.</p><p class="muted">If that one is yours and you closed it, take over here. Votes and answers on the other screen stay on that screen.</p><div class="row2" style="gap:10px;justify-content:center"><button class="btn" id="guardGo">Take over here</button><button class="btn ghost" id="guardNo">Go to the team page</button></div></div></div>
 <div id="film" class="hidden"></div>
 
 <script src="/wfo/program.js"></script>
@@ -84,6 +87,7 @@
 <script src="/q2/vendor/qrcode-generator-1.4.4.js"></script>
 <script src="/q2/assets/fx.js"></script>
 <script src="/q2/assets/live.js"></script>
+<script src="/wfo/racers.js"></script>
 <script src="/wfo/voice.js"></script>
 <script src="/wfo/film.js"></script>
 <script src="/wfo/host.js"></script>

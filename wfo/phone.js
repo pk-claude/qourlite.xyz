@@ -71,7 +71,7 @@
     cards.forEach(el => el.remove()); cards.clear();
     main.innerHTML = `<div class="card ${film ? 'film' : 'idle'}">${film ? '' : '<div class="pulse"></div>'}<p class="big">${esc(big)}</p><p class="sub" ${film ? 'style="color:#bbb"' : ''}>${esc(sub)}</p></div>`;
   }
-  const optBtn = (txt, i, data) => `<button class="opt" ${data}><span class="fill" style="width:0"></span><span class="ltr">${LTR[i]}</span><span class="txt">${esc(txt)}</span><span class="pct"></span></button>`;
+  const optBtn = (txt, i, data) => `<button class="opt" ${data}><span class="fill" style="width:0"></span><span class="ltr">${LTR[i]}</span><span class="txt">${esc(txt)}<br><span class="place"></span></span><span class="pct"></span><span class="rc">${Racers.svg(i)}</span></button>`;
 
   function build(a) {
     const el = document.createElement('section');
@@ -123,6 +123,9 @@
       const p = show ? Math.round(100 * (tally[i] || 0) / tot) : 0;
       b.querySelector('.fill').style.width = p + '%';
       b.querySelector('.pct').textContent = show ? p + '%' : '';
+      // Race position of your pick
+      const v = (tally || [])[i] || 0, ahead = (tally || []).filter(n => n > v).length, tie = (tally || []).filter(n => n === v).length > 1;
+      b.querySelector('.place').textContent = mine === i && show ? (ahead === 0 ? (tie ? `Your ${Racers.name(i).toLowerCase()} is tied for the lead` : `Your ${Racers.name(i).toLowerCase()} is in the lead`) : `Your ${Racers.name(i).toLowerCase()} is in P${ahead + 1}`) : '';
     });
   }
   function paint(el) {

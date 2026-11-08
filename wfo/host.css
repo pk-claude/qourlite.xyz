@@ -7,7 +7,7 @@ body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: var(--ink); 
 .small { font-size: .82rem; line-height: 1.4; }
 button { font: inherit; cursor: pointer; }
 
-.bar { height: 58px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 22px; border-bottom: 3px solid var(--or); }
+.bar { height: 58px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 22px; }
 .brand { font-size: 1.15rem; display: flex; gap: 10px; align-items: center; }
 .brand span { color: var(--or); }
 .tabs { display: flex; gap: 4px; background: var(--soft); padding: 4px; border-radius: 10px; }
@@ -20,7 +20,7 @@ button { font: inherit; cursor: pointer; }
 .relays i.up { background: #22c55e; } .relays i.down, .relays i.off { background: #ef4444; } .relays i.standby { background: #cbd5e1; }
 .banner { background: #fef3c7; color: #92400e; padding: 10px 22px; font-weight: 700; }
 
-.view { display: none; height: calc(100% - 58px); }
+.view { display: none; height: calc(100% - 66px); }
 .view.on { display: grid; }
 #vRun { grid-template-columns: 220px minmax(0, 1fr) 270px; grid-template-rows: minmax(0, 1fr) auto; }
 .acts { grid-column: 1; grid-row: 1 / span 2; border-right: 1px solid var(--line); padding: 18px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--soft); }
@@ -64,7 +64,7 @@ button { font: inherit; cursor: pointer; }
 .catrow b { color: var(--ink); margin-left: 6px; }
 
 .join { grid-column: 3; grid-row: 1; border-left: 1px solid var(--line); padding: 26px 22px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.join .qr { width: 220px; height: 220px; }
+.join .qr { width: 190px; height: 190px; }
 .join .qr svg { width: 100%; height: 100%; }
 .jurl { font-size: 1.35rem; font-weight: 700; color: var(--or); }
 .join p { margin: 0; color: var(--mut); line-height: 1.4; }
@@ -143,3 +143,68 @@ textarea, select { width: 100%; font: inherit; border: 1.5px solid var(--line); 
 #film .begin button { background: var(--or); color: #fff; border: 0; border-radius: 99px; padding: 16px 44px; font-size: 1.3rem; font-weight: 700; cursor: pointer; }
 #film .begin p { font-family: Arial, sans-serif; color: #a8a29e; margin: 0; font-size: .95rem; }
 @media (prefers-reduced-motion: reduce) { #film .glow { animation: none; } #film .frag { transition: opacity 1s; } }
+
+/* ---------- Peak Season Grand Prix ---------- */
+.flagline { height: 8px; background: repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0 / 8px 8px; border-bottom: 2px solid var(--or); }
+.stage { background: linear-gradient(180deg, #fff, #fbfaf8); }
+.gp-head h1 { margin-bottom: 2px; }
+.gp-head .sub { margin-bottom: 14px; }
+.tracks { display: grid; gap: 14px; }
+.track { background: #2b2d31; border-radius: 14px; padding: 10px 14px 8px; box-shadow: inset 0 2px 0 rgba(255,255,255,.06), 0 6px 18px rgba(0,0,0,.12); }
+.tq { color: #fff; font-weight: 700; font-size: 1.05rem; margin: 2px 0 6px; }
+.lane { display: grid; grid-template-columns: 210px 1fr 96px; align-items: center; gap: 12px; height: 46px; border-top: 2px dashed rgba(255,255,255,.18); }
+.lane:first-of-type, .tq + .lane { border-top: 0; }
+.tracks.single .lane { height: 78px; grid-template-columns: 300px 1fr 120px; }
+.lname { color: #e5e7eb; font-weight: 700; font-size: .98rem; display: flex; align-items: center; gap: 8px; line-height: 1.15; }
+.lname i { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.tracks.single .lname { font-size: 1.2rem; }
+.lane.lead .lname { color: #fff; }
+.road { position: relative; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.07)); }
+.road::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #fff; opacity: .5; }
+.finish { position: absolute; right: 0; top: 0; bottom: 0; width: 14px; background: repeating-conic-gradient(#111 0 25%, #fff 0 50%) 0 0 / 7px 7px; }
+.car { position: absolute; bottom: 2px; height: 90%; transition: left 1.4s cubic-bezier(.25,.9,.3,1.15); }
+.tracks.single .car { height: 86%; }
+.car .racer { height: 100%; width: auto; display: block; filter: drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
+.lane.moving .car .racer { animation: rumble .35s ease-in-out infinite alternate; }
+.lane.lead .car .racer { filter: drop-shadow(0 0 8px rgba(249,99,3,.9)) drop-shadow(0 3px 2px rgba(0,0,0,.45)); }
+@keyframes rumble { to { transform: translateY(-1.5px) rotate(-.6deg); } }
+.car .pos { position: absolute; top: -2px; right: -30px; font-size: .72rem; font-weight: 800; color: #111; background: #e5e7eb; border-radius: 5px; padding: 1px 5px; }
+.lane.lead .car .pos { background: var(--or); color: #fff; }
+.lv { text-align: right; color: #fff; display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; }
+.lv .cnt { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.tracks.single .lv .cnt { font-size: 1.9rem; }
+.lv .pct { color: #9ca3af; font-weight: 700; min-width: 34px; }
+.manual .lane .man { display: inline-flex; gap: 3px; }
+.lane .man { display: none; }
+.ticker { margin-top: 14px; display: grid; gap: 6px; }
+.tick { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; color: var(--mut); padding: 6px 12px; border-radius: 10px; background: var(--soft); }
+.tick .ti svg { height: 26px; width: auto; display: block; }
+.tick.fresh { background: #fff7ed; color: var(--ink); border: 1.5px solid #fed7aa; font-size: 1.15rem; animation: pop .5s cubic-bezier(.3,1.6,.5,1); }
+.tick.idle { font-style: italic; }
+@keyframes pop { from { transform: scale(.94); opacity: .3; } }
+.pit { width: 100%; margin-top: 14px; display: grid; gap: 14px; text-align: left; }
+.pitrow { display: flex; gap: 12px; align-items: center; }
+.pitrow.col { flex-direction: column; align-items: stretch; gap: 6px; }
+.pitrow span, .pitgrid span { display: block; color: var(--mut); font-size: .8rem; }
+.pitrow b { font-size: 1.05rem; }
+.ring { flex: none; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--or) calc(var(--p) * 1%), var(--soft) 0); position: relative; }
+.ring::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: #fff; }
+.ring b { position: relative; z-index: 1; font-size: .95rem; }
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 44px; }
+.spark i { flex: 1; background: var(--or); border-radius: 3px 3px 0 0; opacity: .85; }
+.pitgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pitgrid div { background: var(--soft); border-radius: 10px; padding: 8px 10px; }
+.pitgrid b { font-size: .95rem; }
+.join { overflow: auto; }
+.blink { animation: bl 1.4s infinite; } @keyframes bl { 50% { opacity: .25; } }
+.guard { position: fixed; inset: 0; z-index: 90; background: rgba(15,15,17,.55); display: grid; place-items: center; }
+.guard > div { background: #fff; border-radius: 16px; padding: 26px 30px; max-width: 520px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.guard h2 { margin: 0 0 10px; }
+.tracks.multi { gap: 10px; }
+.tracks.multi .track { padding: 6px 12px 4px; }
+.tracks.multi .tq { font-size: .95rem; margin: 0 0 2px; }
+.tracks.multi .lane { height: 34px; }
+.tracks.multi .lname { font-size: .9rem; }
+.tracks.multi .lv .cnt { font-size: 1.15rem; }
+.tracks.multi ~ .ticker { margin-top: 10px; }
+.stage:has(.tracks.multi) .gp-head .sub { display: none; }
