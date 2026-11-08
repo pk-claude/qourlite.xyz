@@ -69,22 +69,36 @@
   }
   function idle(main, big, sub, film) {
     cards.forEach(el => el.remove()); cards.clear();
-    main.innerHTML = `<div class="card ${film ? 'film' : 'idle'}">${film ? '' : '<div class="pulse"></div>'}<p class="big">${esc(big)}</p><p class="sub" ${film ? 'style="color:#bbb"' : ''}>${esc(sub)}</p></div>`;
+    main.innerHTML = `<div class="card ${film ? 'film' : 'idle'}">${film ? '' : '<div class="lights"><i></i><i></i><i></i><i></i><i></i></div>'}<p class="big">${esc(big)}</p><p class="sub" ${film ? 'style="color:#bbb"' : ''}>${esc(sub)}</p></div>`;
   }
-  const optBtn = (txt, i, data) => `<button class="opt" ${data}><span class="fill" style="width:0"></span><span class="ltr">${LTR[i]}</span><span class="txt">${esc(txt)}<br><span class="place"></span></span><span class="pct"></span><span class="rc">${Racers.svg(i)}</span></button>`;
+  const optBtn = (txt, i, data) => `<button class="opt" ${data} style="--c:${Racers.color(i)}"><span class="fill" style="width:0"></span><span class="ltr">${LTR[i]}</span><span class="txt">${esc(txt)}<br><span class="place"></span></span><span class="pct"></span><span class="rc">${Racers.svg(i)}</span></button>`;
 
+  // Boost: fires flames behind your racer on the big screen. It never changes a vote.
+  const boostRow = q => `<div class="boostrow" data-bq="${q}"><button class="boost" data-bq="${q}">Boost my racer</button><span class="bcount"></span></div>`;
+  let myBoosts = 0;
+  function boost(a, q, btn) {
+    if (btn.classList.contains('cool')) return;
+    const i = a.kind === 'multi' ? me.votes.debate[q] : me.votes[a.id];
+    if (i == null) return;
+    live.publishUp({ p: pid, k: 'boost', a: a.id, q, i }, { important: false });
+    myBoosts++;
+    btn.classList.remove('fire', 'cool'); void btn.offsetWidth; btn.classList.add('fire', 'cool');
+    setTimeout(() => btn.classList.remove('cool'), 2500);
+    if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+    document.querySelectorAll('.bcount').forEach(n => (n.textContent = `${myBoosts} boost${myBoosts === 1 ? '' : 's'} fired`));
+  }
   function build(a) {
     const el = document.createElement('section');
     el.className = 'card';
     el.dataset.id = a.id;
     if (a.kind === 'multi') {
       el.innerHTML = `<p class="kick">${esc(a.label)}</p><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p>` +
-        a.qs.map((q, qi) => `<h2>${qi + 1}. ${esc(q.q)}</h2><div class="opts">${q.opts.map((o, i) => optBtn(o, i, `data-q="${qi}" data-i="${i}"`)).join('')}</div>`).join('') +
+        a.qs.map((q, qi) => `<h2><span class="rn">RACE ${qi + 1}</span>${esc(q.q)}</h2><div class="opts">${q.opts.map((o, i) => optBtn(o, i, `data-q="${qi}" data-i="${i}"`)).join('')}</div>${boostRow(qi)}`).join('') +
         `<div class="saved"></div>`;
     } else if (a.kind === 'single') {
       const opts = a.id === 'real' ? S.real || [] : a.opts;
       el.dataset.k = a.id === 'real' ? opts.join('|') : '';
-      el.innerHTML = `<p class="kick">${esc(a.label)}</p><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p><h2></h2><div class="opts">${opts.map((o, i) => optBtn(o, i, `data-i="${i}"`)).join('')}</div><div class="saved"></div>`;
+      el.innerHTML = `<p class="kick">${esc(a.label)}</p><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p><h2></h2><div class="opts">${opts.map((o, i) => optBtn(o, i, `data-i="${i}"`)).join('')}</div>${boostRow(0)}<div class="saved"></div>`;
     } else {
       el.innerHTML = `<p class="kick">${esc(a.label)}</p><h1>${esc(a.title)}</h1><h2 style="margin-top:4px">${esc(a.q)}</h2><p class="sub">${esc(a.sub)}</p>
         <div class="chips">${a.cats.map(c => `<button class="chip" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>
@@ -105,6 +119,7 @@
       el.querySelector('.mine').onclick = e => { const b = e.target.closest('[data-del]'); if (!b) return; me.vis.splice(+b.dataset.del, 1); change(); };
     }
     if (a.kind !== 'text') el.onclick = e => {
+      const bb = e.target.closest('.boost'); if (bb) return boost(a, +bb.dataset.bq, bb);
       const b = e.target.closest('.opt'); if (!b) return;
       const i = +b.dataset.i;
       if (a.kind === 'multi') me.votes.debate[+b.dataset.q] = i; else me.votes[a.id] = i;
@@ -124,8 +139,9 @@
       b.querySelector('.fill').style.width = p + '%';
       b.querySelector('.pct').textContent = show ? p + '%' : '';
       // Race position of your pick
-      const v = (tally || [])[i] || 0, ahead = (tally || []).filter(n => n > v).length, tie = (tally || []).filter(n => n === v).length > 1;
-      b.querySelector('.place').textContent = mine === i && show ? (ahead === 0 ? (tie ? `Your ${Racers.name(i).toLowerCase()} is tied for the lead` : `Your ${Racers.name(i).toLowerCase()} is in the lead`) : `Your ${Racers.name(i).toLowerCase()} is in P${ahead + 1}`) : '';
+      const t = tally || [], v = t[i] || 0, ahead = t.filter(n => n > v).length, tie = t.filter(n => n === v).length > 1, gap = Math.max(...t, 0) - v;
+      const who = `#${Racers.num(i)} ${Racers.name(i)}`;
+      b.querySelector('.place').textContent = mine === i && show ? (ahead === 0 ? (tie ? `${who}: tied for P1. Boost it!` : `${who}: P1. Defend the lead!`) : `${who}: P${ahead + 1}, ${gap} behind. Boost it!`) : '';
     });
   }
   function paint(el) {
@@ -134,10 +150,12 @@
     const sv = el.querySelector('.saved');
     if (a.kind === 'multi') {
       a.qs.forEach((q, qi) => bars([...el.querySelectorAll(`.opt[data-q="${qi}"]`)], me.votes.debate[qi], (T.debate || [])[qi]));
+      a.qs.forEach((q, qi) => el.querySelector(`.boostrow[data-bq="${qi}"]`).classList.toggle('on', me.votes.debate[qi] != null));
       const n = me.votes.debate.filter(v => v != null).length;
       sv.textContent = n ? (ok ? `Saved (${n} of 3). Change your pick any time.` : 'Sending...') : '';
     } else if (a.kind === 'single') {
       bars([...el.querySelectorAll('.opt')], me.votes[id], T[id]);
+      el.querySelector('.boostrow').classList.toggle('on', me.votes[id] != null);
       sv.textContent = me.votes[id] != null ? (ok ? 'Saved. You can change your vote.' : 'Sending...') : '';
     } else {
       const ta = el.querySelector('textarea');

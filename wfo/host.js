@@ -58,7 +58,9 @@
   const clean = s => String(s || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim();
   const idx = (v, n) => (Number.isInteger(v) && v >= 0 && v < n ? v : null);
   function onUp(m) {
-    if (m.k !== 'me' || typeof m.p !== 'string' || !/^[a-z0-9]{1,12}$/.test(m.p)) return;
+    if (typeof m.p !== 'string' || !/^[a-z0-9]{1,12}$/.test(m.p)) return;
+    if (m.k === 'boost') return onBoost(m);
+    if (m.k !== 'me') return;
     const old = H.phones[m.p];
     if (old && !(m.v > old.v)) return;
     const vt = m.votes || {};
@@ -114,36 +116,82 @@
     render();
   };
 
-  // ---------- Run: the Peak Season Grand Prix ----------
-  let trackKey = '', prevLead = {}, prevTot = {}, ticker = [], beats = [], leadChanges = 0;
-  const POS = ['P1', 'P2', 'P3', 'P4', 'P5'];
+  // ---------- Run: Race to Peak, as a TV race broadcast ----------
+  let trackKey = '', prevLead = {}, prevTot = {}, ticker = [], beats = [], leadChanges = 0, boosts = 0, primed = false, lastQuip = Date.now(), lastBoostSay = 0;
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const fill = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k]);
+  const LINES = {
+    first: ['Lights out and away we go! {a} gets the jump off the line.', 'And they are off. {a} leaves the dock door first.', '{a} takes the first vote. Bold strategy, early in the shift.'],
+    over: ['{a} dives down the inside of {b} at the dock door!', '{a} passes {b}. {b} is blaming the WMS.', 'Huge move by {a}. {b} has asked for a recount.', '{a} slipstreams past {b} down the main aisle.', '{b} took the long way round the cross-dock. {a} says thank you.'],
+    tie: ['{a} and {b}, side by side. Nobody blinks.', 'Photo finish territory: {a} and {b}.', '{a} and {b} are tied. Somebody call Finance for a tiebreaker.'],
+    mile: ['{n} votes in. That beats our forecast.', '{n} votes. Labor standard exceeded.', '{n} votes and not one merged cell.'],
+    idle: ['{last} is in the pits for a cold brew refill.', 'Yellow flag: someone opened a spreadsheet with merged cells.', 'Race control is reviewing {last} for driving without a spotter.', 'Team radio, {last}: "Box, box." "Which box? We have four million."', '{leader} is holding position. Tribal knowledge says do not overthink it.', 'Weather update: 100 percent chance of peak volume.', '{last} reports a slow puncture on aisle 14.', 'Still time to vote. The phone in your pocket is a performance part.', '{last} asks for a labor plan refresh. It went stale 30 minutes ago.', 'Fun fact: {leader} has never once been late to a 6 AM start.'],
+    boost: ['{a} gets a boost from the crowd!', 'Boost button pressed. {a} feels the love.', 'The grandstand is fired up for {a}.'],
+  };
+  const LAPS = { debate: [1, 'Formation lap'], vision: [1, 'Formation lap'], voa: [3, 'Pit wall'], hh: [5, 'Race calendar'], real: [6, 'Final lap'] };
   function tracksOf(a, T) {
-    if (a.kind === 'multi') return a.qs.map((q, qi) => ({ key: 'debate.' + qi, q: q.q, opts: q.opts, t: T.debate[qi], mq: qi }));
-    if (a.kind === 'single') return [{ key: a.id, q: '', opts: optsOf(a.id), t: T[a.id], mq: 0 }];
+    if (a.kind === 'multi') return a.qs.map((q, qi) => ({ key: 'debate.' + qi, q: q.q, opts: q.opts, t: T.debate[qi], mq: qi, n: qi + 1 }));
+    if (a.kind === 'single') return [{ key: a.id, q: a.title, opts: optsOf(a.id), t: T[a.id], mq: 0, n: 1 }];
     return [];
   }
   let sayAct = '';
-  function say(msg, racer) { ticker.unshift({ msg, racer, act: sayAct, at: Date.now() }); ticker = ticker.slice(0, 30); }
-  // Commentary: compare every track with what it showed last time.
-  let primed = false;
+  function say(msg, racer, big) {
+    ticker.unshift({ msg, racer, act: sayAct, at: Date.now() }); ticker = ticker.slice(0, 30);
+    if (big && view === 'run' && sayAct === H.show) banner(big, msg, racer);
+  }
+  // Commentary: compare every race with what it showed last time.
   function commentate() {
     const T = tallies();
     const quiet = !primed; primed = true; // the first pass only records where everyone stands
     WFO.acts.forEach(a => tracksOf(a, T).forEach(tr => {
       sayAct = a.id;
       const tot = tr.t.reduce((s, n) => s + n, 0), was = prevTot[tr.key] || 0;
-      if (tot > was && !quiet) for (let k = was; k < tot; k++) beats.push(Date.now());
+      if (tot > was && !quiet) { for (let k = was; k < tot; k++) beats.push(Date.now()); if (a.id === H.show) FX.sound.play('tick'); }
       const max = Math.max(...tr.t), leaders = tr.t.map((v, i) => (v === max && max > 0 ? i : -1)).filter(i => i >= 0);
       const lead = leaders.length === 1 ? leaders[0] : null, old = prevLead[tr.key];
       const live = H.order.includes(a.id) && !quiet;
-      if (live && was === 0 && tot > 0) say(`And they're off! ${tr.opts[tr.t.findIndex(v => v > 0)]} takes the first vote.`, tr.t.findIndex(v => v > 0));
-      else if (live && lead != null && old != null && old !== 'tie' && lead !== old) { say(`${tr.opts[lead]} overtakes ${tr.opts[old]}!`, lead); leadChanges++; }
-      else if (live && lead == null && leaders.length > 1 && old !== 'tie' && tot > 1) say(`Neck and neck: ${leaders.map(i => tr.opts[i]).join(' and ')}.`, leaders[0]);
-      if (live && tot > was && [10, 20, 30, 40, 50, 75, 100].some(m => was < m && tot >= m)) say(`${tot} votes in. The pit crew is busy.`, lead == null ? 0 : lead);
+      if (live && was === 0 && tot > 0) { const f = tr.t.findIndex(v => v > 0); say(fill(pick(LINES.first), { a: tr.opts[f] }), f, 'LIGHTS OUT'); }
+      else if (live && lead != null && old != null && old !== 'tie' && lead !== old) { say(fill(pick(LINES.over), { a: tr.opts[lead], b: tr.opts[old] }), lead, 'OVERTAKE'); leadChanges++; }
+      else if (live && lead == null && leaders.length > 1 && old !== 'tie' && tot > 1) say(fill(pick(LINES.tie), { a: tr.opts[leaders[0]], b: tr.opts[leaders[1]] }), leaders[0], 'SIDE BY SIDE');
+      if (live && tot > was && [10, 20, 30, 40, 50, 75, 100].some(m => was < m && tot >= m)) say(fill(pick(LINES.mile), { n: tot }), lead == null ? 0 : lead);
+      if (tot > was) lastQuip = Date.now();
       prevLead[tr.key] = lead != null ? lead : leaders.length ? 'tie' : null;
       prevTot[tr.key] = tot;
     }));
     beats = beats.filter(t => Date.now() - t < 600000);
+  }
+  // When the shown race goes quiet, the commentator fills the air.
+  setInterval(() => {
+    const a = ACTS[H.show];
+    if (view !== 'run' || !H.order.includes(a.id) || Date.now() - lastQuip < 22000) return;
+    const tr = tracksOf(a, tallies())[Math.floor(Math.random() * Math.max(1, tracksOf(a, tallies()).length))];
+    if (!tr) return;
+    const order = tr.t.map((v, i) => [v, i]).sort((x, y) => y[0] - x[0]);
+    sayAct = a.id; lastQuip = Date.now();
+    say(fill(pick(LINES.idle), { last: tr.opts[order[order.length - 1][1]], leader: tr.opts[order[0][1]] }), order[order.length - 1][1]);
+    renderTicker(a);
+  }, 4000);
+
+  let bannerT = 0;
+  function banner(kind, msg, racer) {
+    const b = $('banner');
+    b.innerHTML = `<div class="bn-in" style="--c:${Racers.color(racer || 0)}"><b>${esc(kind)}</b><span>${esc(msg)}</span></div>`;
+    b.classList.remove('go'); void b.offsetWidth; b.classList.add('go');
+    FX.sound.play(kind === 'OVERTAKE' ? 'whoosh' : 'ding');
+    clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('go'), 3400);
+  }
+
+  // A phone pressed Boost for the racer it backs.
+  const lastBoost = {};
+  function onBoost(m) {
+    const a = ACTS[m.a]; if (!a || a.kind === 'text' || !H.order.includes(a.id)) return;
+    if (Date.now() - (lastBoost[m.p] || 0) < 2500) return;
+    lastBoost[m.p] = Date.now(); boosts++;
+    const key = a.kind === 'multi' ? 'debate.' + (+m.q || 0) : a.id;
+    const tr = tracksOf(a, tallies()).find(t => t.key === key); if (!tr || tr.opts[+m.i] == null) return;
+    const car = $('stage').querySelector(`.race[data-k="${key}"] .lane[data-i="${+m.i}"] .car`);
+    if (car) { car.classList.remove('boost'); void car.offsetWidth; car.classList.add('boost'); }
+    if (Date.now() - lastBoostSay > 9000) { lastBoostSay = Date.now(); sayAct = a.id; say(fill(pick(LINES.boost), { a: tr.opts[+m.i] }), +m.i); renderTicker(a); }
   }
 
   function renderRun() {
@@ -153,53 +201,68 @@
       const can = a.id !== 'real' || H.realOpts.length;
       return `<div class="act ${H.show === a.id ? 'show' : ''}" data-show="${a.id}"><b>${esc(a.label)}</b>
         <div class="st ${open ? 'open' : ''}"><span>${open ? 'Open on phones' : can ? 'Closed' : 'After the story'}</span>${can ? `<button class="tg" data-tg="${a.id}">${open ? 'Close' : 'Open'}</button>` : ''}</div></div>`;
-    }).join('') + `<p class="note">Click a card to show it here. Open puts it on every phone. The 2027 answer can stay open while other votes run.</p>`;
+    }).join('') + `<p class="note">Click a card to show it. Open puts it on every phone. P hides these controls for the room.</p>`;
     const a = ACTS[H.show], T = tallies(), open = H.order.includes(a.id);
     const nPh = Object.keys(H.phones).length;
     const trs = tracksOf(a, T);
+    const lap = LAPS[a.id] || [1, ''];
+    $('lap').innerHTML = `<b>LAP ${lap[0]}</b>/7 <span>${esc(lap[1])}</span>`;
     const key = H.show + '|' + trs.map(t => t.opts.join(',')).join('/');
     if (key !== trackKey) {
       trackKey = key;
-      const head = `<div class="gp-head"><div><p class="kick">${esc(a.label)} <span class="state" id="stState"></span></p><h1>${esc(a.title)}</h1><p class="sub">${esc(a.sub)}</p></div></div>`;
-      if (a.kind === 'text') $('stage').innerHTML = head + `<div class="visbig"><div><div class="num" id="visNum">0</div><div class="lbl" id="visLbl">answers</div>
-        <p class="q">${esc(a.q)}</p><div class="catrow" id="visCats"></div><p class="muted" style="margin-top:18px">Anonymous. Stays open until the story at the end.</p></div></div>`;
-      else if (a.id === 'real' && !H.realOpts.length) $('stage').innerHTML = head + `<p class="sub">The racers come from the themes. Run the Story tab first, then press "Send themes to the room".</p>`;
-      else $('stage').innerHTML = head + `<div class="tracks ${trs.length > 1 ? 'multi' : 'single'}">${trs.map(tr => `<div class="track" data-k="${tr.key}">
-          ${tr.q ? `<div class="tq">${esc(tr.q)}</div>` : ''}
-          ${tr.opts.map((o, i) => `<div class="lane" data-i="${i}"><div class="lname"><i style="background:${Racers.color(i)}"></i>${esc(o)}</div>
-            <div class="road"><div class="finish"></div><div class="car" style="left:0%">${Racers.svg(i)}<b class="pos"></b></div></div>
-            <div class="lv"><span class="man"><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="-1">-</button><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="1">+</button></span><b class="cnt">0</b><small class="pct"></small></div></div>`).join('')}
-        </div>`).join('')}</div><div class="ticker" id="ticker"></div>`;
+      const head = `<div class="bc-head"><span class="bc-live ${open ? 'on' : ''}" id="stState"></span><span class="bc-kick">${esc(a.label)}</span><h1>${esc(a.kind === 'multi' ? a.title : a.kind === 'text' ? 'Fuel for the final lap' : 'The ' + a.label.toLowerCase())}</h1></div>`;
+      if (a.kind === 'text') $('stage').innerHTML = head + `<div class="fuel"><div class="tank"><div class="liq" id="fuelLiq"><i></i><i></i><i></i></div><div class="ticks">${[100, 75, 50, 25].map(p => `<span style="bottom:${p}%">${p === 100 ? 'F' : ''}</span>`).join('')}<span style="bottom:0">E</span></div></div>
+        <div class="fuel-r"><div class="num" id="visNum">0</div><div class="lbl" id="visLbl">answers in the tank</div><p class="q">${esc(a.title)} <b>${esc(a.q)}</b></p>
+        <div class="catrow" id="visCats"></div><p class="hint">Every anonymous answer is fuel. At the end, Claude turns the whole tank into our 2027 story.</p></div></div>`;
+      else if (a.id === 'real' && !H.realOpts.length) $('stage').innerHTML = head + `<p class="hint">The racers come from the themes. Run the Story tab first, then press "Send themes to the room".</p>`;
+      else $('stage').innerHTML = head + `<div class="races ${trs.length > 1 ? 'multi' : 'single'}">${trs.map(tr => `<div class="race" data-k="${tr.key}">
+          <div class="tower"><div class="tw-h"><span>RACE ${tr.n}</span>${esc(tr.q)}</div><div class="tw-rows">${tr.opts.map((o, i) => `<div class="tw" data-i="${i}" style="--c:${Racers.color(i)}"><b class="p"></b><i></i><span class="o">${esc(o)}<small>#${Racers.num(i)} ${esc(Racers.name(i))} | ${esc(Racers.team(i))}</small></span><span class="g"></span>
+            <span class="man"><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="-1">-</button><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="1">+</button></span></div>`).join('')}</div></div>
+          <div class="track"><div class="tilt">${tr.opts.map((o, i) => `<div class="lane" data-i="${i}"><div class="kerb"></div><div class="car" style="left:0%"><div class="trail"></div><div class="flame"></div>${Racers.svg(i)}</div></div>`).join('')}<div class="fin"></div><div class="startl"></div></div></div>
+        </div>`).join('')}</div>`;
     }
-    const st = $('stState'); if (st) { st.textContent = open ? 'Open' : 'Closed'; st.className = 'state ' + (open ? 'open' : ''); }
+    const st = $('stState'); if (st) { st.textContent = open ? 'LIVE' : 'CLOSED'; st.className = 'bc-live ' + (open ? 'on' : ''); }
     if (a.kind === 'text') {
       const all = answers(), people = new Set(all.filter(x => x.p).map(x => x.p)).size;
+      const goal = Math.max(10, Math.round(nPh * 1.5));
       $('visNum').textContent = all.length;
-      $('visLbl').textContent = `answers${people ? ` from ${people} ${people === 1 ? 'person' : 'people'}` : ''}`;
+      $('visLbl').textContent = `answers in the tank${people ? `, from ${people} ${people === 1 ? 'person' : 'people'}` : ''}`;
+      $('fuelLiq').style.height = Math.min(100, 100 * all.length / goal) + '%';
       $('visCats').innerHTML = a.cats.map(c => `<span>${esc(c)}<b>${all.filter(x => x.c === c).length}</b></span>`).join('');
     }
     trs.forEach(tr => {
-      const el = $('stage').querySelector(`.track[data-k="${tr.key}"]`); if (!el) return;
-      const tot = tr.t.reduce((s, n) => s + n, 0), max = Math.max(...tr.t);
+      const el = $('stage').querySelector(`.race[data-k="${tr.key}"]`); if (!el) return;
+      const max = Math.max(...tr.t);
       const finish = Math.max(max, Math.ceil(nPh * 0.6), 4);
-      const order = tr.t.map((v, i) => [v, i]).sort((x, y) => y[0] - x[0]);
+      const order = tr.t.map((v, i) => [v, i]).sort((x, y) => y[0] - x[0] || x[1] - y[1]);
+      const rowH = 100 / tr.opts.length;
+      el.querySelectorAll('.tw').forEach(row => {
+        const i = +row.dataset.i, v = tr.t[i] || 0, rank = order.findIndex(o => o[1] === i);
+        row.style.top = (rank * rowH) + '%'; row.style.height = rowH + '%';
+        row.classList.toggle('lead', v > 0 && v === max);
+        row.querySelector('.p').textContent = v > 0 ? rank + 1 : '-';
+        row.querySelector('.g').innerHTML = v === 0 ? '<em>PIT</em>' : v === max ? `<b>${v}</b> ${v === 1 ? 'vote' : 'votes'}` : `<b>${v}</b> +${max - v}`;
+      });
       el.querySelectorAll('.lane').forEach(lane => {
         const i = +lane.dataset.i, v = tr.t[i] || 0;
-        lane.querySelector('.car').style.left = (82 * v / finish).toFixed(1) + '%';
-        const rank = order.findIndex(o => o[1] === i);
-        const tied = order.filter(o => o[0] === v).length > 1;
+        const car = lane.querySelector('.car'), left = 84 * v / finish;
+        if (car.dataset.left && +car.dataset.left < left) { car.classList.remove('surge'); void car.offsetWidth; car.classList.add('surge'); }
+        car.dataset.left = left; car.style.left = left.toFixed(1) + '%';
         lane.classList.toggle('lead', v > 0 && v === max);
         lane.classList.toggle('moving', v > 0);
-        lane.querySelector('.pos').textContent = v > 0 ? (v === max ? (tied ? 'TIE' : 'P1') : POS[rank]) : '';
-        lane.querySelector('.cnt').textContent = v;
-        lane.querySelector('.pct').textContent = tot ? Math.round(100 * v / tot) + '%' : '';
       });
     });
-    const tk = $('ticker');
-    const mine = ticker.filter(m => m.act === a.id).slice(0, a.kind === 'multi' ? 2 : 4);
-    if (tk) tk.innerHTML = mine.length ? mine.map((m, k) => `<div class="tick ${k === 0 && Date.now() - m.at < 6000 ? 'fresh' : ''}"><span class="ti">${Racers.svg(m.racer || 0)}</span>${esc(m.msg)}</div>`).join('') : '<div class="tick idle">Engines warming up. Scan the code to vote.</div>';
+    renderTicker(a);
     renderPit(a, T, nPh);
     $('stage').classList.toggle('manual', $('manualOn').checked);
+  }
+  function renderTicker(a) {
+    const mine = ticker.filter(m => m.act === a.id).slice(0, 6);
+    const items = mine.length ? mine : [{ msg: 'Engines warming up. Scan the code, pick a racer, then smash the Boost button.', racer: 0 }];
+    const html = items.map((m, k) => `<span class="ti ${k === 0 ? 'new' : ''}" style="--c:${Racers.color(m.racer || 0)}"><i></i>${esc(m.msg)}</span>`).join('');
+    const tk = $('ticker'); if (tk.dataset.h === html) return;
+    tk.dataset.h = html;
+    tk.innerHTML = `<div class="tk-lab">RACE CONTROL</div><div class="tk-run"><div class="tk-in">${html}${html}</div></div>`;
   }
   // Pit wall: the numbers beside the QR code.
   function renderPit(a, T, nPh) {
@@ -215,13 +278,24 @@
     let close = '';
     if (a.kind === 'multi') {
       const gaps = T.debate.map((t, qi) => { const s = t.slice().sort((x, y) => y - x); return [s[0] - s[1], qi, s[0]]; }).filter(g => g[2] > 0).sort((x, y) => x[0] - y[0]);
-      if (gaps.length) close = `Q${gaps[0][1] + 1}, ${gaps[0][0] === 0 ? 'dead heat' : `${gaps[0][0]} vote${gaps[0][0] === 1 ? '' : 's'} apart`}`;
+      if (gaps.length) close = `Race ${gaps[0][1] + 1}: ${gaps[0][0] === 0 ? 'dead heat' : `+${gaps[0][0]}`}`;
     }
-    $('pit').innerHTML = `<div class="pitrow"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><b>${voted} of ${nPh}</b><span>phones in this race</span></div></div>
-      <div class="pitrow col"><span>Votes, last 5 minutes</span><div class="spark">${buckets.map(n => `<i style="height:${Math.max(4, 100 * n / bmax)}%"></i>`).join('')}</div><span><b>${lastMin}</b> in the last minute</span></div>
-      <div class="pitgrid"><div><b>${leadChanges}</b><span>lead changes</span></div><div><b>${close || 'none yet'}</b><span>closest race</span></div></div>`;
+    $('pit').innerHTML = `<div class="pitrow"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><b>${voted} of ${nPh}</b><span>phones on the grid</span></div></div>
+      <div class="pitrow col"><span>Votes per 30 seconds</span><div class="spark">${buckets.map(n => `<i style="height:${Math.max(4, 100 * n / bmax)}%"></i>`).join('')}</div><span><b>${lastMin}</b> in the last minute</span></div>
+      <div class="pitgrid"><div><b>${leadChanges}</b><span>overtakes</span></div><div><b>${boosts}</b><span>boosts fired</span></div><div class="w2"><b>${close || 'no contest yet'}</b><span>closest race</span></div></div>`;
   }
   setInterval(() => { if (view === 'run') renderPit(ACTS[H.show], tallies(), Object.keys(H.phones).length); }, 5000);
+  // Present mode: P hides the controls so the room sees only the broadcast.
+  function present(on) { document.body.classList.toggle('present', on); }
+  addEventListener('keydown', e => {
+    if (e.target.closest('input, textarea, select') || document.getElementById('film').innerHTML) return;
+    const k = e.key.toLowerCase();
+    if (k === 'p') present(!document.body.classList.contains('present'));
+    if (k === 's') { $('sndBtn').textContent = FX.sound.toggle() ? 'Sound off' : 'Sound on'; }
+  });
+  $('presBtn').onclick = () => present(!document.body.classList.contains('present'));
+  $('sndBtn').onclick = () => { $('sndBtn').textContent = FX.sound.toggle() ? 'Sound off' : 'Sound on'; };
+  $('sndBtn').textContent = FX.sound.muted ? 'Sound off' : 'Sound on';
   $('acts').onclick = e => {
     const tg = e.target.closest('[data-tg]');
     if (tg) {
@@ -240,7 +314,7 @@
   $('manualOn').onchange = () => $('stage').classList.toggle('manual', $('manualOn').checked);
   $('resetBtn').onclick = () => {
     if (!confirm('Clear every vote, every 2027 answer, the themes and the story? Phones are cleared too. Use this after a rehearsal.')) return;
-    H = fresh(Date.now()); trackKey = ''; ticker = []; beats = []; leadChanges = 0; save(); broadcast(true); render(); renderStory();
+    H = fresh(Date.now()); trackKey = ''; ticker = []; beats = []; leadChanges = 0; boosts = 0; save(); broadcast(true); render(); renderStory();
   };
 
   // ---------- visions ----------
