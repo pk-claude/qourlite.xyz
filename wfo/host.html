@@ -7,14 +7,14 @@
 <title>WFO All Hands: Presenter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/wfo/host.css">
 </head>
 <body>
 <header class="bar">
-  <div class="brand"><b>WFO All Hands</b><span>|</span>Race to Peak</div>
+  <div class="brand"><span class="logo"><i></i>RACE <em>TO</em> PEAK</span><span class="sub">WFO All Hands</span><span class="lap" id="lap"></span></div>
   <nav class="tabs" id="tabs"><button data-v="run" class="on">Run</button><button data-v="vis">Visions</button><button data-v="story">Story</button></nav>
-  <div class="meta"><span id="nPhones">0 phones</span><span class="relays" id="relays" title=""></span><span class="url" id="shortUrl"></span></div>
+  <div class="meta"><button class="hb" id="sndBtn">Sound on</button><button class="hb" id="presBtn">Present (P)</button><span id="nPhones">0 phones</span><span class="relays" id="relays" title=""></span><span class="url" id="shortUrl"></span></div>
 </header>
 <div class="flagline"></div>
 <div class="banner hidden" id="takenOver">Another presenter screen opened this room more recently. This one is paused. Close this tab, or reload it to take over again.</div>
@@ -29,6 +29,8 @@
     <p>Scan or type the link.<br>No sign-in. No name.</p>
     <div class="pit" id="pit"></div>
   </div>
+  <div class="ticker" id="ticker"></div>
+  <div id="banner" class="banner-ot"></div>
   <div class="foot">
     <label><input type="checkbox" id="manualOn"> Add votes by hand</label>
     <span id="relayDetail" class="muted"></span>
