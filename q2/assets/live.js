@@ -38,6 +38,7 @@
     let ntfySources = {};
     let hostChannels = null; // from the host's state, for players
     let lastLive = 0; // when we last received a fresh host state
+    let lastMqttLive = 0; // ...and when one last came over a direct MQTT relay
     let bestSt = 0; // start time of the newest presenter screen seen; older ones are ignored
     let lastNtfyStateKey = '';
     let hostSid = null; // players: the host session their messages belong to
@@ -60,7 +61,7 @@
         // Two presenter screens in one room (e.g. an old tab left open): the most recently opened one wins.
         if (!msg._stale && (msg.st || 0) > bestSt) bestSt = msg.st || 0;
         msg._old = !msg._stale && (msg.st || 0) < bestSt;
-        if (!msg._stale && !msg._old) { lastLive = Date.now(); hostSid = msg.sid || hostSid; if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
+        if (!msg._stale && !msg._old) { lastLive = Date.now(); if (clients[chId]) lastMqttLive = lastLive; hostSid = msg.sid || hostSid; if (Array.isArray(msg.ch)) hostChannels = msg.ch; }
       }
       onMsg && onMsg(topicKey, msg, chId);
     }
@@ -138,7 +139,11 @@
     }
     if (webCh) {
       setStatus(webCh.id, 'connecting');
+      // Players skip the site relay while a direct MQTT relay is bringing fresh host state
+      // (the host re-sends at least every 12s), so 150 phones do not all hit the site every 2s.
+      const mqttFresh = () => Date.now() - lastMqttLive < 20000 && upMqtt().length > 0;
       const poll = () => {
+        if (role !== 'host' && mqttFresh()) { setTimeout(poll, 2000); return; }
         const p = role === 'host' ? (mySid ? webGet('k=up&sid=' + mySid, 'up') : Promise.resolve()) : webGet('k=state', 'state');
         p.finally(() => setTimeout(poll, webFails > 2 ? 5000 : role === 'host' ? 1500 : 2000));
       };
