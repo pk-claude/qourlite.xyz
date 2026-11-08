@@ -11,9 +11,11 @@
 
   let pid = store.get('wfo-pid', null);
   if (!pid) { pid = Live.rid(6); store.set('wfo-pid', pid); }
-  const blank = () => ({ ep: 0, v: 0, votes: { debate: [null, null, null], voa: null, hh: null, real: null }, realKey: '', vis: [] });
+  const blankVotes = () => Object.fromEntries(WFO.acts.filter(a => a.kind !== 'text').map(a => [a.id, a.kind === 'multi' ? a.qs.map(() => null) : null]));
+  const blank = () => ({ ep: 0, v: 0, votes: blankVotes(), realKey: '', vis: [] });
   let me = store.get(KEY, null) || blank();
   me.votes = Object.assign(blank().votes, me.votes || {});
+  WFO.acts.filter(a => a.kind === 'multi').forEach(a => { if (!Array.isArray(me.votes[a.id]) || me.votes[a.id].length !== a.qs.length) me.votes[a.id] = a.qs.map(() => null); });
   me.vis = Array.isArray(me.vis) ? me.vis : [];
   const save = () => store.set(KEY, me);
   let S = null;           // latest presenter state
@@ -78,7 +80,7 @@
   let myBoosts = 0;
   function boost(a, q, btn) {
     if (btn.classList.contains('cool')) return;
-    const i = a.kind === 'multi' ? me.votes.debate[q] : me.votes[a.id];
+    const i = a.kind === 'multi' ? me.votes[a.id][q] : me.votes[a.id];
     if (i == null) return;
     live.publishUp({ p: pid, k: 'boost', a: a.id, q, i }, { important: false });
     myBoosts++;
@@ -122,7 +124,7 @@
       const bb = e.target.closest('.boost'); if (bb) return boost(a, +bb.dataset.bq, bb);
       const b = e.target.closest('.opt'); if (!b) return;
       const i = +b.dataset.i;
-      if (a.kind === 'multi') me.votes.debate[+b.dataset.q] = i; else me.votes[a.id] = i;
+      if (a.kind === 'multi') me.votes[a.id][+b.dataset.q] = i; else me.votes[a.id] = i;
       if (navigator.vibrate) navigator.vibrate(20);
       change();
     };
@@ -149,10 +151,10 @@
     const ok = acked();
     const sv = el.querySelector('.saved');
     if (a.kind === 'multi') {
-      a.qs.forEach((q, qi) => bars([...el.querySelectorAll(`.opt[data-q="${qi}"]`)], me.votes.debate[qi], (T.debate || [])[qi]));
-      a.qs.forEach((q, qi) => el.querySelector(`.boostrow[data-bq="${qi}"]`).classList.toggle('on', me.votes.debate[qi] != null));
-      const n = me.votes.debate.filter(v => v != null).length;
-      sv.textContent = n ? (ok ? `Saved (${n} of 3). Change your pick any time.` : 'Sending...') : '';
+      a.qs.forEach((q, qi) => bars([...el.querySelectorAll(`.opt[data-q="${qi}"]`)], me.votes[id][qi], (T[id] || [])[qi]));
+      a.qs.forEach((q, qi) => el.querySelector(`.boostrow[data-bq="${qi}"]`).classList.toggle('on', me.votes[id][qi] != null));
+      const n = me.votes[id].filter(v => v != null).length;
+      sv.textContent = n ? (ok ? `Saved (${n} of ${a.qs.length}). Change your pick any time.` : 'Sending...') : '';
     } else if (a.kind === 'single') {
       bars([...el.querySelectorAll('.opt')], me.votes[id], T[id]);
       el.querySelector('.boostrow').classList.toggle('on', me.votes[id] != null);

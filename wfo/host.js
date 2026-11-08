@@ -64,10 +64,12 @@
     const old = H.phones[m.p];
     if (old && !(m.v > old.v)) return;
     const vt = m.votes || {};
-    const d = Array.isArray(vt.debate) ? vt.debate : [];
+
     H.phones[m.p] = {
       v: +m.v || Date.now(), at: (old && old.at) || Date.now(),
-      votes: { debate: [0, 1, 2].map(i => idx(d[i], 4)), voa: idx(vt.voa, 3), hh: idx(vt.hh, 3), real: idx(vt.real, H.realOpts.length) },
+      votes: Object.fromEntries(WFO.acts.filter(a => a.kind !== 'text').map(a => [a.id, a.kind === 'multi'
+        ? a.qs.map((q, i) => idx((Array.isArray(vt[a.id]) ? vt[a.id] : [])[i], q.opts.length))
+        : idx(vt[a.id], optsOf(a.id).length)])),
       vis: (Array.isArray(m.vis) ? m.vis : []).slice(0, 3).map(x => ({ t: clean(x && x.t).slice(0, 300), c: ACTS.vision.cats.includes(x && x.c) ? x.c : '' })).filter(x => x.t),
     };
     save(); broadcast(); renderSoon();
@@ -76,17 +78,20 @@
   // ---------- counts ----------
   const optsOf = id => (id === 'real' ? H.realOpts : ACTS[id].opts);
   function manualOf(id) {
-    const want = id === 'debate' ? [4, 4, 4] : [optsOf(id).length];
+    const a = ACTS[id], want = a.kind === 'multi' ? a.qs.map(q => q.opts.length) : [optsOf(id).length];
     let m = H.manual[id];
-    if (!Array.isArray(m) || (id === 'real' && m[0].length !== want[0])) m = H.manual[id] = want.map(n => Array(n).fill(0));
+    if (!Array.isArray(m) || m.length !== want.length || m.some((r, i) => !Array.isArray(r) || r.length !== want[i])) m = H.manual[id] = want.map(n => Array(n).fill(0));
     return m;
   }
   function tallies() {
-    const T = { debate: manualOf('debate').map(r => r.slice()) };
-    ['voa', 'hh', 'real'].forEach(id => (T[id] = manualOf(id)[0].slice()));
+    const T = {};
+    WFO.acts.forEach(a => { if (a.kind === 'multi') T[a.id] = manualOf(a.id).map(r => r.slice()); else if (a.kind === 'single') T[a.id] = manualOf(a.id)[0].slice(); });
     for (const r of Object.values(H.phones)) {
-      r.votes.debate.forEach((v, q) => { if (v != null) T.debate[q][v]++; });
-      ['voa', 'hh', 'real'].forEach(id => { const v = r.votes[id]; if (v != null && v < T[id].length) T[id][v]++; });
+      WFO.acts.forEach(a => {
+        const v = r.votes[a.id];
+        if (a.kind === 'multi') (Array.isArray(v) ? v : []).forEach((x, q) => { if (x != null && T[a.id][q] && x < T[a.id][q].length) T[a.id][q][x]++; });
+        else if (a.kind === 'single' && v != null && v < T[a.id].length) T[a.id][v]++;
+      });
     }
     return T;
   }
@@ -130,7 +135,7 @@
   };
   const LAPS = { debate: [1, 'Formation lap'], vision: [1, 'Formation lap'], voa: [3, 'Pit wall'], hh: [5, 'Race calendar'], real: [6, 'Final lap'] };
   function tracksOf(a, T) {
-    if (a.kind === 'multi') return a.qs.map((q, qi) => ({ key: 'debate.' + qi, q: q.q, opts: q.opts, t: T.debate[qi], mq: qi, n: qi + 1 }));
+    if (a.kind === 'multi') return a.qs.map((q, qi) => ({ key: a.id + '.' + qi, q: q.q, opts: q.opts, t: T[a.id][qi], mq: qi, n: qi + 1 }));
     if (a.kind === 'single') return [{ key: a.id, q: a.title, opts: optsOf(a.id), t: T[a.id], mq: 0, n: 1 }];
     return [];
   }
@@ -187,7 +192,7 @@
     const a = ACTS[m.a]; if (!a || a.kind === 'text' || !H.order.includes(a.id)) return;
     if (Date.now() - (lastBoost[m.p] || 0) < 2500) return;
     lastBoost[m.p] = Date.now(); boosts++;
-    const key = a.kind === 'multi' ? 'debate.' + (+m.q || 0) : a.id;
+    const key = a.kind === 'multi' ? a.id + '.' + (+m.q || 0) : a.id;
     const tr = tracksOf(a, tallies()).find(t => t.key === key); if (!tr || tr.opts[+m.i] == null) return;
     const car = $('stage').querySelector(`.race[data-k="${key}"] .lane[data-i="${+m.i}"] .car`);
     if (car) { car.classList.remove('boost'); void car.offsetWidth; car.classList.add('boost'); }
@@ -201,7 +206,7 @@
       const can = a.id !== 'real' || H.realOpts.length;
       return `<div class="act ${H.show === a.id ? 'show' : ''}" data-show="${a.id}"><b>${esc(a.label)}</b>
         <div class="st ${open ? 'open' : ''}"><span>${open ? 'Open on phones' : can ? 'Closed' : 'After the story'}</span>${can ? `<button class="tg" data-tg="${a.id}">${open ? 'Close' : 'Open'}</button>` : ''}</div></div>`;
-    }).join('') + `<p class="note">Click a card to show it. Open puts it on every phone. P hides these controls for the room.</p>`;
+    }).join('') + storyCard() + `<p class="note">Click a card to show it. Open puts it on every phone. P hides these controls for the room.</p>`;
     const a = ACTS[H.show], T = tallies(), open = H.order.includes(a.id);
     const nPh = Object.keys(H.phones).length;
     const trs = tracksOf(a, T);
@@ -215,7 +220,7 @@
         <div class="fuel-r"><div class="num" id="visNum">0</div><div class="lbl" id="visLbl">answers in the tank</div><p class="q">${esc(a.title)} <b>${esc(a.q)}</b></p>
         <div class="catrow" id="visCats"></div><p class="hint">Every anonymous answer is fuel. At the end, Claude turns the whole tank into our 2027 story.</p></div></div>`;
       else if (a.id === 'real' && !H.realOpts.length) $('stage').innerHTML = head + `<p class="hint">The racers come from the themes. Run the Story tab first, then press "Send themes to the room".</p>`;
-      else $('stage').innerHTML = head + `<div class="races ${trs.length > 1 ? 'multi' : 'single'}">${trs.map(tr => `<div class="race" data-k="${tr.key}">
+      else $('stage').innerHTML = head + `<div class="races ${trs.length > 1 ? 'multi' : 'single'}" style="grid-template-rows:repeat(${trs.length}, minmax(0, 1fr))">${trs.map(tr => `<div class="race" data-k="${tr.key}">
           <div class="tower"><div class="tw-h"><span>RACE ${tr.n}</span>${esc(tr.q)}</div><div class="tw-rows">${tr.opts.map((o, i) => `<div class="tw" data-i="${i}" style="--c:${Racers.color(i)}"><b class="p"></b><i></i><span class="o">${esc(o)}<small>#${Racers.num(i)} ${esc(Racers.name(i))} | ${esc(Racers.team(i))}</small></span><span class="g"></span>
             <span class="man"><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="-1">-</button><button data-m="${a.id}" data-q="${tr.mq}" data-i="${i}" data-d="1">+</button></span></div>`).join('')}</div></div>
           <div class="track"><div class="tilt">${tr.opts.map((o, i) => `<div class="lane" data-i="${i}"><div class="kerb"></div><div class="car" style="left:0%"><div class="trail"></div><div class="flame"></div>${Racers.svg(i)}</div></div>`).join('')}<div class="fin"></div><div class="startl"></div></div></div>
@@ -267,7 +272,7 @@
   // Pit wall: the numbers beside the QR code.
   function renderPit(a, T, nPh) {
     let voted = 0;
-    if (a.kind === 'multi') voted = Object.values(H.phones).filter(r => r.votes.debate.some(v => v != null)).length;
+    if (a.kind === 'multi') voted = Object.values(H.phones).filter(r => (r.votes[a.id] || []).some(v => v != null)).length;
     else if (a.kind === 'single') voted = Object.values(H.phones).filter(r => r.votes[a.id] != null).length;
     else voted = Object.values(H.phones).filter(r => r.vis.length).length;
     const pct = nPh ? Math.round(100 * voted / nPh) : 0;
@@ -277,7 +282,7 @@
     const lastMin = beats.filter(t => now - t < 60000).length;
     let close = '';
     if (a.kind === 'multi') {
-      const gaps = T.debate.map((t, qi) => { const s = t.slice().sort((x, y) => y - x); return [s[0] - s[1], qi, s[0]]; }).filter(g => g[2] > 0).sort((x, y) => x[0] - y[0]);
+      const gaps = T[a.id].map((t, qi) => { const s = t.slice().sort((x, y) => y - x); return [s[0] - s[1], qi, s[0]]; }).filter(g => g[2] > 0).sort((x, y) => x[0] - y[0]);
       if (gaps.length) close = `Race ${gaps[0][1] + 1}: ${gaps[0][0] === 0 ? 'dead heat' : `+${gaps[0][0]}`}`;
     }
     $('pit').innerHTML = `<div class="pitrow"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><b>${voted} of ${nPh}</b><span>phones on the grid</span></div></div>
@@ -297,6 +302,7 @@
   $('sndBtn').onclick = () => { $('sndBtn').textContent = FX.sound.toggle() ? 'Sound off' : 'Sound on'; };
   $('sndBtn').textContent = FX.sound.muted ? 'Sound off' : 'Sound on';
   $('acts').onclick = e => {
+    if (e.target.closest('[data-play]')) return playStory();
     const tg = e.target.closest('[data-tg]');
     const wasOpen = H.order.includes('vision'), wasShow = H.show;
     if (tg) {
@@ -407,12 +413,13 @@
   // few minutes while new answers keep arriving. A story you edited by hand is never overwritten.
   let autoBusy = false, autoAgain = false, autoLast = 0;
   const sameAnswers = v => H.snap && H.storyText && !H.backup && H.snap.length === v.length && H.snap.every((a, i) => a.t === v[i].t);
-  function autoPill(txt, cls) { const el = $('autoPill'); el.textContent = txt; el.className = 'autopill ' + (cls || ''); el.classList.toggle('hidden', !txt); }
+  function autoPill(txt, cls) { const el = $('autoPill'); el.textContent = txt; el.className = 'autopill ' + (cls || ''); el.classList.toggle('hidden', !txt); if (view === 'run') renderSoon(); }
   async function autoStory(why) {
     if (passive || aiOn === false) return;
     const v = visible();
-    if (sameAnswers(v) && (H.goals || []).length === goalsFor(v).length) return;
-    if (H.edited) { autoPill('Story edited by hand: auto-update paused', 'warn'); return; }
+    if (!v.length) { if (pendingPlay) { pendingPlay = false; openStage(); } return; } // nothing from the team yet: the prepared story covers this
+    if (sameAnswers(v) && (H.goals || []).length === goalsFor(v).length) { if (pendingPlay) { pendingPlay = false; openStage(); } return; }
+    if (H.edited) { autoPill('Story edited by hand: auto-update paused', 'warn'); if (pendingPlay) { pendingPlay = false; openStage(); } return; }
     if (autoBusy) { autoAgain = true; return; }
     autoBusy = true; autoLast = Date.now();
     try {
@@ -423,17 +430,18 @@
       autoPill('Claude is writing the story...', 'busy');
       await runStory();
       $('storyMsg').className = 'msg ok'; $('storyMsg').textContent = `Written automatically from ${v.length} answers at ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`;
-      autoPill(`Story ready: ${v.length} answers`, 'ok');
+      autoPill(`Story ready: ${v.length} answer${v.length === 1 ? '' : 's'}`, 'ok');
     } catch (e) {
       autoPill('Story: Claude did not answer, retrying soon', 'warn');
       autoLast = Date.now() - 120000; // try again in about a minute
     }
     autoBusy = false;
-    if (autoAgain) { autoAgain = false; autoStory('new answers'); }
+    if (autoAgain && !pendingPlay) { autoAgain = false; autoStory('new answers'); }
+    if (pendingPlay) { pendingPlay = false; autoAgain = false; render(); openStage(); }
   }
   // Background refresh while answers keep coming in.
   setInterval(() => { if (H.order.includes('vision') || H.show !== 'vision') if (Date.now() - autoLast > 180000) autoStory('refresh'); }, 20000);
-  if (H.storyText) autoPill(`Story ready: ${(H.snap || []).length} answers`, 'ok');
+  if (H.storyText) autoPill(`Story ready: ${(H.snap || []).length} answer${(H.snap || []).length === 1 ? '' : 's'}`, 'ok');
   let editT = 0;
   $('storyText').oninput = () => { H.storyText = $('storyText').value; H.edited = true; save(); clearTimeout(editT); editT = setTimeout(prepareVoice, 2000); };
 
@@ -511,7 +519,8 @@
     $('sendMsg').className = 'msg ' + (ok ? 'ok' : 'err');
     $('sendMsg').textContent = ok ? 'Sent. The vote is open on every phone. The 2027 question is now closed.' : 'Find themes first.';
   };
-  $('stageBtn').onclick = () => {
+  $('stageBtn').onclick = () => openStage();
+  function openStage() {
     let P = parse(H.storyText || '');
     if (!P.chapters.length) {
       // Nothing written (no answers, or Claude could not be reached): play the prepared story.
@@ -541,7 +550,28 @@
       onEnd: () => sendThemes(),
     });
     if (Voice.kind === 'tts' && voiceReady !== 'ready') prepareVoice();
-  };
+  }
+
+  // ---------- the Play button on the Run tab ----------
+  // One button: closes the 2027 question if it is still open, makes sure the story is written
+  // from the latest answers, then opens the stage. Nothing else to remember.
+  let pendingPlay = false;
+  function storyCard() {
+    const v = visible();
+    let st, cls = '';
+    if (pendingPlay || autoBusy) { st = 'Claude is writing the story. It opens on its own when ready.'; cls = 'busy'; }
+    else if (H.storyText && !H.backup && !needsUpdate(v)) { st = `Ready: written from ${(H.snap || []).length} answer${(H.snap || []).length === 1 ? '' : 's'}${(H.goals || []).length ? ' and our 2027 goals' : ''}.`; cls = 'ok'; }
+    else if (aiOn === false || !v.length) st = 'No story from the team yet. Press Play and the prepared story runs.';
+    else st = `${v.length} answer${v.length === 1 ? '' : 's'} in. Press Play: Claude writes the story first (about 30 seconds).`;
+    return `<div class="act story ${cls}"><b>Our 2027 story</b><span class="sst">${esc(st)}</span><button class="play" data-play ${pendingPlay || autoBusy ? 'disabled' : ''}>${pendingPlay || autoBusy ? 'Writing...' : 'Play our 2027 story'}</button></div>`;
+  }
+  const needsUpdate = v => !(sameAnswers(v) && (H.goals || []).length === goalsFor(v).length);
+  function playStory() {
+    if (H.order.includes('vision')) { H.order = H.order.filter(x => x !== 'vision'); save(); broadcast(true); }
+    const v = visible();
+    if (aiOn !== false && v.length && !H.edited && (needsUpdate(v) || autoBusy)) { pendingPlay = true; render(); autoStory('play'); return; }
+    openStage();
+  }
 
   // ---------- start ----------
   $('shortUrl').textContent = SHORT;
