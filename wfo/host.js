@@ -417,6 +417,7 @@
   async function autoStory(why) {
     if (passive || aiOn === false) return;
     const v = visible();
+    if (!v.length) { if (pendingPlay) { pendingPlay = false; openStage(); } return; } // nothing from the team yet: the prepared story covers this
     if (sameAnswers(v) && (H.goals || []).length === goalsFor(v).length) { if (pendingPlay) { pendingPlay = false; openStage(); } return; }
     if (H.edited) { autoPill('Story edited by hand: auto-update paused', 'warn'); if (pendingPlay) { pendingPlay = false; openStage(); } return; }
     if (autoBusy) { autoAgain = true; return; }
