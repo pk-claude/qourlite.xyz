@@ -113,19 +113,26 @@ export default async function handler(req, res) {
   const answers = (Array.isArray(b.answers) ? b.answers : []).slice(0, 300)
     .map((a, i) => ({ id: i + 1, t: cap(a && a.t, 300), c: cap(a && a.c, 30) }))
     .filter(a => a.t);
-  if (!answers.length) return res.status(400).json({ error: 'no answers' });
-  const list = answers.map(a => `${a.id}. ${a.c ? `[${a.c}] ` : ''}${a.t}`).join('\n');
+  // Team goals: the planned 2027 direction, blended in when few answers arrive. Never counted as people.
+  const N = answers.length;
+  const goals = (Array.isArray(b.goals) ? b.goals : []).slice(0, 20).map((g, i) => ({ id: N + i + 1, t: cap(g, 200), goal: true })).filter(g => g.t);
+  const items = [...answers, ...goals];
+  if (!items.length) return res.status(400).json({ error: 'no answers' });
+  const list = items.map(a => `${a.id}. ${a.goal ? '[team goal] ' : a.c ? `[${a.c}] ` : ''}${a.t}`).join('\n');
+  const isAnswer = id => id >= 1 && id <= N;
 
   try {
     if (b.step === 'themes') {
-      const out = await ask(THEMES_SYSTEM, `<answers>\n${list}\n</answers>\nGroup these ${answers.length} answers into themes.`, THEMES_SCHEMA, 'low', 6000);
-      const valid = new Set(answers.map(a => a.id));
+      const note = goals.length ? `\nItems marked [team goal] are the team's planned direction for 2027, not answers from people. Group them with the answers they fit, or into their own themes.` : '';
+      const out = await ask(THEMES_SYSTEM + note, `<answers>\n${list}\n</answers>\nGroup these ${items.length} items into themes.`, THEMES_SCHEMA, 'low', 6000);
+      const valid = new Set(items.map(a => a.id));
       const used = new Set();
       const themes = (out.themes || []).map(t => {
         const ids = [...new Set((t.ids || []).filter(id => valid.has(id) && !used.has(id)))];
         ids.forEach(id => used.add(id));
-        return { name: undash(cap(t.name, 60)), summary: undash(cap(t.summary, 160)), quote: undash(cap(t.quote, 120)), ids, n: ids.length };
-      }).filter(t => t.n > 0).sort((x, y) => y.n - x.n).slice(0, 5);
+        // n counts only people's answers; g counts the team goals in the theme
+        return { name: undash(cap(t.name, 60)), summary: undash(cap(t.summary, 160)), quote: undash(cap(t.quote, 120)), ids, n: ids.filter(isAnswer).length, g: ids.filter(id => !isAnswer(id)).length };
+      }).filter(t => t.ids.length > 0).sort((x, y) => y.n - x.n || y.g - x.g).slice(0, 5);
       return res.status(200).json({ themes, skipped: (out.skipped || []).filter(id => valid.has(id) && !used.has(id)) });
     }
 
@@ -134,12 +141,13 @@ export default async function handler(req, res) {
         name: cap(t && t.name, 60), n: Math.max(0, parseInt(t && t.n, 10) || 0),
         ids: (Array.isArray(t && t.ids) ? t.ids : []).map(Number).filter(Number.isInteger),
       })).filter(t => t.name);
-      const byId = new Map(answers.map(a => [a.id, a]));
+      const byId = new Map(items.map(a => [a.id, a]));
+      const line = a => a.goal ? `- (team goal) ${a.t}` : `- ${a.t}`;
       const brief = themes.length
-        ? themes.map((t, i) => `<theme index="${i}" name="${t.name}" people_count="${t.n}">\n${t.ids.map(id => byId.get(id)).filter(Boolean).map(a => `- ${a.t}`).join('\n')}\n</theme>`).join('\n')
-        : `<theme index="0" name="Our 2027" people_count="${answers.length}">\n${answers.map(a => `- ${a.t}`).join('\n')}\n</theme>`;
-      const total = themes.length ? themes.reduce((s, t) => s + t.n, 0) : answers.length;
-      const out = await ask(STORY_SYSTEM, `${total} answers, grouped by theme:\n${brief}\n\nWrite the film.`, STORY_SCHEMA, 'medium', 12000);
+        ? themes.map((t, i) => `<theme index="${i}" name="${t.name}" people_count="${t.ids.filter(isAnswer).length}">\n${t.ids.map(id => byId.get(id)).filter(Boolean).map(line).join('\n')}\n</theme>`).join('\n')
+        : `<theme index="0" name="Our 2027" people_count="${N}">\n${items.map(line).join('\n')}\n</theme>`;
+      const note = goals.length ? `\n\nLines marked (team goal) come from the team's 2027 planning, not from a person's answer. Use them for direction and substance. Never quote them as someone's words and never count them as people. A theme with people_count 0 is a team goal: tell it as what the team set out to do and did.` : '';
+      const out = await ask(STORY_SYSTEM + note, `${N} answers from people${goals.length ? ` plus ${goals.length} team goals` : ''}, grouped by theme:\n${brief}\n\nWrite the film.`, STORY_SCHEMA, 'medium', 12000);
       return res.status(200).json({
         title: undash(cap(out.title, 80)),
         chapters: (out.chapters || []).slice(0, 6).map(c => ({ heading: undash(cap(c.heading, 60)), text: undash(cap(c.text, 900)), theme: Number.isInteger(c.theme) ? c.theme : -1 })),

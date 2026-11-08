@@ -350,7 +350,7 @@
     $('ansReady').textContent = `${v.length} answers ready.` + (H.snap && newer > 0 ? ` ${newer} arrived after the themes were found: press Find themes again to include them.` : '');
   }
   function renderThemes() {
-    $('themesOut').innerHTML = (H.themes || []).map(t => `<div class="theme"><b>${esc(t.name)}</b><span class="c">${t.n} answer${t.n === 1 ? '' : 's'}</span><p>${esc(t.summary)}</p>${t.quote ? `<q>${esc(t.quote)}</q>` : ''}</div>`).join('');
+    $('themesOut').innerHTML = (H.themes || []).map(t => `<div class="theme"><b>${esc(t.name)}</b><span class="c">${t.n ? `${t.n} answer${t.n === 1 ? '' : 's'}` : ''}${t.n && t.g ? ' + ' : ''}${t.g ? `${t.g} team goal${t.g === 1 ? '' : 's'}` : ''}</span><p>${esc(t.summary)}</p>${t.quote ? `<q>${esc(t.quote)}</q>` : ''}</div>`).join('');
   }
   function renderStory() { renderStatus(); renderStoryCounts(); renderThemes(); $('storyText').value = H.storyText || ''; fillVoices(); }
 
@@ -363,17 +363,21 @@
   function busy(btn, msgEl, txt) { btn.disabled = true; msgEl.className = 'msg'; let s = 0; msgEl.textContent = txt; const iv = setInterval(() => (msgEl.textContent = `${txt} ${++s}s`), 1000); return () => { clearInterval(iv); btn.disabled = false; }; }
   // Themes and story: one pipeline, run by the buttons or on its own in the background.
   const snapOf = v => v.map(a => ({ t: a.t, c: a.c, p: a.p }));
+  // Prepared team goals join in when few answers arrive, or always if the box is ticked.
+  const goalsFor = v => ($('goalsAlways').checked || v.length < WFO.goalsBelow ? WFO.goals : []);
+  $('goalsAlways').checked = !!H.goalsAlways;
+  $('goalsAlways').onchange = () => { H.goalsAlways = $('goalsAlways').checked; save(); autoStory('team goals setting'); };
   async function runThemes(v) {
-    const snap = snapOf(v);
-    const j = await post({ step: 'themes', answers: snap });
-    H.snap = snap; H.themes = j.themes; save();
+    const snap = snapOf(v), goals = goalsFor(v);
+    const j = await post({ step: 'themes', answers: snap, goals });
+    H.snap = snap; H.goals = goals; H.themes = j.themes; save();
     renderThemes(); renderStoryCounts();
     return j;
   }
   async function runStory() {
     const snap = H.snap || snapOf(visible());
-    const j = await post({ step: 'story', answers: snap, themes: H.themes || [] });
-    H.story = j; H.edited = false;
+    const j = await post({ step: 'story', answers: snap, goals: H.goals || [], themes: H.themes || [] });
+    H.story = j; H.edited = false; H.backup = false;
     H.storyText = `# ${j.title}\n\n` + j.chapters.map(c => `## ${c.heading}\n${c.text}`).join('\n\n') + (j.closing ? `\n\n${j.closing}` : '');
     save();
     $('storyText').value = H.storyText;
@@ -382,8 +386,7 @@
   }
   $('themesBtn').onclick = async () => {
     const v = visible();
-    if (!v.length) { $('themesMsg').className = 'msg err'; $('themesMsg').textContent = 'No answers yet.'; return; }
-    const done = busy($('themesBtn'), $('themesMsg'), `Claude is reading ${v.length} answers...`);
+    const done = busy($('themesBtn'), $('themesMsg'), `Claude is reading ${v.length} answers${goalsFor(v).length ? ' and the team goals' : ''}...`);
     try {
       const j = await runThemes(v);
       $('themesMsg').className = 'msg ok'; $('themesMsg').textContent = `${j.themes.length} themes${j.skipped && j.skipped.length ? `. ${j.skipped.length} left out (off topic or identifying).` : '.'}`;
@@ -391,7 +394,6 @@
     done();
   };
   $('storyBtn').onclick = async () => {
-    if (!(H.snap || visible()).length) { $('storyMsg').className = 'msg err'; $('storyMsg').textContent = 'No answers yet.'; return; }
     const done = busy($('storyBtn'), $('storyMsg'), 'Claude is writing...');
     try {
       await runStory();
@@ -404,12 +406,12 @@
   // Runs when the 2027 question is closed or the presenter moves on from it, and refreshes every
   // few minutes while new answers keep arriving. A story you edited by hand is never overwritten.
   let autoBusy = false, autoAgain = false, autoLast = 0;
-  const sameAnswers = v => H.snap && H.storyText && H.snap.length === v.length && H.snap.every((a, i) => a.t === v[i].t);
+  const sameAnswers = v => H.snap && H.storyText && !H.backup && H.snap.length === v.length && H.snap.every((a, i) => a.t === v[i].t);
   function autoPill(txt, cls) { const el = $('autoPill'); el.textContent = txt; el.className = 'autopill ' + (cls || ''); el.classList.toggle('hidden', !txt); }
   async function autoStory(why) {
     if (passive || aiOn === false) return;
     const v = visible();
-    if (v.length < 2 || sameAnswers(v)) return;
+    if (sameAnswers(v) && (H.goals || []).length === goalsFor(v).length) return;
     if (H.edited) { autoPill('Story edited by hand: auto-update paused', 'warn'); return; }
     if (autoBusy) { autoAgain = true; return; }
     autoBusy = true; autoLast = Date.now();
@@ -510,22 +512,30 @@
     $('sendMsg').textContent = ok ? 'Sent. The vote is open on every phone. The 2027 question is now closed.' : 'Find themes first.';
   };
   $('stageBtn').onclick = () => {
-    const P = parse(H.storyText || '');
-    if (!P.chapters.length) { $('voiceMsg').className = 'msg err'; $('voiceMsg').textContent = 'Write or paste the story first.'; return; }
+    let P = parse(H.storyText || '');
+    if (!P.chapters.length) {
+      // Nothing written (no answers, or Claude could not be reached): play the prepared story.
+      H.storyText = WFO.backup.storyText; H.themes = WFO.backup.themes; H.story = null; H.snap = H.snap || []; H.goals = WFO.goals; H.backup = true; save();
+      $('storyText').value = H.storyText; renderThemes();
+      P = parse(H.storyText); prepareVoice();
+      $('voiceMsg').className = 'msg'; $('voiceMsg').textContent = 'No story yet, so the prepared story is playing.';
+    }
     const themes = (H.themes || []).map(t => ({ name: t.name, n: t.n }));
     const snap = H.snap || visible();
     const inThemes = new Set((H.themes || []).flatMap(t => t.ids || []));
     const pool = snap.filter((a, i) => !inThemes.size || inThemes.has(i + 1));
-    const frags = pool.map(a => a.t.length > 95 ? a.t.slice(0, 92).replace(/\s+\S*$/, '') + '...' : a.t).sort(() => Math.random() - 0.5);
+    const goals = H.goals || [];
+    const short = t => (t.length > 95 ? t.slice(0, 92).replace(/\s+\S*$/, '') + '...' : t);
+    const frags = [...pool.map(a => short(a.t)), ...(pool.length < 10 ? goals.slice(0, 10 - pool.length).map(short) : [])].sort(() => Math.random() - 0.5);
     const chapThemes = (H.story && H.story.chapters) || [];
     P.chapters.forEach((c, i) => {
       const ti = chapThemes[i] ? chapThemes[i].theme : -1;
       const t = (H.themes || [])[ti];
-      c.src = t ? `From ${t.n} answer${t.n === 1 ? '' : 's'} about: ${t.name}` : '';
+      c.src = !t ? '' : t.n ? `From ${t.n} answer${t.n === 1 ? '' : 's'} about: ${t.name}` : `From our 2027 goals: ${t.name}`;
     });
     Film.open({
       title: P.title || 'Our 2027', chapters: P.chapters, closing: P.closing, frags, themes,
-      answers: pool.length, people: new Set(pool.map(a => a.p).filter(Boolean)).size,
+      answers: pool.length, people: new Set(pool.map(a => a.p).filter(Boolean)).size, withGoals: goals.length > 0,
       qr: FX.qrSVG(JOIN), url: SHORT, voiceNote: voiceNote(),
       onLive: on => { film = on; broadcast(true); },
       onEnd: () => sendThemes(),

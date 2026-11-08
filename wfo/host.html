@@ -63,6 +63,7 @@
     <div class="private">Private view until you open the stage.</div>
     <div class="status" id="aiStatus"></div>
     <p class="muted" style="margin:10px 0 0">Steps 1 and 2 run on their own when you close the 2027 question or move on from it, and refresh every few minutes while new answers arrive. The buttons are a manual backup. If you edit the story by hand, automatic updates stop so your edits are kept.</p>
+    <label class="muted" style="display:block;margin-top:8px"><input type="checkbox" id="goalsAlways"> Always blend in our prepared 2027 team goals. They are added on their own when fewer than 8 answers come in, and never counted as answers. If there is no story at all, the stage plays a prepared story.</label>
     <div class="step"><span class="n">1</span><div><h3>Find themes</h3><p class="muted" id="ansReady"></p><button class="btn" id="themesBtn">Find themes</button><span class="msg" id="themesMsg"></span></div></div>
     <div class="themes" id="themesOut"></div>
     <div class="step"><span class="n">2</span><div><h3>Write the story</h3><p class="muted">Claude writes about two minutes of narration from the themes and your team's own words. Read it. Edit anything in the box.</p><button class="btn" id="storyBtn">Write the story</button><span class="msg" id="storyMsg"></span></div></div>
@@ -85,6 +86,7 @@
 <div id="film" class="hidden"></div>
 
 <script src="/wfo/program.js"></script>
+<script src="/wfo/prepared.js"></script>
 <script>window.LIVE_ROOM = WFO.room;</script>
 <script src="/q2/vendor/mqtt-5.10.1.min.js"></script>
 <script src="/q2/vendor/qrcode-generator-1.4.4.js"></script>
