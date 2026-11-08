@@ -118,9 +118,9 @@
     const total = D.answers;
     Music.start();
     D.onLive && D.onLive(true);
-    World.set({ dawn: 0.06, grass: 0, bloom: 0, trees: 0, path: 0, build: 0, people: 0, links: 0, gather: 0, lanterns: 0, dim: 0 });
+    World.set({ zoom: 3.2, dawn: 0.06, grass: 0, bloom: 0, trees: 0, path: 0, build: 0, people: 0, links: 0, gather: 0, network: 0, lanterns: 0, dim: 0 });
     // 1. the question
-    let L = layer(`<div><div class="kick">Workforce Operations &nbsp;|&nbsp; November 9, 2026</div><p class="lede" style="margin-top:3vh">Today, ${D.people ? `${say(D.people).toLowerCase()} of you wrote ${total}` : `this team wrote ${total}`} answers to one question.</p></div>`);
+    let L = layer(`<div><div class="kick">Workforce Operations &nbsp;|&nbsp; November 9, 2026</div><p class="lede" style="margin-top:3vh">${total ? `Today, ${D.people ? `${say(D.people).toLowerCase()} of you wrote ${total}` : `this team wrote ${total}`} answer${total === 1 ? '' : 's'} to one question.` : 'Today, this team looked ahead to 2027.'}</p></div>`);
     await wait(3600, tok);
     L.innerHTML = `<div><div class="kick">The question</div><p class="ttl" style="font-size:clamp(2rem,4.2vw,3.8rem)">It is December 2027, and we are looking back on our best year.</p><p class="lede">What did this team do that you are proudest of?</p></div>`;
     await wait(6200, tok);
@@ -141,11 +141,11 @@
       scene.appendChild(el);
       return el;
     });
-    L = layer(`<div><p class="lede" id="fl">Claude read every answer.</p><div class="tchips"></div></div>`);
+    L = layer(`<div><p class="lede" id="fl">${total && D.withGoals ? 'Claude read every answer, and the goals we set for 2027.' : total ? 'Claude read every answer.' : 'Claude read the goals we set for 2027.'}</p><div class="tchips"></div></div>`);
     for (const el of frags) { await wait(420, tok); el.classList.add('on'); el.style.transform = `translate(${(Math.random() - 0.5) * 30}px, ${-10 - Math.random() * 20}px)`; }
     await wait(3800, tok);
     frags.forEach(el => el.classList.remove('on'));
-    World.seeds(total); World.set({ dawn: 0.16, grass: 0.22 });
+    World.seeds(Math.max(total, D.frags.length)); World.set({ zoom: 3.0, dawn: 0.16, grass: 0.06 });
     const fl = L.querySelector('#fl');
     fl.style.transition = 'opacity .6s'; fl.style.opacity = 0;
     await wait(700, tok);
@@ -157,13 +157,13 @@
     fl.textContent = D.themes.length > 1 ? `Together they grow into ${say(D.themes.length).toLowerCase()} hopes for this team.` : 'Together they grow into one hope for this team.';
     fl.style.opacity = 1;
     const tc = L.querySelector('.tchips');
-    tc.innerHTML = D.themes.map(t => `<span class="tchip">${esc(t.name)}<b>${t.n}</b></span>`).join('');
+    tc.innerHTML = D.themes.map(t => `<span class="tchip">${esc(t.name)}${t.n ? `<b>${t.n}</b>` : ''}</span>`).join('');
     for (const el of tc.children) { await wait(650, tok); el.classList.add('on'); }
     await wait(4200, tok);
     await clear(tok, 1800);
 
     // 3. title: first light
-    World.set({ dawn: 0.3, grass: 0.45, trees: 0.12 }); Music.lift(0.15);
+    World.set({ zoom: 2.6, dawn: 0.3, grass: 0.12, bloom: 0.14, people: 0.02 }); Music.lift(0.15);
     L = layer(`<div><div class="kick">Looking back from 2028</div><div class="ttl">${esc(D.title)}</div></div>`);
     await wait(1600, tok);
     if (!captionsOnly && Voice.kind !== 'none') { ctl = Voice.say(D.title + '.', () => {}); await ctl.done; ctl = null; check(tok); }
@@ -175,8 +175,9 @@
       const ch = D.chapters[i];
       // each chapter moves the world forward: more light, more growth, more people, more connection
       const f = (i + 1) / D.chapters.length;
-      World.set({ dawn: 0.3 + 0.62 * f, grass: 0.5 + 0.5 * f, trees: 0.2 + 0.8 * f, bloom: 0.85 * f, path: f, build: Math.min(1, f * 1.15),
-        people: Math.min(1, 0.25 + f), links: Math.max(0, (f - 0.3) / 0.7) });
+      // start small, keep building: growth spreads outward and the camera pulls back each chapter
+      World.set({ zoom: 2.4 - 1.5 * f, dawn: 0.3 + 0.62 * f, grass: 0.15 + 0.85 * f, bloom: 0.12 + 0.88 * f, trees: f, path: f, build: Math.min(1, f * 1.15),
+        people: 0.1 + 0.9 * f, links: Math.max(0, (f - 0.3) / 0.7), network: Math.max(0, (f - 0.55) / 0.45) });
       Music.lift(0.2 + 0.6 * f);
       const el = layer(`<div class="chap"><div class="kick">${ch.heading ? `Chapter ${i + 1}` : ''}</div><div class="h">${esc(ch.heading || '')}</div></div><div class="cap"></div><div class="src">${esc(ch.src || '')}</div>`);
       await wait(1500, tok);
@@ -186,7 +187,7 @@
       await clear(tok, 1300);
     }
     // 5. closing
-    World.set({ dawn: 1, bloom: 1, trees: 1, path: 1, build: 1, people: 1, links: 1, gather: 1, lanterns: 1 }); Music.lift(1);
+    World.set({ zoom: 0.62, dawn: 1, grass: 1, bloom: 1, trees: 1, path: 1, build: 1, people: 1, links: 1, gather: 1, network: 1, lanterns: 1 }); Music.lift(1);
     if (D.closing) {
       const el = layer(`<div class="cap"></div>`);
       await wait(900, tok);
