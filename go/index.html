@@ -25,30 +25,13 @@
     <div class="row"><input type="text" id="nm" maxlength="18" autocomplete="off" placeholder="e.g. Rich Uncle Pete"><button class="sq" id="dice" aria-label="Random name">🎲</button></div>
     <label>Pick your token</label>
     <div class="toks" id="toks"></div>
-    <button class="go" id="goBtn">Collect $500 and play</button>
+    <button class="go" id="goBtn">Collect $500 and get your 5 DCs</button>
     <p class="muted center small">No login, no app. Only your name, token and answers are shared, and only with this game.</p>
   </section>
 
-  <!-- deed questions -->
-  <section class="screen" id="sDeedQ">
-    <div class="kicker">Your personal title deed</div>
-    <h1>The AI Banker wants to know...</h1>
-    <p class="muted" style="margin:0">Three quick answers. Claude turns them into your own Monopoly property, live, and it may appear on the big screen. Keep it work-friendly.</p>
-    <div id="dq"></div>
-    <button class="go gold" id="printBtn">Print my deed</button>
-    <button class="linkish" id="skipDeed">Skip for now</button>
-  </section>
-
-  <!-- printing -->
-  <section class="screen" id="sPrint">
-    <div class="printing"><div class="printer">🖨️</div><h2>The AI Banker is writing your deed...</h2><p class="muted">Usually a few seconds.</p></div>
-  </section>
-
-  <!-- my deed -->
+  <!-- my DCs -->
   <section class="screen" id="sDeed">
     <div class="deed-wrap" id="myDeed"></div>
-    <button class="go" id="deedOk">Love it. Take me to the game</button>
-    <button class="linkish" id="redoDeed">Change my answers</button>
   </section>
 
   <!-- waiting -->
@@ -80,7 +63,7 @@
 
 <div class="dock" id="dock"><div class="dock-in">
   <div class="reacts" id="reacts"></div>
-  <div class="tabs"><button class="on" id="tabPlay">Play</button><button id="tabDeed">My deed</button></div>
+  <div class="tabs"><button class="on" id="tabPlay">Play</button><button id="tabDeed">My DCs</button></div>
 </div></div>
 
 <script>window.LIVE_ROOM = 'mono-allhands';</script>
@@ -88,7 +71,6 @@
 <script src="/q2/assets/fx.js"></script>
 <script src="/q2/assets/live.js"></script>
 <script src="/monopoly/assets/program.js"></script>
-<script src="/monopoly/assets/deed.js"></script>
 <script src="/monopoly/assets/play.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>

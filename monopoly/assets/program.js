@@ -8,56 +8,59 @@ window.MONO = {
   },
 
   // 40 spaces, index 0 = GO, counter-clockwise from the bottom-right corner like the real board.
-  // Themed as a box's trip through a distribution center: yard, receiving, putaway, storage, pick, pack, sort, ship.
+  // Every ownable space is a real Home Depot distribution building, named by city and platform
+  // (RDC rapid, SDC stocking, DFC direct fulfillment, FDC flatbed, CB Crown Bolt, RLC reverse logistics).
+  // Locations come from the Yard Driver network map in the November AHM deck. Prices follow local
+  // real-estate cost: the cheapest markets are brown, coastal California is Boardwalk.
   board: [
     { t: 'corner', n: 'GO', sub: 'Collect $200' },
-    { t: 'prop', c: 'brown', n: 'Trailer Yard', p: 60 },
+    { t: 'prop', c: 'brown', n: 'West Columbia RDC', p: 60 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'brown', n: 'Dock Door 12', p: 60 },
+    { t: 'prop', c: 'brown', n: 'McCalla RDC', p: 60 },
     { t: 'tax', n: 'Damage Claim', sub: 'Pay $200' },
-    { t: 'rail', n: 'Inbound Conveyor', p: 200 },
-    { t: 'prop', c: 'lightblue', n: 'Receiving Lane', p: 100 },
+    { t: 'rail', n: 'Memphis CB', p: 200 },
+    { t: 'prop', c: 'lightblue', n: 'Topeka RDC', p: 100 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'lightblue', n: 'ASN Avenue', p: 100 },
-    { t: 'prop', c: 'lightblue', n: 'Unload Station', p: 120 },
+    { t: 'prop', c: 'lightblue', n: 'Lake Park RDC', p: 100 },
+    { t: 'prop', c: 'lightblue', n: 'Van Buren RDC', p: 120 },
     { t: 'corner', n: 'Damage Cage', sub: 'Just visiting' },
-    { t: 'prop', c: 'pink', n: 'Putaway Path', p: 140 },
-    { t: 'util', n: 'Forklift Battery Room', p: 150 },
-    { t: 'prop', c: 'pink', n: 'Reach Truck Row', p: 140 },
-    { t: 'prop', c: 'pink', n: 'Slotting Street', p: 160 },
-    { t: 'rail', n: 'Sortation Conveyor', p: 200 },
-    { t: 'prop', c: 'orange', n: 'Pallet Rack Row', p: 180 },
+    { t: 'prop', c: 'pink', n: 'Monroe RDC', p: 140 },
+    { t: 'util', n: 'Savannah SDC', p: 150 },
+    { t: 'prop', c: 'pink', n: 'Tolleson RDC', p: 140 },
+    { t: 'prop', c: 'pink', n: 'Pittston RDC', p: 160 },
+    { t: 'rail', n: 'Carlisle CB', p: 200 },
+    { t: 'prop', c: 'orange', n: 'San Antonio FDC', p: 180 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'orange', n: 'Bulk Storage Bay', p: 180 },
-    { t: 'prop', c: 'orange', n: 'Mezzanine Way', p: 200 },
+    { t: 'prop', c: 'orange', n: 'Houston RDC', p: 180 },
+    { t: 'prop', c: 'orange', n: 'Dallas DFC', p: 200 },
     { t: 'corner', n: 'Break Room', sub: 'Free parking' },
-    { t: 'prop', c: 'red', n: 'Pick Path', p: 220 },
+    { t: 'prop', c: 'red', n: 'Joliet RDC', p: 220 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'red', n: 'Goods-to-Person Grid', p: 220 },
-    { t: 'prop', c: 'red', n: 'Robot Pick Cell', p: 240 },
-    { t: 'rail', n: 'Spiral Conveyor', p: 200 },
-    { t: 'prop', c: 'yellow', n: 'Yard Truck Row', p: 260 },
-    { t: 'prop', c: 'yellow', n: 'AMR Alley', p: 260 },
-    { t: 'util', n: 'Robot Charging Dock', p: 150 },
-    { t: 'prop', c: 'yellow', n: 'Pack Station', p: 280 },
+    { t: 'prop', c: 'red', n: 'Breinigsville RDC', p: 220 },
+    { t: 'prop', c: 'red', n: 'Atlanta RDC', p: 240 },
+    { t: 'rail', n: 'Atlanta RLC', p: 200 },
+    { t: 'prop', c: 'yellow', n: 'Redlands RDC', p: 260 },
+    { t: 'prop', c: 'yellow', n: 'Winchester RDC', p: 260 },
+    { t: 'util', n: 'Cranbury SDC', p: 150 },
+    { t: 'prop', c: 'yellow', n: 'Miami DFC', p: 280 },
     { t: 'corner', n: 'Go to Damage Cage', sub: 'Unscanned pallet' },
-    { t: 'prop', c: 'green', n: 'Recycling Boulevard', p: 300 },
-    { t: 'prop', c: 'green', n: 'Cross-Dock Court', p: 300 },
+    { t: 'prop', c: 'green', n: 'Perth Amboy FDC', p: 300 },
+    { t: 'prop', c: 'green', n: 'Westfield RDC', p: 300 },
     { t: 'chest', n: 'Community Chest' },
-    { t: 'prop', c: 'green', n: 'Load Planning Lane', p: 320 },
-    { t: 'rail', n: 'Outbound Conveyor', p: 200 },
+    { t: 'prop', c: 'green', n: 'Ontario RDC', p: 320 },
+    { t: 'rail', n: 'Joliet SDC', p: 200 },
     { t: 'chance', n: 'Chance' },
-    { t: 'prop', c: 'darkblue', n: 'Outbound Dock', p: 350 },
+    { t: 'prop', c: 'darkblue', n: 'Seattle FDC', p: 350 },
     { t: 'tax', n: 'Overtime Tax', sub: 'Pay $100' },
-    { t: 'prop', c: 'darkblue', n: 'Last Mile Boardwalk', p: 400 },
+    { t: 'prop', c: 'darkblue', n: 'Los Angeles DFC', p: 400 },
   ],
 
   // Starting cash from the Bank, and what a right answer pays.
   start: 500,
   pay: { base: 200, speed: 200 }, // $200 for right, up to +$200 for speed; doubled on double questions
   limit: 20, // seconds per question
-  chestDraws: 2, // Community Chest draws after the podium
-  hand: 5, // properties dealt to each player; landing on one you own doubles your rent for that question
+  chestDraws: 1, // one Community Chest draw after the podium: the second winner
+  hand: 5, // DCs dealt to each player; landing on one you own doubles your rent for that question
 
   // One question per section of the November 2026 all-hands, asked as the transition into that section.
   // Six rolls make one full lap: 8 + 8 + 6 + 4 + 5 + 9 = 40 spaces, so the last roll lands back on GO.
@@ -78,9 +81,9 @@ window.MONO = {
     },
     {
       id: 'q3', section: 'Guest Speaker: SBD', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
-      q: 'Our guest speaker, Stephen Frankiewicz, leads SBD. What does SBD stand for?',
-      opts: ['Strategic Business Development', 'Supply-chain Big Data', 'Store Bulk Delivery', 'Shipping, Boxing & Distribution'], a: 0,
-      fact: 'Strategic Business Development. Over to Stephen Frankiewicz, Sr. Manager.',
+      q: 'What was the largest acquisition in Home Depot\'s history?',
+      opts: ['SRS Distribution (2024)', 'GMS Inc. (2025)', 'Hughes Supply (2006)', 'Interline Brands (2015)'], a: 0,
+      fact: 'SRS Distribution, bought in 2024. Over to Stephen Frankiewicz and Strategic Business Development.',
     },
     {
       id: 'q4', section: 'HD Yard Driver & EV', at: 26, dice: [1, 3], tag: 'YARD DRIVER & EV',
@@ -102,17 +105,9 @@ window.MONO = {
     },
   ],
 
-  // Phone questions that feed the AI property deed.
-  deedQs: [
-    { k: 'power', q: 'Your work superpower', ph: 'e.g. finding the one wrong cell in a 40-tab model' },
-    { k: 'snack', q: 'A snack or drink you would defend with your life', ph: 'e.g. the last cold brew in the fridge' },
-    { k: 'phrase', q: 'The phrase you say most in meetings', ph: 'e.g. "let\'s take that offline"' },
-  ],
-  deedIdeas: {
-    power: ['Inbox zero by noon', 'Finding the typo in slide 47', 'Making Excel do things Excel should not do', 'Remembering everyone\'s birthday', 'Fixing the printer', 'Turning a 1-hour meeting into 20 minutes'],
-    snack: ['Hot Cheetos', 'The last cold brew', 'Office donuts', 'Gummy bears', 'Popcorn from the break room', 'Dark chocolate, obviously'],
-    phrase: ['"Let\'s take that offline"', '"Can you see my screen?"', '"You\'re on mute"', '"Quick question"', '"Per my last email"', '"Let\'s circle back"'],
-  },
+
+  // Home Depot taglines, shown on the big screen between questions.
+  taglines: ['How doers get more done.', 'More saving. More doing.', "Let's do this."],
 
   // Game pieces, distribution-center style: robots, trucks, totes, safety gear.
   tokens: ['🤖', '📦', '🚚', '🚛', '🦺', '⛑️', '🔋', '🛒', '🏷️', '📋', '🔧', '🪜', '🧤', '🚧', '🧯', '🎲'],

@@ -17,13 +17,10 @@
   let pid = store.get('ql-pid', null);
   if (!pid) { pid = Live.rid(6); store.set('ql-pid', pid); }
   let me = store.get('mono-me', null); // {nm, av}
-  let deed = store.get('mono-deed', null);
-  let deedAns = store.get('mono-dans', {});
-  let deedSkipped = store.get('mono-dskip', false);
   const ansKey = 'mono-ans-' + ROOM;
   const myMs = {};
   let myAns = store.get(ansKey, {});
-  let S = null, joined = false, tab = 'play', printing = false, editingDeed = false, celebrated = {};
+  let S = null, joined = false, tab = 'play', celebrated = {};
   const shownAt = {}; // when each question first appeared on this phone: speed is timed from here, so slower connections are not penalised
 
   // ---------- relay ----------
@@ -39,22 +36,19 @@
   const send = (payload, opts) => live.publishUp({ p: pid, nm: me && me.nm, av: me && me.av, ...payload }, opts);
   let joinTries = 0;
   const sendJoin = () => { joinTries++; send({ k: 'join' }); };
-  const sendDeed = () => { if (deed) send({ k: 'deed', d: deed }); };
   const mine = () => (S && !S._stale && S.me && S.me[pid]) || null; // [cash/10, rank, gain/10, flags]
   // My dealt properties: the big screen deals the same hand from the same player id.
   const HAND = M.handFor(pid);
   const ownsQ = q => q && HAND.includes(q.at);
-  function handHTML(hot) {
-    return `<div class="props">${HAND.map(i => {
+  function handHTML(hot, big) {
+    return `<div class="props ${big ? 'big' : ''}">${HAND.map(i => {
       const sp = M.board[i];
-      return `<div class="pc ${i === hot ? 'hot' : ''}" style="--c:${sp.c ? M.colors[sp.c] : '#ddd'}"><i></i>${esc(sp.n)}</div>`;
+      return `<div class="pc ${i === hot ? 'hot' : ''}" style="--c:${sp.c ? M.colors[sp.c] : '#ddd'}"><i></i><span>${esc(sp.n)}</span>${big ? `<small>$${sp.p}</small>` : ''}</div>`;
     }).join('')}</div>`;
   }
   setInterval(() => {
     if (!me) return;
-    if (!joined) { if (live.anyUp() || joinTries < 3) sendJoin(); return; }
-    const m = mine();
-    if (deed && m && !(m[3] & 2)) sendDeed(); // host has no deed for us yet (e.g. it was reset)
+    if (!joined && (live.anyUp() || joinTries < 3)) sendJoin();
   }, 4000);
 
   // ---------- join ----------
@@ -72,34 +66,10 @@
     me = { nm: ($('nm').value.trim() || pick(NAMES)).slice(0, 18), av: selAv };
     store.set('mono-me', me);
     joined = false; sendJoin();
-    if (deed) sendDeed();
     sound.play('cash'); if (navigator.vibrate) navigator.vibrate(30);
     render();
   };
   $('editMe').onclick = () => { me = null; render(); };
-
-  // ---------- deed ----------
-  $('dq').innerHTML = M.deedQs.map(d => `<label for="dq_${d.k}">${esc(d.q)}</label>
-    <div class="row" style="margin:6px 0 12px"><input type="text" id="dq_${d.k}" maxlength="60" autocomplete="off" placeholder="${esc(d.ph)}"><button class="sq" data-fill="${d.k}" aria-label="Random answer">🎲</button></div>`).join('');
-  M.deedQs.forEach(d => { $('dq_' + d.k).value = deedAns[d.k] || ''; });
-  $('dq').onclick = e => {
-    const b = e.target.closest('[data-fill]'); if (!b) return;
-    $('dq_' + b.dataset.fill).value = pick(M.deedIdeas[b.dataset.fill]); sound.play('boing');
-  };
-  $('printBtn').onclick = async () => {
-    deedAns = {}; M.deedQs.forEach(d => (deedAns[d.k] = $('dq_' + d.k).value.trim()));
-    store.set('mono-dans', deedAns);
-    printing = true; editingDeed = false; render();
-    const d = await DEED.make(me.nm, me.av, deedAns);
-    printing = false;
-    deed = d; store.set('mono-deed', deed);
-    sendDeed();
-    sound.play('fanfare'); confetti({ count: 100, colors: MONEY });
-    tab = 'deed'; render();
-  };
-  $('skipDeed').onclick = () => { deedSkipped = true; store.set('mono-dskip', true); editingDeed = false; tab = 'play'; render(); };
-  $('deedOk').onclick = () => { tab = 'play'; render(); };
-  $('redoDeed').onclick = () => { editingDeed = true; render(); };
 
   // ---------- state ----------
   function onState(m) {
@@ -115,7 +85,7 @@
     $('meCash').textContent = fmt(my ? my[0] * 10 : M.start);
     // A new question pulls players back to the Play tab once, so nobody misses it.
     if (!m._stale && m.ph === 'q' && m.q && m.q.open && tab !== 'play' && !celebrated['pull' + m.q.id] && myAns[m.q.id] == null) {
-      celebrated['pull' + m.q.id] = 1; tab = 'play'; editingDeed = false; if (navigator.vibrate) navigator.vibrate(60);
+      celebrated['pull' + m.q.id] = 1; tab = 'play'; if (navigator.vibrate) navigator.vibrate(60);
     }
     render();
   }
@@ -123,21 +93,17 @@
   // ---------- rendering ----------
   const showScreen = id => {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
-    $('dock').classList.toggle('hidden', ['sJoin', 'sDeedQ', 'sPrint'].includes(id));
+    $('dock').classList.toggle('hidden', id === 'sJoin');
+    // questions and answers must fit on one screen: no dock, compact layout
+    document.body.classList.toggle('fit', ['sQ', 'sLocked', 'sResult'].includes(id));
   };
   function render() {
     if (!me) return showScreen('sJoin');
     $('meAv').textContent = me.av; $('meNm').textContent = me.nm;
     $('tabPlay').classList.toggle('on', tab === 'play'); $('tabDeed').classList.toggle('on', tab === 'deed');
-    if (printing) return showScreen('sPrint');
-    const early = !S || S._stale || S.ph === 'lobby' || S.ph === 'rules';
-    if (editingDeed || (tab === 'deed' && !deed) || (!deed && !deedSkipped && early)) return showScreen('sDeedQ');
     if (tab === 'deed') {
-      $('myDeed').innerHTML = `<div class="flip-in" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px">
-        <div class="kicker" style="align-self:flex-start">Your ${HAND.length} properties</div>${handHTML()}
-        <p class="muted small" style="margin:0">Token lands on one of these? Your right answer pays double rent.</p>
-        <div class="kicker" style="align-self:flex-start;margin-top:8px">Your AI title deed (just for fun)</div>
-        ${DEED.html(deed, { owner: me.nm, tok: me.av })}${DEED.chanceHTML(deed)}</div>`;
+      $('myDeed').innerHTML = `<div class="kicker" style="align-self:flex-start">Your ${HAND.length} Home Depot DCs</div>${handHTML(null, true)}
+        <p class="muted" style="margin:0;text-align:center">When the forklift lands on one of yours, your right answer pays <b>double rent</b>.</p>`;
       return showScreen('sDeed');
     }
     if (!S || S._stale) {
@@ -147,6 +113,8 @@
     const my = mine();
     if (S.ph === 'lobby' || S.ph === 'rules') return wait(joined ? `You're in, ${esc(me.nm)}!` : 'Joining...', `${fmt(my ? my[0] * 10 : M.start)} in the bank, and you own these ${HAND.length} properties:`, `${handHTML()}<p class="muted small">If the token lands on one, your right answer pays double rent. Questions pop up here on their own.</p>`);
     const q = S.q;
+    const tk = my ? my[4] || 0 : 0;
+    const tkLine = `<p class="tk-line">🎟️ <b>${tk}</b> Community Chest ticket${tk === 1 ? '' : 's'}. Every answer adds one.</p>`;
     if (S.ph === 'roll' && q) {
       // wait for the token to finish walking on the big screen before saying where it landed
       const key = 'roll' + q.id;
@@ -154,9 +122,9 @@
       if (Date.now() - celebrated[key] < 3800) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. Watch the big screen.`, handHTML());
       if (ownsQ(q)) {
         if (!celebrated[key + 'own']) { celebrated[key + 'own'] = 1; sound.play('fanfare'); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
-        return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at));
+        return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at) + tkLine);
       }
-      return wait(`Landed on ${esc(q.sp)}`, 'Not one of yours this time. The question pops up here in a moment.', handHTML());
+      return wait(`Landed on ${esc(q.sp)}`, 'Not one of yours this time. The question pops up here in a moment.', handHTML() + tkLine);
     }
     if (S.ph === 'q' && q) {
       if (myAns[q.id] != null) return locked(q, my);
@@ -226,7 +194,7 @@
     el.innerHTML = `<div class="r-head">${a == null ? 'No answer' : right ? 'Right!' : 'Not quite'}</div>
       ${right ? `<div class="r-pts">+${fmt(gain)}</div>${ownsQ(q) ? '<div class="r-line"><b>Double rent: you own this property!</b></div>' : ''}` : ''}
       <div class="r-line">${late ? 'Your answer reached the Bank after time was up.' : a == null ? 'Too slow for the Bank this time.' : right ? pick(RIGHT) : `${pick(WRONG)} It was ${esc(q.opts[S.rv.a])}.`}</div>
-      ${my ? `<div style="margin-top:12px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n}</div>` : ''}
+      ${my ? `<div style="margin-top:10px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n} &middot; 🎟️ ${my[4] || 0} Community Chest ticket${my[4] === 1 ? '' : 's'}</div>` : ''}
       <div class="r-fact">${esc(S.rv.fact)}</div>`;
     if (right && !celebrated[q.id]) { celebrated[q.id] = 1; sound.play('cash'); confetti({ count: 80, colors: MONEY }); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
   }
@@ -250,9 +218,9 @@
     if (n > -1) {
       const key = 'won' + n;
       if (!celebrated[key]) { celebrated[key] = 1; sound.play('fanfare'); confetti({ count: 200, colors: MONEY }); if (navigator.vibrate) navigator.vibrate([60, 60, 60]); }
-      return wait(`You won! Prize pick #${n + 1}`, `${esc(pk[n].why)}. See the host after the meeting to pick your prize.`);
+      return wait(pk[n].why === '1st place' ? 'You are the Monopoly Champion!' : 'Community Chest: you won!', 'You won a prize. See the host after the meeting.');
     }
-    if (S.ph === 'podium') return wait('And the winners are...', `You finished #${my ? my[1] : '-'} with ${fmt(my ? my[0] * 10 : 0)}. Community Chest draws are next: everyone outside the top 3 is in.`);
+    if (S.ph === 'podium') return wait('And the champion is...', `You finished #${my ? my[1] : '-'} with ${fmt(my ? my[0] * 10 : 0)}. Next: one Community Chest draw. Everyone except 1st place is in.`);
     if (S.ph === 'chest') {
       const w = pk.find(x => x.pid === S.cw);
       return w ? wait(`${esc(w.av)} ${esc(w.nm)} wins!`, 'Advance to the prize table. (Not you this time.)') : wait('Community Chest', 'No one left to draw.');
@@ -268,9 +236,9 @@
     lastReact = Date.now();
     send({ k: 're', e: +b.dataset.e }, { important: false });
   };
-  $('tabPlay').onclick = () => { tab = 'play'; editingDeed = false; render(); };
+  $('tabPlay').onclick = () => { tab = 'play'; render(); };
   $('tabDeed').onclick = () => { tab = 'deed'; render(); };
 
-  if (me) { sendJoin(); if (deed) setTimeout(sendDeed, 1500); }
+  if (me) sendJoin();
   render();
 })();
