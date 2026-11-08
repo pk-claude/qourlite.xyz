@@ -7,7 +7,7 @@ window.WFO = {
       qs: [
         { q: 'What is the best Thanksgiving food?', opts: ['Turkey', 'Stuffing', 'Mashed potatoes and gravy', 'Pie'] },
         { q: 'When can holiday decorations go up?', opts: ['Before Halloween', 'The day after Halloween', 'After Thanksgiving', 'December 1 or later'] },
-        { q: 'What is the best holiday movie?', opts: ['Elf', 'Home Alone', 'Die Hard', 'Christmas Vacation'] },
+        { q: 'Which meeting phrase should be banned in 2027?', opts: ['"Let\'s circle back"', '"Per my last email"', '"Can everyone see my screen?"', '"You\'re on mute"'] },
       ] },
     { id: 'vision', label: 'Your 2027 answer', kind: 'text', title: 'It is December 2027, and we are looking back on our best year.', q: 'What did this team do that you are proudest of?',
       sub: 'One or two sentences. Anonymous: no name is collected. Keep names and anything confidential out. Up to three answers.',
