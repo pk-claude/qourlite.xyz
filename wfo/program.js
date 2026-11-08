@@ -12,8 +12,6 @@ window.WFO = {
     { id: 'vision', label: 'Your 2027 answer', kind: 'text', title: 'It is December 2027, and we are looking back on our best year.', q: 'What did this team do that you are proudest of?',
       sub: 'One or two sentences. Anonymous: no name is collected. Keep names and anything confidential out. Up to three answers.',
       cats: ['How we grew', 'How we served', 'How we transformed', 'How we stuck together'] },
-    { id: 'voa', label: 'VOA poll', kind: 'single', title: 'Which of these would you sign up for first?', sub: 'Then we take two minutes of open discussion.',
-      opts: ['Pitch a speaker', 'Shape the social group', 'Own your development'] },
     { id: 'hh', label: 'Happy hour vote', kind: 'multi', title: 'Team happy hour: pick a day and a place', sub: 'Everyone is welcome. Non-alcoholic options available.',
       qs: [
         { q: 'Which day?', opts: ['Wed, Dec 2, after the volunteer event (about 4:30 PM)', 'Thu, Dec 3, after the holiday party (about 4:30 PM)', 'Another evening that week'] },
