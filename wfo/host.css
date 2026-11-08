@@ -357,3 +357,21 @@ body { font-family: 'Titillium Web', Arial, sans-serif; }
 .racer .led { animation: bl 1.4s infinite; }
 @keyframes bcn { 50% { fill: #ff7a00; } }
 @keyframes bcnglow { 0%, 100% { opacity: .9; } 50% { opacity: .15; } }
+/* proportions for the big screen: words first, racing second */
+.race { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); }
+.tw-h { font-size: clamp(1.05rem, 2.2vh, 1.75rem); padding: .45em .8em; line-height: 1.15; }
+.tw-h span { font-size: .62em; }
+.tw { grid-template-columns: clamp(30px, 3.4vh, 52px) 6px minmax(0, 1fr) auto auto; gap: 12px; padding: 0 14px 0 8px; }
+.tw .p { font-size: clamp(1.2rem, 2.8vh, 2.3rem); }
+.tw .o { font-size: clamp(1.05rem, 2.5vh, 2rem); white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.12; }
+.tw .o small { font-size: clamp(.68rem, 1.15vh, .95rem); margin-top: .15em; }
+.tw .g { font-size: clamp(.9rem, 1.7vh, 1.35rem); }
+.tw .g b { font-size: clamp(1.35rem, 3.1vh, 2.6rem); }
+.tw .g em { font-size: clamp(.7rem, 1.2vh, .95rem); }
+.races.single .tw-h { font-size: clamp(1.3rem, 2.9vh, 2.3rem); }
+.races.single .tw .o { font-size: clamp(1.3rem, 3.2vh, 2.6rem); }
+.races.single .tw .p { font-size: clamp(1.5rem, 3.6vh, 3rem); }
+.races.single .tw .g b { font-size: clamp(1.7rem, 4vh, 3.3rem); }
+.car { height: 100%; }
+.races.single .car { height: 72%; max-height: 120px; }
+.bc-head h1 { font-size: clamp(1.6rem, 3.2vh, 2.6rem); }

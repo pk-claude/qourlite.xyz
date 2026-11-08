@@ -119,14 +119,12 @@
     Music.start();
     D.onLive && D.onLive(true);
     World.set({ zoom: 3.2, dawn: 0.06, grass: 0, bloom: 0, trees: 0, path: 0, build: 0, people: 0, links: 0, gather: 0, network: 0, lanterns: 0, dim: 0 });
-    // 1. the question
-    let L = layer(`<div><div class="kick">Workforce Operations &nbsp;|&nbsp; November 9, 2026</div><p class="lede" style="margin-top:3vh">${total ? `Today, ${D.people ? `${say(D.people).toLowerCase()} of you wrote ${total}` : `this team wrote ${total}`} answer${total === 1 ? '' : 's'} to one question.` : 'Today, this team looked ahead to 2027.'}</p></div>`);
-    await wait(3600, tok);
-    L.innerHTML = `<div><div class="kick">The question</div><p class="ttl" style="font-size:clamp(2rem,4.2vw,3.8rem)">It is December 2027, and we are looking back on our best year.</p><p class="lede">What did this team do that you are proudest of?</p></div>`;
-    await wait(6200, tok);
-    await clear(tok);
+    // 1. one card: who answered, and the question (short: the room already knows it)
+    let L = layer(`<div><div class="kick">${total ? `${D.people ? `${say(D.people)} of you` : 'This team'} &nbsp;|&nbsp; ${total} answer${total === 1 ? '' : 's'}` : 'Workforce Operations'}</div><p class="ttl" style="font-size:clamp(2rem,4.2vw,3.8rem)">What did this team do in 2027 that you are proudest of?</p></div>`);
+    await wait(3000, tok);
+    await clear(tok, 700);
 
-    // 2. reading the answers
+    // 2. the answers flash by and fall as seeds; the themes appear (about 7 seconds)
     const scene = root.querySelector('.scene');
     const cells = [];
     for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) if (!(r > 0 && r < 3 && c === 1)) cells.push([c, r]);
@@ -137,38 +135,28 @@
       const [c, r] = cells[i];
       el.style.left = (4 + c * 32 + Math.random() * 4) + 'vw';
       el.style.top = (8 + r * 21 + Math.random() * 5) + 'vh';
-      el.textContent = '“' + t + '”';
+      el.textContent = '\u201c' + t + '\u201d';
       scene.appendChild(el);
       return el;
     });
-    L = layer(`<div><p class="lede" id="fl">${total && D.withGoals ? 'Claude read every answer, and the goals we set for 2027.' : total ? 'Claude read every answer.' : 'Claude read the goals we set for 2027.'}</p><div class="tchips"></div></div>`);
-    for (const el of frags) { await wait(420, tok); el.classList.add('on'); el.style.transform = `translate(${(Math.random() - 0.5) * 30}px, ${-10 - Math.random() * 20}px)`; }
-    await wait(3800, tok);
+    L = layer(`<div><p class="lede" id="fl">Every answer is a seed.</p><div class="tchips"></div></div>`);
+    for (const el of frags) { await wait(120, tok); el.classList.add('on'); el.style.transform = `translate(${(Math.random() - 0.5) * 30}px, ${-10 - Math.random() * 20}px)`; }
+    await wait(1500, tok);
     frags.forEach(el => el.classList.remove('on'));
     World.seeds(Math.max(total, D.frags.length)); World.set({ zoom: 3.0, dawn: 0.16, grass: 0.06 });
-    const fl = L.querySelector('#fl');
-    fl.style.transition = 'opacity .6s'; fl.style.opacity = 0;
-    await wait(700, tok);
-    fl.textContent = 'Every answer is a seed.';
-    fl.style.opacity = 1;
-    await wait(2600, tok);
-    fl.style.opacity = 0;
-    await wait(700, tok);
-    fl.textContent = D.themes.length > 1 ? `Together they grow into ${say(D.themes.length).toLowerCase()} hopes for this team.` : 'Together they grow into one hope for this team.';
-    fl.style.opacity = 1;
     const tc = L.querySelector('.tchips');
     tc.innerHTML = D.themes.map(t => `<span class="tchip">${esc(t.name)}${t.n ? `<b>${t.n}</b>` : ''}</span>`).join('');
-    for (const el of tc.children) { await wait(650, tok); el.classList.add('on'); }
-    await wait(4200, tok);
-    await clear(tok, 1800);
+    for (const el of tc.children) { await wait(250, tok); el.classList.add('on'); }
+    await wait(2000, tok);
+    await clear(tok, 800);
 
     // 3. title: first light
     World.set({ zoom: 2.6, dawn: 0.3, grass: 0.12, bloom: 0.14, people: 0.02 }); Music.lift(0.15);
     L = layer(`<div><div class="kick">Looking back from 2028</div><div class="ttl">${esc(D.title)}</div></div>`);
-    await wait(1600, tok);
+    await wait(700, tok);
     if (!captionsOnly && Voice.kind !== 'none') { ctl = Voice.say(D.title + '.', () => {}); await ctl.done; ctl = null; check(tok); }
-    await wait(2400, tok);
-    await clear(tok, 1600);
+    await wait(1200, tok);
+    await clear(tok, 900);
 
     // 4. chapters
     for (let i = 0; i < D.chapters.length; i++) {
@@ -180,7 +168,7 @@
         people: 0.1 + 0.9 * f, links: Math.max(0, (f - 0.3) / 0.7), network: Math.max(0, (f - 0.55) / 0.45) });
       Music.lift(0.2 + 0.6 * f);
       const el = layer(`<div class="chap"><div class="kick">${ch.heading ? `Chapter ${i + 1}` : ''}</div><div class="h">${esc(ch.heading || '')}</div></div><div class="cap"></div><div class="src">${esc(ch.src || '')}</div>`);
-      await wait(1500, tok);
+      await wait(900, tok);
       if (ch.src) el.querySelector('.src').classList.add('on');
       await narrate(ch.text, tok, el.querySelector('.cap'));
       await wait(1400, tok);

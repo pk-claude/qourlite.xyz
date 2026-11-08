@@ -12,6 +12,9 @@
   // ---------- state ----------
   const fresh = ep => ({ sid: Live.rid(6), ep: ep || 0, order: [], show: 'debate', phones: {}, hidden: {}, manual: {}, pasted: [], snap: null, themes: null, story: null, storyText: '', realOpts: [], voice: '' });
   let H = Object.assign(fresh(), Live.store.get(KEY, {}) || {});
+  // activities removed from the program (e.g. the old VOA poll) drop out of saved state
+  H.order = (H.order || []).filter(id => WFO.acts.some(a => a.id === id));
+  if (!WFO.acts.some(a => a.id === H.show)) H.show = 'debate';
   const save = () => { if (!passive) Live.store.set(KEY, H); };
   const HID = Live.rid(6);
   let ST = 0, passive = false, film = false;

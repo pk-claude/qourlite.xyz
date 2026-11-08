@@ -5,15 +5,13 @@ window.WFO = {
   acts: [
     { id: 'debate', label: 'Warm-up debate', kind: 'multi', title: 'Settle it: three friendly debates', sub: 'No wrong answers. You can change your pick.',
       qs: [
-        { q: 'What is the best Thanksgiving food?', opts: ['Turkey', 'Stuffing', 'Mashed potatoes and gravy', 'Pie'] },
-        { q: 'When can holiday decorations go up?', opts: ['Before Halloween', 'The day after Halloween', 'After Thanksgiving', 'December 1 or later'] },
-        { q: 'What is the best holiday movie?', opts: ['Elf', 'Home Alone', 'Die Hard', 'Christmas Vacation'] },
+        { q: 'What is the best way to eat Thanksgiving leftovers?', opts: ['The next-day sandwich', 'Cold pie for breakfast', 'Reheated full plate', 'Leftovers are overrated'] },
+        { q: 'What is the worst holiday chore?', opts: ['Untangling the lights', 'Dishes after the big meal', 'Holiday traffic', 'Wrapping gifts'] },
+        { q: 'Which meeting phrase should be banned in 2027?', opts: ['"Let\'s circle back"', '"Per my last email"', '"Can everyone see my screen?"', '"You\'re on mute"'] },
       ] },
     { id: 'vision', label: 'Your 2027 answer', kind: 'text', title: 'It is December 2027, and we are looking back on our best year.', q: 'What did this team do that you are proudest of?',
       sub: 'One or two sentences. Anonymous: no name is collected. Keep names and anything confidential out. Up to three answers.',
       cats: ['How we grew', 'How we served', 'How we transformed', 'How we stuck together'] },
-    { id: 'voa', label: 'VOA poll', kind: 'single', title: 'Which of these would you sign up for first?', sub: 'Then we take two minutes of open discussion.',
-      opts: ['Pitch a speaker', 'Shape the social group', 'Own your development'] },
     { id: 'hh', label: 'Happy hour vote', kind: 'multi', title: 'Team happy hour: pick a day and a place', sub: 'Everyone is welcome. Non-alcoholic options available.',
       qs: [
         { q: 'Which day?', opts: ['Wed, Dec 2, after the volunteer event (about 4:30 PM)', 'Thu, Dec 3, after the holiday party (about 4:30 PM)', 'Another evening that week'] },
