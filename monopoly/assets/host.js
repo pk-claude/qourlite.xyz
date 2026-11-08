@@ -1,4 +1,4 @@
-/* Big screen. The host is the single source of truth: it keeps players, deeds,
+/* Big screen. The host is the single source of truth: it keeps players,
    answers and cash, and broadcasts a small state object to the phones.
    It can be driven from its own keyboard or from a phone (remote.html, PIN-protected). */
 (function () {
@@ -27,7 +27,7 @@
 
   // ---------- persistent host state ----------
   const fresh = () => ({
-    sid: Live.rid(6), pos: 0, players: {}, deeds: {}, hidden: {}, answers: {}, opened: {}, closed: {}, scored: {}, gained: {},
+    sid: Live.rid(6), pos: 0, players: {}, answers: {}, opened: {}, closed: {}, scored: {}, gained: {},
     prevRank: {}, chest: [], extra: {}, pin: String(1000 + Math.floor(Math.random() * 9000)),
   });
   let H = Live.store.get(KEY, null) || fresh();
@@ -64,7 +64,7 @@
   }
 
   // Kept small: one update must stay under the site relay's size limit with 150 players.
-  // me[pid] = [cash / 10, rank, rent this question / 10, flags]; flags: 1 = answered this question, 2 = deed received.
+  // me[pid] = [cash / 10, rank, rent this question / 10, flags]; flags: 1 = answered this question.
   function stateForPhones() {
     const st = steps[H.pos];
     const out = { t: Date.now(), sid: H.sid, hid: HID, st: ST, ph: st.v, pos: H.pos, n: Object.keys(H.players).length, lbl: LABEL(st), nx: steps[H.pos + 1] ? LABEL(steps[H.pos + 1]) : '' };
@@ -72,7 +72,7 @@
     const box = it ? H.answers[it.id] || {} : {};
     out.me = {};
     ranking().forEach((p, idx) => {
-      out.me[p.pid] = [p.cash / 10, idx + 1, it ? ((H.gained[it.id] || {})[p.pid] || 0) / 10 : 0, (box[p.pid] ? 1 : 0) | (H.deeds[p.pid] ? 2 : 0)];
+      out.me[p.pid] = [p.cash / 10, idx + 1, it ? ((H.gained[it.id] || {})[p.pid] || 0) / 10 : 0, box[p.pid] ? 1 : 0];
     });
     if (it) {
       const sp = M.board[it.at];
@@ -124,7 +124,6 @@
     const pid = addPlayer(m);
     if (!pid) return;
     if (m.k === 'ans') onAnswer(pid, m);
-    else if (m.k === 'deed') onDeed(pid, m.d);
     else if (m.k === 're' && REACTS[m.e] != null) floatReaction(REACTS[m.e]);
   }
   // Remote commands name the step they were pressed on, so a repeated or late copy never skips ahead twice.
@@ -134,17 +133,6 @@
     if (m.at !== H.pos) return;
     if (m.a === 'next') next();
     else if (m.a === 'prev') prev();
-  }
-  function onDeed(pid, raw) {
-    const d = DEED.tidy(raw);
-    if (!d) return;
-    ['prop', 'tag', 'chance'].forEach(k => (d[k] = clean(d[k])));
-    d.rent = d.rent.map(clean);
-    const isNew = !H.deeds[pid];
-    H.deeds[pid] = d; save();
-    $('stDeeds').textContent = Object.values(H.deeds).filter(x => x.by === 'ai').length;
-    if (steps[H.pos].v === 'lobby') { spotQueue.unshift(pid); if (isNew || spotPid === pid) nextSpot(true); }
-    broadcast();
   }
   function onAnswer(pid, m) {
     const it = qOf(steps[H.pos]);
@@ -225,9 +213,9 @@
   // Ties on cash go to whoever was faster in total on their right answers, then to whoever joined first.
   const ranking = () => Object.entries(H.players).map(([pid, p]) => ({ pid, ...p }))
     .sort((a, b) => b.cash - a.cash || (a.tms || 0) - (b.tms || 0) || a.j - b.j);
-  // Prize pick order: the top 3, then each Community Chest winner in draw order.
+  // The winners: 1st place, then each Community Chest draw.
   function picks() {
-    const r = ranking().slice(0, 3).map((p, i) => ({ pid: p.pid, why: ['1st place', '2nd place', '3rd place'][i] }));
+    const r = ranking().slice(0, 1).map(p => ({ pid: p.pid, why: '1st place' }));
     H.chest.forEach((pid, k) => { if (pid && H.players[pid]) r.push({ pid, why: `Community Chest #${k + 1}` }); });
     return r;
   }
@@ -275,7 +263,8 @@
     M.board.forEach((s, p) => {
       const g = gridPos(p);
       const d = document.createElement('div');
-      d.className = `sp side-${g.side} ${s.t === 'corner' ? 'corner' : ''}`;
+      const longWord = Math.max(...s.n.split(' ').map(w => w.length)) >= 10; // e.g. BREINIGSVILLE: shrink rather than split the word
+      d.className = `sp side-${g.side} ${s.t === 'corner' ? 'corner' : ''} ${longWord && s.t !== 'corner' ? 'lw' : ''}`;
       d.id = 'sp' + p;
       d.style.gridRow = g.r; d.style.gridColumn = g.c;
       if (s.c) d.style.setProperty('--c', M.colors[s.c]);
@@ -327,15 +316,15 @@
   let musicTimer = null;
   function render(silent) {
     clearInterval(tickTimer);
-    clearInterval(spotTimer);
+    clearInterval(tagTimer);
     const st = steps[H.pos];
     const it = qOf(st);
     music(st, it);
     $('hudSeg').textContent = it ? `Roll ${st.i + 1} of ${M.quiz.length} · ${it.section}: ${M.board[it.at].n}` : 'Monopoly: All-Hands Edition';
     if (st.v === 'lobby' || st.v === 'rules' || st.v === 'roll') {
       show('vStage'); markDone();
-      if (st.v === 'lobby') { pane('.center-pane', 'cLobby'); pane('.side-pane', 'sLobby'); placeWalker(0); renderCrowd(); startSpot(); }
-      else if (st.v === 'rules') { pane('.center-pane', 'cRules'); pane('.side-pane', 'sLobby'); placeWalker(0); renderCrowd(); startSpot(); if (!silent) sound.play('whoosh'); }
+      if (st.v === 'lobby') { pane('.center-pane', 'cLobby'); pane('.side-pane', 'sLobby'); placeWalker(0); renderCrowd(); startTaglines(); }
+      else if (st.v === 'rules') { pane('.center-pane', 'cRules'); pane('.side-pane', 'sLobby'); placeWalker(0); renderCrowd(); startTaglines(); if (!silent) sound.play('whoosh'); }
       else renderRoll(st, silent);
     }
     else if (st.v === 'q' || st.v === 'reveal') {
@@ -347,12 +336,23 @@
     else if (st.v === 'podium') renderPodium(silent);
     else if (st.v === 'chest') renderChest(st.k, silent);
     else if (st.v === 'end') renderEnd(silent);
+    renderLeaders();
   }
   function renderCount() {
     const ids = Object.keys(H.players), bots = ids.filter(id => id.startsWith('bot')).length;
     $('hudCount').textContent = ids.length + (bots ? ` (${bots} bots)` : '');
     $('stPlayers').textContent = ids.length;
-    $('stDeeds').textContent = Object.values(H.deeds).filter(x => x.by === 'ai').length;
+    renderLeaders();
+  }
+  // Always-visible scoreboard while the game runs: how many are playing, and the top 5.
+  function renderLeaders() {
+    const v = steps[H.pos].v;
+    const on = v === 'roll' || v === 'q' || v === 'reveal';
+    $('leaders').classList.toggle('hidden', !on);
+    if (!on) return;
+    const r = ranking();
+    $('leaders').innerHTML = `<div class="ld-n"><b class="num">${r.length}</b><span>playing</span></div>` +
+      r.slice(0, 5).map((p, i) => `<div class="ld-p ${i === 0 ? 'first' : ''}"><span class="ld-r">${i + 1}</span><span class="ld-av">${p.av}</span><span class="ld-nm">${esc(p.nm)}</span><span class="ld-c num">${fmt(p.cash)}</span></div>`).join('');
   }
 
   // lobby
@@ -371,27 +371,13 @@
       while ($('crowd').children.length > 48) $('crowd').lastElementChild.remove();
     } else toast(`${p.av} <b>${esc(p.nm)}</b> joined the game`);
   }
-  // deed spotlight: newest first, then cycles through everyone's
-  let spotQueue = [], spotPid = null, spotTimer = null, spotIdx = 0;
-  function startSpot() { clearInterval(spotTimer); nextSpot(true); spotTimer = setInterval(() => nextSpot(), 7000); }
-  function nextSpot(fromQueue) {
-    const v = steps[H.pos].v;
-    if (v !== 'lobby' && v !== 'rules') return;
-    const all = Object.keys(H.deeds).filter(pid => !H.hidden[pid] && H.players[pid]);
-    if (!all.length) return;
-    let pid = null;
-    while (spotQueue.length && !pid) { const q = spotQueue.shift(); if (all.includes(q)) pid = q; }
-    if (!pid) { if (fromQueue && spotPid && all.includes(spotPid)) pid = spotPid; else pid = all[spotIdx++ % all.length]; }
-    spotPid = pid;
-    const p = H.players[pid], d = H.deeds[pid];
-    $('spot').innerHTML = `<div class="flip-in" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px">${DEED.html(d, { owner: p.nm, tok: p.av })}${DEED.chanceHTML(d)}</div>`;
-    $('spot').title = 'Click to hide this deed from the big screen';
+  // Home Depot taglines rotate on the lobby side panel.
+  let tagTimer = null, tagIdx = 0;
+  function startTaglines() {
+    clearInterval(tagTimer);
+    const show1 = () => { const el = $('tagline'); el.textContent = M.taglines[tagIdx++ % M.taglines.length]; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
+    show1(); tagTimer = setInterval(show1, 5000);
   }
-  $('spot').addEventListener('click', () => {
-    if (!spotPid) return;
-    H.hidden[spotPid] = true; save(); toast('Deed hidden from the big screen.');
-    spotPid = null; $('spot').innerHTML = '<div class="spot-empty">Hidden.</div>'; nextSpot();
-  });
 
   // roll
   async function renderRoll(st, silent) {
@@ -411,6 +397,7 @@
     const me = busy;
     placeWalker(from);
     $('rollSum').innerHTML = '&nbsp;'; $('rollLand').innerHTML = '&nbsp;';
+    const stamp = $('letsDo'); stamp.classList.remove('on'); void stamp.offsetWidth; stamp.classList.add('on');
     sound.play('drumroll', 1.2);
     showDie($('die1'), d1, true); showDie($('die2'), d2, true);
     await sleep(1400);
@@ -435,7 +422,7 @@
     if (sp.t === 'chance') return `<div class="chance-card" style="max-width:320px"><div class="cc-q">?</div><div><div class="cc-k">Chance</div><div class="cc-t">Bank error in your favour. This question pays DOUBLE rent.</div></div></div>`;
     const own = ownersOf(it);
     const col = sp.c ? M.colors[sp.c] : '#fff', dark = !sp.c || ['yellow', 'lightblue'].includes(sp.c);
-    return `<div class="prop-card" style="--c:${col};--t:${dark ? '#111' : '#fff'}"><div class="ph">${esc(sp.n)}</div><div class="pb">Rent: up to $${M.pay.base + M.pay.speed}<br><span style="font-weight:600">Answer right, answer fast.</span></div></div>
+    return `<div class="prop-card" style="--c:${col};--t:${dark ? '#111' : '#fff'}"><div class="ph">${esc(sp.n)}</div><div class="pb">Price $${sp.p}<br><span>Rent up to $${M.pay.base + M.pay.speed}</span></div></div>
       <div class="owners"><b class="num">${own.length}</b> ${own.length === 1 ? 'player owns' : 'players own'} this property<br><span>Their right answer pays <b>DOUBLE</b></span>
       <div class="own-faces">${own.slice(0, 40).map(pid => `<span title="${esc(H.players[pid].nm)}">${H.players[pid].av}</span>`).join('')}</div></div>`;
   }
@@ -549,7 +536,7 @@
   // community chest
   function drawChest(k) {
     if (H.chest[k] !== undefined) return;
-    const won = new Set([...ranking().slice(0, 3).map(p => p.pid), ...H.chest]);
+    const won = new Set([...ranking().slice(0, 1).map(p => p.pid), ...H.chest]);
     const pool = Object.keys(H.players).filter(pid => !won.has(pid));
     H.chest[k] = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
     save();
@@ -559,7 +546,7 @@
     drawChest(k); broadcast(true);
     const pid = H.chest[k];
     $('chestPast').innerHTML = H.chest.slice(0, k).filter(Boolean).map(x => `<span class="chip">${H.players[x].av} ${esc(H.players[x].nm)}</span>`).join('');
-    $('chestSub').textContent = `Draw ${k + 1} of ${CHEST_DRAWS}. Everyone who played is in, except the top 3.`;
+    $('chestSub').textContent = CHEST_DRAWS > 1 ? `Draw ${k + 1} of ${CHEST_DRAWS}. Everyone who played is in, except 1st place.` : 'One random draw. Everyone who played is in, remote included, except 1st place.';
     if (!pid) { $('slotIn').innerHTML = '<div>No one left to draw</div>'; $('slotIn').style.transform = 'none'; $('chestMsg').textContent = ''; return; }
     const w = H.players[pid];
     const others = Object.values(H.players);
@@ -583,7 +570,7 @@
 
   function renderEnd(silent) {
     show('vEnd');
-    $('endLots').innerHTML = picks().map((x, n) => `<div class="lot" style="--i:${n}"><div class="lh" ${x.why.startsWith('Community') ? 'style="background:#1a6fb5"' : ''}>Pick #${n + 1}</div><div class="lb">${H.players[x.pid].av} ${esc(H.players[x.pid].nm)}<br><span style="font-weight:600">${x.why}</span></div></div>`).join('');
+    $('endLots').innerHTML = picks().map((x, n) => `<div class="lot win-card" style="--i:${n}"><div class="lh" ${x.why.startsWith('Community') ? 'style="background:#2d6aa3"' : ''}>${x.why.startsWith('Community') ? 'Community Chest' : 'Monopoly Champion'}</div><div class="lb"><span class="wc-av">${H.players[x.pid].av}</span>${esc(H.players[x.pid].nm)}<br><span style="font-weight:600">${x.why}${x.why === '1st place' ? ' · ' + fmt(H.players[x.pid].cash) : ''}</span></div></div>`).join('');
     if (!silent) { sound.play('fanfare'); confetti({ count: 200, colors: MONEY }); }
   }
 
@@ -611,14 +598,13 @@
   // ---------- menu ----------
   const LABEL = st => ({
     lobby: () => 'Lobby (QR code)', rules: () => 'How to win', roll: () => `Roll ${st.i + 1}: ${qOf(st).section}`, q: () => `Q${st.i + 1}: question open`, reveal: () => `Q${st.i + 1}: answer`,
-    board: () => 'Final standings', podium: () => 'Podium', chest: () => `Community Chest draw ${st.k + 1}`, end: () => 'Game over (prize pick order)',
+    board: () => 'Final standings', podium: () => 'Podium', chest: () => (CHEST_DRAWS > 1 ? `Community Chest draw ${st.k + 1}` : 'Community Chest draw'), end: () => 'Game over (the 2 winners)',
   }[st.v])();
   function buildMenu() {
     $('menuList').innerHTML = steps.map((st, i) => st.v === 'reveal' ? '' : `<button data-go="${i}" class="${i === H.pos ? 'cur' : ''}">${esc(LABEL(st))}</button>`).join('');
     $('remotePin').textContent = H.pin;
     $('remoteQr').innerHTML = qrSVG(REMOTE_URL);
     $('remoteUrl').textContent = REMOTE_URL.replace(/^https?:\/\//, '');
-    fetch('/api/deed').then(r => r.json()).then(j => ($('aiStatus').textContent = j.ai ? 'AI deeds: LIVE (Claude)' : 'AI deeds: template only (no API key set in Vercel)')).catch(() => ($('aiStatus').textContent = 'AI deeds: could not check'));
   }
   const toggleMenu = on => { buildMenu(); $('menu').classList.toggle('hidden', !on); };
   $('menuList').addEventListener('click', e => {
@@ -633,14 +619,14 @@
   $('menuClose').onclick = () => toggleMenu(false);
   $('btnCopy').onclick = () => {
     const lines = ['Monopoly: All-Hands Edition results', ''];
-    lines.push('Prize pick order:');
+    lines.push('Winners:');
     picks().forEach((x, n) => lines.push(`${n + 1}. ${H.players[x.pid].nm} (${x.why})`));
     lines.push('', 'Richest tycoons:');
     ranking().filter(p => !p.pid.startsWith('bot')).slice(0, 10).forEach((p, i) => lines.push(`${i + 1}. ${p.nm}: ${fmt(p.cash)}`));
     navigator.clipboard.writeText(lines.join('\n')).then(() => { $('btnCopy').textContent = 'Copied'; setTimeout(() => ($('btnCopy').textContent = 'Copy results summary'), 1500); });
   };
   $('btnReset').onclick = () => {
-    if (!confirm('Reset all players, deeds and cash? Phones keep their name and deed and rejoin by themselves. The remote PIN stays the same.')) return;
+    if (!confirm('Reset all players and cash? Phones keep their name and rejoin by themselves. The remote PIN stays the same.')) return;
     const pin = H.pin;
     H = fresh(); H.pin = pin; save(); toggleMenu(false); go(0, { silent: true });
   };
@@ -662,7 +648,6 @@
     BOT_NAMES.forEach((nm, i) => setTimeout(() => {
       const bot = { p: 'bot' + i, nm, av: M.tokens[i % M.tokens.length] };
       onUp({ k: 'join', ...bot });
-      setTimeout(() => onUp({ k: 'deed', ...bot, d: DEED.local(nm, {}) }), 600 + Math.random() * 2500);
     }, i * 300));
     clearInterval(botTimer);
     botTimer = setInterval(() => {

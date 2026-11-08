@@ -1,5 +1,6 @@
 /* Background music for the presenter screen, synthesized live (no audio files).
-     lobby: a bouncy warehouse shuffle with a forklift back-up beep as its hook
+     lobby: an original, Home Depot ad-style groove: a syncopated, reggae-tinged rock guitar riff
+            over a driving beat, with a power-drill rev as the hook (not the actual Home Depot jingle)
      think: a ticking, building bed for the 20 seconds a question is open
    MUSIC.play('lobby' | 'think'), MUSIC.stop(). The Music button / B key turns it off;
    the Sound button (FX) mutes it too. */
@@ -45,27 +46,74 @@
   }
   const kick = (t, vol = 0.5) => note(120, t, 0.18, { type: 'sine', vol, slide: -80 });
 
-  // ---------- lobby: 8 bars of C, Am, F, G at 104 bpm, in eighth notes ----------
+  // ---------- shared instruments for the lobby groove ----------
+  let shaper = null;
+  function guitarBus() {
+    if (shaper) return shaper;
+    // overdriven electric guitar: soft clipping into a cabinet-like low-pass
+    shaper = ctx.createWaveShaper();
+    const n = 1024, curve = new Float32Array(n);
+    for (let k = 0; k < n; k++) { const x = (k / n) * 2 - 1; curve[k] = Math.tanh(x * 6); }
+    shaper.curve = curve; shaper.oversample = '2x';
+    const cab = ctx.createBiquadFilter(); cab.type = 'lowpass'; cab.frequency.value = 2600; cab.Q.value = 0.7;
+    const out = ctx.createGain(); out.gain.value = 0.16;
+    shaper.connect(cab).connect(out).connect(master);
+    return shaper;
+  }
+  function guitar(midis, t, dur, vol = 0.5) {
+    const bus = guitarBus();
+    midis.forEach(m => {
+      [0, 4].forEach(cents => { // two slightly detuned strings per note
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(hz(m), t); o.detune.value = cents;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(bus); o.start(t); o.stop(t + dur + 0.05);
+      });
+    });
+  }
+  function snare(t, vol = 0.22) {
+    hat(t, vol, 0.14);
+    if (!noiseBuf) return;
+    const s2 = ctx.createBufferSource(); s2.buffer = noiseBuf;
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 0.8;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vol * 1.4, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    s2.connect(f).connect(g).connect(master); s2.start(t); s2.stop(t + 0.2);
+    note(190, t, 0.08, { type: 'triangle', vol: vol * 0.9, slide: -60 });
+  }
+  // a cordless drill revving up and down: the hook at the end of every 4 bars
+  function drill(t, dur) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(90, t);
+    o.frequency.exponentialRampToValueAtTime(420, t + dur * 0.55); o.frequency.exponentialRampToValueAtTime(140, t + dur);
+    f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 1.2;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.1, t + 0.05); g.gain.setValueAtTime(0.1, t + dur * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f).connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  // ---------- lobby: 8 bars at 112 bpm in sixteenths (E, E, A, B / E, E, G-A, B) ----------
   const L = {
-    spb: 60 / 104 / 2, len: 64,
-    roots: [48, 45, 41, 43, 48, 45, 41, 43],
-    chords: [[60, 64, 67], [57, 60, 64], [57, 60, 65], [59, 62, 67], [60, 64, 67], [57, 60, 64], [57, 60, 65], [59, 62, 67]],
-    mel: [
-      76, 0, 79, 0, 81, 79, 76, 0,   72, 0, 74, 76, 0, 0, 72, 0,
-      77, 0, 76, 74, 72, 0, 69, 0,   71, 0, 74, 0, 79, 0, 0, 0,
-      76, 0, 79, 0, 81, 84, 81, 0,   79, 0, 76, 74, 76, 0, 72, 0,
-      77, 0, 81, 0, 79, 77, 76, 74,  74, 76, 79, 0, 84, 0, 0, 0],
+    spb: 60 / 112 / 4, len: 128,
+    roots: [40, 40, 45, 47, 40, 40, 43, 47],
+    // where the guitar hits within each bar of 16: pushed, off-beat stabs give the bounce
+    hits: [0, 3, 6, 8, 10, 11, 14],
     play(i, t) {
-      const bar = Math.floor(i / 8), s = i % 8, r = this.roots[bar];
-      if (s === 0 || s === 4) kick(t, 0.45);
-      hat(t, s % 2 ? 0.06 : 0.03);
-      const bass = [r, 0, r + 7, 0, r + 12, 0, r + 7, r + 9][s];
-      if (bass) note(hz(bass - 12), t, this.spb * 0.9, { type: 'triangle', vol: 0.5 });
-      if (s % 2) this.chords[bar].forEach(m => note(hz(m), t, 0.09, { type: 'square', vol: 0.045, lp: 2400 }));
-      const m = this.mel[i];
-      if (m) note(hz(m), t, this.spb * 1.6, { type: 'triangle', vol: 0.22 });
-      // the hook: a forklift reversing (beep... beep) at the end of every 4 bars
-      if ((bar === 3 || bar === 7) && (s === 5 || s === 7)) note(1350, t, 0.12, { type: 'square', vol: 0.06, lp: 3000 });
+      const bar = Math.floor(i / 16), s = i % 16;
+      let r = this.roots[bar];
+      if (bar === 6 && s >= 8) r = 45; // G then A in bar 7
+      // drums: kick on 1, the 'and' of 2 and 3; snare with a clap on 2 and 4; driving eighth hats
+      if (s === 0 || s === 6 || s === 8) kick(t, 0.55);
+      if (s === 4 || s === 12) { snare(t); hat(t + 0.012, 0.08, 0.05); }
+      if (s % 2 === 0) hat(t, s % 4 === 2 ? 0.07 : 0.035);
+      if (s === 14) hat(t, 0.06, 0.22); // open hat into the next bar
+      // bass locks to the kick and walks up to the next chord
+      const bass = { 0: r, 3: r, 6: r, 8: r + 7, 10: r + 12, 14: r + 10 }[s];
+      if (bass != null) note(hz(bass - 12), t, this.spb * 1.8, { type: 'triangle', vol: 0.55, lp: 900 });
+      // guitar: power chords (root, fifth, octave) on the syncopated hits; short and palm-muted except the last
+      if (this.hits.includes(s) && !(bar % 4 === 3 && s >= 8)) guitar([r + 12, r + 19, r + 24], t, s === 14 ? this.spb * 3 : this.spb * 1.2);
+      // a little lead lick answering the riff in bars 2 and 6
+      if (bar % 4 === 1) { const lick = { 8: 76, 9: 79, 10: 81, 12: 79, 13: 76, 14: 74 }[s]; if (lick) note(hz(lick), t, this.spb * 1.5, { type: 'square', vol: 0.05, lp: 2800 }); }
+      // the hook: the drill revs over the last half of every 4th bar
+      if (bar % 4 === 3 && s === 8) drill(t, this.spb * 8);
     },
   };
 

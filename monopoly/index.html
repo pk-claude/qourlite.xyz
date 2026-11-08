@@ -30,8 +30,23 @@
     <div class="board-wrap">
       <div class="board" id="board">
         <div class="board-center">
-          <div class="amr-lane" aria-hidden="true"><span class="amr">🤖<i>📦</i></span></div>
-          <div class="belt" aria-hidden="true"><span>📦</span><span>📦</span><span>📦</span><span>📦</span><span>📦</span></div>
+          <!-- a goods-to-person robot shuttling a tote along a taped floor lane -->
+          <div class="amr-lane" aria-hidden="true">
+            <div class="amr"><svg viewBox="0 0 80 52"><ellipse cx="38" cy="49" rx="32" ry="2.5" fill="rgba(0,0,0,.25)"/>
+              <g class="tote"><rect x="15" y="3" width="44" height="20" rx="2" fill="#5b6b78"/><rect x="13" y="1" width="48" height="4" rx="1.5" fill="#4a5864"/><rect x="31" y="9" width="12" height="4" rx="2" fill="#3a4650"/><rect x="18" y="13" width="9" height="6" fill="#F96302"/></g>
+              <rect class="lift" x="33" y="22" width="8" height="6" fill="#333"/>
+              <rect x="4" y="26" width="66" height="15" rx="6" fill="#F96302"/><rect x="4" y="36" width="66" height="5" rx="2" fill="#1d1d1d"/>
+              <rect x="60" y="20" width="9" height="7" rx="2" fill="#222"/><rect x="61.5" y="22" width="6" height="2" fill="#5fd3ff" class="lidar"/>
+              <circle cx="12" cy="31" r="2.6" fill="#3ddc84" class="led"/><text x="44" y="34" font-size="6" font-family="Arial" font-weight="700" fill="#fff">AMR</text>
+              <circle cx="18" cy="44" r="5" fill="#222"/><circle cx="18" cy="44" r="2" fill="#888"/><circle cx="58" cy="44" r="5" fill="#222"/><circle cx="58" cy="44" r="2" fill="#888"/></svg></div>
+          </div>
+          <!-- a roller conveyor with cartons riding through a barcode scan tunnel -->
+          <div class="belt" aria-hidden="true">
+            <div class="rollers"></div>
+            <div class="cartons"><i class="bx b1"></i><i class="bx b2"></i><i class="bx b3"></i><i class="bx b4"></i><i class="bx b5"></i></div>
+            <div class="scanner"><span class="beam"></span></div>
+          </div>
+          <div class="lets-do" id="letsDo">LET'S DO THIS.</div>
           <div class="center-pane" id="cLobby">
             <div class="logo c-logo"><span class="logo-bar">MONOPOLY</span><span class="logo-sub">All-Hands Meeting · November 2026</span></div>
             <div class="c-qr" id="qrBig"></div>
@@ -41,11 +56,11 @@
           <div class="center-pane" id="cRules">
             <div class="logo c-logo" style="font-size:clamp(22px,2.6vw,48px)"><span class="logo-bar">HOW TO WIN</span></div>
             <div class="rules">
-              <div class="rule"><span class="ri">🎲</span><div>One roll per section of today's meeting<small>Six rolls take the forklift once around the board, back to GO.</small></div></div>
-              <div class="rule"><span class="ri">💵</span><div>Right answer = you collect rent<small>$200, plus up to $200 more for speed. Chance and the final GO question pay double.</small></div></div>
-              <div class="rule"><span class="ri">🏠</span><div>You own 5 random properties<small>Token lands on one of yours? Your right answer pays double rent. Check your phone.</small></div></div>
-              <div class="rule"><span class="ri">🏆</span><div>Most cash wins<small>A tie on cash goes to whoever was faster in total on their right answers.</small></div></div>
-              <div class="rule"><span class="ri">🎁</span><div>Prizes: top 3, then Community Chest<small>Random draws among everyone else, remote included. Winners pick prizes in that order.</small></div></div>
+              <div class="rule"><span class="ri">🎲</span><div>One roll before each section, one lap of the network<small>Six rolls take the forklift past real Home Depot DCs and back to GO.</small></div></div>
+              <div class="rule"><span class="ri">🧰</span><div>Pros buy into the ecosystem: right answers collect rent<small>$200, plus up to $200 more for speed. Faster answers, bigger tickets.</small></div></div>
+              <div class="rule"><span class="ri">🏭</span><div>You own 5 Home Depot DCs<small>Land on one of yours and your right answer pays double. Los Angeles DFC is prime real estate; West Columbia RDC is a bargain.</small></div></div>
+              <div class="rule"><span class="ri">🚚</span><div>Free delivery drives value: Chance and GO pay double<small>Those two rolls deliver double rent to everyone who gets them right.</small></div></div>
+              <div class="rule"><span class="ri">🏆</span><div>Two winners<small>1st place in cash (a tie goes to the faster total answer time), plus one Community Chest draw for everyone else, remote included.</small></div></div>
             </div>
           </div>
           <div class="center-pane" id="cRoll">
@@ -60,12 +75,9 @@
     </div>
     <aside class="side">
       <div class="side-pane" id="sLobby">
-        <div class="stat-row">
-          <div class="stat"><b class="num" id="stPlayers">0</b><span>Players</span></div>
-          <div class="stat"><b class="num" id="stDeeds">0</b><span>Deeds written by AI</span></div>
-        </div>
-        <span class="ai-badge"><span class="dot"></span>Claude is writing everyone a personal title deed</span>
-        <div class="spot" id="spot"><div class="spot-empty">Join on your phone, answer 3 silly questions,<br>and the AI Banker writes you a property deed. It shows up here.</div></div>
+        <div class="stat big-stat"><b class="num" id="stPlayers">0</b><span>Players in the game</span></div>
+        <div class="tag-card"><div class="kicker">The Home Depot</div><div class="tagline" id="tagline">How doers get more done.</div></div>
+        <div class="deal-note">Every player is dealt <b>5 real Home Depot DCs</b>. Check your phone to see yours.</div>
         <div class="crowd" id="crowd"></div>
       </div>
       <div class="side-pane" id="sRoll">
@@ -101,7 +113,7 @@
 
   <!-- PODIUM -->
   <section class="view" id="vPodium">
-    <div class="kicker">The Monopoly Champion is...</div>
+    <div class="kicker">The Monopoly Champion is... (1st place wins a prize)</div>
     <div class="podium">
       <div class="pod p2"><div class="pod-av" id="pAv2"></div><div class="pod-nm" id="pNm2"></div><div class="pod-sc num" id="pSc2"></div><div class="pod-block">2</div></div>
       <div class="pod p1"><div class="pod-av" id="pAv1"></div><div class="pod-nm" id="pNm1"></div><div class="pod-sc num" id="pSc1"></div><div class="pod-block">1</div></div>
@@ -114,7 +126,7 @@
   <section class="view" id="vChest">
     <div class="chest-card">
       <div class="ck">COMMUNITY CHEST</div>
-      <div class="muted" style="color:#555;font-weight:700" id="chestSub">Random draw. Everyone who played is in, except auction winners.</div>
+      <div class="muted" style="color:#555;font-weight:700" id="chestSub">One random draw. Everyone who played is in, remote included, except 1st place.</div>
       <div class="slot"><div class="slot-in" id="slotIn"></div></div>
       <div style="font-weight:800" id="chestMsg">Press Next to draw</div>
     </div>
@@ -124,11 +136,12 @@
   <!-- END -->
   <section class="view" id="vEnd">
     <div class="logo" style="font-size:clamp(40px,7vw,120px);transform:rotate(-6deg)"><span class="logo-bar">GAME OVER</span></div>
-    <p class="big-sub">Prize pick order. Winners: see the host after the meeting.<br>Everyone else: you may now flip the board.</p>
+    <p class="big-sub">Our two winners: see the host after the meeting.<br>Everyone else: you may now flip the board.</p>
     <div class="lots" id="endLots"></div>
   </section>
 </main>
 
+<div class="leaders hidden" id="leaders" aria-live="polite"></div>
 <div class="mini-join" id="miniJoin"><div class="mini-qr" id="qrMini"></div><div><div class="kicker">Join</div><b class="num">qourlite.xyz/go</b></div></div>
 <div class="reactions" id="reactions" aria-hidden="true"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -166,7 +179,7 @@
     <div class="mini-qr" id="remoteQr"></div>
     <div><h3 style="margin:0 0 4px">Run it from your phone</h3>
       <div class="small">Scan, or open <b id="remoteUrl"></b>, and enter PIN <b class="num" id="remotePin" style="font-size:1.3rem;color:var(--gold)"></b>. Keep this screen private: the PIN is only shown here.</div>
-      <div class="small muted" id="aiStatus" style="margin-top:6px"></div></div>
+</div>
   </div>
   <div class="menu-actions">
     <button id="btnCopy">Copy results summary</button>
@@ -184,7 +197,6 @@
 <script src="/q2/assets/fx.js"></script>
 <script src="/q2/assets/live.js"></script>
 <script src="assets/program.js"></script>
-<script src="assets/deed.js"></script>
 <script src="assets/host.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
