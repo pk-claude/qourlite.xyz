@@ -188,5 +188,104 @@
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.12);
   }
 
-  window.MUSIC = { play, stop, toggle, beep, get on() { return on; }, get suspended() { return !ctx || ctx.state !== 'running'; }, get track() { return current; } };
+  // ---------- sound effects (follow the Sound button, not the Music button) ----------
+  let sfxOut = null;
+  function sfxBus() {
+    if (!ac() || (window.FX && FX.sound.muted)) return null;
+    if (!sfxOut) { sfxOut = ctx.createGain(); sfxOut.gain.value = 0.9; sfxOut.connect(ctx.destination); }
+    if (!noiseBuf) { noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    return sfxOut;
+  }
+  function burst(bus, t, { dur = 0.03, vol = 0.3, type = 'bandpass', f = 2500, q = 1.2 } = {}) {
+    const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.playbackRate.value = 0.8 + Math.random() * 0.5;
+    const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+    const g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(fl).connect(g).connect(bus); n.start(t, Math.random() * 0.1); n.stop(t + dur + 0.02);
+  }
+  function tone(bus, freq, t, dur, { type = 'sine', vol = 0.2, attack = 0.004, slide = 0, lp = 0 } = {}) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    let out = g; if (lp) { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp; g.connect(f); out = f; }
+    o.connect(g); out.connect(bus); o.start(t); o.stop(t + dur + 0.05);
+  }
+  // one die hitting the table: a sharp plastic click with a short woody knock under it
+  function clack(bus, t, vol) {
+    burst(bus, t, { dur: 0.025, vol: vol, f: 3200 + Math.random() * 1500, q: 2 });
+    tone(bus, 700 + Math.random() * 500, t, 0.05, { type: 'triangle', vol: vol * 0.5 });
+  }
+  const sfx = {
+    // shaken in a hand, thrown, tumbling, two dice settling
+    dice() {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 14; i++) burst(bus, t0 + i * 0.035 + Math.random() * 0.012, { dur: 0.02, vol: 0.12, f: 2200 + Math.random() * 1800, q: 3 });
+      let t = t0 + 0.55, gap = 0.07, v = 0.5;
+      for (let i = 0; i < 9; i++) { clack(bus, t, v); clack(bus, t + 0.012 + Math.random() * 0.02, v * 0.7); t += gap; gap *= 1.18; v *= 0.86; }
+      clack(bus, t + 0.05, 0.22); clack(bus, t + 0.13, 0.16);
+    },
+    // an electric forklift pulling away, cruising, braking: motor whine plus tyre rumble, hydraulic hiss at the stop
+    forklift(sec) {
+      const bus = sfxBus(); if (!bus) return;
+      const t = ctx.currentTime, end = t + sec;
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+      o.type = 'sawtooth'; o2.type = 'square';
+      o.frequency.setValueAtTime(60, t); o.frequency.exponentialRampToValueAtTime(190, t + 0.5); o.frequency.setValueAtTime(190, end - 0.35); o.frequency.exponentialRampToValueAtTime(70, end);
+      o2.frequency.setValueAtTime(121, t); o2.frequency.exponentialRampToValueAtTime(381, t + 0.5); o2.frequency.setValueAtTime(381, end - 0.35); o2.frequency.exponentialRampToValueAtTime(141, end);
+      f.type = 'lowpass'; f.frequency.value = 900; f.Q.value = 4;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.25); g.gain.setValueAtTime(0.09, end - 0.3); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.05);
+      o.connect(f); o2.connect(f); f.connect(g).connect(bus); o.start(t); o2.start(t); o.stop(end + 0.1); o2.stop(end + 0.1);
+      // tyres on the concrete floor: a soft, steady rumble ticking over the board's spaces
+      for (let x = t; x < end - 0.1; x += 0.19) burst(bus, x, { dur: 0.06, vol: 0.05, type: 'lowpass', f: 300, q: 0.7 });
+      burst(bus, end, { dur: 0.35, vol: 0.08, type: 'highpass', f: 4000, q: 0.5 });
+    },
+    // two toots of a forklift horn
+    horn() {
+      const bus = sfxBus(); if (!bus) return;
+      const t = ctx.currentTime;
+      [0, 0.22].forEach(d => { tone(bus, 415, t + d, 0.16, { type: 'square', vol: 0.09, lp: 1800 }); tone(bus, 523, t + d, 0.16, { type: 'square', vol: 0.06, lp: 1800 }); });
+    },
+    // a brass fanfare with timpani and a crash on the last chord
+    fanfare() {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime;
+      const chords = [[60, 64, 67], [60, 64, 67], [65, 69, 72], [67, 71, 74], [72, 76, 79, 84]];
+      const at = [0, 0.18, 0.36, 0.72, 1.08], len = [0.15, 0.15, 0.32, 0.32, 1.9];
+      chords.forEach((c, k) => {
+        c.forEach(m => [0, 6].forEach(cents => {
+          const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(), t = t0 + at[k];
+          o.type = 'sawtooth'; o.frequency.value = hz(m); o.detune.value = cents;
+          f.type = 'lowpass'; f.frequency.setValueAtTime(500, t); f.frequency.exponentialRampToValueAtTime(3200, t + 0.06); f.frequency.exponentialRampToValueAtTime(1400, t + len[k]);
+          g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.035, t + 0.03); g.gain.setValueAtTime(0.035, t + len[k] * 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + len[k]);
+          o.connect(f).connect(g).connect(bus); o.start(t); o.stop(t + len[k] + 0.05);
+        }));
+        tone(bus, k === 4 ? 98 : 131, t0 + at[k], 0.5, { vol: 0.35, slide: -30 });
+      });
+      for (let i = 0; i < 6; i++) burst(bus, t0 + 1.08 + i * 0.02, { dur: 1.6 - i * 0.2, vol: 0.06, type: 'highpass', f: 5000, q: 0.4 });
+    },
+    // a cheering crowd: hundreds of claps thinning out, with a rising "whoo"
+    applause(sec = 4) {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 260; i++) {
+        const x = Math.random() * sec, dens = x < 0.4 ? x / 0.4 : 1 - Math.max(0, (x - sec * 0.6) / (sec * 0.4));
+        if (Math.random() > dens) continue;
+        burst(bus, t0 + x, { dur: 0.03, vol: 0.07 + Math.random() * 0.05, f: 1200 + Math.random() * 2200, q: 1.5 });
+      }
+      const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 3;
+      f.frequency.setValueAtTime(450, t0); f.frequency.exponentialRampToValueAtTime(900, t0 + 0.8); f.frequency.exponentialRampToValueAtTime(600, t0 + 2);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.05, t0 + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.2);
+      n.connect(f).connect(g).connect(bus); n.start(t0); n.stop(t0 + 2.3);
+    },
+    // coins spilling out of the Community Chest
+    coins(sec = 1.4) {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime;
+      for (let i = 0; i < 34; i++) { const t = t0 + Math.pow(Math.random(), 0.7) * sec, f = 2600 + Math.random() * 2600; tone(bus, f, t, 0.18, { vol: 0.05 }); tone(bus, f * 1.5, t + 0.01, 0.12, { vol: 0.025 }); }
+    },
+  };
+
+  window.MUSIC = { play, stop, toggle, beep, sfx, get on() { return on; }, get suspended() { return !ctx || ctx.state !== 'running'; }, get track() { return current; } };
 })();

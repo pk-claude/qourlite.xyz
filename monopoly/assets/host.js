@@ -317,6 +317,7 @@
   let musicTimer = null;
   function render(silent) {
     clearInterval(tickTimer);
+    if (steps[H.pos].v !== 'podium') CELEBRATE.spotlight(false);
     clearInterval(tagTimer);
     const st = steps[H.pos];
     const it = qOf(st);
@@ -399,21 +400,22 @@
     placeWalker(from);
     $('rollSum').innerHTML = '&nbsp;'; $('rollLand').innerHTML = '&nbsp;';
     const stamp = $('letsDo'); stamp.classList.remove('on'); void stamp.offsetWidth; stamp.classList.add('on');
-    sound.play('drumroll', 1.2);
+    MUSIC.sfx.dice();
     showDie($('die1'), d1, true); showDie($('die2'), d2, true);
     await sleep(1400);
     if (me !== busy) return;
     $('rollSum').textContent = `${d1} + ${d2} = ${dist}`;
     const w = $('walker');
+    MUSIC.sfx.forklift(dist * 0.19 + 0.1);
     for (let s = 1; s <= dist; s++) {
       if (me !== busy) return;
       placeWalker((from + s) % 40);
       w.classList.remove('hop'); void w.offsetWidth; w.classList.add('hop');
-      MUSIC.beep();
       await sleep(190);
     }
     if (me !== busy) return;
     land();
+    MUSIC.sfx.horn();
     if (sp.t === 'chance' || it.at === 0) { sound.play('fanfare'); confetti({ count: 120, colors: ['#f96302', '#ffe35a', '#fff'] }); }
     else sound.play('ding');
   }
@@ -512,7 +514,9 @@
     $('tieNote').innerHTML = tieNote(r);
     const pods = document.querySelectorAll('.pod');
     pods.forEach(el => el.classList.remove('up'));
-    if (silent) { pods.forEach(el => el.classList.add('up')); return; }
+    $('champBanner').classList.remove('on');
+    CELEBRATE.spotlight(false);
+    if (silent) { pods.forEach(el => el.classList.add('up')); $('champBanner').classList.add('on'); return; }
     const me = busy;
     const order = ['.p3', '.p2', '.p1'];
     for (let k = 0; k < 3; k++) {
@@ -520,7 +524,11 @@
       if (me !== busy) return;
       document.querySelector(order[k]).classList.add('up');
     }
-    sound.play('fanfare');
+    // the champion: spotlight, banner, brass, the crowd, fireworks and money raining down
+    CELEBRATE.spotlight(true);
+    $('champBanner').classList.add('on');
+    MUSIC.sfx.fanfare(); setTimeout(() => MUSIC.sfx.applause(5), 900);
+    CELEBRATE.fireworks(7); CELEBRATE.money(70);
     confetti({ count: 260, spread: 1.6, colors: MONEY }); setTimeout(() => confetti({ count: 200, x: 0.2, colors: MONEY }), 500); setTimeout(() => confetti({ count: 200, x: 0.8, colors: MONEY }), 900);
   }
 
@@ -544,7 +552,9 @@
   function drawChest(k) {
     if (H.chest[k] !== undefined) return;
     const won = new Set([...ranking().slice(0, 1).map(p => p.pid), ...H.chest]);
-    const pool = Object.keys(H.players).filter(pid => !won.has(pid)).flatMap(pid => Array(tickets(pid)).fill(pid));
+    const eligible = Object.keys(H.players).filter(pid => !won.has(pid));
+    let pool = eligible.flatMap(pid => Array(tickets(pid)).fill(pid));
+    if (!pool.length) pool = eligible; // nobody answered on a phone (e.g. a show-of-hands game): one ticket each
     H.chest[k] = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
     save();
   }
@@ -562,7 +572,7 @@
     $('slotIn').innerHTML = reel.map(p => `<div><span>${p.av}</span><span>${esc(p.nm)}</span></div>`).join('');
     const rowH = $('slotIn').firstElementChild.offsetHeight;
     const end = `translateY(${-(reel.length - 1) * rowH}px)`;
-    const win = () => { $('chestMsg').innerHTML = `Advance to the prize table. <b>${w.av} ${esc(w.nm)}</b> collects a prize! (${tickets(pid)} ticket${tickets(pid) === 1 ? '' : 's'})`; };
+    const win = () => { $('chestMsg').innerHTML = `Advance to the prize table. <b>${w.av} ${esc(w.nm)}</b> collects a prize!${tickets(pid) ? ` (${tickets(pid)} ticket${tickets(pid) === 1 ? '' : 's'})` : ''}`; };
     if (silent) { $('slotIn').style.transition = 'none'; $('slotIn').style.transform = end; win(); return; }
     $('chestMsg').textContent = 'Shuffling the Community Chest...';
     $('slotIn').style.transition = 'none'; $('slotIn').style.transform = 'translateY(0)';
@@ -573,7 +583,11 @@
     for (let t = 0; t < 26; t++) { setTimeout(() => { if (me === busy) sound.play('tick'); }, 4200 * Math.pow(t / 26, 2.2)); }
     await sleep(4300);
     if (me !== busy) return;
-    win(); sound.play('fanfare'); confetti({ count: 240, colors: MONEY, spread: 1.5 });
+    win();
+    $('vChest').classList.remove('opened'); void $('vChest').offsetWidth; $('vChest').classList.add('opened');
+    MUSIC.sfx.coins(); setTimeout(() => MUSIC.sfx.fanfare(), 250); setTimeout(() => MUSIC.sfx.applause(4), 1100);
+    CELEBRATE.fireworks(5); CELEBRATE.money(40);
+    confetti({ count: 240, colors: ['#ffcf73', '#f2d27a', '#fff', '#2d6aa3'], spread: 1.5 });
   }
 
   function renderEnd(silent) {
@@ -582,7 +596,7 @@
     const avg = S2.asked.length ? S2.asked.reduce((a, q) => a + q.ans, 0) / S2.asked.length : 0;
     $('endStats').innerHTML = `<b class="num">${S2.n}</b> played${att ? ` (${pct(S2.n, att)} of the room)` : ''} · <b class="num">${pct(avg, S2.n)}</b> average answer rate · <b class="num">${S2.allIn}</b> answered every question`;
     $('endLots').innerHTML = picks().map((x, n) => `<div class="lot win-card" style="--i:${n}"><div class="lh" ${x.why.startsWith('Community') ? 'style="background:#2d6aa3"' : ''}>${x.why.startsWith('Community') ? 'Community Chest' : 'Monopoly Champion'}</div><div class="lb"><span class="wc-av">${H.players[x.pid].av}</span>${esc(H.players[x.pid].nm)}<br><span style="font-weight:600">${x.why}${x.why === '1st place' ? ' · ' + fmt(H.players[x.pid].cash) : ''}</span></div></div>`).join('');
-    if (!silent) { sound.play('fanfare'); confetti({ count: 200, colors: MONEY }); }
+    if (!silent) { MUSIC.sfx.fanfare(); setTimeout(() => MUSIC.sfx.applause(3), 900); CELEBRATE.fireworks(4); confetti({ count: 200, colors: MONEY }); }
   }
 
   // ---------- reactions & toasts ----------
