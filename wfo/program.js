@@ -14,8 +14,11 @@ window.WFO = {
       cats: ['How we grew', 'How we served', 'How we transformed', 'How we stuck together'] },
     { id: 'voa', label: 'VOA poll', kind: 'single', title: 'Which of these would you sign up for first?', sub: 'Then we take two minutes of open discussion.',
       opts: ['Pitch a speaker', 'Shape the social group', 'Own your development'] },
-    { id: 'hh', label: 'Happy hour vote', kind: 'single', title: 'Team happy hour: which works best?', sub: 'Everyone is welcome. Non-alcoholic options available.',
-      opts: ['Wed, Dec 2, after the volunteer event (about 5:00 PM)', 'Thu, Dec 3, after the holiday party (about 4:30 PM)', 'Another evening that week'] },
+    { id: 'hh', label: 'Happy hour vote', kind: 'multi', title: 'Team happy hour: pick a day and a place', sub: 'Everyone is welcome. Non-alcoholic options available.',
+      qs: [
+        { q: 'Which day?', opts: ['Wed, Dec 2, after the volunteer event (about 4:30 PM)', 'Thu, Dec 3, after the holiday party (about 4:30 PM)', 'Another evening that week'] },
+        { q: 'Which place?', opts: ["Laseter's Tavern, Vinings: closest, cheap drinks, pool tables", 'South City Kitchen, Vinings', 'Creatwood Tavern and Rooftop, Smyrna', 'Viking Alchemist Meadery, Smyrna'] },
+      ] },
     { id: 'real', label: 'Make it real', kind: 'single', title: 'Which part of our 2027 story do we make real first?', sub: 'The top theme goes on the next All Hands agenda.', opts: [] },
   ],
 };

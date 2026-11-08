@@ -332,3 +332,10 @@ body { font-family: 'Titillium Web', Arial, sans-serif; }
 .autopill { font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: #262a33; color: #cbd0d8; }
 .autopill.busy { color: #ffcf3f; } .autopill.busy::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #ffcf3f; animation: livep 1s infinite; }
 .autopill.ok { color: #4ade80; } .autopill.warn { color: #fca5a5; }
+/* Play our 2027 story: the one button on the Run tab */
+.act.story { border-color: #5a3a14; background: linear-gradient(160deg, #2a1d10, #1a1d23); }
+.act.story b { color: #ffcf3f; }
+.act.story .sst { font-size: .78rem; color: var(--tx2); line-height: 1.35; }
+.act.story.ok .sst { color: #86efac; } .act.story.busy .sst { color: #ffcf3f; }
+.act .play { border: 0; border-radius: 8px; padding: 10px; font-family: inherit; font-weight: 900; font-style: italic; font-size: .95rem; color: #fff; background: linear-gradient(90deg, var(--or), #ff9a3c); box-shadow: 0 4px 16px rgba(249,99,3,.35); }
+.act .play:disabled { opacity: .6; }
