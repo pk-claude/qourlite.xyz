@@ -345,6 +345,26 @@
     navigator.clipboard.writeText(txt).then(() => ($('copyMsg').textContent = 'Copied.'), () => ($('copyMsg').textContent = 'Copy failed: select the list and copy it.'));
   };
 
+  // Download every answer as a spreadsheet, grouped under the theme Claude put it in.
+  $('exportBtn').onclick = () => {
+    const snap = H.snap || [], themes = H.themes || [];
+    const themeOf = new Map();
+    themes.forEach(t => (t.ids || []).forEach(id => { const a = snap[id - 1]; if (a) themeOf.set((a.p || '') + '|' + a.t, t.name); }));
+    const order = themes.map(t => t.name);
+    const rows = answers().map(a => ({ theme: themeOf.get((a.p || '') + '|' + a.t) || (a.off ? 'Hidden from the story' : 'Not in a theme (left out, or arrived after the story)'), t: a.t, c: a.c || '', hid: a.off ? 'Hidden' : '' }));
+    const rank = n => { const i = order.indexOf(n); return i < 0 ? order.length + (n.startsWith('Hidden') ? 1 : 0) : i; };
+    rows.sort((x, y) => rank(x.theme) - rank(y.theme));
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [['Theme', 'Answer', 'Prompt chip picked', 'Hidden on the Visions tab'].map(q).join(',')];
+    rows.forEach(r => lines.push([r.theme, r.t, r.c, r.hid].map(q).join(',')));
+    lines.push('', ['Theme', 'Answers in theme', 'Summary', 'Quote'].map(q).join(','));
+    themes.forEach(t => lines.push([t.name, t.n || 0, t.summary || '', t.quote || ''].map(q).join(',')));
+    const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'WFO 2027 answers by theme.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    $('copyMsg').textContent = `Downloaded ${rows.length} answers${themes.length ? ` in ${themes.length} themes` : ' (no themes yet: press Find themes on the Story tab first)'}.`;
+  };
+
   // ---------- story ----------
   let aiOn = null;
   fetch('/api/story', { cache: 'no-store' }).then(r => r.json()).then(j => (aiOn = !!j.ai), () => (aiOn = false)).finally(renderStatus);
