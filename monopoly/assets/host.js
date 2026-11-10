@@ -259,9 +259,24 @@
   // ---------- board ----------
   // Board icons, distribution-center style. Rails are conveyors; utilities are chargers.
   const CONVEYOR = '<svg viewBox="0 0 40 20" width="2.2em" aria-hidden="true"><rect x="1" y="5" width="38" height="7" rx="3.5" fill="#555"/><g fill="#bbb"><circle cx="6" cy="8.5" r="2.4"/><circle cx="14" cy="8.5" r="2.4"/><circle cx="22" cy="8.5" r="2.4"/><circle cx="30" cy="8.5" r="2.4"/><circle cx="35" cy="8.5" r="2.4"/></g><rect x="10" y="0" width="9" height="5" fill="#c8955a" stroke="#7a5230" stroke-width=".8"/><rect x="5" y="12" width="3" height="7" fill="#777"/><rect x="32" y="12" width="3" height="7" fill="#777"/></svg>';
-  const ICON = { chest: '📦', chance: '❓', rail: CONVEYOR, tax: '💸' };
-  const SPACE_ICON = { 12: '🔋', 28: '🤖' };
-  const CORNER_ICON = ['➡️', '🚧', '☕', '👷'];
+  // Clean line icons, drawn in the board's ink colour, instead of emoji.
+  const svgI = (body, w = '2em') => `<svg viewBox="0 0 24 24" width="${w}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  const ICON = {
+    chest: svgI('<path d="M3 8l9-4 9 4v9l-9 4-9-4z" stroke="#2d6aa3"/><path d="M3 8l9 4 9-4M12 12v9" stroke="#2d6aa3"/><path d="M7.5 6l9 4" stroke="#2d6aa3" opacity=".6"/>'),
+    chance: '<span class="ic-q">?</span>',
+    rail: CONVEYOR,
+    tax: svgI('<circle cx="12" cy="12" r="9" stroke="#1f6b1a"/><path d="M15 9.2c-.6-1-1.7-1.6-3-1.6-1.8 0-3 .9-3 2.2 0 3 6 1.400 6 4.400 0 1.300-1.300 2.200-3 2.200-1.400 0-2.600-.6-3.200-1.700M12 6v12" stroke="#1f6b1a"/>'),
+  };
+  const SPACE_ICON = {
+    12: svgI('<rect x="3" y="8" width="16" height="9" rx="2"/><path d="M21 11v3M12 9.500l-2.500 3.500h4l-2.500 3.500" stroke="#f96302"/>'),
+    28: svgI('<rect x="5" y="9" width="14" height="9" rx="3"/><path d="M12 9V5M9 5h6"/><circle cx="9.500" cy="13.500" r="1.200" fill="#f96302" stroke="none"/><circle cx="14.500" cy="13.500" r="1.200" fill="#f96302" stroke="none"/><path d="M7 20.500h2M15 20.500h2"/>'),
+  };
+  const CORNER_ICON = [
+    svgI('<path d="M3 12h15M12 5l7 7-7 7" stroke="#c8102e" stroke-width="2.6"/>', '2.4em'),
+    svgI('<rect x="4" y="4" width="16" height="16" rx="1.500"/><path d="M8 4v16M12 4v16M16 4v16" stroke="#f96302"/>', '2.1em'),
+    svgI('<path d="M5 10h11v4a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 11h1.500a2.500 2.500 0 0 1 0 5H16M8 4.500c0 1 1 1 1 2s-1 1-1 2M12 4.500c0 1 1 1 1 2s-1 1-1 2" /><path d="M4 21h13" stroke="#f96302"/>', '2.1em'),
+    svgI('<path d="M4 16a8 8 0 0 1 16 0z" stroke="#f96302"/><path d="M2.500 16h19M12 8V5.500M9 9.500V7M15 9.500V7"/>', '2.1em'),
+  ];
   // The token: an orange forklift carrying a pallet. Drawn facing left; flipped on the top row.
   const FORKLIFT = '<svg viewBox="0 0 64 48" aria-hidden="true"><rect x="2" y="12" width="18" height="16" fill="#c8955a" stroke="#7a5230" stroke-width="1"/><path d="M2 18h18" stroke="#e8d3a8" stroke-width="2"/><rect x="0" y="29" width="22" height="4" fill="#8b5a2b"/><rect x="0" y="33" width="25" height="2.6" fill="#333"/><rect x="22" y="3" width="4" height="35" fill="#444"/><path d="M30 20V6h19v14" fill="none" stroke="#333" stroke-width="2.2"/><rect x="26" y="20" width="27" height="16" rx="3" fill="#F96302"/><rect x="50" y="17" width="11" height="19" rx="2" fill="#c24e00"/><circle cx="40" cy="14" r="3.6" fill="#f2c9a0"/><path d="M36 13a4 4 0 0 1 8 0z" fill="#fdd835"/><circle cx="33" cy="39" r="6.5" fill="#222"/><circle cx="33" cy="39" r="2.5" fill="#999"/><circle cx="53" cy="40" r="5.5" fill="#222"/><circle cx="53" cy="40" r="2.2" fill="#999"/></svg>';
   function gridPos(p) {
@@ -328,7 +343,7 @@
   let musicTimer = null;
   function render(silent) {
     clearInterval(tickTimer);
-    if (steps[H.pos].v !== 'podium') CELEBRATE.spotlight(false);
+    if (steps[H.pos].v !== 'podium') { CELEBRATE.spotlight(false); $('champTake').classList.remove('on', 'out', 'reveal'); }
     clearInterval(tagTimer);
     document.body.classList.remove('urgent');
     tilt(false);
@@ -365,7 +380,39 @@
   function tilt(on) {
     const wrap = $('board').parentNode, scene = document.querySelector('.dc-scene');
     wrap.classList.toggle('tilt', !!on && TILT);
-    try { if (on && TILT) scene.pauseAnimations(); else scene.unpauseAnimations(); } catch (e) {}
+    if (!on) { wrap.classList.remove('orbit', 'rolling'); $('dice3d').classList.remove('on'); }
+  }
+  // Two real 3D dice thrown across the tilted board: they arc in from the near corner, bounce, tumble and settle on the roll.
+  const BOUNCES = [0.40, 0.72, 0.96, 1.13, 1.25]; // seconds at which a die hits the board; the sound uses the same times
+  function throwDice(d1, d2) {
+    const box = $('dice3d'), W = box.offsetWidth, sz = W * 0.11, D = 1450;
+    box.style.setProperty('--s', sz + 'px');
+    box.innerHTML = ''; box.classList.add('on');
+    [d1, d2].forEach((n, k) => {
+      const el = document.createElement('div'); el.className = 'd3';
+      el.innerHTML = `<div class="d3s"></div><div class="d3b"><div class="d3i">${[1, 2, 3, 4, 5, 6].map(f => `<div class="face f${f}">${Array.from({ length: 9 }, (_, q) => PIPS[f].includes(q) ? '<i></i>' : '<span></span>').join('')}</div>`).join('')}</div></div>`;
+      const tx = W * (k ? 0.585 : 0.415) + (Math.random() - 0.5) * W * 0.03, ty = W * (k ? 0.53 : 0.47) + (Math.random() - 0.5) * W * 0.03;
+      const sx = W * (k ? 0.02 : -0.12), sy = W * (k ? 1.12 : 1.0);
+      el.style.left = tx + 'px'; el.style.top = ty + 'px';
+      box.appendChild(el);
+      el.animate([{ transform: `translate(${sx - tx}px, ${sy - ty}px)` }, { transform: 'translate(0, 0)' }], { duration: D, easing: 'cubic-bezier(.15,.6,.3,1)', fill: 'both' });
+      // height: a fall to the first impact, then arcs that get lower each bounce
+      const hit = BOUNCES.map(x => (x * 1000) / D), peak = [1.5, 0.85, 0.45, 0.2].map(h => h * sz), z = v => `translateZ(${v + sz / 2}px)`;
+      const kf = [{ offset: 0, transform: z(sz * 2.1), easing: 'ease-in' }];
+      hit.forEach((h, i) => {
+        kf.push({ offset: h, transform: z(0), easing: 'ease-out' });
+        if (i < hit.length - 1) kf.push({ offset: (h + hit[i + 1]) / 2, transform: z(peak[i]), easing: 'ease-in' });
+      });
+      kf.push({ offset: 1, transform: z(0) });
+      el.querySelector('.d3b').animate(kf, { duration: D, fill: 'both' });
+      const [rx, ry] = FACE_ROT[n], yaw = (Math.random() - 0.5) * 50, dir = k ? -1 : 1;
+      el.querySelector('.d3i').animate([
+        { transform: `rotateZ(${yaw + dir * 260}deg) rotateX(${rx + dir * 900}deg) rotateY(${ry - dir * 720}deg)` },
+        { transform: `rotateZ(${yaw}deg) rotateX(${rx}deg) rotateY(${ry}deg)` },
+      ], { duration: D * 0.93, easing: 'cubic-bezier(.2,.55,.35,1)', fill: 'both' });
+      el.querySelector('.d3s').animate([{ opacity: 0.1, transform: 'scale(1.9)' }, { opacity: 0.5, transform: 'scale(1)' }], { duration: D * 0.3, fill: 'both' });
+    });
+    MUSIC.sfx.dice(BOUNCES);
   }
   function renderCount() {
     const ids = Object.keys(H.players), bots = ids.filter(id => id.startsWith('bot')).length;
@@ -438,14 +485,28 @@
     $('rollSum').innerHTML = '&nbsp;'; $('rollLand').innerHTML = '&nbsp;';
     const stamp = $('letsDo'); stamp.classList.remove('on'); void stamp.offsetWidth; stamp.classList.add('on');
     tilt(true);
-    MUSIC.sfx.dice();
-    showDie($('die1'), d1, true); showDie($('die2'), d2, true);
-    await sleep(1400);
-    if (me !== busy) return;
+    showDie($('die1'), d1); showDie($('die2'), d2);
+    if (TILT) {
+      $('board').parentNode.classList.add('rolling'); // the card steps aside: the dice are thrown on the board itself
+      throwDice(d1, d2);
+      await sleep(1650);
+      if (me !== busy) return;
+      const chip = document.createElement('div'); chip.className = 'd3-sum'; chip.textContent = `${d1} + ${d2} = ${dist}`;
+      $('dice3d').appendChild(chip); MUSIC.sfx.chime();
+      await sleep(750);
+      if (me !== busy) return;
+      $('board').parentNode.classList.add('orbit'); // the camera drifts round the table while the forklift drives
+    } else {
+      MUSIC.sfx.dice(BOUNCES);
+      showDie($('die1'), d1, true); showDie($('die2'), d2, true);
+      await sleep(1400);
+      if (me !== busy) return;
+    }
     $('rollSum').textContent = `${d1} + ${d2} = ${dist}`;
     const w = $('walker');
     MUSIC.sfx.forklift(dist * 0.19 + 0.1);
     for (let s = 1; s <= dist; s++) {
+      MUSIC.sfx.step(s, dist);
       if (me !== busy) return;
       placeWalker((from + s) % 40);
       w.classList.remove('hop'); void w.offsetWidth; w.classList.add('hop');
@@ -518,7 +579,7 @@
       <span class="opt-n num">${revealed ? `${d[i]} <small>${Math.round((d[i] / tot) * 100)}%</small>` : ''}</span></div>`).join('');
     $('timer').classList.toggle('hidden', revealed);
     $('fact').classList.toggle('on', revealed);
-    $('fact').classList.toggle('wait', suspense);
+    $('fact').classList.toggle('held', suspense);
     $('particip').classList.toggle('hidden', !revealed);
     renderAnswered(it);
     if (!revealed) {
@@ -541,7 +602,7 @@
     MUSIC.sfx.riser(1.25);
     await sleep(1300);
     if (me !== busy) return;
-    $('opts').classList.remove('pending'); $('fact').classList.remove('wait');
+    $('opts').classList.remove('pending'); $('fact').classList.remove('held');
     MUSIC.sfx.hit();
     renderLeaders();
     countUp($('paid'), paid, { dur: 1400, fmt });
@@ -591,16 +652,35 @@
     const pods = document.querySelectorAll('.pod');
     pods.forEach(el => el.classList.remove('up'));
     $('champBanner').classList.remove('on');
+    $('champTake').classList.remove('on', 'out');
     CELEBRATE.spotlight(false);
     if (silent) { pods.forEach(el => el.classList.add('up')); $('champBanner').classList.add('on'); return; }
     const me = busy;
-    const order = ['.p3', '.p2', '.p1'];
-    for (let k = 0; k < 3; k++) {
-      if (k === 2) { sound.play('drumroll', 2); await sleep(2100); } else { await sleep(900); sound.play('boing'); }
-      if (me !== busy) return;
-      document.querySelector(order[k]).classList.add('up');
+    const order = ['.p3', '.p2'];
+    for (let k = 0; k < 2; k++) {
+      await sleep(1000); if (me !== busy) return;
+      sound.play('boing'); document.querySelector(order[k]).classList.add('up');
     }
-    // the champion: spotlight, banner, brass, the crowd, fireworks and money raining down
+    await sleep(900); if (me !== busy) return;
+    // the champion takes the whole screen: searchlights and a drumroll, then the name, the anthem, cannons and the crowd
+    const champ = r[0];
+    if (champ) {
+      $('ctAv').textContent = champ.av; $('ctNm').textContent = champ.nm; $('ctSc').textContent = '$0';
+      $('champTake').classList.add('on');
+      sound.play('drumroll', 2.4); MUSIC.sfx.riser(2.4);
+      await sleep(2500); if (me !== busy) return;
+      $('champTake').classList.add('reveal');
+      MUSIC.sfx.hit(); MUSIC.sfx.victory(); setTimeout(() => MUSIC.sfx.applause(9), 300);
+      countUp($('ctSc'), champ.cash, { dur: 2200, fmt });
+      CELEBRATE.fireworks(9); CELEBRATE.flashes(7);
+      [0, 700, 1500, 2500, 3600, 4800].forEach((t, i) => setTimeout(() => { if (me !== busy) return; confetti({ count: 130, x: i % 2 ? 0.94 : 0.06, y: 0.98, spread: 0.55, colors: ['#ffcf73', '#f96302', '#ffffff', '#c8102e'] }); }, t));
+      setTimeout(() => { if (me === busy) CELEBRATE.money(26); }, 1200);
+      await sleep(7200); if (me !== busy) return;
+      $('champTake').classList.add('out');
+      setTimeout(() => { if (me === busy) $('champTake').classList.remove('on', 'out', 'reveal'); }, 700);
+    }
+    document.querySelector('.p1').classList.add('up');
+    // then the podium: spotlight, banner, a last fanfare, fireworks and money raining down
     CELEBRATE.spotlight(true);
     $('champBanner').classList.add('on');
     MUSIC.sfx.fanfare(); setTimeout(() => MUSIC.sfx.applause(5), 900);
@@ -662,7 +742,8 @@
     win();
     $('vChest').classList.remove('opened'); void $('vChest').offsetWidth; $('vChest').classList.add('opened');
     MUSIC.sfx.coins(); setTimeout(() => MUSIC.sfx.fanfare(), 250); setTimeout(() => MUSIC.sfx.applause(4), 1100);
-    CELEBRATE.fireworks(5); CELEBRATE.money(40);
+    CELEBRATE.fireworks(6); CELEBRATE.money(30); CELEBRATE.flashes(4);
+    [200, 1100, 2100].forEach((t, i) => setTimeout(() => { if (me === busy) confetti({ count: 120, x: i % 2 ? 0.94 : 0.06, y: 0.98, spread: 0.55, colors: ['#ffcf73', '#2d6aa3', '#ffffff'] }); }, t));
     confetti({ count: 240, colors: ['#ffcf73', '#f2d27a', '#fff', '#2d6aa3'], spread: 1.5 });
   }
 

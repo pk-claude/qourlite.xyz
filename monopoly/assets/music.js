@@ -216,35 +216,77 @@
     tone(bus, 700 + Math.random() * 500, t, 0.05, { type: 'triangle', vol: vol * 0.5 });
   }
   const sfx = {
-    // shaken in a hand, thrown, tumbling, two dice settling
-    dice() {
+    // wooden dice on a felt table: a soft shake, then warm knocks that land with each bounce and die away
+    dice(hits = [0.4, 0.72, 0.96, 1.13, 1.25]) {
       const bus = sfxBus(); if (!bus) return;
       const t0 = ctx.currentTime;
-      for (let i = 0; i < 14; i++) burst(bus, t0 + i * 0.035 + Math.random() * 0.012, { dur: 0.02, vol: 0.12, f: 2200 + Math.random() * 1800, q: 3 });
-      let t = t0 + 0.55, gap = 0.07, v = 0.5;
-      for (let i = 0; i < 9; i++) { clack(bus, t, v); clack(bus, t + 0.012 + Math.random() * 0.02, v * 0.7); t += gap; gap *= 1.18; v *= 0.86; }
-      clack(bus, t + 0.05, 0.22); clack(bus, t + 0.13, 0.16);
+      for (let i = 0; i < 6; i++) burst(bus, t0 + i * 0.05, { dur: 0.05, vol: 0.035, type: 'bandpass', f: 1400, q: 1.2 });
+      hits.forEach((h, i) => {
+        const v = 0.3 * Math.pow(0.72, i);
+        [0, 0.035 + Math.random() * 0.02].forEach((d, j) => {
+          const f = (j ? 392 : 330) * (1 + (Math.random() - 0.5) * 0.08);
+          tone(bus, f, t0 + h + d, 0.11, { type: 'sine', vol: v });
+          tone(bus, f * 2.76, t0 + h + d, 0.05, { type: 'sine', vol: v * 0.3 });
+          burst(bus, t0 + h + d, { dur: 0.02, vol: v * 0.2, type: 'lowpass', f: 1800, q: 0.7 });
+        });
+      });
     },
-    // an electric forklift pulling away, cruising, braking: motor whine plus tyre rumble, hydraulic hiss at the stop
+    // a quiet electric hum under the drive
     forklift(sec) {
       const bus = sfxBus(); if (!bus) return;
       const t = ctx.currentTime, end = t + sec;
-      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-      o.type = 'sawtooth'; o2.type = 'square';
-      o.frequency.setValueAtTime(60, t); o.frequency.exponentialRampToValueAtTime(190, t + 0.5); o.frequency.setValueAtTime(190, end - 0.35); o.frequency.exponentialRampToValueAtTime(70, end);
-      o2.frequency.setValueAtTime(121, t); o2.frequency.exponentialRampToValueAtTime(381, t + 0.5); o2.frequency.setValueAtTime(381, end - 0.35); o2.frequency.exponentialRampToValueAtTime(141, end);
-      f.type = 'lowpass'; f.frequency.value = 900; f.Q.value = 4;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.25); g.gain.setValueAtTime(0.09, end - 0.3); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.05);
-      o.connect(f); o2.connect(f); f.connect(g).connect(bus); o.start(t); o2.start(t); o.stop(end + 0.1); o2.stop(end + 0.1);
-      // tyres on the concrete floor: a soft, steady rumble ticking over the board's spaces
-      for (let x = t; x < end - 0.1; x += 0.19) burst(bus, x, { dur: 0.06, vol: 0.05, type: 'lowpass', f: 300, q: 0.7 });
-      burst(bus, end, { dur: 0.35, vol: 0.08, type: 'highpass', f: 4000, q: 0.5 });
+      [[82, 123, 0.05], [123, 185, 0.025]].forEach(([f0, f1, v]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + 0.5); o.frequency.setValueAtTime(f1, end - 0.3); o.frequency.exponentialRampToValueAtTime(f0, end);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.3); g.gain.setValueAtTime(v, end - 0.3); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.05);
+        o.connect(g).connect(bus); o.start(t); o.stop(end + 0.1);
+      });
     },
-    // two toots of a forklift horn
+    // one marimba note for each space the forklift passes, climbing a pentatonic scale to the landing
+    step(i, n) {
+      const bus = sfxBus(); if (!bus) return;
+      const t = ctx.currentTime, scale = [0, 2, 4, 7, 9];
+      const k = 12 - n + i, m = 60 + 12 * Math.floor(k / 5) + scale[((k % 5) + 5) % 5];
+      tone(bus, hz(m), t, 0.28, { type: 'sine', vol: 0.16 });
+      tone(bus, hz(m) * 4, t, 0.07, { type: 'sine', vol: 0.04 });
+    },
+    // the total appears: a small glassy chime
+    chime() {
+      const bus = sfxBus(); if (!bus) return;
+      const t = ctx.currentTime;
+      [76, 83, 88].forEach((m, i) => { tone(bus, hz(m), t + i * 0.07, 0.5, { type: 'sine', vol: 0.09 }); tone(bus, hz(m) * 2.01, t + i * 0.07, 0.25, { type: 'sine', vol: 0.02 }); });
+    },
+    // arrival: two soft bell notes
     horn() {
       const bus = sfxBus(); if (!bus) return;
       const t = ctx.currentTime;
-      [0, 0.22].forEach(d => { tone(bus, 415, t + d, 0.16, { type: 'square', vol: 0.09, lp: 1800 }); tone(bus, 523, t + d, 0.16, { type: 'square', vol: 0.06, lp: 1800 }); });
+      [[72, 0], [79, 0.14]].forEach(([m, d]) => { tone(bus, hz(m), t + d, 0.7, { type: 'sine', vol: 0.14 }); tone(bus, hz(m) * 3, t + d, 0.25, { type: 'sine', vol: 0.03 }); });
+    },
+    // the champion's anthem: brass melody over a marching beat, ending on a long bright chord
+    victory() {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime, b = 0.24;
+      const brass = (m, t, len, v = 0.03) => [0, 7].forEach(c => {
+        const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+        o.type = 'sawtooth'; o.frequency.value = hz(m); o.detune.value = c;
+        f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.exponentialRampToValueAtTime(3000, t + 0.05); f.frequency.exponentialRampToValueAtTime(1300, t + len);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.03); g.gain.setValueAtTime(v, t + len * 0.75); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+        o.connect(f).connect(g).connect(bus); o.start(t); o.stop(t + len + 0.05);
+      });
+      // melody (beats, midi, length in beats), then chords underneath
+      [[0, 67, 1], [1, 72, 1], [2, 76, 1], [3, 79, 2], [5, 76, 1], [6, 79, 3], [9, 81, 1], [10, 79, 1], [11, 77, 1], [12, 76, 2], [14, 74, 1], [15, 72, 1], [16, 74, 2], [18, 79, 2], [20, 84, 7]]
+        .forEach(([at, m, len]) => { brass(m, t0 + at * b, len * b * 0.95, 0.04); brass(m - 12, t0 + at * b, len * b * 0.95, 0.02); });
+      [[0, [48, 55, 64]], [8, [53, 57, 65]], [12, [48, 55, 64]], [16, [55, 59, 62]], [20, [48, 55, 64, 72]]].forEach(([at, ch], i, all) => {
+        const len = ((all[i + 1] ? all[i + 1][0] : 27) - at) * b;
+        ch.forEach(m => brass(m, t0 + at * b, len, 0.018));
+      });
+      for (let i = 0; i < 20; i++) {
+        tone(bus, i % 4 === 0 ? 62 : 55, t0 + i * b, 0.16, { vol: i % 2 ? 0.16 : 0.34, slide: -22 });
+        if (i % 2) burst(bus, t0 + i * b, { dur: 0.09, vol: 0.09, type: 'highpass', f: 2500, q: 0.5 });
+        burst(bus, t0 + i * b + b / 2, { dur: 0.03, vol: 0.035, type: 'highpass', f: 7000, q: 0.5 });
+      }
+      tone(bus, 49, t0 + 20 * b, 1.4, { vol: 0.5, slide: -18 });
+      for (let i = 0; i < 5; i++) burst(bus, t0 + 20 * b + i * 0.02, { dur: 1.9 - i * 0.25, vol: 0.06, type: 'highpass', f: 5200, q: 0.4 });
     },
     // a brass fanfare with timpani and a crash on the last chord
     fanfare() {
