@@ -75,5 +75,17 @@
     el.classList.toggle('on', !!on && !reduced());
   }
 
-  window.CELEBRATE = { fireworks, money, spotlight };
+  // camera flashes popping around the room
+  function flashes(sec = 6) {
+    if (reduced()) return;
+    for (let i = 0; i < sec * 5; i++) {
+      setTimeout(() => {
+        const d = document.createElement('div'); d.className = 'cam-flash';
+        d.style.left = (4 + Math.random() * 92) + '%'; d.style.top = (8 + Math.random() * 84) + '%';
+        document.body.appendChild(d); setTimeout(() => d.remove(), 500);
+      }, Math.random() * sec * 1000);
+    }
+  }
+
+  window.CELEBRATE = { fireworks, money, spotlight, flashes };
 })();

@@ -119,7 +119,7 @@
       // wait for the token to finish walking on the big screen before saying where it landed
       const key = 'roll' + q.id;
       if (!celebrated[key]) { celebrated[key] = Date.now(); setTimeout(render, 4000); }
-      if (Date.now() - celebrated[key] < 3800) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. Watch the big screen.`, handHTML());
+      if (Date.now() - celebrated[key] < 3800) return wait('Rolling the dice...', `Roll ${q.i + 1} of ${q.of}. Watch the big screen.`, handHTML(), '🎲');
       if (ownsQ(q)) {
         if (!celebrated[key + 'own']) { celebrated[key + 'own'] = 1; sound.play('fanfare'); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
         return wait('It landed on YOUR property!', `<b>${esc(q.sp)}</b> is yours. Get this question right for <b>double rent</b>.`, handHTML(q.at) + tkLine);
@@ -136,8 +136,8 @@
     if (S.ph === 'podium' || S.ph === 'chest' || S.ph === 'end') return prizes(my);
     wait('Stand by', '');
   }
-  function wait(h, sub, extra) {
-    $('wAv').textContent = me.av; $('wHead').innerHTML = h; $('wSub').innerHTML = sub;
+  function wait(h, sub, extra, icon) {
+    $('wAv').textContent = icon || me.av; $('wAv').classList.toggle('spin', !!icon); $('wHead').innerHTML = h; $('wSub').innerHTML = sub;
     $('wExtra').innerHTML = extra || '';
     $('editMe').classList.toggle('hidden', !!S && !S._stale && S.ph !== 'lobby' && S.ph !== 'rules');
     showScreen('sWait');
@@ -145,8 +145,11 @@
 
   // question
   let barTimer = null;
+  const rankBefore = {}; // where this player stood when each question opened, to show the climb afterwards
   function question(q) {
     showScreen('sQ');
+    const mineNow = mine();
+    if (rankBefore[q.id] == null && mineNow) rankBefore[q.id] = mineNow[1];
     if (!shownAt[q.id]) shownAt[q.id] = Date.now();
     $('qTag').textContent = `${q.sp.toUpperCase()}${q.dbl ? ' · DOUBLE RENT' : ''}`;
     $('qTag').className = 'ptag' + (q.dbl ? ' dbl' : '');
@@ -194,6 +197,7 @@
     el.innerHTML = `<div class="r-head">${a == null ? 'No answer' : right ? 'Right!' : 'Not quite'}</div>
       ${right ? `<div class="r-pts">+${fmt(gain)}</div>${ownsQ(q) ? '<div class="r-line"><b>Double rent: you own this property!</b></div>' : ''}` : ''}
       <div class="r-line">${late ? 'Your answer reached the Bank after time was up.' : a == null ? 'Too slow for the Bank this time.' : right ? pick(RIGHT) : `${pick(WRONG)} It was ${esc(q.opts[S.rv.a])}.`}</div>
+      ${my && rankBefore[q.id] && rankBefore[q.id] !== my[1] ? `<div class="r-move ${my[1] < rankBefore[q.id] ? 'up' : 'down'}">${my[1] < rankBefore[q.id] ? '▲ Up' : '▼ Down'} ${Math.abs(rankBefore[q.id] - my[1])} place${Math.abs(rankBefore[q.id] - my[1]) === 1 ? '' : 's'}</div>` : ''}
       ${my ? `<div style="margin-top:10px;font-weight:800">Cash ${fmt(my[0] * 10)} &middot; #${my[1]} of ${S.n} &middot; 🎟️ ${my[4] || 0} Community Chest ticket${my[4] === 1 ? '' : 's'}</div>` : ''}
       <div class="r-fact">${esc(S.rv.fact)}</div>`;
     if (right && !celebrated[q.id]) { celebrated[q.id] = 1; sound.play('cash'); confetti({ count: 80, colors: MONEY }); if (navigator.vibrate) navigator.vibrate([30, 40, 30]); }
