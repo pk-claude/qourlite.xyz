@@ -68,22 +68,22 @@ window.MONO = {
   // Facts come from the November 2026 AHM deck.
   quiz: [
     {
-      id: 'q1', section: 'HR Update', at: 8, dice: [3, 5], tag: 'HR UPDATE',
+      id: 'q1', section: 'Guest Speaker: SBD', at: 8, dice: [3, 5], tag: 'GUEST SPEAKER: SBD',
+      q: 'What was the largest acquisition in Home Depot\'s history?',
+      opts: ['SRS Distribution (2024)', 'GMS Inc. (2025)', 'Hughes Supply (2006)', 'Interline Brands (2015)'], a: 0,
+      fact: 'SRS Distribution, bought in 2024. Thanks to Stephen Frankiewicz and Strategic Business Development.',
+    },
+    {
+      id: 'q2', section: 'HR Update', at: 16, dice: [4, 4], tag: 'HR UPDATE',
       q: '2027 benefits enrollment is open now. What is happening to medical rates for 2027?',
       opts: ['Up about 5%', 'Staying flat', 'Down about 3%', 'Paid in Monopoly money'], a: 1,
       fact: 'Medical rates stay flat for 2027. Enroll Nov. 5-19 at livetheorangelife.com; benefits start Jan. 1.',
     },
     {
-      id: 'q2', section: 'VOA Update', at: 16, dice: [4, 4], tag: 'VOA UPDATE',
+      id: 'q3', section: 'VOA Update', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
       q: 'How many events has our SC Ops VOA team facilitated?',
       opts: ['5+', '12+', '30+', '100+'], a: 2,
       fact: '30+ events, and 1,850 student readiness kits packed. Coming up: Factor II: Results (Nov 18) and Fall Trivia (Nov 24).',
-    },
-    {
-      id: 'q3', section: 'Guest Speaker: SBD', at: 22, dice: [2, 4], tag: 'CHANCE', double: true,
-      q: 'What was the largest acquisition in Home Depot\'s history?',
-      opts: ['SRS Distribution (2024)', 'GMS Inc. (2025)', 'Hughes Supply (2006)', 'Interline Brands (2015)'], a: 0,
-      fact: 'SRS Distribution, bought in 2024. Thanks to Stephen Frankiewicz and Strategic Business Development.',
     },
     {
       id: 'q4', section: 'HD Yard Driver & EV', at: 26, dice: [1, 3], tag: 'YARD DRIVER & EV',
