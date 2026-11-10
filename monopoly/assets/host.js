@@ -183,6 +183,7 @@
       num.textContent = sec;
       arc.style.strokeDashoffset = C * (1 - left / total);
       arc.parentNode.parentNode.classList.toggle('urgent', sec <= 5);
+      document.body.classList.toggle('urgent', sec <= 5 && left > 0);
       if (sec !== lastSec && sec <= 5 && sec > 0) sound.play('tick');
       lastSec = sec;
       if (left <= 0) { clearInterval(tickTimer); onEnd(); }
@@ -233,9 +234,19 @@
     render(silent);
     broadcast(true);
   }
+  // A double press, a bouncing clicker or a repeated remote tap moves one step, never two;
+  // and a question that only just opened cannot be shut by a stray second press.
+  let lastNext = 0;
   function next() {
+    const now = Date.now();
+    if (now - lastNext < 450) return;
     const st = steps[H.pos], it = qOf(st);
-    if (st.v === 'q' && it && isOpen(it.id)) { timeUp(it); return; }
+    if (st.v === 'q' && it && isOpen(it.id)) {
+      const n = Object.keys(H.players).length, a = Object.keys(H.answers[it.id] || {}).length;
+      if (now - H.opened[it.id] < 3000 && !(n && a >= n)) return;
+      lastNext = now; timeUp(it); return;
+    }
+    lastNext = now;
     go(H.pos + 1);
   }
   function prev() {
@@ -284,7 +295,7 @@
   const tokenAt = i => (i > 0 ? M.quiz[i - 1].at : 0); // where the token sits before roll i
   function markDone() {
     M.quiz.forEach(it => $('sp' + it.at).classList.toggle('done', !!H.scored[it.id]));
-    document.querySelectorAll('.sp.hit').forEach(e => e.classList.remove('hit'));
+    document.querySelectorAll('.sp.hit, .sp.trail').forEach(e => e.classList.remove('hit', 'trail'));
   }
 
   // dice
@@ -319,9 +330,12 @@
     clearInterval(tickTimer);
     if (steps[H.pos].v !== 'podium') CELEBRATE.spotlight(false);
     clearInterval(tagTimer);
+    document.body.classList.remove('urgent');
+    tilt(false);
     const st = steps[H.pos];
     const it = qOf(st);
     music(st, it);
+    renderProg(st);
     $('hudSeg').textContent = it ? `Roll ${st.i + 1} of ${M.quiz.length} · ${it.section}: ${M.board[it.at].n}` : 'Monopoly: All-Hands Edition';
     if (st.v === 'lobby' || st.v === 'rules' || st.v === 'roll') {
       show('vStage'); markDone();
@@ -338,7 +352,20 @@
     else if (st.v === 'podium') renderPodium(silent);
     else if (st.v === 'chest') renderChest(st.k, silent);
     else if (st.v === 'end') renderEnd(silent);
-    renderLeaders();
+    if (silent || st.v !== 'reveal') renderLeaders(); // on a live reveal the scoreboard moves with the answer, not before it
+  }
+  // Six pips in the top bar: which roll we are on, and which are done.
+  function renderProg(st) {
+    const started = !['lobby', 'rules'].includes(st.v);
+    $('prog').innerHTML = M.quiz.map((q, i) => `<i class="${H.scored[q.id] ? 'done' : ''} ${st.i === i ? 'cur' : ''}" title="${esc(q.section)}"></i>`).join('');
+    $('prog').classList.toggle('hidden', !started);
+  }
+  // The board leans back like a table while the forklift drives, then stands up again for the landing.
+  const TILT = !new URLSearchParams(location.search).has('flat') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tilt(on) {
+    const wrap = $('board').parentNode, scene = document.querySelector('.dc-scene');
+    wrap.classList.toggle('tilt', !!on && TILT);
+    try { if (on && TILT) scene.pauseAnimations(); else scene.unpauseAnimations(); } catch (e) {}
   }
   function renderCount() {
     const ids = Object.keys(H.players), bots = ids.filter(id => id.startsWith('bot')).length;
@@ -352,9 +379,19 @@
     const on = v === 'roll' || v === 'q' || v === 'reveal';
     $('leaders').classList.toggle('hidden', !on);
     if (!on) return;
+    const el = $('leaders'), st = steps[H.pos];
+    const before = {};
+    el.querySelectorAll('[data-pid]').forEach(e => (before[e.dataset.pid] = e.getBoundingClientRect().left));
     const r = ranking();
-    $('leaders').innerHTML = `<div class="ld-n"><b class="num">${r.length}</b><span>playing</span></div>` +
-      r.slice(0, 5).map((p, i) => `<div class="ld-p ${i === 0 ? 'first' : ''}"><span class="ld-r">${i + 1}</span><span class="ld-av">${p.av}</span><span class="ld-nm">${esc(p.nm)}</span><span class="ld-c num">${fmt(p.cash)}</span></div>`).join('');
+    const g = v === 'reveal' ? H.gained[qOf(st).id] || {} : {};
+    el.innerHTML = `<div class="ld-n"><b class="num">${r.length}</b><span>playing</span></div>` +
+      r.slice(0, 5).map((p, i) => `<div class="ld-p ${i === 0 ? 'first' : ''}" data-pid="${esc(p.pid)}"><span class="ld-r">${i + 1}</span><span class="ld-av">${p.av}</span><span class="ld-nm">${esc(p.nm)}</span><span class="ld-c num">${fmt(p.cash)}</span>${g[p.pid] ? `<span class="ld-g num">+${fmt(g[p.pid])}</span>` : ''}</div>`).join('');
+    if (!el.animate || !Object.keys(before).length) return;
+    el.querySelectorAll('[data-pid]').forEach(e => {
+      const was = before[e.dataset.pid], now = e.getBoundingClientRect().left;
+      if (was == null) e.animate([{ transform: 'translateY(130%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 550, easing: 'cubic-bezier(.2,1.3,.4,1)' });
+      else if (Math.abs(was - now) > 2) e.animate([{ transform: `translateX(${was - now}px)` }, { transform: 'none' }], { duration: 700, easing: 'cubic-bezier(.2,1,.3,1)' });
+    });
   }
 
   // lobby
@@ -400,6 +437,7 @@
     placeWalker(from);
     $('rollSum').innerHTML = '&nbsp;'; $('rollLand').innerHTML = '&nbsp;';
     const stamp = $('letsDo'); stamp.classList.remove('on'); void stamp.offsetWidth; stamp.classList.add('on');
+    tilt(true);
     MUSIC.sfx.dice();
     showDie($('die1'), d1, true); showDie($('die2'), d2, true);
     await sleep(1400);
@@ -411,13 +449,28 @@
       if (me !== busy) return;
       placeWalker((from + s) % 40);
       w.classList.remove('hop'); void w.offsetWidth; w.classList.add('hop');
+      const cell = $('sp' + ((from + s) % 40)); cell.classList.remove('trail'); void cell.offsetWidth; cell.classList.add('trail');
       await sleep(190);
     }
     if (me !== busy) return;
+    tilt(false);
     land();
     MUSIC.sfx.horn();
+    setTimeout(() => { if (me === busy) landBurst(it); }, 950); // once the board has stood back up
     if (sp.t === 'chance' || it.at === 0) { sound.play('fanfare'); confetti({ count: 120, colors: ['#f96302', '#ffe35a', '#fff'] }); }
     else sound.play('ding');
+  }
+  // A shock ring on the landed space, and the tokens of everyone who owns it flying out of it.
+  function landBurst(it) {
+    const r = $('sp' + it.at).getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const add = (cls, txt, css) => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; d.style.cssText = `left:${cx}px;top:${cy}px;${css || ''}`; document.body.appendChild(d); setTimeout(() => d.remove(), 2400); };
+    add('land-ring', ''); add('land-ring', '', 'animation-delay:.18s');
+    const own = M.ownable.includes(it.at) ? ownersOf(it).slice(0, 36) : [];
+    own.forEach((pid, k) => {
+      const a = Math.random() * 6.283, d = 110 + Math.random() * 240;
+      add('own-fly', H.players[pid].av, `--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 70}px;animation-delay:${k * 22}ms`);
+    });
+    if (own.length) sound.play('pop');
   }
   function landCard(it) {
     const sp = M.board[it.at];
@@ -431,30 +484,45 @@
   }
 
   // question
-  function renderQ(it, st, silent) {
+  // Shrinks the question screen's type until everything fits above the scoreboard, on any laptop or projector.
+  function fitQ() {
+    // measured from layout boxes, which entrance animations and scaling do not disturb
+    const v = $('vQ'), pad = parseFloat(getComputedStyle(v).paddingBottom) || 0;
+    const fits = () => { const kids = [...v.children].filter(e => e.offsetHeight), last = kids[kids.length - 1]; return !last || last.offsetTop + last.offsetHeight <= v.clientHeight - pad + 1; };
+    // the question itself gives way first (on the answer screen it has already been read), then everything else
+    let t = 1, k = 1;
+    v.style.setProperty('--qs', 1); v.style.setProperty('--qt', 1);
+    while (t > 0.56 && !fits()) { t -= 0.04; v.style.setProperty('--qt', t.toFixed(2)); }
+    while (k > 0.5 && !fits()) { k -= 0.04; v.style.setProperty('--qs', k.toFixed(2)); }
+  }
+  async function renderQ(it, st, silent) {
     show('vQ');
     const sp = M.board[it.at];
     $('qSpace').style.setProperty('--c', sp.c ? M.colors[sp.c] : '#fff');
     $('qSpace').querySelector('.qs-n').textContent = sp.n;
     const nOwn = M.ownable.includes(it.at) ? ownersOf(it).length : 0;
-    $('qTag').textContent = it.double ? `${it.tag}: DOUBLE RENT` : nOwn ? `${it.tag} · ${nOwn} OWNERS: DOUBLE RENT` : it.tag;
+    $('qTag').textContent = it.double ? `${it.tag}: DOUBLE RENT` : nOwn ? `${it.tag} · ${nOwn} ${nOwn === 1 ? 'OWNER' : 'OWNERS'}: DOUBLE RENT` : it.tag;
     $('qTag').className = 'q-tag' + (it.double ? ' dbl' : '');
     $('qCount').textContent = `${it.section} · Question ${st.i + 1} of ${M.quiz.length}`;
     $('qText').textContent = it.q;
     const revealed = st.v === 'reveal';
+    const suspense = revealed && !silent; // the bars grow first; the right answer lands a beat later
+    $('vQ').classList.toggle('rv', revealed);
     const d = it.opts.map(() => 0);
     Object.values(H.answers[it.id] || {}).forEach(x => d[x.a]++);
     const tot = Math.max(1, d.reduce((a, b) => a + b, 0));
-    $('opts').className = 'opts' + (revealed ? ' revealed' : '');
+    $('opts').className = 'opts' + (revealed ? ' revealed' : '') + (suspense ? ' pending' : '');
     $('opts').innerHTML = it.opts.map((o, i) => `<div class="opt c${i} ${revealed && i === it.a ? 'right' : ''}" style="--i:${i}">
       <div class="opt-bar" style="--w:${revealed ? (d[i] / tot) * 100 : 0}%"></div>
       <span class="opt-l"><span>${LETTERS[i]}</span></span><span class="opt-t">${esc(o)}</span>
       <span class="opt-n num">${revealed ? `${d[i]} <small>${Math.round((d[i] / tot) * 100)}%</small>` : ''}</span></div>`).join('');
     $('timer').classList.toggle('hidden', revealed);
     $('fact').classList.toggle('on', revealed);
+    $('fact').classList.toggle('wait', suspense);
     $('particip').classList.toggle('hidden', !revealed);
     renderAnswered(it);
     if (!revealed) {
+      fitQ();
       runTimer('timerArc', 'timerNum', H.opened[it.id], () => limitOf(it), () => { if (isOpen(it.id)) timeUp(it); });
       if (!silent) sound.play('whoosh');
       return;
@@ -467,7 +535,15 @@
       ${fp ? `<div class="fast"><div class="kicker" style="color:#8a6d00">Fastest finger</div>${fp.av} ${esc(fp.nm)} <span class="num">${(fast[1].ms / 1000).toFixed(1)}s</span></div>` : ''}
       ${M.ownable.includes(it.at) ? `<div class="fast"><div class="kicker" style="color:#8a6d00">Owners cashed in</div>${Object.keys(g).filter(pid => owns(pid, it)).length} of ${ownersOf(it).length}</div>` : ''}
       <div class="rent"><span class="kicker" style="color:#555">Rent paid out</span><span class="num" id="paid">$0</span>${Object.keys(g).length} players</div>`;
+    fitQ();
     if (silent) { $('paid').textContent = fmt(paid); return; }
+    const me = busy;
+    MUSIC.sfx.riser(1.25);
+    await sleep(1300);
+    if (me !== busy) return;
+    $('opts').classList.remove('pending'); $('fact').classList.remove('wait');
+    MUSIC.sfx.hit();
+    renderLeaders();
     countUp($('paid'), paid, { dur: 1400, fmt });
     if (tot > 0 && d[it.a] / tot >= 0.5) { sound.play('cash'); confetti({ count: 150, colors: MONEY }); }
     else if (d.some(x => x > 0)) { sound.play('trombone'); toast('Most of the room missed that one. Go directly to Jail. Do not pass GO.'); }
@@ -528,8 +604,8 @@
     CELEBRATE.spotlight(true);
     $('champBanner').classList.add('on');
     MUSIC.sfx.fanfare(); setTimeout(() => MUSIC.sfx.applause(5), 900);
-    CELEBRATE.fireworks(7); CELEBRATE.money(70);
-    confetti({ count: 260, spread: 1.6, colors: MONEY }); setTimeout(() => confetti({ count: 200, x: 0.2, colors: MONEY }), 500); setTimeout(() => confetti({ count: 200, x: 0.8, colors: MONEY }), 900);
+    CELEBRATE.fireworks(7); CELEBRATE.money(32);
+    confetti({ count: 140, spread: 1.6, colors: MONEY }); setTimeout(() => confetti({ count: 110, x: 0.12, colors: MONEY }), 500); setTimeout(() => confetti({ count: 110, x: 0.88, colors: MONEY }), 900);
   }
 
   const secs = ms => (ms < 100 ? (ms / 1000).toFixed(3) : (ms / 1000).toFixed(1)) + 's';
@@ -543,7 +619,7 @@
         ? `${esc(a.nm)} and ${esc(b.nm)} tied on ${fmt(a.cash)}: ${esc(a.nm)} answered ${secs((b.tms || 0) - (a.tms || 0))} faster in total.`
         : `${esc(a.nm)} and ${esc(b.nm)} tied on cash and speed: ${esc(a.nm)} joined first.`);
     }
-    return notes.join('<br>');
+    return notes.slice(0, 2).join('<br>');
   }
 
   // community chest
@@ -745,7 +821,7 @@
     else if (kl === 't') addTime();
   });
   $('stage').addEventListener('dblclick', next);
-  addEventListener('resize', () => { const st = steps[H.pos]; if (st.v === 'roll') placeWalker(qOf(st).at); else if (st.v === 'lobby' || st.v === 'rules') placeWalker(0); });
+  addEventListener('resize', () => { const st = steps[H.pos]; if (st.v === 'q' || st.v === 'reveal') fitQ(); if (st.v === 'roll') placeWalker(qOf(st).at); else if (st.v === 'lobby' || st.v === 'rules') placeWalker(0); });
 
   // ---------- boot ----------
   buildBoard();

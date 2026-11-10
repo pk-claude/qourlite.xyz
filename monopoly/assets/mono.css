@@ -650,3 +650,112 @@ body.phone.fit .app { min-height: calc(100dvh - 6px); }
 .champ-banner { top: 1.5%; font-size: clamp(30px, 4vw, 76px); }
 #vPodium .podium { margin-top: 9vh; }
 #spotlight { background: radial-gradient(ellipse 24% 42% at var(--sx, 50%) 60%, rgba(255,240,200,.3), transparent 72%), rgba(0,0,0,.28); }
+
+/* ================= v7: fit on any screen, and more show ================= */
+/* --- the question screen is sized from the smaller of width and height, then fitQ() trims it until it fits --- */
+#vQ { --u: min(1vw, 1.72vh); --qs: 1; gap: calc(var(--u) * 1.15 * var(--qs)); padding: calc(var(--u) * 1) 28px 118px; overflow: hidden; }
+#vQ .q-text { font-size: calc(clamp(1.35rem, var(--u) * 3.5, 4.2rem) * var(--qs) * var(--qt, 1)); padding: calc(var(--u) * 1.1) calc(var(--u) * 1.6); border-top-width: calc(var(--u) * .9); }
+#vQ .q-space .qs-n { font-size: calc(clamp(1rem, var(--u) * 1.5, 1.7rem)); padding: 4px 12px; }
+#vQ .timer { width: calc(var(--u) * 7 * var(--qs)); height: calc(var(--u) * 7 * var(--qs)); }
+#vQ .timer span { font-size: calc(var(--u) * 2.5 * var(--qs)); }
+#vQ .opts { gap: calc(var(--u) * 1 * var(--qs)); }
+#vQ .opt { min-height: calc(var(--u) * 7.2 * var(--qs)); padding: calc(var(--u) * .7 * var(--qs)) calc(var(--u) * 1.4); font-size: calc(clamp(1.1rem, var(--u) * 2.2, 2.6rem) * var(--qs)); }
+#vQ .opt-l { width: calc(var(--u) * 3.4 * var(--qs)); height: calc(var(--u) * 3.4 * var(--qs)); }
+#vQ .fact { font-size: calc(clamp(.95rem, var(--u) * 1.4, 1.7rem) * var(--qs)); padding: calc(var(--u) * .9 * var(--qs)) calc(var(--u) * 1.4); gap: calc(var(--u) * 1.2); }
+#vQ .fact .rent .num { font-size: 1.5em; }
+#vQ .particip { font-size: calc(clamp(1rem, var(--u) * 1.6, 1.9rem) * var(--qs)); padding: 4px 16px; }
+#vQ .particip b { font-size: 1.4em; }
+#vQ.rv .answered { display: none; } /* the participation pill says it on the reveal */
+.fact.wait { visibility: hidden; }
+
+/* --- suspense: the room's answers show first, the right one lands a beat later --- */
+.opts.revealed.pending .opt, .opts.revealed.pending .opt.right { filter: none; outline: none; transform: none; }
+.opts.pending .opt.right .opt-l::after { content: none; }
+.opts.pending .opt.right .opt-l span { display: inline; }
+.opts.pending .opt { animation: hold .32s ease-in-out infinite alternate; }
+@keyframes hold { to { filter: brightness(1.12); } }
+.opts.revealed:not(.pending) .opt.right { animation: rightIn .7s cubic-bezier(.2,1.6,.4,1); box-shadow: 0 8px 0 rgba(0,0,0,.35), 0 0 60px 8px rgba(255,255,255,.45); }
+@keyframes rightIn { 0% { transform: scale(.94); } 55% { transform: scale(1.07); } 100% { transform: scale(1.02); } }
+
+/* --- the last five seconds: the edges of the screen pulse red --- */
+body.urgent::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 14; box-shadow: inset 0 0 140px 30px rgba(200,16,46,.55); animation: edge .5s ease-in-out infinite alternate; }
+@keyframes edge { from { opacity: .35; } to { opacity: 1; } }
+
+/* --- every screen change sweeps in on the diagonal --- */
+.view.on { animation: vwipe .6s cubic-bezier(.65,0,.2,1); }
+@keyframes vwipe { from { clip-path: polygon(0 0, 0 0, -25% 100%, -25% 100%); opacity: .6; } to { clip-path: polygon(0 0, 125% 0, 100% 100%, -25% 100%); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .view.on { animation: none; } }
+
+/* --- progress pips in the top bar --- */
+.prog { display: inline-flex; gap: 7px; margin-left: 18px; vertical-align: middle; }
+.prog i { width: 15px; height: 15px; border-radius: 4px; background: rgba(251,245,227,.16); border: 2px solid rgba(251,245,227,.4); transform: rotate(45deg); transition: all .4s; }
+.prog i.done { background: var(--orange); border-color: var(--orange); }
+.prog i.cur { background: #ffcf73; border-color: #fff; box-shadow: 0 0 14px 3px rgba(255,207,115,.8); animation: pip 1s ease-in-out infinite alternate; }
+@keyframes pip { to { transform: rotate(45deg) scale(1.25); } }
+
+/* --- the roll: the board leans back like a table, the forklift leaves a trail, the landing rings --- */
+.board-wrap { transition: transform 1s cubic-bezier(.3,.9,.3,1); transform-origin: 50% 62%; will-change: transform; }
+.board-wrap.tilt { transform: perspective(1500px) rotateX(34deg) scale(1.02); }
+.board-wrap.tilt .walker { filter: drop-shadow(0 14px 6px rgba(0,0,0,.5)); }
+.sp.trail { animation: trail 1.6s ease-out; }
+@keyframes trail { 0% { box-shadow: inset 0 0 0 99px rgba(249,99,2,.85); } 100% { box-shadow: inset 0 0 0 99px rgba(249,99,2,0); } }
+.land-ring { position: fixed; z-index: 40; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 6px solid var(--orange); pointer-events: none; opacity: 0; animation: ring 1.1s ease-out forwards; }
+@keyframes ring { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(11); opacity: 0; border-width: 1px; } }
+.own-fly { position: fixed; z-index: 41; font-size: 2.2rem; margin: -.6em 0 0 -.6em; pointer-events: none; opacity: 0; animation: ownFly 1.7s cubic-bezier(.15,.8,.3,1) forwards; }
+@keyframes ownFly { 0% { transform: scale(.3); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.5) rotate(20deg); opacity: 0; } }
+.board-center #cLobby { background: rgba(232, 242, 229, .97); }
+
+/* --- scoreboard strip: what each leader just earned --- */
+.ld-p { position: relative; }
+.ld-g { position: absolute; right: 8px; top: -14px; background: #1f6b1a; color: #fff; font-weight: 800; font-size: .95rem; padding: 1px 8px; border-radius: 999px; border: 2px solid #fff; animation: gainIn .6s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes gainIn { from { transform: translateY(14px) scale(.4); opacity: 0; } }
+
+/* --- podium: the winners stand in front of the spotlight, and their names stay readable under the money --- */
+.podium { position: relative; z-index: 32; }
+.pod-nm { background: var(--cream); color: var(--cream-ink); border: 3px solid #2b2118; border-radius: 10px; padding: .08em .6em; margin: 6px 0 4px; white-space: nowrap; box-shadow: 0 5px 0 rgba(0,0,0,.35); position: relative; z-index: 2; }
+.pod { width: 280px; } .p1 { z-index: 3; }
+.pod-nm:empty, .pod-sc:empty { display: none; }
+.p1 .pod-nm { font-size: 2.3rem; background: #fff4c9; border-color: var(--red); }
+.pod-sc { font-weight: 800; font-size: 1.6rem; text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+.champ-banner { top: 3%; font-size: clamp(26px, 3.6vw, 66px); z-index: 33; }
+#vPodium > .kicker { visibility: hidden; }
+.bill-fall { opacity: .92; }
+.tie-note { position: relative; z-index: 32; }
+
+/* --- phone: dice tumble while the big screen rolls; how far you climbed after each answer --- */
+#wAv.spin { animation: dieSpin .8s cubic-bezier(.5,0,.5,1) infinite; display: inline-block; }
+@keyframes dieSpin { 0% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(1.25); } 100% { transform: rotate(360deg) scale(1); } }
+.r-move { display: inline-block; margin-top: 8px; padding: 3px 14px; border-radius: 999px; font-weight: 900; color: #fff; background: #1f6b1a; animation: gainIn .6s cubic-bezier(.2,1.6,.4,1) both; }
+.r-move.down { background: #8a1f1f; }
+
+/* ================= v8: midnight palette, and room for the DC to be seen ================= */
+/* A deep navy table with a faint blueprint grid replaces the wood: orange, cream and the property colours all read brighter on it. */
+:root {
+  --felt: #13294b; --felt2: #050b16;
+  --muted: #b9c6da; --line: rgba(190,215,255,.2); --panel: rgba(6,14,28,.6);
+}
+body {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(249,99,2,.20), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(150,190,255,.055) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(150,190,255,.055) 0 1px, transparent 1px 48px),
+    radial-gradient(ellipse at 50% 35%, #1b3a66 0%, var(--felt) 45%, var(--felt2) 100%) fixed;
+}
+.board { border-color: #0a1424; box-shadow: 0 30px 80px rgba(0,0,0,.65), 0 0 0 12px #0a1424, 0 0 0 15px var(--orange), 0 0 70px 10px rgba(249,99,2,.18); }
+.sp { border-color: #1c2733; }
+.board-center { background: #d6e4dc; }
+.mini-join { background: rgba(4,10,22,.72); border: 1px solid var(--line); }
+.hud .pill { backdrop-filter: blur(4px); }
+#spotlight { background: radial-gradient(ellipse 22% 38% at var(--sx, 50%) 58%, rgba(255,240,200,.3), transparent 70%), rgba(2,6,14,.5); }
+/* the cards in the middle of the board are smaller, so the DC working around them is in view */
+.board-center .center-pane { background: rgba(247, 250, 246, .95); backdrop-filter: none; border-color: #0a1424; box-shadow: 0 14px 0 rgba(10,20,36,.28), 0 20px 40px rgba(0,0,0,.25); }
+.board-center #cLobby { width: 58%; padding: 2.2% 2.4%; gap: 1.1vh; background: rgba(247, 250, 246, .97); }
+.board-center #cLobby .c-logo { font-size: clamp(16px, 2.1vw, 40px); }
+.board-center #cLobby .c-qr { width: 62%; }
+.board-center #cLobby .c-url { font-size: clamp(12px, 1.15vw, 22px); }
+.board-center #cLobby .c-sub { font-size: clamp(10px, .85vw, 16px); }
+.board-center #cRoll { width: 50%; padding: 1.6% 2%; gap: 1.2vh; }
+.board-center #cRoll .roll-total { font-size: clamp(16px, 2vw, 38px); }
+.board-center #cLobby .c-url { overflow-wrap: anywhere; max-width: 100%; }
+.tie-note { font-size: clamp(.85rem, 1.15vw, 1.15rem); margin-top: 8px; }
+.ld-p { column-gap: 6px; padding: 6px 8px; } .ld-nm { font-size: .95rem; } .ld-av { font-size: 1.35rem; } .ld-r { font-size: 1.5rem; }

@@ -279,6 +279,26 @@
       const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.05, t0 + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.2);
       n.connect(f).connect(g).connect(bus); n.start(t0); n.stop(t0 + 2.3);
     },
+    // suspense before an answer: a rising whoosh over a quickening timpani roll
+    riser(sec = 1.2) {
+      const bus = sfxBus(); if (!bus) return;
+      const t0 = ctx.currentTime;
+      const n = ctx.createBufferSource(); n.buffer = noiseBuf; n.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2.5;
+      f.frequency.setValueAtTime(300, t0); f.frequency.exponentialRampToValueAtTime(6000, t0 + sec);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.11, t0 + sec * 0.95); g.gain.exponentialRampToValueAtTime(0.0001, t0 + sec + 0.05);
+      n.connect(f).connect(g).connect(bus); n.start(t0); n.stop(t0 + sec + 0.1);
+      let t = t0, gap = 0.16, v = 0.1;
+      while (t < t0 + sec - 0.03) { tone(bus, 87, t, 0.12, { vol: v, slide: -15 }); t += gap; gap = Math.max(0.045, gap * 0.86); v = Math.min(0.3, v * 1.12); }
+    },
+    // the answer lands: a deep drum, a bright chord and a splash
+    hit() {
+      const bus = sfxBus(); if (!bus) return;
+      const t = ctx.currentTime;
+      tone(bus, 70, t, 0.7, { vol: 0.55, slide: -35 });
+      [60, 67, 72, 76].forEach(m => tone(bus, hz(m), t, 0.7, { type: 'triangle', vol: 0.07 }));
+      burst(bus, t, { dur: 0.6, vol: 0.1, type: 'highpass', f: 4500, q: 0.4 });
+    },
     // coins spilling out of the Community Chest
     coins(sec = 1.4) {
       const bus = sfxBus(); if (!bus) return;
