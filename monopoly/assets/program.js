@@ -99,9 +99,9 @@ window.MONO = {
     },
     {
       id: 'q6', section: 'Final Thoughts', at: 0, dice: [6, 3], tag: 'BACK TO GO', double: true,
-      q: 'Fill in our team mission: "Run Today. ______ Tomorrow."',
-      opts: ['Win', 'Reinvent', 'Own', 'Rest'], a: 1,
-      fact: '"Our job is to run today while reinventing tomorrow." - Joanna Kronberg',
+      q: 'How many stores does The Home Depot have?',
+      opts: ['About 1,350', 'About 1,850', 'About 2,350', 'About 3,350'], a: 2,
+      fact: 'About 2,350 stores.',
     },
   ],
 
