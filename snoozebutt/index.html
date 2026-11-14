@@ -245,12 +245,20 @@
   var d = new Date(Date.now() + 60000);
   $('time').value = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
   window.__dbg = function (i) { forced = i; };   // used only for checking frames
-  // start wiggling with lights straight away; sound needs one tap (browser rule)
-  dancing = true; body.classList.add('dancing'); $('dance').textContent = 'Stop'; status('Tap anywhere for sound.');
-  document.addEventListener('pointerdown', function once() {
-    document.removeEventListener('pointerdown', once);
-    if (dancing && !timer) { setDancing(true); if (!alarmOn) status('Shake it.'); }
-  });
+  // start wiggling and try the music straight away. Browsers that block autoplay
+  // keep the sound suspended; it then starts on the first tap, click or key.
+  dancing = true; body.classList.add('dancing'); $('dance').textContent = 'Stop';
+  setDancing(true);
+  function playing() { return ctx && ctx.state === 'running'; }
+  status(playing() ? 'Shake it.' : 'Tap anywhere for sound.');
+  if (ctx) ctx.addEventListener('statechange', function () { if (playing() && dancing && !alarmOn) status('Shake it.'); });
+  var kick = ['pointerdown', 'touchend', 'click', 'keydown'];
+  function once() {
+    if (!audio() || !dancing) return;
+    if (!timer) setDancing(true);
+    if (playing()) { kick.forEach(function (t) { document.removeEventListener(t, once, true); }); if (!alarmOn) status('Shake it.'); }
+  }
+  kick.forEach(function (t) { document.addEventListener(t, once, true); });
   requestAnimationFrame(frame);
 })();
 </script>

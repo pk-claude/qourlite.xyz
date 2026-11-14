@@ -1,27 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <style>
-        body { font-family: system-ui; margin: 40px; line-height: 1.6; }
-        h1 { color: #333; }
-        a { color: #0066cc; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 10px 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>qourlite.xyz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0d0b14; --ink: #f6f1ff; --mute: #a69cbf; --line: rgba(255,255,255,.1); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: "Bricolage Grotesque", system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* drifting colour blobs */
+  .blobs { position: fixed; inset: 0; z-index: -1; filter: blur(80px); opacity: .55; pointer-events: none; }
+  .blobs i { position: absolute; width: 42vmax; height: 42vmax; border-radius: 50%; animation: drift 22s ease-in-out infinite alternate; }
+  .blobs i:nth-child(1) { background: #ff5b2e; left: -12vmax; top: -12vmax; }
+  .blobs i:nth-child(2) { background: #7a3cff; right: -14vmax; top: 10vh; animation-duration: 27s; animation-delay: -6s; }
+  .blobs i:nth-child(3) { background: #00c2a8; left: 30vw; bottom: -22vmax; animation-duration: 31s; animation-delay: -12s; }
+  @keyframes drift { 50% { transform: translate(8vw, 6vh) scale(1.15); } 100% { transform: translate(-6vw, 10vh) scale(.9); } }
+  .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  header { text-align: center; padding: 64px 16px 28px; }
+  h1 { margin: 0; font-weight: 800; font-size: clamp(44px, 9vw, 104px); letter-spacing: -.04em; line-height: .95; display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+  h1 .ch { display: inline-block; animation: hop 3.6s ease-in-out infinite; animation-delay: calc(var(--i) * .09s); }
+  @keyframes hop { 0%, 70%, 100% { transform: none; } 78% { transform: translateY(-.14em) rotate(-6deg); } 86% { transform: translateY(.03em) rotate(3deg); } }
+  h1 .dot { color: #ff5b2e; }
+  .eye { display: inline-grid; place-items: center; width: .78em; height: .78em; margin: 0 .02em; border-radius: 50%; background: #fff; vertical-align: middle; box-shadow: inset 0 -.06em 0 rgba(0,0,0,.18); }
+  .eye b { width: .36em; height: .36em; border-radius: 50%; background: #111; transition: transform .08s linear; }
+  .tag { margin: 18px auto 0; max-width: 560px; color: var(--mute); font-size: clamp(16px, 2.2vw, 20px); font-weight: 500; }
+  .tag em { font-style: normal; color: var(--ink); background: linear-gradient(transparent 60%, rgba(255,91,46,.55) 60%); }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 16px 16px 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; perspective: 1200px; }
+  @media (max-width: 960px) { main { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { main { grid-template-columns: 1fr; gap: 22px; } header { padding-top: 44px; } }
+
+  .card { position: relative; display: block; color: inherit; text-decoration: none; border-radius: 20px; padding: 10px;
+    background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03)); border: 1px solid var(--line);
+    transform-style: preserve-3d; transform: rotateX(var(--rx, 0)) rotateY(var(--ry, 0)); transition: transform .25s ease, box-shadow .25s ease, border-color .25s;
+    opacity: 0; animation: rise .7s cubic-bezier(.2,.9,.3,1.3) forwards; animation-delay: calc(var(--n) * .08s + .2s); }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px) scale(.94); } to { opacity: 1; transform: none; } }
+  .card:hover, .card:focus-visible { border-color: var(--c); box-shadow: 0 24px 60px -18px var(--c); outline: none; }
+  .card.live { animation: none; opacity: 1; transition: transform .08s linear, box-shadow .25s, border-color .25s; }
+
+  .shot { position: relative; aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,.08); }
+  .shot .bar { position: absolute; z-index: 2; inset: 0 0 auto; height: 22px; display: flex; gap: 6px; align-items: center; padding: 0 10px; background: rgba(13,11,20,.82); backdrop-filter: blur(6px); }
+  .shot .bar i { width: 8px; height: 8px; border-radius: 50%; background: #ff5f57; }
+  .shot .bar i:nth-child(2) { background: #febc2e; } .shot .bar i:nth-child(3) { background: #28c840; }
+  .shot .bar span { margin-left: 8px; font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.02); transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+  .card:hover .shot img { transform: scale(1.12) translateY(-2%); }
+  .shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform: translateX(-120%); }
+  .card:hover .shot::after { transform: translateX(120%); transition: transform .9s ease; }
+
+  .sticker { position: absolute; z-index: 3; top: -12px; right: -10px; padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 13px;
+    background: var(--c); color: #120d1c; transform: rotate(8deg) translateZ(40px); box-shadow: 0 6px 16px rgba(0,0,0,.4); animation: wobble 2.8s ease-in-out infinite; }
+  @keyframes wobble { 50% { transform: rotate(-4deg) translateZ(40px) scale(1.06); } }
+
+  .meta { padding: 14px 6px 6px; transform: translateZ(24px); }
+  .meta h2 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.01em; display: flex; justify-content: space-between; gap: 8px; }
+  .meta h2 .go { color: var(--c); transition: transform .25s; }
+  .card:hover .go { transform: translateX(6px) rotate(-12deg); }
+  .meta p { margin: 6px 0 0; color: var(--mute); font-size: 15px; line-height: 1.4; }
+
+  footer { text-align: center; color: var(--mute); font-size: 14px; padding: 20px 16px 48px; }
+  footer button { font: inherit; color: var(--ink); background: none; border: 1px dashed var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  footer button:hover { border-color: #ff5b2e; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .card { opacity: 1; }
+  }
+</style>
 </head>
 <body>
-    <h1>Documents</h1>
-    <ul>
-        <li><a href="/docs/document1.html">Document 1</a></li>
-        <li><a href="/kaiju/">Kaiju Rampage (game prototype)</a></li>
-        <li><a href="/q2/">Earnings Unpacked: Q2 live session</a></li>
-        <li><a href="/monopoly/">Monopoly: All-Hands Edition (November 2026 AHM)</a></li>
-        <li><a href="/wfo/">WFO All Hands: live activities (November 9, 2026)</a></li>
-        <li><a href="/snoozebutt/">Snooze Butt-on (wiggle alarm)</a></li>
-    </ul>
+<div class="blobs"><i></i><i></i><i></i></div>
+<div class="grain"></div>
+
+<header>
+  <h1 aria-label="qourlite.xyz">
+    <span class="ch" style="--i:0">q</span><span class="eye" aria-hidden="true"><b></b></span><span class="ch" style="--i:2">u</span><span class="ch" style="--i:3">r</span><span class="ch" style="--i:4">l</span><span class="ch" style="--i:5">i</span><span class="ch" style="--i:6">t</span><span class="ch" style="--i:7">e</span><span class="ch dot" style="--i:8">.</span><span class="ch" style="--i:9">x</span><span class="ch" style="--i:10">y</span><span class="ch" style="--i:11">z</span>
+  </h1>
+  <p class="tag">A playground of slightly unhinged web toys. <em>Productivity not guaranteed.</em></p>
+</header>
+
+<main>
+  <a class="card" href="/snoozebutt/" style="--n:0; --c:#ffb347">
+    <span class="sticker">NEW</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/snoozebutt</span></div><img src="/home/snoozebutt.webp" alt="Snooze Butt-on: a dancing chihuahua under club lasers"></div>
+    <div class="meta"><h2>Snooze Butt-on <span class="go">&rarr;</span></h2><p>An alarm clock that is a chihuahua's rear end. Twenty smacks to snooze.</p></div>
+  </a>
+  <a class="card" href="/kaiju/" style="--n:1; --c:#ff8a3d">
+    <span class="sticker">3D</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/kaiju</span></div><img src="/home/kaiju.webp" alt="Kaiju Rampage: a monster in a 3D Manhattan at sunset"></div>
+    <div class="meta"><h2>Kaiju Rampage <span class="go">&rarr;</span></h2><p>Real Manhattan. Real building heights. No building permits.</p></div>
+  </a>
+  <a class="card" href="/q2/" style="--n:2; --c:#ff6a00">
+    <span class="sticker">LIVE QUIZ</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/q2</span></div><img src="/home/q2.webp" alt="Earnings Unpacked: Q2 headline numbers and quiz tiles"></div>
+    <div class="meta"><h2>Earnings Unpacked <span class="go">&rarr;</span></h2><p>Q2 earnings, explained to people who skipped finance class.</p></div>
+  </a>
+  <a class="card" href="/monopoly/" style="--n:3; --c:#e8323c">
+    <span class="sticker">PASS GO</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/monopoly</span></div><img src="/home/monopoly.webp" alt="Monopoly All-Hands Edition: a game board of distribution centers"></div>
+    <div class="meta"><h2>Monopoly: All-Hands <span class="go">&rarr;</span></h2><p>Collect $200. Avoid the Damage Cage. Mind the forklifts.</p></div>
+  </a>
+  <a class="card" href="/wfo/" style="--n:4; --c:#ff7a1a">
+    <span class="sticker">VROOM</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/wfo</span></div><img src="/home/wfo.webp" alt="WFO All Hands: forklifts racing to the finish line for votes"></div>
+    <div class="meta"><h2>WFO All Hands <span class="go">&rarr;</span></h2><p>Forklifts drag-race for your vote. Leftovers debate settled at last.</p></div>
+  </a>
+  <a class="card" href="/docs/document1.html" style="--n:5; --c:#9aa6ff">
+    <span class="sticker">A CLASSIC</span>
+    <div class="shot"><div class="bar"><i></i><i></i><i></i><span>qourlite.xyz/docs/document1</span></div><img src="/home/docs.webp" alt="Document 1: a plain test page"></div>
+    <div class="meta"><h2>Document 1 <span class="go">&rarr;</span></h2><p>Where it all began. A test page. It was, in fact, tested.</p></div>
+  </a>
+</main>
+
+<footer><button id="surprise" type="button">I'm feeling lucky</button></footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pupil = document.querySelector('.eye b'), eye = document.querySelector('.eye');
+  // googly eye follows the pointer
+  window.addEventListener('pointermove', function (e) {
+    var r = eye.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    var a = Math.atan2(dy, dx), d = Math.min(r.width * 0.2, Math.hypot(dx, dy) / 12);
+    pupil.style.transform = 'translate(' + Math.cos(a) * d + 'px,' + Math.sin(a) * d + 'px)';
+  });
+  // 3D tilt on hover (mouse only)
+  if (!reduce) document.querySelectorAll('.card').forEach(function (c) {
+    c.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      c.classList.add('live'); c.style.setProperty('--ry', (x * 14) + 'deg'); c.style.setProperty('--rx', (-y * 14) + 'deg');
+    });
+    c.addEventListener('pointerleave', function () { c.style.setProperty('--ry', '0deg'); c.style.setProperty('--rx', '0deg'); });
+  });
+  // random page
+  var links = Array.prototype.map.call(document.querySelectorAll('.card'), function (c) { return c.getAttribute('href'); });
+  document.getElementById('surprise').addEventListener('click', function () { location.href = links[Math.floor(Math.random() * links.length)]; });
+})();
+</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
