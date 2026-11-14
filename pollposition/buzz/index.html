@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex">
+<title>Poll Position - Buzzer</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#0e2320;color:#f6edd9;font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center}
+h1{margin:0;font-size:34px}
+input{font:inherit;font-size:28px;text-align:center;text-transform:uppercase;width:180px;padding:10px;border-radius:10px;border:0}
+button{font:inherit;font-size:22px;font-weight:700;border:0;border-radius:14px;padding:16px 22px;background:#63e2b9;color:#0e2320;width:100%;max-width:340px}
+#buzz{width:min(78vw,56vh);height:min(78vw,56vh);max-width:none;border-radius:50%;background:#ff6b4a;color:#fff;font-size:44px;box-shadow:0 12px 0 #a83a22;touch-action:manipulation}
+#buzz:active,#buzz.hit{transform:translateY(8px);box-shadow:0 4px 0 #a83a22}
+#msg{min-height:24px;color:#ffd166}
+.hide{display:none}
+</style>
+</head>
+<body>
+<h1>Poll Position</h1>
+<div id="join">
+  <p>Enter the game code from the big screen</p>
+  <p><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters"></p>
+  <p><button onclick="join(0)">Join team 1 (left side)</button></p>
+  <p><button onclick="join(1)">Join team 2 (right side)</button></p>
+</div>
+<div id="play" class="hide">
+  <p id="who"></p>
+  <button id="buzz">BUZZ</button>
+  <p><a href="" style="color:#63e2b9">Change team or code</a></p>
+</div>
+<div id="msg"></div>
+<script>
+const pid = Math.random().toString(36).slice(2, 10), msg = document.getElementById('msg');
+let sid = '', team = 0, n = 0;
+function send(k) {
+  return fetch('/api/relay?room=pollposition&k=up', {method: 'POST', headers: {'content-type': 'application/json'},
+    body: JSON.stringify({id: pid + '-' + k + '-' + (n++), sid, p: pid, k, team, t: Date.now()})}).then(r => { if (!r.ok) throw 0; });
+}
+function join(t) {
+  sid = document.getElementById('code').value.trim().toUpperCase(); team = t;
+  if (!/^[A-Z0-9]{4}$/.test(sid)) { msg.textContent = 'Type the 4-character code first.'; return; }
+  send('join').then(() => {
+    document.getElementById('join').className = 'hide'; document.getElementById('play').className = '';
+    document.getElementById('who').textContent = 'Team ' + (t + 1) + ' buzzer. Game ' + sid + '.'; msg.textContent = '';
+  }).catch(() => { msg.textContent = 'Could not connect. Check your signal and try again.'; });
+}
+const b = document.getElementById('buzz');
+b.addEventListener('pointerdown', () => {
+  b.classList.add('hit'); setTimeout(() => b.classList.remove('hit'), 300);
+  send('buzz').then(() => { msg.textContent = 'Sent!'; setTimeout(() => msg.textContent = '', 1200); }).catch(() => { msg.textContent = 'Not sent. Check your signal.'; });
+});
+</script>
+</body>
+</html>

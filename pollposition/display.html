@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Poll Position - Audience screen</title>
+<style>
+:root{--bg:#0e2320;--panel:#17362f;--line:#2c5a50;--cream:#f6edd9;--ink:#1b2a27;--coral:#ff6b4a;--mint:#63e2b9;--gold:#ffd166}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% -10%,#225248,var(--bg) 70%);color:var(--cream);font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column;padding:2vh 3vw;gap:2vh}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3vh}
+.logo{font-size:13vw;font-weight:900;letter-spacing:-.03em;line-height:.9;color:var(--cream);text-shadow:.5vw .5vw 0 var(--coral)}
+.sub{font-size:3vw;color:var(--mint);letter-spacing:.2em;text-transform:uppercase}
+.vs{font-size:4vw;font-weight:700}.vs span{color:var(--coral);padding:0 1vw}
+.join{font-size:2.2vw;background:var(--panel);border:2px solid var(--line);border-radius:1vw;padding:1.5vh 2vw}
+.join b{color:var(--gold);letter-spacing:.15em}
+.bar{display:flex;align-items:stretch;gap:2vw}
+.team{flex:1;background:var(--panel);border:.4vw solid var(--line);border-radius:1.5vw;padding:1vh 1.5vw;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.team .tn{font-size:2.6vw;font-weight:700}.team .ts{font-size:5vw;font-weight:900;color:var(--gold)}
+.team.ctl{border-color:var(--mint)}
+.team.buzz{border-color:var(--coral);background:var(--coral);color:var(--ink);animation:pulse .5s 4}
+.team.buzz .ts{color:var(--ink)}
+@keyframes pulse{50%{transform:scale(1.04)}}
+.mid{width:20vw;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.rl{font-size:1.6vw;color:var(--mint);text-transform:uppercase;letter-spacing:.12em}
+.pot{font-size:6vw;font-weight:900;line-height:1}
+.q{font-size:3.4vw;font-weight:700;text-align:center;min-height:9vh;display:flex;align-items:center;justify-content:center}
+.board{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;gap:1.4vh 1.5vw}
+.tile{background:var(--panel);border:.25vw dashed var(--line);border-radius:1.2vw;display:flex;align-items:center;justify-content:center;font-size:4vw;font-weight:900;color:var(--line);min-height:0}
+.tile.open{background:var(--cream);color:var(--ink);border:.25vw solid var(--cream);justify-content:space-between;padding:0 1.5vw;font-size:2.8vw;font-weight:700;gap:1vw}
+.tile.open .ap{background:var(--ink);color:var(--gold);border-radius:.8vw;padding:.4vh 1vw;font-weight:900;min-width:5vw;text-align:center}
+.tile.flip{animation:flip .5s}
+@keyframes flip{0%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+.strikes{height:7vh;display:flex;justify-content:center;gap:1.5vw}
+.strikes b,.bigx b{display:inline-flex;align-items:center;justify-content:center;background:var(--coral);color:var(--cream);border-radius:50%;font-weight:900}
+.strikes b{width:7vh;height:7vh;font-size:4.5vh}
+.bigx{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:3vw;background:rgba(0,0,0,.55);animation:pop 1.3s forwards;pointer-events:none}
+.bigx b{width:24vw;height:24vw;font-size:18vw}
+@keyframes pop{0%{transform:scale(.3);opacity:0}15%{transform:scale(1.05);opacity:1}80%{opacity:1}100%{opacity:0}}
+table.lt{flex:1;width:100%;border-collapse:separate;border-spacing:1vw 1.2vh;font-size:2.8vw}
+.lt td{background:var(--panel);border-radius:1vw;padding:0 1.5vw;height:9vh}
+.lt td.ln{width:5vw;background:none;color:var(--mint);font-weight:900;text-align:center}
+.lt td.lp{width:9vw;text-align:center;font-weight:900;color:var(--gold)}
+.lt td.on{background:var(--cream);color:var(--ink);font-weight:700}
+.lt td.lp.on{background:var(--ink);color:var(--gold)}
+.lfoot{display:flex;justify-content:space-between;align-items:center;font-size:3vw;font-weight:700}
+.lfoot .big{font-size:6vw;font-weight:900;color:var(--gold)}
+.lfoot .timer{color:var(--coral)}
+.won{color:var(--mint)}
+.hint{position:fixed;bottom:1vh;right:1vw;font-size:1.1vw;opacity:.45}
+</style>
+<script src="questions.js"></script>
+</head>
+<body>
+<div id="app"><div class="center"><div class="sub">Open this screen from the host page</div></div></div>
+<div class="hint" id="hint">Click anywhere for full screen</div>
+<script>
+const G = window.GAME, app = document.getElementById('app');
+let S = null;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const team = i => `<div class="team ${S.buzz===i?'buzz':''} ${S.control===i?'ctl':''}"><div class="tn">${esc(S.teams[i].name)}</div><div class="ts">${S.teams[i].score}</div></div>`;
+
+function render(fx) {
+  if (!S || !G) return;
+  let h = '';
+  if (S.phase === 'title') {
+    h = `<div class="center"><div class="logo">${esc(G.title)}</div><div class="sub">${esc(G.subtitle)}</div>
+      <div class="vs">${esc(S.teams[0].name)}<span>vs</span>${esc(S.teams[1].name)}</div>
+      ${S.phones ? `<div class="join">Phone buzzers: go to <b>${esc(S.joinUrl)}</b> and enter code <b>${esc(S.sid)}</b></div>` : ''}</div>`;
+  } else if (S.phase === 'round') {
+    const r = G.rounds[S.ri];
+    const tiles = r.a.map((a, i) => S.revealed[i]
+      ? `<div class="tile open ${fx.reveal===i?'flip':''}"><span>${esc(a[0])}</span><span class="ap">${a[1]}</span></div>`
+      : `<div class="tile">${i+1}</div>`).join('');
+    h = `<div class="bar">${team(0)}<div class="mid"><div class="rl">Round ${S.ri+1}${r.mult>1 ? ' - ' + (r.mult===2?'double':'triple') + ' points' : ''}</div><div class="pot">${S.pot}</div></div>${team(1)}</div>
+      <div class="q">${S.showQ ? esc(r.q) : ''}</div>
+      <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length/2)},1fr)">${tiles}</div>
+      <div class="strikes">${'<b>X</b>'.repeat(S.strikes)}</div>`;
+  } else if (S.phase === 'lightning') {
+    const cell = (p, i) => { const a = S.la[p][i], hide = p===0 && S.hideP1;
+      return `<td class="${a.st&&!hide?'on':''}">${a.st&&!hide?esc(a.t):''}</td><td class="lp ${a.sp&&!hide?'on':''}">${a.sp&&!hide?a.p:''}</td>`; };
+    const total = S.la.flat().reduce((n, a) => n + (a.sp ? Number(a.p)||0 : 0), 0);
+    h = `<div class="bar"><div class="mid" style="width:100%"><div class="rl">Lightning round</div></div></div>
+      <table class="lt">${[0,1,2,3,4].map(i => `<tr><td class="ln">${i+1}</td>${cell(0,i)}${cell(1,i)}</tr>`).join('')}</table>
+      <div class="lfoot"><div class="timer">Time: ${S.timer}</div><div class="${total>=G.lightningTarget?'won':''}">${total>=G.lightningTarget?'Target reached!':'Target: '+G.lightningTarget}</div><div>Total <span class="big">${total}</span></div></div>`;
+  } else if (S.phase === 'winner') {
+    const [a, b] = S.teams;
+    const w = a.score === b.score ? "It's a tie!" : esc((a.score > b.score ? a : b).name) + ' wins!';
+    h = `<div class="center"><div class="sub">Final score</div><div class="logo" style="font-size:9vw">${w}</div>
+      <div class="vs">${esc(a.name)} ${a.score}<span>-</span>${b.score} ${esc(b.name)}</div></div>`;
+  }
+  if (fx.strike) h += `<div class="bigx">${'<b>X</b>'.repeat(fx.strike)}</div>`;
+  app.innerHTML = h;
+}
+
+window.addEventListener('message', e => { if (e.data && e.data.S) { S = e.data.S; render(e.data.fx || {}); } });
+if (window.opener) window.opener.postMessage({hello: 1}, '*');
+// Buzzer keys pressed while this window has focus are passed to the host window.
+document.addEventListener('keydown', e => { if (window.opener) window.opener.postMessage({key: e.code}, '*'); if (/^Page|^Arrow|^Space/.test(e.code)) e.preventDefault(); });
+document.addEventListener('click', () => { document.getElementById('hint').style.display = 'none'; if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); });
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
