@@ -7,51 +7,66 @@
 <title>REPLY ALL - Host screen</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f1eff8;color:#14123a;font-family:"Segoe UI",system-ui,Arial,sans-serif;font-size:15px}
-header{background:#0a0a1f;color:#fff8ea;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:0;z-index:2}
-header h1{font-size:20px;margin:0 16px 0 0;letter-spacing:.02em}
-main{max-width:1120px;margin:0 auto;padding:14px 16px 60px}
+body{margin:0;background:#f1eff8;color:#14123a;font-family:"Segoe UI",system-ui,Arial,sans-serif;font-size:14px}
+header{background:#0a0a1f;color:#fff8ea;padding:6px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:sticky;top:0;z-index:2}
+header h1{font-size:17px;margin:0 8px 0 0;letter-spacing:.02em}
+main{max-width:1340px;margin:0 auto;padding:8px 12px 30px}
 button,select,input{font:inherit}
-button{border:1px solid #a9a4c8;background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer}
+button{border:1px solid #a9a4c8;background:#fff;border-radius:7px;padding:5px 10px;cursor:pointer}
 button:hover{background:#ece8ff}
 button.on{background:#14123a;color:#fff;border-color:#14123a}
 header button.on{background:#ffe14d;color:#0a0a1f;border-color:#ffe14d;font-weight:700}
 button.go{background:#6c4cff;color:#fff;border-color:#6c4cff;font-weight:600}
 button.bad{background:#e5263a;color:#fff;border-color:#e5263a;font-weight:600}
 button.fun{background:#ff3d8b;color:#fff;border-color:#ff3d8b;font-weight:600}
+button.live{background:#1f9d55;color:#fff;border-color:#1f9d55;font-weight:600}
+button.next{font-size:17px;padding:8px 18px}
 button:disabled{opacity:.4;cursor:default}
-.card{background:#fff;border:1px solid #dcd8ee;border-radius:12px;padding:12px 14px;margin-top:12px}
-.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#6a6690;margin:0 0 8px}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.scores input.nm{width:60%;font-weight:600;padding:6px}
-.scores input.sc{width:90px;font-size:22px;font-weight:700;text-align:center;padding:4px}
-.qtext{font-size:22px;font-weight:600;margin:6px 0 10px}
-.ans{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.ans button{text-align:left;display:flex;justify-content:space-between;gap:10px;font-size:16px}
-.ans button.done{background:#e6e3f2;color:#8582a3;text-decoration:line-through}
-.status{font-weight:700;padding:4px 10px;border-radius:6px;background:#fff3c4}
+.card{background:#fff;border:1px solid #dcd8ee;border-radius:10px;padding:9px 12px;margin-top:8px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6a6690;margin:8px 0 5px}
+.card h2:first-child{margin-top:0}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row+.row{margin-top:6px}
+.cols{display:grid;grid-template-columns:1.35fr 1fr;gap:8px;align-items:start}
+.top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.top input.nm{width:150px;font-weight:600;padding:5px}
+.top input.sc{width:74px;font-size:19px;font-weight:700;text-align:center;padding:2px}
+.qtext{font-size:19px;font-weight:600;margin:6px 0 8px}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.ans button{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px;padding:4px 8px}
+.ans button small{display:block;font-size:11.5px;color:#6a6690;font-weight:400}
+.ans button.done{background:#e6e3f2;color:#8582a3}
+.ans button span>i{font-style:normal}.ans button.done span>i{text-decoration:line-through}
+kbd{display:inline-block;min-width:19px;text-align:center;border:1px solid #a9a4c8;border-bottom-width:2px;border-radius:4px;font:600 11px Consolas,monospace;padding:0 3px;background:#f6f4ff;color:#14123a}
+.status{font-weight:700;padding:3px 9px;border-radius:6px;background:#fff3c4}
 .status.hot{background:#ff3d8b;color:#fff}
-.muted{color:#6a6690;font-size:13px}
+.muted{color:#6a6690;font-size:12.5px}
 .err{background:#ffe2e5;border:2px solid #e5263a;padding:16px;margin:20px;border-radius:10px;font-size:17px}
 table.l{width:100%;border-collapse:collapse}
-table.l td{padding:6px 4px;border-top:1px solid #e8e5f3;vertical-align:top}
-table.l input.t{width:150px;padding:5px}table.l input.p{width:56px;padding:5px;text-align:center}
-.chips button{padding:3px 8px;font-size:13px;margin:2px 2px 0 0}
-.big{font-size:26px;font-weight:700}
-input.wide{flex:1;min-width:220px;padding:7px}
-.chipbar{background:#14123a;color:#fff8ea;border-color:#14123a}
-.chipbar h2{color:#2de2e6}.chipbar .muted{color:#b9b5dc}
+table.l td{padding:4px 4px;border-top:1px solid #e8e5f3;vertical-align:top}
+table.l td.act{background:#f3f0ff}
+table.l input.t{width:150px;padding:4px}table.l input.p{width:52px;padding:4px;text-align:center}
+table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
+.chips button{padding:1px 6px;font-size:12px;margin:2px 2px 0 0}
+.big{font-size:24px;font-weight:700}
+input.wide{flex:1;min-width:200px;padding:6px}
+.chipbar{background:#14123a;color:#fff8ea;border-color:#14123a;padding:6px 12px}
+.chipbar .muted{color:#b9b5dc}
 #chipLast{font-style:italic}
+#roastBox:not(:empty){margin-top:6px;padding:6px 8px;border:2px dashed #ff3d8b;border-radius:8px;background:#fff0f6}
+.plist{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;max-height:84px;overflow:auto}
+.plist label{border:1px solid #a9a4c8;border-radius:6px;padding:2px 7px;background:#fff3c4}
+.plist label.ok{background:#dff5e7;border-color:#1f9d55}
+ol.check{margin:4px 0;padding-left:20px}ol.check li{margin:5px 0}
+.grp input.t{width:210px;padding:4px}.grp input.p{width:60px;padding:4px;text-align:center}
 </style>
 <script src="questions.js"></script>
 </head>
 <body>
 <div id="app"></div>
 <script>
-const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_state_v1', ROOM = 'replyall';
+const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_state_v3', ROOM = 'replyall';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pick = a => a[Math.floor(Math.random() * a.length)];
 const MODE = m => m === 3 ? 'Bonus season: triple budget' : m === 2 ? 'Q4 crunch: double budget' : 'Regular business';
 const STAMPS = ['NOTED.', 'SEE ME.', 'PER MY LAST EMAIL'];
 
@@ -61,8 +76,9 @@ function problems() {
   const out = [], bad = (a) => !Array.isArray(a) || !a.length || a.some(x => !Array.isArray(x) || typeof x[0] !== 'string' || typeof x[1] !== 'number');
   (G.rounds || []).forEach((r, i) => { if (!r.q || bad(r.a)) out.push('Main round ' + (i + 1) + ' has a broken question or answer list.'); });
   (G.lightning || []).forEach(s => { if (!s.qs || s.qs.length !== 5) out.push('Final round ' + s.name + ' must have exactly 5 questions.'); else s.qs.forEach((q, i) => { if (!q.q || bad(q.a)) out.push('Final round ' + s.name + ' question ' + (i + 1) + ' is broken.'); }); });
-  if (!G.rounds || !G.rounds.length) out.push('There are no main rounds.');
+  if (!G.rounds || G.rounds.length < 4) out.push('There must be at least 4 main rounds.');
   if (!G.lightning || !G.lightning.length) out.push('There is no final round set.');
+  if (!Array.isArray(G.room) || !G.room.length) out.push('The "room" list (You said questions) is missing or empty.');
   return out;
 }
 const probs = problems();
@@ -71,18 +87,48 @@ const LINES = G.chip || {};
 
 // ---------- state ----------
 const ONLINE = /^http/.test(location.protocol);
-const blankLa = () => [0, 1].map(() => Array.from({length: 5}, () => ({t: '', p: 0, st: false, sp: false})));
-const fresh = () => ({teams: G.teams.map(n => ({name: n, score: 0})), phase: 'title', ri: 0, revealed: [], strikes: 0, pot: 0, awarded: false, control: null,
-  buzzOpen: false, buzz: null, showQ: false, li: 0, lp: 0, la: blankLa(), hideP1: false, timer: 20, lreset: 0,
-  phones: ONLINE, sid: Math.random().toString(36).slice(2, 6).toUpperCase().replace(/[01OIL]/g, 'X'), joinUrl: location.host + location.pathname.replace(/[^/]*$/, '') + 'buzz'});
-let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-if (!S || !S.teams || S.ri >= G.rounds.length || S.li >= G.lightning.length) S = fresh();
-S.buzzOpen = false;
-let win = null, tick = null, phoneInfo = '', said = '', chipLast = '';
 const pref = (k, d) => localStorage.getItem('replyall_' + k) || d, setPref = (k, v) => localStorage.setItem('replyall_' + k, v);
+const newSid = () => Array.from({length: 4}, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
+// The join code stays the same across reloads and new games, so a QR code people already scanned keeps working.
+function sid() { let s = pref('sid', ''); if (!/^[A-Z0-9]{4}$/.test(s)) { s = newSid(); setPref('sid', s); } return s; }
+const joinUrl = s => location.origin + location.pathname.replace(/[^/]*$/, '') + 'buzz/?c=' + s;
+const blankLa = () => [0, 1].map(() => Array.from({length: 5}, () => ({t: '', p: 0, st: false, sp: false})));
+const fresh = () => ({teams: G.teams.map(n => ({name: n, score: 0})), phase: 'title', ri: 0, useCustom: false, custom: null, revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null,
+  buzzOpen: false, buzz: null, buzzPid: null, showQ: false, li: 0, lp: 0, la: blankLa(), lq: null, hideP1: false, timer: 20, lreset: 0, lend: null,
+  items: 0, allowed: {}, survey: null, phones: ONLINE, sid: sid(), joinUrl: joinUrl(sid())});
+let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!S || !S.teams || !G.rounds[S.ri] || !G.lightning[S.li]) S = fresh();
+S.buzzOpen = false;
+const cur = () => S.useCustom && S.custom ? S.custom : G.rounds[S.ri];
+let win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0;
+let phones = [], answers = [], phoneErr = '';
 
-function push(fx) { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (win && !win.closed) win.postMessage({S, fx: fx || {}}, '*'); }
+// ---------- link to the audience screen ----------
+// Every update goes out twice: on a broadcast channel (survives a refresh of either window) and straight to the window this page opened.
+const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
+function push(fx) {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  seq = Math.max(seq + 1, Date.now()); const m = {S, fx: fx || {}, seq};
+  try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
+  postState();
+}
 function up(fx) { push(fx); render(); }
+function fromScreen(d, src) {
+  if (!d || d.S) return;
+  if (d.hello || d.alive) { const was = alive(); lastAlive = Date.now(); if (d.hello) { if (src) win = src; push(); } if (!was) audLight(); }
+  if (d.key && S.buzzOpen) buzzKey(d.key);
+}
+if (bc) bc.onmessage = e => fromScreen(e.data);
+window.addEventListener('message', e => fromScreen(e.data, e.source));
+const alive = () => Date.now() - lastAlive < 5000;
+function audLight() { const el = document.getElementById('aud'); if (!el) return; el.className = alive() ? 'live' : 'go'; el.textContent = alive() ? 'Audience screen: connected' : 'Open audience screen'; }
+setInterval(audLight, 1000);
+
+// ---------- undo ----------
+const hist = [], timers = [];
+function snap() { hist.push(JSON.stringify(S)); if (hist.length > 60) hist.shift(); }
+function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+function clearLater() { timers.splice(0).forEach(clearTimeout); }
 
 // ---------- sound (made in the browser, no files needed) ----------
 let AC; const ac = () => AC = AC || new (window.AudioContext || window.webkitAudioContext)();
@@ -99,6 +145,7 @@ const SFX = {
   time() { tone(300, 0, .9, 'sawtooth', .3); },
   whoosh() { noise(0, .5, .25); tone(220, 0, .25, 'triangle', .15); tone(440, .2, .5, 'triangle', .2); },
   award() { [659, 784, 1047, 1319].forEach((f, i) => tone(f, i * .1, .45, 'triangle')); },
+  drum() { for (let i = 0; i < 26; i++) noise(i * .07, .07, .1 + i * .012); },
   win() { [523, 659, 784, 1047, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, i * .15, .5, 'triangle')); }
 };
 // Hold music: a cheerful loop that plays while a team thinks.
@@ -119,157 +166,303 @@ function stopVoice() { if (current) { current.pause(); current = null; } if (win
 if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { if (S.phase === 'title') render(); };
 
 // ---------- Chip, the AI intern ----------
-// level: 'big' lines are spoken in Highlights mode; everything is spoken in Everything mode.
+// Chip shows every line as text. He speaks out loud only for "big" lines unless the host picks Everything.
 function chip(text, big) {
   if (!text) return; chipLast = text; push({chip: text}); const el = document.getElementById('chipLast'); if (el) el.textContent = text;
-  const mode = pref('chip', 'highlights'); if (mode === 'all' || (mode === 'highlights' && big)) tts(text, true);
+  const mode = pref('chip', 'highlights'); if (mode === 'all' || (mode === 'highlights' && big)) { if (window.speechSynthesis) speechSynthesis.cancel(); tts(text, true); }
 }
-const chipLine = (k, big) => chip(pick(LINES[k] || []), big);
+// Lines are dealt like a shuffled deck: none repeats until its whole list has been used.
+const bags = {};
+function draw(k) { if (!bags[k] || !bags[k].length) bags[k] = (LINES[k] || []).slice().sort(() => Math.random() - .5); return bags[k].pop(); }
+const chipLine = (k, big) => chip(draw(k), big);
+// A live AI line is never sent to the big screen directly. It waits here for the scorekeeper to read and send.
+const roundKey = () => S.phase + (S.useCustom ? 'you' : S.ri);
 async function roast(answer, question) {
-  const fallback = () => chipLine('strike', true);
-  if (!ONLINE || !answer.trim()) return fallback();
+  if (!ONLINE || !answer.trim()) return; const k = roundKey();
   try {
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 5000);
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
     const r = await fetch('/api/quip', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({question, answer}), signal: ctl.signal}); clearTimeout(t);
-    const j = await r.json(); if (!r.ok || !j.text) throw 0; chip(j.text, true);
-  } catch (e) { fallback(); }
+    const j = await r.json(); if (!r.ok || !j.text || roundKey() !== k) return; pending = String(j.text); setRoast();
+  } catch (e) {}
 }
+const roastHtml = () => pending ? 'Chip wrote a live line about that answer: <b>' + esc(pending) + '</b> <button class="fun" onclick="A.roastSend()">Send to screen</button> <button onclick="A.roastDrop()">Discard</button>' : '';
+function setRoast() { const el = document.getElementById('roastBox'); if (el) el.innerHTML = roastHtml(); }
 
 // ---------- buzzers ----------
-// Keyboard: any key on the left half = team 1, right half = team 2.
+// Keyboard: a letter or number key on the left half = team 1, right half = team 2.
 // A presenter clicker (Page Up / Page Down) = team 1. A number pad = team 2.
-const LEFT = new Set('Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Tab KeyQ KeyW KeyE KeyR KeyT CapsLock KeyA KeyS KeyD KeyF KeyG ShiftLeft KeyZ KeyX KeyC KeyV KeyB ControlLeft AltLeft PageUp PageDown'.split(' '));
-const isRight = c => /^(Digit[6-90]|Key[YUIOPHJKLNM]|Minus|Equal|Backspace|Bracket|Backslash|Semicolon|Quote|Enter|Comma|Period|Slash|ShiftRight|ControlRight|AltRight|Arrow|Numpad)/.test(c);
-function buzzIn(t) { if (!S.buzzOpen || S.phase !== 'round') return false; S.buzz = t; S.buzzOpen = false; SFX.buzz(); up(); return true; }
+const LEFT = new Set('Backquote Digit1 Digit2 Digit3 Digit4 Digit5 KeyQ KeyW KeyE KeyR KeyT KeyA KeyS KeyD KeyF KeyG KeyZ KeyX KeyC KeyV KeyB PageUp PageDown'.split(' '));
+const isRight = c => /^(Digit[6-90]|Key[YUIOPHJKLNM]|Minus|Equal|Bracket|Backslash|Semicolon|Quote|Comma|Period|Slash|Arrow|Numpad(?!Enter))/.test(c);
+function buzzIn(t, pid) { if (!S.buzzOpen || S.phase !== 'round') return false; S.buzz = t; S.buzzPid = pid || null; S.buzzOpen = false; SFX.buzz(); up(); return true; }
 function buzzKey(code) { return LEFT.has(code) ? buzzIn(0) : isRight(code) ? buzzIn(1) : false; }
-document.addEventListener('keydown', e => { if (S.buzzOpen && !/INPUT/.test(e.target.tagName) && buzzKey(e.code)) e.preventDefault(); });
-window.addEventListener('message', e => { if (!e.data) return; if (e.data.hello) { win = e.source; push(); } if (e.data.key) buzzKey(e.data.key); });
+document.addEventListener('keydown', e => {
+  const typing = /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
+  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ' && !typing) { e.preventDefault(); return A.undo(); }
+  if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (S.buzzOpen) { if (buzzKey(e.code)) e.preventDefault(); return; }
+  if (S.phase === 'round') { const m = /^(?:Digit|Numpad)([1-8])$/.exec(e.code); if (m && cur().a[m[1] - 1] && !S.revealed[m[1] - 1]) A.reveal(m[1] - 1); else if (e.code === 'KeyX') A.strike(); }
+  if (S.phase === 'lightning' && e.code === 'Space') { e.preventDefault(); A.lnext(); }
+});
 
-// Phones: each phone posts to this site's relay; the host page reads the relay.
-const seen = new Set(), EMOJI = {clap: '\u{1F44F}', laugh: '\u{1F602}', groan: '\u{1F62C}', fire: '\u{1F525}'}; let polling = false, first = true;
+// Phones: each phone posts to this site's relay; this page reads the relay and posts back what phones should show.
+const seen = new Set(), EMOJI = {clap: '\u{1F44F}', laugh: '\u{1F602}', groan: '\u{1F62C}', fire: '\u{1F525}'}; let polling = false, first = true, armed = false;
 async function pollPhones(countBuzzes) {
   if (!ONLINE || polling) return; polling = true;
   try {
     const r = await fetch('/api/relay?room=' + ROOM + '&k=up&sid=' + S.sid, {cache: 'no-store'}); if (!r.ok) throw 0;
-    const msgs = (await r.json()).msgs.map(m => { try { return JSON.parse(m); } catch (e) { return {}; } });
-    const fresh = msgs.filter(m => m.id && !seen.has(m.id)); msgs.forEach(m => seen.add(m.id));
-    const buzzes = fresh.filter(m => m.k === 'buzz').sort((a, b) => a.t - b.t), reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
-    const joins = msgs.filter(m => m.k === 'join'), n = [0, 1, 2].map(t => joins.filter(m => m.team === t).length);
-    setPhoneInfo('Phones joined: ' + S.teams[0].name + ' ' + n[0] + ', ' + S.teams[1].name + ' ' + n[1] + ', audience ' + n[2]);
+    const msgs = (await r.json()).msgs.map(m => { try { return JSON.parse(m); } catch (e) { return {}; } }).filter(m => m && m.id && /^[a-z0-9-]{1,32}$/i.test(m.p || ''));
+    const fresh = msgs.filter(m => !seen.has(m.id)); msgs.forEach(m => seen.add(m.id));
+    const now = Date.now();
+    phones = msgs.filter(m => m.k === 'join' && now - m.t < 8 * 3600e3).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
+    const reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
     if (reacts.length && !first) push({react: reacts.slice(0, 12)});
-    if (countBuzzes && buzzes.length) buzzIn(buzzes[0].team === 1 ? 1 : 0);
-    first = false;
-  } catch (e) { setPhoneInfo('Phones are not reachable right now. Keyboard buzzers still work.'); }
-  polling = false;
+    if (S.survey && S.survey.st === 'open') { answers = msgs.filter(m => m.k === 'ans' && m.q === S.survey.n && typeof m.a === 'string' && m.a.trim()).map(m => m.a.trim().slice(0, 30));
+      if (answers.length !== S.survey.count) { S.survey.count = answers.length; push(); const el = document.getElementById('scount'); if (el) el.textContent = answers.length; } }
+    // Only phones the scorekeeper approved can buzz.
+    if (countBuzzes) { const b = fresh.filter(m => m.k === 'buzz' && S.allowed[m.p] && (m.team === 0 || m.team === 1)).sort((a, b) => a.t - b.t)[0]; if (b) buzzIn(b.team, b.p); }
+    first = false; phoneErr = '';
+  } catch (e) { phoneErr = ' Phones are not reachable right now. Keyboard buzzers still work.'; }
+  polling = false; setPhones();
 }
-function setPhoneInfo(s) { phoneInfo = s; const el = document.getElementById('phoneInfo'); if (el) el.textContent = s; }
-let armed = false;
+function phonesHtml() {
+  if (!ONLINE) return '<span class="muted">Phones (buzzers, reactions, the You said round, live AI lines) need the game opened from the website. Keyboard buzzers work anywhere.</span>';
+  const team = phones.filter(p => p.team < 2), wait = team.filter(p => !S.allowed[p.p]).length;
+  return `Phones: <b>${team.length}</b> buzzers, <b>${phones.length - team.length}</b> audience. ${wait ? `<button class="go" onclick="A.allowAll()">Approve all ${wait} waiting</button>` : ''}<span class="muted">${esc(phoneErr)}</span>
+    <div class="plist">${team.map(p => `<label class="${S.allowed[p.p] ? 'ok' : ''}"><input type="checkbox" ${S.allowed[p.p] ? 'checked' : ''} onchange="A.allow('${p.p}',this.checked)"> ${esc(p.name || 'Phone ' + p.p.slice(0, 3))} (${esc(S.teams[p.team].name)})</label>`).join('')}</div>`;
+}
+function setPhones() { const el = document.getElementById('phonesBox'), h = phonesHtml(); if (el && el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } }
+let lastState = '';
+function postState() {
+  if (!ONLINE) return;
+  const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null};
+  const j = JSON.stringify(st); if (j === lastState) return; lastState = j;
+  fetch('/api/relay?room=' + ROOM + '&k=state', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(Object.assign({id: 's' + Date.now()}, st))}).catch(() => { lastState = ''; });
+}
 setInterval(() => { if (S.buzzOpen && armed) pollPhones(true); }, 300);
 setInterval(() => { if (!S.buzzOpen) pollPhones(false); }, 1000);
+setInterval(() => { lastState = ''; postState(); }, 30000);
+
+// ---------- the "You said" round: turn the room's answers into a board ----------
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/^(the|a|an|some|my|our) /, '').replace(/s$/, '').trim();
+function localGroups(list) {
+  const m = new Map(); list.forEach(a => { const k = norm(a); if (!k) return; const g = m.get(k) || {label: a.trim().replace(/\b\w/g, c => c.toUpperCase()).slice(0, 24), count: 0}; g.count++; m.set(k, g); });
+  return [...m.values()].sort((a, b) => b.count - a.count).slice(0, 10);
+}
+async function cluster(question, list) {
+  if (ONLINE && list.length >= 4) try {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+    const r = await fetch('/api/quip', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({mode: 'cluster', question, answers: list}), signal: ctl.signal}); clearTimeout(t);
+    const j = await r.json(); if (r.ok && Array.isArray(j.groups) && j.groups.length) return j.groups.map(g => ({label: String(g.label), count: Number(g.count) || 0}));
+  } catch (e) {}
+  return localGroups(list);   // no AI: exact matches only, the scorekeeper merges the rest by hand
+}
 
 // ---------- actions ----------
-function resetRound() { Object.assign(S, {revealed: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, showQ: false}); said = ''; stopVoice(); }
+function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; clearLater(); stopVoice(); }
+const leaveOk = () => S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
+// Between rounds the audience sees the standings before the next round card.
+function standings(nextMult) {
+  if (S.phase !== 'round' || !S.awarded) return [];
+  const [a, b] = S.teams, d = Math.abs(a.score - b.score), t = a.score < b.score ? a : b;
+  return [[a.name + ' vs ' + b.name, a.score + ' : ' + b.score, !d ? 'All square. Perfect alignment.' : t.name + ' trails by ' + d + '. ' + (nextMult > 1 ? 'The next one pays ' + (nextMult === 2 ? 'double.' : 'triple.') : 'Plenty of budget left.'), 3400]];
+}
+function nextStep() {
+  const p = S.phase;
+  if (p === 'title') return ['Start round 1', () => A.round(0)];
+  if (p === 'round') {
+    if (!S.useCustom && S.ri < 2) return ['Round ' + (S.ri + 2), () => A.round(S.ri + 1)];
+    if (!S.useCustom && S.ri === 2) return ONLINE ? ['You said round', () => A.sprep()] : ['Round 4', () => A.round(3)];
+    return ['Final round', () => A.lstart()];
+  }
+  if (p === 'survey') return ['Skip it: play round 4', () => A.round(3)];
+  if (p === 'lightning') return ['Winner', () => A.winner()];
+  return null;
+}
+const ltotal = () => S.la.flat().reduce((n, a) => n + (a.sp ? Number(a.p) || 0 : 0), 0);
+const isDup = i => { const a = norm(S.la[0][i].t), b = norm(S.la[1][i].t); return !!a && a === b; };
+const itemsLine = () => 'For the minutes: I logged ' + S.items + ' action item' + (S.items === 1 ? '' : 's') + ' today. I will follow up on none of them.';
+
 const A = {
-  open() { win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
-  phase(p) { S.phase = p; S.buzzOpen = false; if (p === 'winner') { SFX.win(); up(); setTimeout(() => chipLine('win', true), 1500); return; } up(); },
+  open() { if (alive() && !confirm('The audience screen is already open and connected. Open a second one?')) return; win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
+  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; up(); },
+  next() { const n = nextStep(); if (n) n[1](); },
+  phase(p) { if (!leaveOk()) return; snap(); S.phase = p; S.buzzOpen = false; up(); },
   hello() { chipLine('hello', true); },
-  round(i) { i = Number(i); if (i < 0 || i >= G.rounds.length) return; S.ri = i; resetRound(); S.phase = 'round'; SFX.whoosh(); up({card: ['Agenda item ' + (i + 1), 'ROUND ' + (i + 1), MODE(G.rounds[i].mult)]}); setTimeout(() => chipLine('round'), 2500); },
+  round(i) { i = Number(i); if (!G.rounds[i] || !leaveOk()) return; snap(); const cards = standings(G.rounds[i].mult);
+    S.ri = i; S.useCustom = false; resetRound(); S.phase = 'round'; SFX.whoosh();
+    cards.push(['Agenda item ' + (i + 1), 'ROUND ' + (i + 1), MODE(G.rounds[i].mult)]); up({cards}); later(() => chipLine('round'), cards.length * 2400 + 300); },
   showQ() { S.showQ = !S.showQ; up(); },
-  read() { const r = G.rounds[S.ri]; S.showQ = true; up(); speak(r.id, r.q); },
-  async buzzOpen() { S.buzz = null; armed = false; S.buzzOpen = true; up(); await pollPhones(false); armed = true; },
-  buzzClear() { S.buzz = null; S.buzzOpen = false; up(); },
-  control(i) { S.control = i; S.buzz = null; up(); },
-  reveal(i) { if (S.revealed[i]) return; const r = G.rounds[S.ri]; S.revealed[i] = true; if (!S.awarded) S.pot += r.a[i][1] * r.mult; (i === 0 ? SFX.top : SFX.ding)(); up(); if (!S.awarded) chipLine(i === 0 ? 'top' : 'good', i === 0); },
+  read() { const r = cur(); S.showQ = true; up(); speak(r.id, r.q); },
+  async buzzOpen() { S.buzz = null; S.buzzPid = null; armed = false; S.buzzOpen = true; up(); if (document.activeElement) document.activeElement.blur(); await pollPhones(false); armed = true; },
+  buzzClear() { S.buzz = null; S.buzzPid = null; S.buzzOpen = false; up(); },
+  control(i) { snap(); S.control = i; S.buzz = null; up(); },
+  // Click an answer to reveal it. Click it again to hide it (a misclick costs nothing).
+  reveal(i) { const r = cur(); if (!r.a[i]) return; snap();
+    if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i]) { S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
+    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } (i === 0 ? SFX.top : SFX.ding)(); up();
+    if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) chipLine('sweep', true); else chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },
   said(v) { said = v; },
-  strike() { if (S.strikes < 3) S.strikes++; SFX.stamp(); const a = said; said = ''; up({stamp: STAMPS[S.strikes - 1], sub: 'strike ' + S.strikes + ' of 3'}); roast(a, G.rounds[S.ri].q); },
-  wrong() { SFX.stamp(); const a = said; said = ''; up({stamp: "LET'S CIRCLE BACK", sub: 'not on the board'}); if (a.trim()) roast(a, G.rounds[S.ri].q); },
-  clearStrikes() { S.strikes = 0; up(); },
-  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.whoosh(); up({card: ['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget']}); setTimeout(() => chipLine('takeover', true), 2500); },
-  award(i) { if (S.awarded) return; const pot = S.pot; S.teams[i].score += pot; S.awarded = true; SFX.award(); up({banner: 'Budget approved: +' + pot + ' to ' + S.teams[i].name});
-    setTimeout(() => chipLine(S.strikes >= 3 && S.control !== null ? (i === S.control ? 'kept' : 'stolen') : 'award'), 900); },
+  strike() { if (S.strikes >= 3 || S.phase !== 'round') return; snap(); S.strikes++; S.items++; SFX.stamp(); const a = said; said = '';
+    up({stamp: STAMPS[S.strikes - 1], sub: 'strike ' + S.strikes + ' of 3 / action item ' + S.items});
+    if (S.strikes === 3) later(() => A.takeover(), 1900); else later(() => chipLine('strike'), 600);
+    roast(a, cur().q); },
+  wrong() { snap(); S.items++; SFX.stamp(); const a = said; said = ''; up({stamp: "LET'S CIRCLE BACK", sub: 'not on the board / action item ' + S.items}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
+  clearStrikes() { snap(); S.strikes = 0; up(); },
+  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.whoosh(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget']]}); later(() => chipLine('takeover', true), 2500); },
+  steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
+  award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX.award();
+    up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n});
+    later(() => chipLine(kind || 'award', !!kind), kind ? 2500 : 900); },
+  rest() { const left = cur().a.map((_, i) => i).filter(i => !S.revealed[i]).reverse(); if (!left.length) return; snap(); chipLine('rest');
+    left.forEach((i, k) => later(() => { S.revealed[i] = true; SFX.ding(); up(); }, 900 + k * 1300)); },
   name(i, v) { S.teams[i].name = v; push(); },
   score(i, v) { S.teams[i].score = Number(v) || 0; push(); },
-  newGame() { if (!confirm('Start a new game? Scores go back to zero.')) return; const names = S.teams.map(t => t.name); S = fresh(); S.teams.forEach((t, i) => t.name = names[i]); seen.clear(); first = true; up(); },
+  newGame() { if (!confirm('Start a new game? Scores go back to zero. Team names, the join code and approved phones are kept.')) return; snap(); const old = S; S = fresh(); S.teams.forEach((t, i) => t.name = old.teams[i].name); S.allowed = old.allowed; A.tstop(); clearLater(); up(); },
+  newCode() { if (!confirm('Make a new join code? Every phone has to join again. Use this only if someone who should not have the code is buzzing.')) return; const s = newSid(); setPref('sid', s); S.sid = s; S.joinUrl = joinUrl(s); S.allowed = {}; phones = []; up(); },
+  allow(p, on) { if (on) S.allowed[p] = true; else delete S.allowed[p]; push(); setPhones(); },
+  allowAll() { phones.forEach(p => { if (p.team < 2) S.allowed[p.p] = true; }); push(); setPhones(); },
   chipSay() { const el = document.getElementById('chipSay'); if (el.value.trim()) chip(el.value.trim(), true); el.value = ''; },
+  roastSend() { const t = pending; pending = null; setRoast(); chip(t, true); },
+  roastDrop() { pending = null; setRoast(); },
+  // "You said" round
+  sprep() { if (!leaveOk()) return; snap(); const cards = standings(3); S.survey = {n: Date.now().toString(36), q: G.room[0], st: 'ready', count: 0, groups: null}; S.phase = 'survey'; S.buzzOpen = false; answers = []; note = ''; clearLater(); SFX.whoosh();
+    cards.push(['Agenda item 4 / triple budget', 'YOU SAID', 'This one is about you']); up({cards}); later(() => chipLine('survey', true), cards.length * 2400 + 300); },
+  sq(v) { S.survey.q = v; const el = document.getElementById('sq'); if (el && el.value !== v) el.value = v; },
+  sopen() { if (!S.survey.q.trim()) return; snap(); Object.assign(S.survey, {n: Date.now().toString(36), q: S.survey.q.trim(), st: 'open', count: 0, groups: null}); answers = []; note = ''; up(); },
+  async sclose() { snap(); polling = false; await pollPhones(false); S.survey.st = 'closed'; busy = true; up(); const g = await cluster(S.survey.q, answers); busy = false; if (S.phase !== 'survey' || S.survey.st !== 'closed') return; S.survey.groups = g; up(); },
+  sreopen() { snap(); S.survey.st = 'open'; S.survey.groups = null; up(); },
+  sedit(i, f, v) { S.survey.groups[i][f] = f === 'count' ? Math.max(0, Math.floor(Number(v)) || 0) : v; push(); },
+  sdel(i) { snap(); S.survey.groups.splice(i, 1); up(); },
+  sadd() { snap(); S.survey.groups.push({label: '', count: 1}); up(); },
+  splay() { const all = S.survey.groups.filter(g => g.label.trim() && g.count > 0).sort((a, b) => b.count - a.count), g = all.slice(0, 6);
+    if (g.length < 3) { note = 'A board needs at least 3 different answers. Reopen the survey, add rows by hand, or play round 4 instead.'; return render(); }
+    snap(); const total = Math.max(S.survey.count, all.reduce((n, x) => n + x.count, 0));
+    S.custom = {id: 'you', q: S.survey.q, mult: 3, n: S.survey.count, a: g.map(x => [x.label.trim().slice(0, 24), Math.max(1, Math.round(100 * x.count / total)), '', ''])};
+    S.useCustom = true; resetRound(); S.phase = 'round'; SFX.whoosh(); up({cards: [['You said', 'THE ROOM HAS SPOKEN', S.survey.count + ' answers / triple budget']]}); later(() => chipLine('round'), 2700); },
   // final round
-  lset(i) { S.li = Number(i); S.la = blankLa(); S.lp = 0; S.hideP1 = false; S.lreset++; A.tstop(); S.timer = 20; up(); },
-  lstart() { S.phase = 'lightning'; SFX.whoosh(); up({card: ['Final round', 'THE 4:59 FRIDAY RUSH', G.lightningTarget + ' points and everybody goes home early']}); },
-  lplayer(p) { S.lp = p; A.tstop(); S.timer = p ? 25 : 20; S.hideP1 = p === 1; up(); },
+  lset(i) { snap(); S.li = Number(i); S.la = blankLa(); S.lp = 0; S.lq = null; S.lend = null; S.hideP1 = false; S.lreset++; A.tstop(); S.timer = 20; up(); },
+  lstart() { if (!leaveOk()) return; snap(); S.phase = 'lightning'; S.buzzOpen = false; clearLater(); SFX.whoosh(); up({cards: [['Final round', 'THE 4:59 FRIDAY RUSH', G.finalStakes || G.lightningTarget + ' points to win']]}); },
+  lplayer(p) { snap(); S.lp = p; A.tstop(); S.timer = p ? 25 : 20; S.hideP1 = p === 1; S.lq = null; up(); },
   lhide() { S.hideP1 = !S.hideP1; up(); },
+  lq(i) { if (S.lq !== i) { S.lq = i; push(); } },
   ltext(p, i, v) { S.la[p][i].t = v; push(); },
   lpts(p, i, v) { S.la[p][i].p = Number(v) || 0; push(); },
-  lfill(i, k) { const a = G.lightning[S.li].qs[i].a[k], c = S.la[S.lp][i]; c.t = a[0]; c.p = a[1]; up(); },
-  lrev(p, i, what) { const c = S.la[p][i]; c[what] = true; if (what === 'sp') (Number(c.p) > 0 ? SFX.ding : SFX.zero)(); else SFX.tick(); up(); },
-  lread(i) { const q = G.lightning[S.li].qs[i]; speak(q.id, q.q); },
-  tstart() { A.tstop(); tick = setInterval(() => { S.timer--; if (S.timer <= 0) { S.timer = 0; A.tstop(); SFX.time(); } else if (S.timer <= 5) SFX.tick(); push(); const el = document.getElementById('tm'); if (el) el.textContent = S.timer + 's'; }, 1000); },
+  ldup(p, i, el) { const d = p === 1 && isDup(i); el.classList.toggle('dup', d); if (d) { SFX.dup(); push({stamp: 'DUPLICATE', sub: 'give a different answer'}); } },
+  lgo(p, i) { const el = document.getElementById('lt' + p + (i + 1)); if (el) el.focus(); else document.activeElement.blur(); },
+  lfill(i, k) { snap(); const a = G.lightning[S.li].qs[i].a[k], c = S.la[S.lp][i]; if (!c.t) c.t = a[0]; c.p = a[1]; up(); },
+  // One button walks the whole reveal: answer, then its points, row by row, player 1 then player 2.
+  lstep() { for (const p of [0, 1]) for (let i = 0; i < 5; i++) { const c = S.la[p][i]; if (c.st && c.sp) continue; if (p === 1 && S.lp === 0) return null; return [p, i, c.st ? 'sp' : 'st']; } return null; },
+  lnext() { const s = A.lstep(); if (!s) return; snap(); const [p, i, what] = s, c = S.la[p][i]; if (p === 1) S.hideP1 = false; S.lq = i; c[what] = true;
+    if (what === 'sp') (Number(c.p) > 0 ? SFX.ding : SFX.zero)(); else SFX.tick(); up();
+    const total = ltotal(), hit = total >= G.lightningTarget; if (S.lend || !(hit || S.la.flat().every(x => x.sp))) return;
+    S.lend = hit ? 'hit' : 'miss'; push();
+    later(() => { if (hit) { SFX.win(); push({cards: [['Final round', 'TARGET HIT', G.finalStakes || '']], confetti: 260}); }
+      else { SFX.zero(); push({cards: [['Final round', 'SO CLOSE', (G.lightningTarget - total) + ' short. Still the best meeting all week.']]}); } }, 1500); },
+  lread(i) { const q = G.lightning[S.li].qs[i]; A.lq(i); speak(q.id, q.q); },
+  tstart() { A.tstop(); tick = setInterval(() => { S.timer--; let fx; if (S.timer <= 0) { S.timer = 0; A.tstop(); SFX.time(); fx = {stamp: 'PENCILS DOWN', sub: 'time is up'}; } else if (S.timer <= 5) SFX.tick(); push(fx); const el = document.getElementById('tm'); if (el) el.textContent = S.timer + 's'; }, 1000); },
   tstop() { clearInterval(tick); tick = null; },
   treset() { A.tstop(); S.timer = S.lp ? 25 : 20; up(); },
-  lclear() { if (!confirm('Clear all final round answers?')) return; A.lset(S.li); }
+  lclear() { if (!confirm('Clear all final round answers?')) return; A.lset(S.li); },
+  winner() { if (!leaveOk()) return; const [a, b] = S.teams;
+    if (a.score === b.score && !confirm('The scores are tied.\n\nOK = show a shared certificate.\nCancel = go back and play a spare round as a tie-breaker (first team with an answer on the board wins).')) return;
+    snap(); A.tstop(); clearLater(); S.buzzOpen = false; SFX.drum(); push({cards: [['The results are in', 'AND THE WINNER IS', 'Drumroll, please']]});
+    later(() => { S.phase = 'winner'; SFX.win(); up(); later(() => chipLine('win', true), 1500); if (S.items) later(() => chip(itemsLine()), 9000); }, 1900); }
 };
 
 // ---------- host screen ----------
 function render() {
-  const ph = S.phase, r = G.rounds[S.ri];
+  const ph = S.phase, r = cur(), nx = nextStep();
   const voices = window.speechSynthesis ? speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)) : [], vsel = pref('voice', ''), cm = pref('chip', 'highlights');
-  const nav = (p, label, fn) => `<button class="${ph===p?'on':''}" onclick="${fn || "A.phase('" + p + "')"}">${label}</button>`;
-  let h = `<header><h1>${esc(G.title)} / host</h1><button class="go" onclick="A.open()">Open audience screen</button>
-    ${nav('title', 'Title')}${nav('round', 'Main rounds')}${nav('lightning', 'Final round', 'A.lstart()')}${nav('winner', 'Winner')}
-    <span style="flex:1"></span><button class="${musicT ? 'on' : ''}" onclick="music(${musicT ? 'false' : 'true'})">${musicT ? 'Hold music is on' : 'Hold music'}</button><button onclick="A.newGame()">New game</button></header><main>
-  <div class="card scores">${S.teams.map((t, i) => `<div><input class="nm" value="${esc(t.name)}" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name">
-    <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score"></div>`).join('')}</div>
-  <div class="card chipbar"><h2>Chip, the AI intern</h2><div class="row">
-    <input class="wide" id="chipSay" placeholder="Type a line for Chip to say" onkeydown="if(event.key==='Enter')A.chipSay()"><button class="fun" onclick="A.chipSay()">Say it</button>
-    <label class="muted">Chip speaks out loud: <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Highlights</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label></div>
-    <p class="muted">Last line: <span id="chipLast">${esc(chipLast)}</span></p></div>`;
+  const nav = (on, label, fn, off) => `<button class="${on ? 'on' : ''}" onclick="${fn}" ${off ? 'disabled' : ''}>${label}</button>`;
+  const inRound = i => ph === 'round' && !S.useCustom && S.ri === i;
+  let h = `<header><h1>${esc(G.title)} / host</h1><button id="aud" class="${alive() ? 'live' : 'go'}" onclick="A.open()">${alive() ? 'Audience screen: connected' : 'Open audience screen'}</button>
+    ${nav(ph === 'title', 'Title', "A.phase('title')")}${[0, 1, 2].map(i => nav(inRound(i), 'Round ' + (i + 1), 'A.round(' + i + ')')).join('')}
+    ${nav(ph === 'survey' || (ph === 'round' && S.useCustom), 'You said', 'A.sprep()', !ONLINE)}${nav(inRound(3), 'Round 4 (backup)', 'A.round(3)')}
+    ${nav(ph === 'lightning', 'Final', 'A.lstart()')}${nav(ph === 'winner', 'Winner', 'A.winner()')}
+    <select onchange="A.round(this.value)" aria-label="Spare rounds" style="max-width:130px"><option value="">Spare rounds</option>${G.rounds.map((x, i) => i < 4 ? '' : `<option value="${i}" ${inRound(i) ? 'selected' : ''}>${i + 1}. ${esc(x.q)}</option>`).join('')}</select>
+    <span style="flex:1"></span><button onclick="A.undo()" ${hist.length ? '' : 'disabled'} title="Ctrl+Z">Undo</button>
+    <button class="${musicT ? 'on' : ''}" onclick="music(${musicT ? 'false' : 'true'})">${musicT ? 'Hold music is on' : 'Hold music'}</button><button onclick="A.newGame()">New game</button></header><main>
+  <div class="top">${S.teams.map((t, i) => `<input class="nm" value="${esc(t.name)}" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name">
+    <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score">`).join('')}
+    <span class="muted">Type over a name or a score to fix it.</span><span style="flex:1"></span>
+    ${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>
+  <div class="card chipbar"><div class="row"><b>Chip</b>
+    <input class="wide" id="chipSay" placeholder="Type a line for Chip to say on the big screen" onkeydown="if(event.key==='Enter')A.chipSay()"><button class="fun" onclick="A.chipSay()">Say it</button>
+    <label class="muted">Speaks out loud: <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Big moments</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label>
+    <span class="muted">Last: <span id="chipLast">${esc(chipLast)}</span></span></div></div>`;
 
   if (ph === 'title' || ph === 'winner') {
-    h += `<div class="card"><h2>${ph === 'title' ? 'Title screen is showing' : 'Winner screen is showing'}</h2>
-      <div class="row"><button class="go" onclick="A.round(0)">Start round 1</button><button class="fun" onclick="A.hello()">Chip says hello</button>
-      <label class="muted">Voice: <select onchange="setPref('voice',this.value)"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label>
-      <button onclick="tts('Testing, one two three')">Test voice</button><button onclick="SFX.top()">Test sound</button></div>
-      <p class="muted">${S.phones ? 'Phones: players and audience open <b>' + esc(S.joinUrl) + '</b> and enter code <b>' + S.sid + '</b>. <span id="phoneInfo">' + esc(phoneInfo) + '</span>' : 'Phone buzzers, reactions and live roasts need the game opened from the website. Keyboard buzzers work anywhere.'}</p></div>`;
+    h += `<div class="cols"><div class="card"><h2>${ph === 'title' ? 'Before the show' : 'Winner screen is showing'}</h2><ol class="check">
+      <li><b>Big screen.</b> Press Windows key + P and choose <b>Extend</b> (not Duplicate). Click "Open audience screen" at the top, drag that window onto the projector, and click it once for full screen. The button turns green when the two windows are talking. If either window is refreshed, they reconnect by themselves.</li>
+      <li><b>Sound.</b> <button onclick="SFX.top()">Test sound</button> <button onclick="tts('Testing, one two three')">Test voice</button>
+        <label class="muted">Voice: <select onchange="setPref('voice',this.value)"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></li>
+      <li><b>Teams.</b> Type the team names into the boxes above.</li>
+      <li><b>Phones.</b> The title screen shows a QR code. Team players pick their team; everyone else joins as audience. Tick the phones that are allowed to buzz (panel on the right).</li>
+      <li><b>Hello.</b> <button class="fun" onclick="A.hello()">Chip says hello</button> then press the purple Next button.</li></ol>
+      <p class="muted">Keys during a round: <kbd>1</kbd> to <kbd>8</kbd> reveal an answer, <kbd>X</kbd> strike, <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo. In the final: <kbd>Space</kbd> reveals the next item. Keys are ignored while you type in a box.</p></div>
+      <div class="card"><h2>Phones</h2>${ONLINE ? `<p>Join code <b class="big">${S.sid}</b> <button onclick="A.newCode()">New code</button><br><span class="muted">${esc(S.joinUrl)}</span></p>` : ''}<div id="phonesBox">${phonesHtml()}</div></div></div>`;
   }
 
   if (ph === 'round') {
     const buzzTxt = S.buzzOpen ? 'BUZZERS OPEN - waiting...' : S.buzz !== null ? esc(S.teams[S.buzz].name) + ' buzzed first' : 'Buzzers closed';
-    h += `<div class="card"><h2>Round</h2><div class="row">
-      <button onclick="A.round(${S.ri-1})" ${S.ri ? '' : 'disabled'}>Previous</button>
-      <select onchange="A.round(this.value)">${G.rounds.map((x, i) => `<option value="${i}" ${i===S.ri?'selected':''}>${i+1}. (x${x.mult}) ${esc(x.q)}</option>`).join('')}</select>
-      <button class="go" onclick="A.round(${S.ri+1})" ${S.ri < G.rounds.length-1 ? '' : 'disabled'}>Next round</button></div>
-      <div class="qtext">${esc(r.q)} <span class="muted">${MODE(r.mult)}</span></div>
-      <div class="row"><button onclick="A.read()">Read aloud</button><button onclick="stopVoice()">Stop voice</button>
-      <button class="${S.showQ?'on':''}" onclick="A.showQ()">${S.showQ ? 'Question is on screen' : 'Show question on screen'}</button></div></div>
-    <div class="card"><h2>1. Face-off</h2><div class="row"><button class="go" onclick="A.buzzOpen()">Open buzzers</button><button onclick="A.buzzClear()">Close / clear</button>
-      <span class="status ${S.buzzOpen||S.buzz!==null?'hot':''}">${buzzTxt}</span>
-      <button class="bad" onclick="A.wrong()">Wrong answer (stamp, no strike)</button></div>
-      <div class="row" style="margin-top:8px">Has the floor: ${S.teams.map((t, i) => `<button class="${S.control===i?'on':''}" onclick="A.control(${i})">${esc(t.name)}</button>`).join('')}
-      <span class="muted" id="phoneInfo">${esc(phoneInfo)}</span></div></div>
-    <div class="card"><h2>2. Answers (click to reveal)</h2><div class="ans">${r.a.map((a, i) => `<button class="${S.revealed[i]?'done':''}" onclick="A.reveal(${i})"><span>${i+1}. ${esc(a[0])}</span><b>${a[1]}</b></button>`).join('')}</div>
-      <div class="row" style="margin-top:10px"><input class="wide" value="${esc(said)}" oninput="A.said(this.value)" placeholder="Optional: type the wrong answer they gave, and Chip roasts it" onkeydown="if(event.key==='Enter')A.strike()">
-      </div><div class="row" style="margin-top:8px"><button class="bad" onclick="A.strike()">Strike</button><b>${S.strikes ? 'Strikes: ' + S.strikes + ' of 3' : 'No strikes'}</b><button onclick="A.clearStrikes()">Clear strikes</button>
-      <button class="fun" onclick="A.takeover()">Announce hostile takeover</button></div></div>
-    <div class="card"><h2>3. Approve the budget</h2><div class="row"><span class="big">${S.pot} points</span>
-      ${S.awarded ? '<span class="status">Awarded. Reveal the rest for fun, then go to the next round.</span>' : S.teams.map((t, i) => `<button class="go" onclick="A.award(${i})">Give to ${esc(t.name)}</button>`).join('')}</div>
-      <p class="muted">Made a mistake? Type the correct score into the score box at the top.</p></div>`;
+    const canSteal = S.strikes >= 3 && S.control !== null && !S.awarded, o = S.control === null ? 0 : 1 - S.control;
+    h += `<div class="cols"><div class="card"><div class="row">
+      <select onchange="A.round(this.value)" style="max-width:330px">${S.useCustom ? '<option selected>You said round (from the room)</option>' : ''}${G.rounds.map((x, i) => `<option value="${i}" ${!S.useCustom && i===S.ri?'selected':''}>${i+1}. (x${x.mult}) ${esc(x.q)}</option>`).join('')}</select>
+      <button onclick="A.read()">Read aloud</button><button onclick="stopVoice()">Stop voice</button>
+      <button class="${S.showQ?'on':''}" onclick="A.showQ()">${S.showQ ? 'Question is on screen' : 'Show question on screen'}</button></div>
+      <div class="qtext">${esc(r.q)} <span class="muted">${S.useCustom ? 'You said: triple budget' : MODE(r.mult)}</span></div>
+      <div class="ans">${r.a.map((a, i) => `<button class="${S.revealed[i]?'done':''}" onclick="A.reveal(${i})" title="${S.revealed[i] ? 'Click to hide again' : 'Click to reveal'}"><span><kbd>${i+1}</kbd> <i>${esc(a[0])}</i>${a[2] ? `<small>also: ${esc(a[2])}</small>` : ''}</span><b>${a[1]}</b></button>`).join('')}</div>
+      <div class="row"><input class="wide" value="${esc(said)}" oninput="A.said(this.value)" placeholder="Optional: type the wrong answer they gave. Chip drafts a line about it for you to review." onkeydown="if(event.key==='Enter')A.strike()">
+        <button class="bad" onclick="A.strike()" ${S.strikes >= 3 ? 'disabled' : ''}>Strike <kbd>X</kbd></button><b>${S.strikes} of 3</b></div>
+      <div class="row"><button onclick="A.wrong()">Wrong answer, no strike (face-off)</button><button onclick="A.clearStrikes()" ${S.strikes ? '' : 'disabled'}>Clear strikes</button>
+        <button onclick="A.takeover()">Replay takeover card</button></div>
+      <div id="roastBox">${roastHtml()}</div></div>
+    <div class="card"><h2>1. Face-off</h2><div class="row"><button class="go" onclick="A.buzzOpen()">Open buzzers</button><button onclick="A.buzzClear()">Close</button>
+      <span class="status ${S.buzzOpen||S.buzz!==null?'hot':''}">${buzzTxt}</span></div>
+      <div class="row">Has the floor: ${S.teams.map((t, i) => `<button class="${S.control===i?'on':''}" onclick="A.control(${i})">${esc(t.name)}</button>`).join('')}</div>
+      <div id="phonesBox" style="margin-top:6px">${phonesHtml()}</div>
+      <h2>2. The budget</h2><div class="row"><span class="big">${S.pot} points</span>
+      ${S.awarded ? `<span class="status">Given.</span><button onclick="A.rest()" ${r.a.every((_, i) => S.revealed[i]) ? 'disabled' : ''}>Reveal the rest</button>`
+        : (canSteal ? `<button class="go" onclick="A.steal(true)">Steal worked: give to ${esc(S.teams[o].name)}</button><button class="go" onclick="A.steal(false)">Steal failed: ${esc(S.teams[S.control].name)} keeps it</button>`
+          : S.teams.map((t, i) => `<button class="go" onclick="A.award(${i})">Give to ${esc(t.name)}</button>`).join(''))}</div>
+      ${canSteal ? '<p class="muted">Three strikes. The other team gets one answer. If it is on the board, click that answer first, then "Steal worked".</p>' : ''}
+      ${S.awarded && nx ? `<div class="row"><button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button></div>` : ''}</div></div>`;
+  }
+
+  if (ph === 'survey') {
+    const v = S.survey;
+    h += `<div class="card"><h2>You said: the room writes this board</h2>` + (v.st === 'ready' ? `
+      <div class="row"><select onchange="A.sq(this.value)">${G.room.map(q => `<option ${q === v.q ? 'selected' : ''}>${esc(q)}</option>`).join('')}</select></div>
+      <div class="row"><input class="wide" id="sq" value="${esc(v.q)}" oninput="A.sq(this.value)" aria-label="Survey question"><button class="go next" onclick="A.sopen()">Open the survey</button></div>
+      <p class="muted">Pick a question or type your own (answerable in one or two words). The big screen is showing the QR code so people can get their phones out. Everyone with a phone can answer, players included.</p>
+      <div id="phonesBox">${phonesHtml()}</div>`
+    : v.st === 'open' ? `<div class="qtext">${esc(v.q)}</div><div class="row"><span class="big"><span id="scount">${v.count}</span> answers in</span>
+      <button class="go next" onclick="A.sclose()">Close the survey and count</button></div><p class="muted">Give it about a minute. Turn on the hold music. You need at least 3 different answers.</p><div id="phonesBox">${phonesHtml()}</div>`
+    : busy || !v.groups ? `<div class="qtext">${esc(v.q)}</div><p class="big">Counting ${v.count} answers...</p>`
+    : `<div class="qtext">${esc(v.q)}</div><p class="muted">Check the tally before it goes on screen. Fix a label, merge by changing counts, or remove anything that should not be shown. The top 6 go on the board; points are each answer's share of the room.</p>
+      <div class="grp">${v.groups.map((g, i) => `<div class="row"><input class="t" maxlength="24" value="${esc(g.label)}" oninput="A.sedit(${i},'label',this.value)" aria-label="Answer ${i+1}"><input class="p" type="number" min="0" value="${g.count}" oninput="A.sedit(${i},'count',this.value)" aria-label="Count ${i+1}"> people <button onclick="A.sdel(${i})">Remove</button></div>`).join('')}</div>
+      <div class="row"><button onclick="A.sadd()">Add a row</button><button onclick="A.sreopen()">Reopen the survey</button><button class="go next" onclick="A.splay()">Put it on the board and play</button></div>
+      ${note ? `<p class="status">${esc(note)}</p>` : ''}`) + '</div>';
   }
 
   if (ph === 'lightning') {
-    const set = G.lightning[S.li], total = S.la.flat().reduce((n, a) => n + (a.sp ? Number(a.p) || 0 : 0), 0);
-    const cell = (p, i) => { const c = S.la[p][i]; return `<td><input class="t" value="${esc(c.t)}" placeholder="what they said" oninput="A.ltext(${p},${i},this.value)"> <input class="p" type="number" value="${c.p}" oninput="A.lpts(${p},${i},this.value)"><br>
-      <button class="${c.st?'on':''}" onclick="A.lrev(${p},${i},'st')">Show answer</button> <button class="${c.sp?'on':''}" onclick="A.lrev(${p},${i},'sp')">Show points</button></td>`; };
-    h += `<div class="card"><h2>Final round: the 4:59 Friday Rush</h2><div class="row">
+    const set = G.lightning[S.li], total = ltotal(), st = A.lstep();
+    const cell = (p, i) => { const c = S.la[p][i]; return `<td class="${S.lp === p ? 'act' : ''}"><input class="t ${p === 1 && isDup(i) ? 'dup' : ''}" id="lt${p}${i}" value="${esc(c.t)}" placeholder="what they said" onfocus="A.lq(${i})" oninput="A.ltext(${p},${i},this.value)" onchange="A.ldup(${p},${i},this)" onkeydown="if(event.key==='Enter')A.lgo(${p},${i})"> <input class="p" type="number" value="${c.p}" oninput="A.lpts(${p},${i},this.value)" aria-label="points">
+      <span class="muted">${c.sp ? 'shown' : c.st ? 'answer shown' : ''}</span></td>`; };
+    h += `<div class="card"><div class="row"><b>Final: the 4:59 Friday Rush</b>
       <select onchange="A.lset(this.value)">${G.lightning.map((s, i) => `<option value="${i}" ${i===S.li?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-      Typing answers for: <button class="${S.lp===0?'on':''}" onclick="A.lplayer(0)">Player 1 (20s)</button><button class="${S.lp===1?'on':''}" onclick="A.lplayer(1)">Player 2 (25s)</button>
-      <span class="big" id="tm">${S.timer}s</span><button class="go" onclick="A.tstart()">Start clock</button><button onclick="A.tstop()">Stop</button><button onclick="A.treset()">Reset clock</button></div>
-      <div class="row" style="margin-top:8px"><button class="${S.hideP1?'on':''}" onclick="A.lhide()">${S.hideP1 ? 'Player 1 answers are hidden' : 'Hide player 1 answers'}</button>
-      <button class="bad" onclick="SFX.dup()">Duplicate answer buzzer</button><span class="big">Total: ${total} / ${G.lightningTarget}</span><button onclick="A.lclear()">Clear all</button></div>
-      <p class="muted">Click an answer chip to fill in the text and points for the selected player. No match = leave points at 0.</p>
-      <table class="l">${set.qs.map((q, i) => `<tr><td><b>${i+1}. ${esc(q.q)}</b> <button onclick="A.lread(${i})">Read aloud</button>
+      Typing for: <button class="${S.lp===0?'on':''}" onclick="A.lplayer(0)">Player 1 (20s)</button><button class="${S.lp===1?'on':''}" onclick="A.lplayer(1)">Player 2 (25s)</button>
+      <span class="big" id="tm">${S.timer}s</span><button class="go" onclick="A.tstart()">Start clock</button><button onclick="A.tstop()">Stop</button><button onclick="A.treset()">Reset</button></div>
+      <div class="row"><button class="go next" onclick="A.lnext()" ${st ? '' : 'disabled'}>${st ? 'Reveal next: player ' + (st[0] + 1) + ', ' + (st[2] === 'st' ? 'answer ' : 'points ') + (st[1] + 1) : S.lp === 0 && S.la[0].every(c => c.sp) ? 'Player 1 done. Switch to player 2.' : 'All revealed'} <kbd>Space</kbd></button>
+      <button class="${S.hideP1?'on':''}" onclick="A.lhide()">${S.hideP1 ? 'Player 1 answers are hidden' : 'Hide player 1 answers'}</button>
+      <span class="big">Total: ${total} / ${G.lightningTarget}</span><button onclick="A.lclear()">Clear all</button></div>
+      <p class="muted">While the clock runs: type each answer, Enter moves down. Afterwards click the matching chip to set its points (no match = 0). A player 2 answer that repeats player 1 turns red and buzzes. The big screen shows the question for the row you are on.</p>
+      <table class="l">${set.qs.map((q, i) => `<tr><td><b>${i+1}. ${esc(q.q)}</b> <button onclick="A.lread(${i})" style="padding:0 6px">Read</button>
         <div class="chips">${q.a.map((a, k) => `<button onclick="A.lfill(${i},${k})">${esc(a[0])} ${a[1]}</button>`).join('')}</div></td>${cell(0, i)}${cell(1, i)}</tr>`).join('')}</table></div>`;
   }
   app.innerHTML = h + '</main>';
 }
-render();
+render(); push();
 window.addEventListener('beforeunload', () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} });
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
