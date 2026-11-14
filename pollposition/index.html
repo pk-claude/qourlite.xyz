@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Poll Position - Host screen</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f1ea;color:#1b2a27;font-family:"Segoe UI",system-ui,Arial,sans-serif;font-size:15px}
+header{background:#0e2320;color:#f6edd9;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header h1{font-size:20px;margin:0 16px 0 0}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 60px}
+button,select,input{font:inherit}
+button{border:1px solid #9aa8a3;background:#fff;border-radius:6px;padding:7px 12px;cursor:pointer}
+button:hover{background:#e7f6f0}
+button.on{background:#0e2320;color:#fff;border-color:#0e2320}
+header button.on{background:#63e2b9;color:#0e2320;border-color:#63e2b9;font-weight:700}
+button.go{background:#1d7a5f;color:#fff;border-color:#1d7a5f;font-weight:600}
+button.bad{background:#d8492c;color:#fff;border-color:#d8492c;font-weight:600}
+button:disabled{opacity:.4;cursor:default}
+.card{background:#fff;border:1px solid #d9d6cb;border-radius:10px;padding:12px 14px;margin-top:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#5c6b66;margin:0 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scores input.nm{width:60%;font-weight:600;padding:6px}
+.scores input.sc{width:90px;font-size:22px;font-weight:700;text-align:center;padding:4px}
+.qtext{font-size:22px;font-weight:600;margin:6px 0 10px}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ans button{text-align:left;display:flex;justify-content:space-between;gap:10px;font-size:16px}
+.ans button.done{background:#dfe9e5;color:#6d7a76;text-decoration:line-through}
+.status{font-weight:700;padding:4px 10px;border-radius:6px;background:#fff3c4}
+.status.hot{background:#ff6b4a;color:#fff}
+.muted{color:#6d7a76;font-size:13px}
+.err{background:#ffe2db;border:2px solid #d8492c;padding:16px;margin:20px;border-radius:10px;font-size:17px}
+table.l{width:100%;border-collapse:collapse}
+table.l td{padding:6px 4px;border-top:1px solid #e5e2d8;vertical-align:top}
+table.l input.t{width:150px;padding:5px}table.l input.p{width:56px;padding:5px;text-align:center}
+.chips button{padding:3px 8px;font-size:13px;margin:2px 2px 0 0}
+.big{font-size:26px;font-weight:700}
+</style>
+<script src="questions.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const G = window.GAME, app = document.getElementById('app'), KEY = 'pollposition_state_v1';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- question file check ----------
+function problems() {
+  if (!G) return ['The file questions.js could not be read. It probably has a missing comma, quote or bracket.'];
+  const out = [], bad = (a) => !Array.isArray(a) || !a.length || a.some(x => !Array.isArray(x) || typeof x[0] !== 'string' || typeof x[1] !== 'number');
+  (G.rounds || []).forEach((r, i) => { if (!r.q || bad(r.a)) out.push('Main round ' + (i + 1) + ' has a broken question or answer list.'); });
+  (G.lightning || []).forEach(s => { if (!s.qs || s.qs.length !== 5) out.push('Lightning ' + s.name + ' must have exactly 5 questions.'); else s.qs.forEach((q, i) => { if (!q.q || bad(q.a)) out.push('Lightning ' + s.name + ' question ' + (i + 1) + ' is broken.'); }); });
+  if (!G.rounds || !G.rounds.length) out.push('There are no main rounds.');
+  if (!G.lightning || !G.lightning.length) out.push('There is no lightning set.');
+  return out;
+}
+const probs = problems();
+if (probs.length) { app.innerHTML = '<div class="err"><b>Question file problem.</b><br>' + probs.map(esc).join('<br>') + '<br><br>Undo the last change to questions.js (or restore your backup copy) and reload this page.</div>'; throw new Error('bad questions.js'); }
+
+// ---------- state ----------
+const ONLINE = /^http/.test(location.protocol);
+const blankLa = () => [0, 1].map(() => Array.from({length: 5}, () => ({t: '', p: 0, st: false, sp: false})));
+const fresh = () => ({teams: G.teams.map(n => ({name: n, score: 0})), phase: 'title', ri: 0, revealed: [], strikes: 0, pot: 0, awarded: false, control: null,
+  buzzOpen: false, buzz: null, showQ: false, li: 0, lp: 0, la: blankLa(), hideP1: false, timer: 20,
+  phones: ONLINE, sid: Math.random().toString(36).slice(2, 6).toUpperCase().replace(/[01OIL]/g, 'X'), joinUrl: location.host + location.pathname.replace(/[^/]*$/, '') + 'buzz'});
+let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!S || !S.teams || S.ri >= G.rounds.length || S.li >= G.lightning.length) S = fresh();
+S.buzzOpen = false;
+let win = null, tick = null, phoneInfo = '';
+
+function push(fx) { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (win && !win.closed) win.postMessage({S, fx: fx || {}}, '*'); }
+function up(fx) { push(fx); render(); }
+
+// ---------- sound (made in the browser, no files needed) ----------
+let AC;
+function tone(f, at, dur, type, vol) { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + at; o.type = type || 'sine'; o.frequency.value = f; o.connect(g); g.connect(AC.destination); g.gain.setValueAtTime(vol || .25, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.start(t); o.stop(t + dur); } catch (e) {} }
+const SFX = {
+  ding() { tone(880, 0, .5); tone(1320, .08, .7); },
+  strike() { tone(110, 0, .7, 'sawtooth', .35); tone(117, 0, .7, 'square', .2); },
+  buzz() { tone(520, 0, .15, 'square'); tone(780, .12, .3, 'square'); },
+  dup() { tone(200, 0, .15, 'square'); tone(200, .2, .15, 'square'); },
+  zero() { tone(160, 0, .5, 'sawtooth', .3); },
+  tick() { tone(1000, 0, .05, 'square', .08); },
+  time() { tone(300, 0, .9, 'sawtooth', .3); },
+  award() { [659, 784, 1047].forEach((f, i) => tone(f, i * .1, .4, 'triangle')); },
+  win() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, i * .16, .45, 'triangle')); }
+};
+
+// ---------- host voice ----------
+let current = null;
+function speak(id, text) {
+  stopVoice();
+  const a = new Audio('audio/' + id + '.mp3'); current = a;
+  const fallback = () => { if (current !== a) return; const u = new SpeechSynthesisUtterance(text), want = localStorage.getItem('pollposition_voice'); const v = speechSynthesis.getVoices().find(x => x.name === want); if (v) u.voice = v; u.rate = .95; speechSynthesis.speak(u); };
+  a.onerror = fallback; a.play().catch(fallback);
+}
+function stopVoice() { if (current) { current.pause(); current = null; } if (window.speechSynthesis) speechSynthesis.cancel(); }
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { if (S.phase === 'title') render(); };
+
+// ---------- buzzers ----------
+// Keyboard: any key on the left half = team 1, right half = team 2.
+// A presenter clicker (Page Up / Page Down) = team 1. A number pad = team 2.
+const LEFT = new Set('Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Tab KeyQ KeyW KeyE KeyR KeyT CapsLock KeyA KeyS KeyD KeyF KeyG ShiftLeft KeyZ KeyX KeyC KeyV KeyB ControlLeft AltLeft PageUp PageDown'.split(' '));
+const isRight = c => /^(Digit[6-90]|Key[YUIOPHJKLNM]|Minus|Equal|Backspace|Bracket|Backslash|Semicolon|Quote|Enter|Comma|Period|Slash|ShiftRight|ControlRight|AltRight|Arrow|Numpad)/.test(c);
+function buzzIn(t) { if (!S.buzzOpen || S.phase !== 'round') return false; S.buzz = t; S.buzzOpen = false; SFX.buzz(); up(); return true; }
+function buzzKey(code) { return LEFT.has(code) ? buzzIn(0) : isRight(code) ? buzzIn(1) : false; }
+document.addEventListener('keydown', e => { if (S.buzzOpen && buzzKey(e.code)) e.preventDefault(); });
+window.addEventListener('message', e => { if (!e.data) return; if (e.data.hello) { win = e.source; push(); } if (e.data.key) buzzKey(e.data.key); });
+
+// Phones: each phone posts to this site's relay; the host page reads the relay.
+const seen = new Set(); let polling = false;
+async function pollPhones(countBuzzes) {
+  if (!ONLINE || polling) return; polling = true;
+  try {
+    const r = await fetch('/api/relay?room=pollposition&k=up&sid=' + S.sid, {cache: 'no-store'}); if (!r.ok) throw 0;
+    const msgs = (await r.json()).msgs.map(m => { try { return JSON.parse(m); } catch (e) { return {}; } });
+    const fresh = msgs.filter(m => m.k === 'buzz' && !seen.has(m.id)).sort((a, b) => a.t - b.t);
+    msgs.forEach(m => seen.add(m.id));
+    const n = [0, 1].map(t => msgs.filter(m => m.k === 'join' && m.team === t).length);
+    setPhoneInfo('Phones joined: ' + S.teams[0].name + ' ' + n[0] + ', ' + S.teams[1].name + ' ' + n[1]);
+    if (countBuzzes && fresh.length) buzzIn(fresh[0].team === 1 ? 1 : 0);
+  } catch (e) { setPhoneInfo('Phone buzzers are not reachable right now. Keyboard buzzers still work.'); }
+  polling = false;
+}
+function setPhoneInfo(s) { phoneInfo = s; const el = document.getElementById('phoneInfo'); if (el) el.textContent = s; }
+let armed = false;
+setInterval(() => { if (S.buzzOpen && armed) pollPhones(true); }, 300);
+setInterval(() => { if (!S.buzzOpen && (S.phase === 'round' || S.phase === 'title')) pollPhones(false); }, 3000);
+
+// ---------- actions ----------
+function resetRound() { Object.assign(S, {revealed: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, showQ: false}); stopVoice(); }
+const A = {
+  open() { win = window.open('display.html', 'pollposition_display', 'width=1280,height=720'); },
+  phase(p) { S.phase = p; S.buzzOpen = false; if (p === 'winner') SFX.win(); up(); },
+  round(i) { i = Number(i); if (i < 0 || i >= G.rounds.length) return; S.ri = i; resetRound(); S.phase = 'round'; up(); },
+  showQ() { S.showQ = !S.showQ; up(); },
+  read() { const r = G.rounds[S.ri]; S.showQ = true; up(); speak(r.id, r.q); },
+  async buzzOpen() { S.buzz = null; armed = false; S.buzzOpen = true; up(); await pollPhones(false); armed = true; },
+  buzzClear() { S.buzz = null; S.buzzOpen = false; up(); },
+  control(i) { S.control = i; up(); },
+  reveal(i) { if (S.revealed[i]) return; const r = G.rounds[S.ri]; S.revealed[i] = true; if (!S.awarded) S.pot += r.a[i][1] * r.mult; SFX.ding(); up({reveal: i}); },
+  strike() { if (S.strikes < 3) S.strikes++; SFX.strike(); up({strike: S.strikes}); },
+  wrong() { SFX.strike(); up({strike: 1}); },
+  clearStrikes() { S.strikes = 0; up(); },
+  award(i) { if (S.awarded) return; S.teams[i].score += S.pot; S.awarded = true; SFX.award(); up(); },
+  name(i, v) { S.teams[i].name = v; push(); },
+  score(i, v) { S.teams[i].score = Number(v) || 0; push(); },
+  newGame() { if (!confirm('Start a new game? Scores go back to zero.')) return; const names = S.teams.map(t => t.name); S = fresh(); S.teams.forEach((t, i) => t.name = names[i]); seen.clear(); up(); },
+  voice(v) { localStorage.setItem('pollposition_voice', v); },
+  // lightning round
+  lset(i) { S.li = Number(i); S.la = blankLa(); S.lp = 0; S.hideP1 = false; A.tstop(); S.timer = 20; up(); },
+  lplayer(p) { S.lp = p; A.tstop(); S.timer = p ? 25 : 20; S.hideP1 = p === 1; up(); },
+  lhide() { S.hideP1 = !S.hideP1; up(); },
+  ltext(p, i, v) { S.la[p][i].t = v; push(); },
+  lpts(p, i, v) { S.la[p][i].p = Number(v) || 0; push(); },
+  lfill(i, k) { const a = G.lightning[S.li].qs[i].a[k], c = S.la[S.lp][i]; c.t = a[0]; c.p = a[1]; up(); },
+  lrev(p, i, what) { const c = S.la[p][i]; c[what] = true; if (what === 'sp') (Number(c.p) > 0 ? SFX.ding : SFX.zero)(); else SFX.tick(); up(); },
+  lread(i) { const q = G.lightning[S.li].qs[i]; speak(q.id, q.q); },
+  tstart() { A.tstop(); tick = setInterval(() => { S.timer--; if (S.timer <= 0) { S.timer = 0; A.tstop(); SFX.time(); } else if (S.timer <= 5) SFX.tick(); push(); const el = document.getElementById('tm'); if (el) el.textContent = S.timer + 's'; }, 1000); },
+  tstop() { clearInterval(tick); tick = null; },
+  treset() { A.tstop(); S.timer = S.lp ? 25 : 20; up(); },
+  lclear() { if (!confirm('Clear all lightning round answers?')) return; A.lset(S.li); }
+};
+
+// ---------- host screen ----------
+function render() {
+  const ph = S.phase, r = G.rounds[S.ri], nav = (p, label) => `<button class="${ph===p?'on':''}" onclick="A.phase('${p}')">${label}</button>`;
+  const voices = window.speechSynthesis ? speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)) : [], vsel = localStorage.getItem('pollposition_voice');
+  let h = `<header><h1>${esc(G.title)} - host</h1><button class="go" onclick="A.open()">Open audience screen</button>
+    ${nav('title', 'Title')}${nav('round', 'Main rounds')}${nav('lightning', 'Lightning round')}${nav('winner', 'Winner')}
+    <span style="flex:1"></span><button onclick="A.newGame()">New game</button></header><main>
+  <div class="card scores">${S.teams.map((t, i) => `<div><input class="nm" value="${esc(t.name)}" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name">
+    <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score"></div>`).join('')}</div>`;
+
+  if (ph === 'title' || ph === 'winner') {
+    h += `<div class="card"><h2>${ph === 'title' ? 'Title screen is showing' : 'Winner screen is showing'}</h2>
+      <div class="row"><button class="go" onclick="A.round(0)">Start round 1</button>
+      <label class="muted">Backup voice: <select onchange="A.voice(this.value)"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label>
+      <button onclick="speak('none','Welcome to ${esc(G.title)}')">Test voice</button><button onclick="SFX.ding()">Test sound</button></div>
+      <p class="muted">${S.phones ? 'Phone buzzers: players open <b>' + esc(S.joinUrl) + '</b> and enter code <b>' + S.sid + '</b>. <span id="phoneInfo">' + esc(phoneInfo) + '</span>' : 'Phone buzzers need the game to be opened from the website. Keyboard buzzers work anywhere.'}</p></div>`;
+  }
+
+  if (ph === 'round') {
+    const buzzTxt = S.buzzOpen ? 'BUZZERS OPEN - waiting...' : S.buzz !== null ? esc(S.teams[S.buzz].name) + ' buzzed first' : 'Buzzers closed';
+    h += `<div class="card"><h2>Round</h2><div class="row">
+      <button onclick="A.round(${S.ri-1})" ${S.ri ? '' : 'disabled'}>Previous</button>
+      <select onchange="A.round(this.value)">${G.rounds.map((x, i) => `<option value="${i}" ${i===S.ri?'selected':''}>${i+1}. (x${x.mult}) ${esc(x.q)}</option>`).join('')}</select>
+      <button class="go" onclick="A.round(${S.ri+1})" ${S.ri < G.rounds.length-1 ? '' : 'disabled'}>Next round</button></div>
+      <div class="qtext">${esc(r.q)} <span class="muted">x${r.mult}</span></div>
+      <div class="row"><button onclick="A.read()">Read aloud</button><button onclick="stopVoice()">Stop voice</button>
+      <button class="${S.showQ?'on':''}" onclick="A.showQ()">${S.showQ ? 'Question is on screen' : 'Show question on screen'}</button></div></div>
+    <div class="card"><h2>1. Face-off</h2><div class="row"><button class="go" onclick="A.buzzOpen()">Open buzzers</button><button onclick="A.buzzClear()">Close / clear</button>
+      <span class="status ${S.buzzOpen||S.buzz!==null?'hot':''}">${buzzTxt}</span>
+      <button class="bad" onclick="A.wrong()">Wrong answer (X, no strike)</button></div>
+      <div class="row" style="margin-top:8px">In control: ${S.teams.map((t, i) => `<button class="${S.control===i?'on':''}" onclick="A.control(${i})">${esc(t.name)}</button>`).join('')}
+      <span class="muted" id="phoneInfo">${esc(phoneInfo)}</span></div></div>
+    <div class="card"><h2>2. Answers (click to reveal)</h2><div class="ans">${r.a.map((a, i) => `<button class="${S.revealed[i]?'done':''}" onclick="A.reveal(${i})"><span>${i+1}. ${esc(a[0])}</span><b>${a[1]}</b></button>`).join('')}</div>
+      <div class="row" style="margin-top:10px"><button class="bad" onclick="A.strike()">Strike</button><span class="big">${'X '.repeat(S.strikes) || 'No strikes'}</span><button onclick="A.clearStrikes()">Clear strikes</button></div></div>
+    <div class="card"><h2>3. Award the pot</h2><div class="row"><span class="big">${S.pot} points</span>
+      ${S.awarded ? '<span class="status">Awarded. Reveal the rest for fun, then go to the next round.</span>' : S.teams.map((t, i) => `<button class="go" onclick="A.award(${i})">Give to ${esc(t.name)}</button>`).join('')}</div>
+      <p class="muted">Made a mistake? Type the correct score into the score box at the top.</p></div>`;
+  }
+
+  if (ph === 'lightning') {
+    const set = G.lightning[S.li], total = S.la.flat().reduce((n, a) => n + (a.sp ? Number(a.p) || 0 : 0), 0);
+    const cell = (p, i) => { const c = S.la[p][i]; return `<td><input class="t" value="${esc(c.t)}" placeholder="what they said" oninput="A.ltext(${p},${i},this.value)"> <input class="p" type="number" value="${c.p}" oninput="A.lpts(${p},${i},this.value)"><br>
+      <button class="${c.st?'on':''}" onclick="A.lrev(${p},${i},'st')">Show answer</button> <button class="${c.sp?'on':''}" onclick="A.lrev(${p},${i},'sp')">Show points</button></td>`; };
+    h += `<div class="card"><h2>Lightning round</h2><div class="row">
+      <select onchange="A.lset(this.value)">${G.lightning.map((s, i) => `<option value="${i}" ${i===S.li?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+      Typing answers for: <button class="${S.lp===0?'on':''}" onclick="A.lplayer(0)">Player 1 (20s)</button><button class="${S.lp===1?'on':''}" onclick="A.lplayer(1)">Player 2 (25s)</button>
+      <span class="big" id="tm">${S.timer}s</span><button class="go" onclick="A.tstart()">Start clock</button><button onclick="A.tstop()">Stop</button><button onclick="A.treset()">Reset clock</button></div>
+      <div class="row" style="margin-top:8px"><button class="${S.hideP1?'on':''}" onclick="A.lhide()">${S.hideP1 ? 'Player 1 answers are hidden' : 'Hide player 1 answers'}</button>
+      <button class="bad" onclick="SFX.dup()">Duplicate answer buzzer</button><span class="big">Total: ${total} / ${G.lightningTarget}</span><button onclick="A.lclear()">Clear all</button></div>
+      <p class="muted">Click an answer chip to fill in the text and points for the selected player. No match = leave points at 0.</p>
+      <table class="l">${set.qs.map((q, i) => `<tr><td><b>${i+1}. ${esc(q.q)}</b> <button onclick="A.lread(${i})">Read aloud</button>
+        <div class="chips">${q.a.map((a, k) => `<button onclick="A.lfill(${i},${k})">${esc(a[0])} ${a[1]}</button>`).join('')}</div></td>${cell(0, i)}${cell(1, i)}</tr>`).join('')}</table></div>`;
+  }
+  app.innerHTML = h + '</main>';
+}
+render();
+window.addEventListener('beforeunload', () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} });
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
