@@ -9,5 +9,112 @@
     "api/quip.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/cereal",
+      "destination": "/reports/cereal/",
+      "permanent": true
+    },
+    {
+      "source": "/cereal/",
+      "destination": "/reports/cereal/",
+      "permanent": true
+    },
+    {
+      "source": "/cereal/:path+",
+      "destination": "/reports/cereal/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/egg",
+      "destination": "/reports/egg/",
+      "permanent": true
+    },
+    {
+      "source": "/egg/",
+      "destination": "/reports/egg/",
+      "permanent": true
+    },
+    {
+      "source": "/egg/:path+",
+      "destination": "/reports/egg/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/spill",
+      "destination": "/live/spill/",
+      "permanent": true
+    },
+    {
+      "source": "/spill/",
+      "destination": "/live/spill/",
+      "permanent": true
+    },
+    {
+      "source": "/spill/:path+",
+      "destination": "/live/spill/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/office",
+      "destination": "/live/office/",
+      "permanent": true
+    },
+    {
+      "source": "/office/",
+      "destination": "/live/office/",
+      "permanent": true
+    },
+    {
+      "source": "/office/:path+",
+      "destination": "/live/office/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/poll",
+      "destination": "/live/poll/",
+      "permanent": true
+    },
+    {
+      "source": "/poll/",
+      "destination": "/live/poll/",
+      "permanent": true
+    },
+    {
+      "source": "/poll/:path+",
+      "destination": "/live/poll/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/trivia",
+      "destination": "/solo/trivia/",
+      "permanent": true
+    },
+    {
+      "source": "/trivia/",
+      "destination": "/solo/trivia/",
+      "permanent": true
+    },
+    {
+      "source": "/trivia/:path+",
+      "destination": "/solo/trivia/:path+",
+      "permanent": true
+    },
+    {
+      "source": "/cat",
+      "destination": "/solo/cat/",
+      "permanent": true
+    },
+    {
+      "source": "/cat/",
+      "destination": "/solo/cat/",
+      "permanent": true
+    },
+    {
+      "source": "/cat/:path+",
+      "destination": "/solo/cat/:path+",
+      "permanent": true
+    }
+  ]
 }

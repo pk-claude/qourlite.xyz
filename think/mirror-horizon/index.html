@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mirror Horizon -- Qourlite</title>
+<meta name="description" content="Seven future horizons, 50 to 20,000 years, mirrored against the past. What will they know of us, and what will they be?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F1EA; --bg2:#EAE7DD; --surface:#FFFFFF; --ink:#171B2A; --ink2:#414A5F; --muted:#6B7488; --rule:#D8D3C4; --rule2:#C6C0AE;
+  --past:#A87B2C; --future:#1D8C7B; --past-soft:rgba(168,123,44,.14); --future-soft:rgba(29,140,123,.14);
+  --sc-c:#14907C; --sc-d:#C2621A; --sc-t:#7452C9;
+  --heat0:#F3F1EA; --heat1:#1D8C7B;
+  --shadow:0 1px 0 rgba(23,27,42,.06), 0 12px 32px -20px rgba(23,27,42,.35);
+  --display:"Bodoni Moda",Didot,"Times New Roman",serif;
+  --body:"Source Sans 3","Source Sans Pro","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1020; --bg2:#0F1529; --surface:#141B30; --ink:#E8E4D9; --ink2:#C2BFB3; --muted:#8F98AD; --rule:#243052; --rule2:#31406A;
+    --past:#D4A85A; --future:#4FB3A0; --past-soft:rgba(212,168,90,.16); --future-soft:rgba(79,179,160,.16);
+    --sc-c:#22A38F; --sc-d:#D4722E; --sc-t:#9B7BE0;
+    --heat0:#141B30; --heat1:#4FB3A0;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 16px 40px -24px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1020; --bg2:#0F1529; --surface:#141B30; --ink:#E8E4D9; --ink2:#C2BFB3; --muted:#8F98AD; --rule:#243052; --rule2:#31406A;
+  --past:#D4A85A; --future:#4FB3A0; --past-soft:rgba(212,168,90,.16); --future-soft:rgba(79,179,160,.16);
+  --sc-c:#22A38F; --sc-d:#D4722E; --sc-t:#9B7BE0;
+  --heat0:#141B30; --heat1:#4FB3A0;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 16px 40px -24px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3,h4{font-family:var(--display);font-weight:400;line-height:1.05;margin:0;text-wrap:balance}
+p{margin:0 0 1em;max-width:68ch}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.grid{display:grid;gap:24px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:20px 22px;box-shadow:var(--shadow)}
+.sub{color:var(--ink2)}
+.small{font-size:14.5px;color:var(--muted)}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:48px 0}
+strong{font-weight:600}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums lining-nums}
+
+/* ---------- nav rail ---------- */
+.rail{position:fixed;left:0;top:0;bottom:0;width:150px;padding:28px 0 28px 22px;border-right:1px solid var(--rule);background:var(--bg);z-index:5;display:flex;flex-direction:column;gap:6px;overflow:auto}
+.rail .eyebrow{margin-bottom:10px}
+.rail a{text-decoration:none;font-family:var(--mono);font-size:12px;color:var(--muted);padding:5px 8px;border-left:2px solid transparent;margin-left:-2px;white-space:nowrap}
+.rail a:hover,.rail a:focus-visible{color:var(--ink);outline:none}
+.rail a.on{color:var(--future);border-left-color:var(--future)}
+.rail .gap{height:12px}
+.rail .theme{margin-top:auto;font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--rule);border-radius:4px;padding:6px 8px;cursor:pointer;width:104px}
+.rail .theme:hover{color:var(--ink)}
+main{margin-left:150px}
+@media (max-width:900px){.rail{display:none}main{margin-left:0}}
+
+/* ---------- hero ---------- */
+.hero{padding:72px 0 40px;position:relative;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.9}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(44px,6.4vw,84px);letter-spacing:-.01em;max-width:14ch}
+.hero h1 em{font-style:italic;color:var(--future)}
+.hero .lede{font-size:20px;max-width:58ch;color:var(--ink2);margin-top:22px}
+.mirror{margin-top:44px}
+.mirror svg{width:100%;height:auto;display:block;overflow:visible}
+.mirror .lbl{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.mirror .yr{font-family:var(--display);font-size:20px;fill:var(--ink)}
+.mirror .tick-p{stroke:var(--past)} .mirror .tick-f{stroke:var(--future)}
+.mirror .note{font-family:var(--body);font-size:12.5px;fill:var(--ink2)}
+.mirror .axis{stroke:var(--rule2)}
+.mirror .now{fill:var(--ink)}
+.mirror g.h{cursor:pointer}
+.mirror g.h:hover .yr{fill:var(--future)}
+.legend-pf{display:flex;gap:26px;margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.legend-pf span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+.legend-pf .p::before{background:var(--past)} .legend-pf .f::before{background:var(--future)}
+
+/* ---------- sections ---------- */
+section{padding:56px 0}
+.sec-head{display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:end;margin-bottom:28px;border-bottom:1px solid var(--rule);padding-bottom:18px}
+.sec-head h2{font-size:38px}
+.sec-head .eyebrow{padding-bottom:6px}
+@media (max-width:700px){.sec-head{grid-template-columns:1fr}}
+
+/* verdict */
+.verdict{display:grid;grid-template-columns:1.25fr 1fr;gap:28px}
+.verdict .big{font-family:var(--display);font-size:29px;line-height:1.22;text-wrap:pretty}
+.verdict .big em{color:var(--future);font-style:italic}
+.claims{display:grid;gap:12px}
+.claim{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--rule)}
+.claim:last-child{border-bottom:1px solid var(--rule)}
+.claim .k{font-family:var(--display);font-size:24px;color:var(--future);line-height:1}
+.claim b{display:block;font-weight:600}
+.claim span{color:var(--ink2);font-size:15.5px}
+@media (max-width:800px){.verdict{grid-template-columns:1fr}}
+
+/* method */
+.lenses{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.lens{padding:14px 16px;border:1px solid var(--rule);border-radius:6px;background:var(--surface)}
+.lens .eyebrow{display:block;margin-bottom:6px}
+.lens b{display:block;font-weight:600;margin-bottom:4px}
+.lens span{font-size:14.5px;color:var(--ink2)}
+.lens.rise{border-top:3px solid var(--future)} .lens.fade{border-top:3px solid var(--past)}
+@media (max-width:900px){.lenses{grid-template-columns:repeat(2,1fr)}}
+.scen{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.scen .card{border-top:3px solid var(--c)}
+.scen .card b{display:block;font-family:var(--display);font-size:22px;margin-bottom:6px}
+.scen .card p{font-size:15px;color:var(--ink2);margin:0}
+@media (max-width:800px){.scen{grid-template-columns:1fr}}
+.anchors{margin-top:26px;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.anchors table{width:100%;border-collapse:collapse;font-size:14.5px}
+.anchors th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--rule)}
+.anchors td{padding:9px 14px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink2)}
+.anchors td:first-child{color:var(--ink);font-weight:500}
+.anchors tr:last-child td{border-bottom:0}
+.anchors .v{font-family:var(--mono);white-space:nowrap;color:var(--ink)}
+.tblwrap{overflow-x:auto}
+
+/* horizon */
+.hz{border-top:1px solid var(--rule);padding:64px 0 48px}
+.hz-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:34px;align-items:baseline}
+.hz-head .yrs{font-family:var(--display);font-size:clamp(64px,8vw,112px);line-height:.9;letter-spacing:-.02em;font-variant-numeric:lining-nums tabular-nums}
+.hz-head .yrs small{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:12px;letter-spacing:.14em}
+.hz-head .dates{display:flex;flex-wrap:wrap;gap:16px 30px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.hz-head .dates b{display:block;font-family:var(--display);font-size:30px;font-weight:400;color:var(--ink);letter-spacing:0}
+.hz-head .dates .p b{color:var(--past)} .hz-head .dates .f b{color:var(--future)}
+.hz-head .thesis{font-size:21px;line-height:1.4;margin-top:14px;max-width:60ch;text-wrap:pretty}
+@media (max-width:700px){.hz-head{grid-template-columns:minmax(0,1fr)}.hz-head .yrs{font-size:64px}}
+.hz-body{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:34px}
+@media (max-width:860px){.hz-body{grid-template-columns:1fr}}
+.pane h3{font-size:15px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.pane h3::after{content:"";flex:1;height:1px;background:var(--rule)}
+.pane.p h3{color:var(--past)} .pane.f h3{color:var(--future)}
+.pane ul{margin:0;padding:0;list-style:none}
+.pane li{padding:8px 0 8px 18px;border-bottom:1px dotted var(--rule);position:relative;font-size:15.5px;color:var(--ink2)}
+.pane li::before{content:"";position:absolute;left:0;top:16px;width:6px;height:6px;border-radius:50%;background:var(--rule2)}
+.pane.p li::before{background:var(--past)} .pane.f li::before{background:var(--future)}
+.pane li b{color:var(--ink);font-weight:600}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.trio .card{border-top:3px solid var(--c);padding:16px 18px}
+.trio .card .eyebrow{color:var(--c);display:block;margin-bottom:6px}
+.trio .card p{font-size:15px;margin:0;color:var(--ink2)}
+@media (max-width:800px){.trio{grid-template-columns:1fr}}
+.memo{margin-top:26px;display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:stretch}
+.memo .card p{margin:0}
+.memo .k3{display:grid;gap:8px}
+.memo .k3 .row{display:grid;grid-template-columns:1fr auto;gap:10px;font-size:14px;align-items:center;padding:6px 0;border-bottom:1px dotted var(--rule)}
+.memo .k3 .row:last-child{border-bottom:0}
+.memo .bars{display:flex;gap:4px}
+.memo .bars i{display:block;width:34px;height:8px;border-radius:2px;background:var(--rule);position:relative;overflow:hidden}
+.memo .bars i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w);background:var(--c)}
+@media (max-width:800px){.memo{grid-template-columns:1fr}}
+.strip{margin-top:26px}
+.strip .eyebrow{display:block;margin-bottom:8px}
+.strip .lensrow{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.strip .l{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:8px 8px 10px;font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.3}
+.strip .l b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);font-weight:400;margin:4px 0 6px}
+.strip .l .bar{height:4px;background:var(--rule);border-radius:2px;overflow:hidden}
+.strip .l .bar i{display:block;height:100%;width:var(--w);background:var(--c)}
+@media (max-width:900px){.strip .lensrow{grid-template-columns:repeat(4,1fr)}}
+
+/* scenario toggle */
+.toggle{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden;font-family:var(--mono);font-size:12.5px}
+.toggle button{background:var(--surface);color:var(--muted);border:0;padding:8px 14px;cursor:pointer;border-right:1px solid var(--rule);display:flex;align-items:center;gap:8px}
+.toggle button:last-child{border-right:0}
+.toggle button i{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block}
+.toggle button.on{color:var(--ink);background:var(--bg2)}
+.toggle button:focus-visible{outline:2px solid var(--future);outline-offset:-2px}
+.sticky-tog{position:sticky;top:0;z-index:4;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--rule);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.sticky-tog .small{margin:0}
+@media (max-width:700px){.sticky-tog .small{display:none}}
+
+/* memory section */
+.prose h3{font-size:27px;margin:34px 0 12px;max-width:70ch}
+.prose p{max-width:70ch}
+.prose .callout{max-width:70ch}
+.kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 8px;max-width:980px}
+.kinds .card b{display:block;font-family:var(--display);font-size:21px;margin-bottom:6px}
+.kinds .card p{font-size:14.5px;color:var(--ink2);margin:0}
+.kinds .card .eyebrow{display:block;margin-bottom:8px}
+@media (max-width:800px){.kinds{grid-template-columns:1fr}}
+.tiers{display:grid;gap:0;border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin:18px 0;max-width:1100px}
+.tier{display:grid;grid-template-columns:120px 1fr 1fr 1fr;gap:16px;padding:14px 16px;border-bottom:1px solid var(--rule);font-size:14.5px;background:var(--surface)}
+.tier:last-child{border-bottom:0}
+.tier.head{background:var(--bg2);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tier .t{font-family:var(--display);font-size:22px}
+.tier .t small{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;margin-top:2px}
+.tier .v{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.tier span{color:var(--ink2)}
+@media (max-width:800px){.tier{grid-template-columns:1fr}}
+.callout{border-left:3px solid var(--future);padding:6px 0 6px 18px;margin:22px 0;font-size:18px;font-family:var(--display);line-height:1.35;color:var(--ink)}
+.callout.p{border-left-color:var(--past)}
+
+/* charts */
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:18px 20px 14px;box-shadow:var(--shadow)}
+.chart h4{font-family:var(--body);font-weight:600;font-size:15px;margin-bottom:2px}
+.chart .small{margin:0 0 10px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .grid line{stroke:var(--rule);stroke-dasharray:2 3}
+.chart .ax text,.chart text.ax{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.chart .ax line,.chart line.ax{stroke:var(--rule2)}
+.chart .lbl{font-family:var(--body);font-size:12px;fill:var(--ink2)}
+.chart .lbl.b{font-weight:600;fill:var(--ink)}
+.chart .leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:8px}
+.chart .leg span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;background:var(--c);margin-right:8px;vertical-align:3px}
+.chart .leg span.dash::before{background:repeating-linear-gradient(90deg,var(--c) 0 4px,transparent 4px 7px)}
+.chart .ctl{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin:8px 0 6px;font-family:var(--mono);font-size:12.5px;color:var(--ink2)}
+.chart .ctl label{display:flex;align-items:center;gap:10px}
+.chart .ctl input[type=range]{width:180px;accent-color:var(--future)}
+.chart .ctl output{font-family:var(--mono);color:var(--ink);min-width:80px}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:12px;padding:6px 9px;border-radius:4px;opacity:0;transform:translate(-50%,-120%);white-space:nowrap;z-index:9;transition:opacity .08s}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.heat{overflow-x:auto}
+.heat table{border-collapse:separate;border-spacing:3px;font-family:var(--mono);font-size:12px;width:100%}
+.heat th{font-weight:500;color:var(--muted);text-align:left;padding:6px 8px;font-size:11px;letter-spacing:.06em}
+.heat th.c{text-align:center}
+.heat td{padding:0}
+.heat td .cell{height:40px;display:flex;align-items:center;justify-content:center;border-radius:3px;color:var(--ink);cursor:default;position:relative}
+.heat td .cell b{font-weight:500}
+.heat td.name{color:var(--ink);white-space:nowrap;padding-right:10px;font-size:12.5px}
+.heat td.name small{display:block;color:var(--muted);font-size:10.5px}
+.smalls{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:1000px){.smalls{grid-template-columns:repeat(2,1fr)}}
+.smalls .chart{padding:12px 14px 10px}
+.smalls .chart h4{font-size:13.5px}
+.weights{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+@media (max-width:900px){.weights{grid-template-columns:1fr}}
+.wctl{display:grid;gap:12px}
+.wctl label{display:grid;grid-template-columns:130px 1fr 52px;align-items:center;gap:12px;font-family:var(--mono);font-size:12.5px;color:var(--ink2)}
+.wctl label i{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block;margin-right:8px}
+.wctl input[type=range]{width:100%;accent-color:var(--future)}
+.wout{display:grid;gap:10px;margin-top:6px}
+.wout .row{display:grid;grid-template-columns:1fr 70px;gap:12px;align-items:center;font-size:14.5px}
+.wout .row .bar{height:10px;background:var(--rule);border-radius:3px;overflow:hidden}
+.wout .row .bar i{display:block;height:100%;width:var(--w);background:var(--future)}
+.wout .row output{font-family:var(--display);font-size:22px;text-align:right}
+.reg table{width:100%;border-collapse:collapse;font-size:14px}
+.reg th{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:10px 12px;border-bottom:1px solid var(--rule);background:var(--bg2)}
+.reg td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink2)}
+.reg td:first-child{color:var(--ink);font-weight:500}
+.reg .v{font-family:var(--mono);color:var(--ink);white-space:nowrap}
+.reg .sens{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:2px 7px;border-radius:3px;border:1px solid var(--rule2);color:var(--ink2);white-space:nowrap}
+.reg .sens.hi{border-color:var(--past);color:var(--past)}
+
+/* lives */
+.life{border-top:1px solid var(--rule);padding:44px 0 28px}
+.life-head{display:grid;grid-template-columns:150px 1fr;gap:28px;align-items:start}
+.life-head .yrs{font-family:var(--display);font-size:64px;line-height:.9;letter-spacing:-.02em}
+.life-head .yrs small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+.life-head .who{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.life-head .who>div{border-top:3px solid var(--c);padding-top:10px}
+.life-head .who .eyebrow{display:block;margin-bottom:6px;color:var(--c)}
+.life-head .who p{font-size:15px;color:var(--ink2);margin:0;max-width:none}
+.vitals{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.vit{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;display:grid;gap:6px;font-size:13.5px;color:var(--ink2)}
+.vit div{display:grid;grid-template-columns:92px 1fr;gap:8px;align-items:baseline}
+.vit span{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.vit b{font-family:var(--display);font-size:22px;font-weight:400;color:var(--c)}
+.stages{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.stages .col{display:grid;gap:0;border-left:2px solid var(--c);padding-left:14px}
+.stages .st{padding:12px 0;border-bottom:1px dotted var(--rule)}
+.stages .st:last-child{border-bottom:0}
+.stages .st .eyebrow{display:block;margin-bottom:4px;color:var(--c)}
+.stages .st p{font-size:15px;color:var(--ink2);margin:0;max-width:none;text-wrap:pretty}
+.bd{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:22px 0 8px}
+.bd .card p{margin:0 0 8px;max-width:none;font-size:15.5px;color:var(--ink2)}
+.bd .card b{font-family:var(--display);font-size:22px;font-weight:400;display:block;margin-bottom:8px}
+@media (max-width:900px){.life-head,.life-head .who,.vitals,.stages,.bd{grid-template-columns:1fr}.life-head .yrs{font-size:48px}}
+footer{padding:40px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--rule)}
+footer a{color:var(--future)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<nav class="rail" aria-label="Sections">
+  <span class="eyebrow">Horizons</span>
+  <a href="#verdict">Hypothesis</a>
+  <a href="#method">Method</a>
+  <div class="gap"></div>
+  <a href="#h50">+50 y</a>
+  <a href="#h100">+100 y</a>
+  <a href="#h500">+500 y</a>
+  <a href="#h2000">+2,000 y</a>
+  <a href="#h5000">+5,000 y</a>
+  <a href="#h10000">+10,000 y</a>
+  <a href="#h20000">+20,000 y</a>
+  <div class="gap"></div>
+  <a href="#lives">Lives</a>
+  <a href="#memory">Memory</a>
+  <a href="#lab">Comparison</a>
+  <a href="#register">Assumptions</a>
+  <button class="theme" id="themeBtn" type="button">theme: auto</button>
+</nav>
+
+<main>
+<header class="hero">
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="eyebrow">A contemplation exercise &middot; seven horizons &middot; three scenarios</span>
+    <h1 style="margin-top:14px">What will they know of us, <em>and what will they be?</em></h1>
+    <p class="lede">Seven forward horizons, from fifty years to twenty thousand. Each is held up against its mirror in the past: the same distance back, and what actually survived from there. The past is the only data we have about how time treats a civilization. The future is scored on fixed lenses under three scenarios so the horizons can be compared, not just imagined.</p>
+    <div class="mirror" id="mirror"></div>
+    <div class="legend-pf"><span class="p">Mirror in the past: what we have from there</span><span class="f">Forward horizon: what may be known and what may exist</span></div>
+  </div>
+</header>
+
+<section id="verdict">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Hypothesis</span><h2>The verdict, stated first</h2></div>
+    <div class="verdict">
+      <div>
+        <p class="big">That we existed will be known at twenty thousand years with near certainty. Where humanity came from will be re-derivable by anyone with science. <em>What happened in 2026</em> is the fragile part: it survives only through an unbroken institutional chain or a deliberately designed, unpowered, self-describing archive, and the base rate for twenty-thousand-year institutional chains is zero.</p>
+        <p class="sub">The mirror makes the point without speculation. Five thousand years back we know king names from lists and nothing that resembles a story. Ten thousand years back we know no name at all. Twenty thousand years back we know their genes, their diet, their tools and their paintings, and nothing of what they called themselves. Those were fully modern humans, as capable as anyone alive today. Time did that to them without any help from a catastrophe.</p>
+        <p class="sub">The forward horizons do not simply extend that curve, because three things are new: we record in volume never seen before, we can now write on media that outlast stone, and machines may soon be the ones doing the remembering. Which of those matters depends on the scenario, and that is what the rest of this page works through.</p>
+      </div>
+      <div class="claims">
+        <div class="claim"><span class="k">I</span><div><b>Volume beats fraction.</b><span>Our era produces more than a million times the records of Rome. Even 0.001% survival leaves more than we have of any ancient civilization. The question is not whether records survive but whether anyone can read them.</span></div></div>
+        <div class="claim"><span class="k">II</span><div><b>Storage is not the constraint. Interpretation is.</b><span>All data humanity has ever generated fits in a few tonnes of DNA. What does not fit in DNA is the meaning of a file format, the context of a name, the ability to read a language.</span></div></div>
+        <div class="claim"><span class="k">III</span><div><b>Language is the first thing to go.</b><span>A thousand years makes a language unreadable to its descendants. Recordings and bilingual keys can freeze it, which no earlier civilization could do. That is a real edge, if it is used.</span></div></div>
+        <div class="claim"><span class="k">IV</span><div><b>Resets are the base case, not the tail.</b><span>No polity has lasted two thousand years. At any plausible hazard rate, twenty thousand years contains at least one dark age. Everything that survives must pass through it unpowered.</span></div></div>
+        <div class="claim"><span class="k">V</span><div><b>Do not store everything. Store the model.</b><span>History has always been lossy compression. The decision rule is: keep what cannot be regenerated, keep the key that reads it, and let the raw stream go.</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Method</span><h2>Lenses, scenarios, and the anchors under them</h2></div>
+    <p class="sub">Every horizon is scored on the same eight lenses from 0 to 10. Four lenses rise as a civilization expands; four fade as continuity with 2026 erodes. Scores are judgments anchored on the base rates below, not measurements. Where a number is a guess it is labeled a guess in the assumptions register.</p>
+    <div class="lenses" id="lensGrid"></div>
+    <div class="scen">
+      <div class="card" style="--c:var(--sc-c)"><b>Continuity</b><p>Growth compounds without a civilizational break. Institutions are replaced but hand over. Technology advances at roughly the pace of the last two centuries, then slows as it saturates. This is the "history keeps going" case, and it has never run for more than about three thousand years anywhere.</p></div>
+      <div class="card" style="--c:var(--sc-d)"><b>Disruption</b><p>At least one reset: a war, collapse, pandemic or technology failure that breaks the institutional chain for a century or more, followed by recovery. Records survive only if they survive unpowered. The Bronze Age collapse, when Greece lost writing for four hundred years, is the template.</p></div>
+      <div class="card" style="--c:var(--sc-t)"><b>Transformation</b><p>Machine intelligence or engineered biology becomes the principal actor within a few centuries. Copying is native, so memory is nearly perfect, but the rememberers are not us. The question shifts from "will records survive" to "will anything still care what a 2026 human meant".</p></div>
+    </div>
+    <div class="anchors tblwrap">
+      <table>
+        <thead><tr><th>Anchor</th><th>Value</th><th>Why it matters</th></tr></thead>
+        <tbody id="anchorRows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="sticky-tog"><div class="wrap" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><span class="eyebrow">Scenario shown in scores</span><div class="toggle" id="scToggle"></div><span class="small">Text stays constant; lens scores and probabilities follow the selected scenario.</span></div></div>
+
+<div id="horizons"></div>
+
+<section id="lives">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Lives</span><h2>One life at each horizon, born there and followed to its end</h2></div>
+    <p class="sub">Twenty-one lives: a person born at each horizon, under each scenario, in five stages. "Average" is taken literally where it can be: the median person of that world, in the place most people are born, in the family shape most people have. Where the median mind is no longer human, the text says so and follows a biological human anyway, because that is the only life the reader can compare with their own.</p>
+    <div class="bd">
+      <div class="card"><b>Will there still be birth?</b><p>In the same form, for a long time under every scenario: womb, labor, a first breath. What changes first is what precedes it. Screening is ordinary by +50, selection and editing by +100, gestation outside the body common by +500. Under Continuity, birth stays a biological event that is designed rather than happened upon, and by +5,000 each human lineage has its own answer. Under Disruption it never changes at all; recovery ages are natural-birth ages. Under Transformation, from roughly +100, most new minds are not born but begun, and human birth becomes a ceremony a small community keeps alive on purpose.</p></div>
+      <div class="card"><b>Will there still be death?</b><p>Death changes form before birth does. Under Disruption it keeps its 2026 shape throughout: aging, disease, accident, at 55 to 72. Under Continuity, the cause shifts by +500 from aging to accident and choice, and by +2,000 an unchosen death is the exception; the interval grows to centuries, and the ending is a decision with a ceremony. Under Transformation, death is a choice by +50, a refusal by +500, and by +5,000 a word from a founding language that applies to minds only by analogy. What no scenario removes is that a biological life ends, and that the people who remain carry it.</p></div>
+    </div>
+    <div class="chart" id="spanChart"></div>
+    <div id="livesList"></div>
+  </div>
+</section>
+
+<section id="memory">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Deep dive</span><h2>Memory: what survives, what it costs, and what to let go</h2></div>
+    <div class="prose">
+      <p>The record question hides three different questions. Separating them changes the answer, because each has a different survival mechanism and a different base rate.</p>
+      <div class="kinds">
+        <div class="card"><span class="eyebrow">Kind 1</span><b>That we existed</b><p>Carried by physical traces. Concrete rubble, a plastic layer in sediment, a plutonium and carbon-14 spike in every ice core, hardware on the Moon that will outlast every building on Earth. Survives every scenario. Needs no reader.</p></div>
+        <div class="card"><span class="eyebrow">Kind 2</span><b>Where humanity came from</b><p>Re-derivable. Fossils, genomes and geology can be read again by any culture that rebuilds science, the way we rebuilt it. It can be lost and re-found. It does not depend on our records at all.</p></div>
+        <div class="card"><span class="eyebrow">Kind 3</span><b>What happened in 2026</b><p>Contingent. Who governed, what people believed, which songs they sang. If the record chain breaks, it is gone and cannot be re-derived from first principles. Every question about "will they know our history" is really about this kind.</p></div>
+      </div>
+      <p>The mirror gives the base rate for Kind 3. Transmitted narrative history, the kind copied hand to hand without interruption, reaches back about three thousand years and is thin past two thousand. Everything older than that is recovered rather than transmitted: dug up, deciphered and reassembled by people who had no living connection to the writers. Sumer was not remembered; it was excavated in the 1840s and its script cracked over the following decades. Even for Rome, an institution we would recognize, the surviving share of Latin literature is small, and it survived because a church copied it for reasons of its own.</p>
+
+      <h3>The physical layer: what media actually last</h3>
+      <p>Two properties decide whether a record is readable in the deep future: how long the substrate holds its pattern, and whether reading it needs a machine that must also survive. A hard drive fails both tests. Fired clay passes both. The interesting new media are those that pass the first test spectacularly (etched nickel, quartz glass, DNA) while failing the second to varying degrees.</p>
+      <div class="chart" id="mediaChart"></div>
+
+      <h3>Survival curves under the scenarios</h3>
+      <p>The curves below are illustrative shapes, not fitted data. They show the probability that a record made today is still readable at a given horizon, by strategy. "Institutional digital" means an organization keeps migrating the bits to new hardware every few years; it survives exactly as long as the organization does. "Designed archive" means an unpowered, redundant, self-describing object built for the purpose, placed in several stable locations.</p>
+      <div class="chart" id="survivalChart"></div>
+
+      <h3>The volume question: can everything be kept?</h3>
+      <p>Physically, yes. Economically, not if "everything" means the whole data stream. The world generated on the order of 180 zettabytes in 2025, growing around 20% a year, and most of it is machine telemetry, duplicates and transient cache. Storage prices fall more slowly than that, so the cost of keeping each year's full output rises, and the cost of keeping all years compounds. The overwhelming feeling is real, but it comes from counting the exhaust, not the work.</p>
+      <div class="two">
+        <div class="chart" id="costChart"></div>
+        <div class="chart" id="volumeChart"></div>
+      </div>
+      <p style="margin-top:22px">Set the exhaust aside and the numbers become small. Every book ever printed is roughly a hundred terabytes of text. All recorded music and film together are tens of petabytes. If every person alive recorded video of their entire waking life at one gigabyte an hour, that lifetime totals about 700 terabytes; ten billion people would make roughly seven zettabytes, one generation's complete life-log, which is under 5% of a single year's current data exhaust. And DNA stores about 215 petabytes per gram, so every byte humanity has ever generated, cumulatively, fits in a few tonnes. The physical ceiling is not the problem for any horizon on this page.</p>
+      <div class="callout">The constraint is not bits. It is the chain of interpretation: the format specification, the language, the context that makes a name mean something, and an institution willing to carry all three.</div>
+
+      <h3>Deciding what to stop storing</h3>
+      <p>A civilization does not need a rule for what to keep as much as a rule for what tier something belongs to, because the tiers have different durabilities and different costs. The structure below is a retention policy in the finance sense: information depreciates at a rate set by how easily it can be regenerated, and only the top tier is written to the expensive, permanent medium.</p>
+      <div class="tiers">
+        <div class="tier head"><span>Tier</span><span>Contents</span><span>Size and medium</span><span>Rule</span></div>
+        <div class="tier"><div class="t">Seed<small>read this first</small></div><span>The key that makes everything else readable: mathematics from counting up, physics constants, the periodic table, a bilingual and pictorial dictionary of the reference language, the human genome, how to decode the next tier. The Rosetta Stone, designed on purpose.</span><div class="v">~1 to 100 GB<br>Etched nickel or quartz, readable with magnification only. Many copies, several bodies.</div><span>Never dropped. Rewritten only to add a new reference language. Must be findable without a map.</span></div>
+        <div class="tier"><div class="t">Canon<small>curated record</small></div><span>Reference works, the sciences, the arts, law, and a chosen narrative history with primary sources. The share of the record a single reader could use to understand the era.</span><div class="v">~1 to 10 PB<br>Quartz or DNA cold copy every few decades; active copy in institutional storage.</div><span>Enters by editorial decision. Leaves only when superseded and the successor cites it.</span></div>
+        <div class="tier"><div class="t">Archive<small>the full record</small></div><span>Everything human-authored: every book, film, message, image, dataset and personal record anyone chose to keep.</span><div class="v">~10 to 100 EB per century<br>Institutional digital, migrated every 5 to 10 years while the institution stands.</div><span>Kept while cheap. Dropped when regenerable, duplicated, or unindexed for a generation. Survives a reset only in samples.</span></div>
+        <div class="tier"><div class="t">Stream<small>exhaust</small></div><span>Sensor logs, telemetry, cache, replicas, intermediate computation. More than 95% of all bytes generated.</span><div class="v">~100+ ZB per year<br>Never archived as such.</div><span>Retained as a summary or a trained model, then discarded. The raw stream is regenerable by the same process that made it.</span></div>
+      </div>
+      <p>Four tests decide the tier of any item, in order. Can it be regenerated from something smaller that we are keeping? If yes, it is stream. Is it a primary record of something that happened, said or made by a person? If yes, it is at least archive. Would a reader who had only this and the seed understand our era better? If yes, it is canon. Is it needed to read everything else? If yes, it is seed. The pattern is what every archive has done by accident; the proposal is to do it on purpose, with the seed tier written to a medium that does not need us.</p>
+
+      <h3>What comes after the disk</h3>
+      <p>The succession of storage media has a direction: from media that need power and a specific machine, toward media that need neither. Magnetic media (decades) gave way to flash (a decade of unpowered retention) for working storage, while archival storage is moving toward molecular and glass media. DNA is the likely cold archive for the archive tier, because its density is extreme, it is stable for millennia when cold and dry, and any future biology will have a reader for it, since the reader is the same one used to read life. Femtosecond-etched quartz, with claimed stability of billions of years at room temperature, is the candidate for the canon tier. For the seed tier the correct medium is the oldest idea: an analog etching, human-scale at the top and microscopic below, that a curious person with a lens can begin to read without any prior technology. Communication follows the same logic. Across interstellar distance the message is the artifact itself, because any signal needs a receiver already listening, while an object waits.</p>
+      <div class="callout p">The one thing every previous civilization lacked and we have: the ability to write the key alongside the text. Whether anyone in 22,026 can read us is largely a decision made in this century, not theirs.</div>
+    </div>
+  </div>
+</section>
+
+<section id="lab">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Comparison</span><h2>The horizons side by side</h2></div>
+    <p class="sub">All charts use a logarithmic time axis so that fifty years and twenty thousand can sit on the same line. The scenario toggle above drives the heat map; the small multiples show all three at once.</p>
+    <div class="chart heat" id="heat"></div>
+    <div style="height:22px"></div>
+    <div class="smalls" id="smalls"></div>
+    <div style="height:22px"></div>
+    <div class="two">
+      <div class="chart" id="resetChart"></div>
+      <div class="chart" id="reachChart"></div>
+    </div>
+    <div style="height:22px"></div>
+    <div class="chart" id="knowChart"></div>
+    <div style="height:22px"></div>
+    <div class="chart">
+      <h4>Your weighting: what is known of 2026 at twenty thousand years</h4>
+      <p class="small">Assign your own probability to each scenario. The three knowledge kinds are blended from the per-scenario estimates in the +20,000 horizon. Weights normalize automatically.</p>
+      <div class="weights">
+        <div class="wctl" id="wctl"></div>
+        <div class="wout" id="wout"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="register">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Assumptions</span><h2>The register: what the analysis rests on</h2></div>
+    <p class="sub">Sensitivity marks how much the twenty-thousand-year verdict moves if the assumption is wrong. Items marked guess are judgment calls with no reliable data behind them.</p>
+    <div class="reg tblwrap"><table><thead><tr><th>Assumption</th><th>Value used</th><th>Basis</th><th>Sensitivity</th></tr></thead><tbody id="regRows"></tbody></table></div>
+  </div>
+</section>
+
+<footer><div class="wrap"><a href="/">&larr; Lunch Shift hub</a> &nbsp;|&nbsp; Think QT-0830 Rev A &nbsp;|&nbsp; Built as a thinking exercise, not a forecast. Figures are anchored where a source exists and labeled as judgment where none does. Lens scores are ordinal and comparable across horizons, not across each other.</div></footer>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+/* =========================== DATA =========================== */
+const SC = [
+  {k:'c',name:'Continuity',css:'var(--sc-c)'},
+  {k:'d',name:'Disruption',css:'var(--sc-d)'},
+  {k:'t',name:'Transformation',css:'var(--sc-t)'}
+];
+const LENSES = [
+  {k:'reach', name:'Reach', dir:'rise', short:'Reach', desc:'Farthest sustained human (or successor) activity. 0 Earth only; 3 Mars outpost; 6 outer solar system; 8 settlement at nearest stars; 10 hundreds of light-years.'},
+  {k:'energy', name:'Energy', dir:'rise', short:'Energy', desc:'Energy commanded relative to today (about 20 TW, Kardashev 0.73). 5 is a Kardashev I planetary civilization; 10 approaches a star\'s full output.'},
+  {k:'bio', name:'Biological divergence', dir:'rise', short:'Biology', desc:'Distance from baseline 2026 humans. 3 somatic editing routine; 5 germline lineages; 7 populations adapted to other worlds; 10 mostly non-biological minds.'},
+  {k:'mind', name:'Machine minds', dir:'rise', short:'Machines', desc:'Share of cognition done by machines. 3 pervasive assistant; 5 peer; 7 most thinking is machine; 10 machines are the principal actors.'},
+  {k:'inst', name:'Institutional continuity', dir:'fade', short:'Institutions', desc:'How much of 2026\'s institutional world (states, firms, universities, faiths) still exists in recognizable form. Base rate: no polity has lasted 2,000 years.'},
+  {k:'lang', name:'Language intelligibility', dir:'fade', short:'Language', desc:'How readable 2026 English is to a person of the horizon. 1,000 years of drift makes a language opaque; recordings and AI can freeze it.'},
+  {k:'rec', name:'Narrative record', dir:'fade', short:'Records', desc:'How much contingent history of 2026 (events, names, beliefs) is both preserved and interpretable. The fragile kind of knowledge.'},
+  {k:'trace', name:'Physical trace', dir:'fade', short:'Traces', desc:'How obvious our existence is from physical evidence alone: structures, sediment, isotopes, lunar hardware. Scenario-independent and slow to fade.'}
+];
+const H = [
+ {id:'h50', y:50, date:'2076', mirror:'1976', gens:2, voyager:'~200 AU',
+  thesis:'The only horizon where the people are the same people. Today\'s children are the elders; the systems they run are versions of ours. The one variable with a wide distribution is machine intelligence, and it is wide enough to make fifty years look like either a long 2020s or the first decades of something else.',
+  back:['<b>Near-total survival</b> of the printed and filmed record from 1976; personal photographs and letters mostly intact in family hands.','<b>The first digital losses</b> are already from this era: NASA\'s original Apollo 11 slow-scan tapes were erased and reused; Viking-era magnetic data needed forensic recovery decades later.','<b>Language fully intelligible</b>; slang and references date it but nothing is opaque.'],
+  fixed:['<b>Population near its peak</b>, around 10 billion, with most projections showing decline afterward.','<b>Warming of roughly 1.5 to 2.5 \u00b0C</b> is already committed regardless of policy from here.','<b>Everyone over about 25 today</b> is in the oldest cohort; institutional memory of 2026 is first-hand.','<b>Halley\'s Comet returns in 2061</b>; Voyager 1, silent since about 2030, is roughly 200 AU out.'],
+  cont:['Whether the AI transition is gradual or abrupt, and whether it is broadly shared.','Whether fusion, cheap solar and storage make energy abundant enough to change what is affordable.','Whether a permanent off-Earth presence (lunar base, Mars outpost) exists or remains episodic.','Whether life expectancy gains resume (+5 to 10 years) or stall.'],
+  sc:{c:'Compounding as usual. Automation does most routine cognitive work; a few thousand people live off Earth; fusion works in demonstration; the web of 2026 is mostly still readable, migrated several times.',
+      d:'A major war, pandemic or systemic failure sets one region back decades. Records survive because the rest of the world keeps its infrastructure. Recovery takes a generation; trust in institutions takes longer.',
+      t:'Machine intelligence reaches and passes human level early in the period. Economic doubling times shorten. By 2076 the important decisions are already being made by, or with, systems no person fully understands.'},
+  memory:'Almost everything institutional survives. Personal digital records are the weak point: platforms have lifetimes of decades, not centuries, and roughly a third of web pages from a given year are gone within ten years. What people save deliberately survives; what they leave in a service does not.',
+  know:{fact:[100,100,100], origin:[100,100,100], narr:[98,90,99]},
+  s:{reach:[3,2,3], energy:[1.5,.5,3], bio:[1,.5,2], mind:[4,3,7], inst:[9,6,7], lang:[10,10,10], rec:[9.5,8,9.5], trace:[10,10,10]}},
+ {id:'h100', y:100, date:'2126', mirror:'1926', gens:4, voyager:'~350 AU',
+  thesis:'No one alive today remains. This is the first horizon where 2026 is a record rather than a memory, which is exactly the test: what we have from 1926 is what survived a century of neglect, not a century of care.',
+  back:['<b>Institutional records intact</b>: newspapers, censuses, court filings, corporate archives, government correspondence.','<b>About 75% of American silent films are lost</b> (Library of Congress survey); nitrate stock decayed or was discarded when it stopped paying.','<b>Personal ephemera mostly gone</b>: letters, diaries and photographs survive only where a family or archive chose to keep them.','<b>Audio recordings exist</b>, thin and precious; the everyday voice of 1926 is rare.'],
+  fixed:['<b>Population around 10 billion and falling</b> in the central projection; older, more urban, more concentrated.','<b>Sea level 0.4 to 1 m higher</b>; several coastal cities have moved or walled themselves.','<b>Voyager 1 about 350 AU out</b>, still less than 1% of the way to the nearest star.','<b>2026 English is period English</b>, like 1926 today: fully readable, audibly dated.'],
+  cont:['Whether the AI transition resolved into a stable settlement or is still contested.','Whether energy is abundant (solar plus fusion) or still constrained.','Whether a few thousand people are permanently off-world, and whether children are born there.','Whether the 21st century\'s existential risks (nuclear, engineered biology, misaligned AI) were passed or merely postponed.'],
+  sc:{c:'A richer, older, more automated world. Cities on the Moon and Mars in the thousands. Germline editing debated for decades and partly normalized. The records of 2026 survive in institutional archives migrated a dozen times.',
+      d:'A century that contained a break: a global war or collapse that cost a large share of the population and decades of capability. By 2126 recovery is well along, but a generation of digital records from around the break is thin or gone.',
+      t:'Non-human minds do most economic and scientific work. Humans are numerous, comfortable, and largely spectators. The archive of 2026 is complete to the byte, because the machines were trained on it and never forgot.'},
+  memory:'The 1926 pattern: institutions remember, individuals are forgotten unless deliberately archived. Our era\'s difference is volume. Even after platform deaths and format rot, the surviving 1% of 2026\'s output is larger than the whole record of 1926. Findability, not existence, decides what is used.',
+  know:{fact:[100,100,100], origin:[100,100,100], narr:[95,70,99]},
+  s:{reach:[4,2,5], energy:[2.5,1,5], bio:[2,1,5], mind:[5,3,9], inst:[8,4,5], lang:[9.5,9,9.5], rec:[9,6,9.5], trace:[10,10,10]}},
+ {id:'h500', y:500, date:'2526', gens:20, mirror:'1526', voyager:'~1,900 AU (0.03 ly)',
+  thesis:'Five hundred years is the distance to the printing press. From 1526 we hold books, paintings, state archives and a readable if effortful language. Forward, five hundred years of even modest compounding is a different civilization, and it is the first horizon where a reset is more likely than not.',
+  back:['<b>Printed books survive well</b>: the press was seventy years old; Tyndale\'s English New Testament appeared in 1526 and copies exist.','<b>State and church archives intact</b> where the state persisted; lost where it did not.','<b>Language readable with effort</b>: early modern English, roughly Shakespeare\'s distance from us.','<b>Nearly no polity of 1526 survives in the same form</b>; the few exceptions are religious or microstates.'],
+  fixed:['<b>Voyager 1 about 0.03 light-years out</b>, still nowhere near a star.','<b>Sea level 1 to 3 m higher</b> in most long-run projections, possibly more if ice sheets destabilize.','<b>Polaris no longer marks the pole</b>; precession has moved it noticeably.','<b>Twenty generations</b>: natural genetic change negligible; cultural change total.'],
+  cont:['Whether growth compounded (a 1% annual rate is 145x; 2% is 20,000x) or saturated.','Whether the inner solar system is settled or remains a research outpost.','Whether the first interstellar probes, launched around 2100 at 1% of light speed, have reported back from Proxima.','Whether humanity is one species or has begun to branch by design.'],
+  sc:{c:'A solar-system civilization: millions off Earth, industrial asteroid mining, energy an order of magnitude above today. Languages have drifted but AI translation makes 2026 material readable. Institutions are new; some carry 2026 names the way universities carry medieval ones.',
+      d:'A dark age of one to three centuries lies between 2026 and 2526, then recovery. Digital records from before the break survive only where they were printed, etched, or carried by an institution that outlived the break. 2026 is known the way 1526 knows Rome: through what was copied.',
+      t:'The transition completed centuries ago. The solar system is being re-engineered. Biological humans exist, possibly as a protected minority. The record of 2026 is complete and studied by minds that find it as alien as we find the Bronze Age.'},
+  memory:'Digital survival now means fifty to a hundred migration cycles, each losing something. Institutional continuity is the whole game: a record is only as durable as the longest-lived organization that chose to keep it, and by 2526 that is a religion, a state that reinvented itself, or a designed archive. Language is the new loss: 2026 English is Shakespeare-distance, readable by scholars and machines.',
+  know:{fact:[100,100,100], origin:[100,98,100], narr:[85,40,98]},
+  s:{reach:[6,3,8], energy:[4.5,2,7], bio:[4,2,8], mind:[7,4,10], inst:[5,2,3], lang:[7,5,8], rec:[7,4,9.5], trace:[9.5,9.5,9.5]}},
+ {id:'h2000', y:2000, date:'4026', mirror:'AD 26', gens:80, voyager:'~0.11 ly',
+  thesis:'Two thousand years is Rome. We know Tiberius by name, we read Latin in schools, the Pantheon stands. We have it because one institution copied manuscripts for its own reasons, and we have a small fraction of what was written. Forward, this is where transmitted history reaches its base-rate limit.',
+  back:['<b>Emperors and senators known by name</b>; ordinary lives known only through a handful of letters, graffiti and gravestones.','<b>A small share of Latin literature survives</b>: of Livy\'s 142 books, 35. Most authors we know only as names cited by others.','<b>Buildings and roads stand</b>: unreinforced Roman concrete and stone outlasted everything built since with rebar.','<b>Latin is dead but taught</b>; it survived as an institutional language, not a spoken one.'],
+  fixed:['<b>Precession has moved the pole 28\u00b0</b>; a different star marks north.','<b>Reinforced concrete from 2026 is gone</b> (design life 100 to 200 years); masonry and earthworks remain.','<b>Voyager about 0.11 light-years out</b>: eighty generations later, still not at a star.','<b>Eighty generations</b>; still negligible natural change to the species.'],
+  cont:['Whether any 2026 institution survives in name (universities and religions are the only candidates with a base rate).','Whether the nearest stars have been reached, which depends entirely on whether 1 to 10% of light speed became routine.','Whether humanity is multiple lineages by design.','Whether the record of 2026 was ever written to a medium that needs no power.'],
+  sc:{c:'Interstellar in the narrow sense: settlements at the nearest few stars, each decades of light-lag from the others, so "humanity" is plural. Energy near Kardashev I. 2026 is ancient history: names known, texture lost, studied by specialists and by machines that read our formats natively.',
+      d:'One or more resets between here and there. The chain of institutions broke; what survives of 2026 is what was excavated or deliberately etched. Our era is known the way we know Rome, with the difference that the ruins are far larger and the surviving texts far fewer per capita.',
+      t:'The rememberers are not biological. Memory of 2026 is perfect and total, in the way we have perfect and total records of a genome: complete, and mostly uninterpreted except by those with reason to look.'},
+  memory:'The volume argument peaks here. Rome left us a few million words; 2026 produced more than a million times that. Even under Disruption, 0.001% survival is a larger corpus than all of classical literature. But interpretability collapses without a key: 2026 English is to 4026 what Latin is to us, if we are lucky, and what Etruscan is to us if we are not.',
+  know:{fact:[100,100,100], origin:[100,95,100], narr:[60,20,95]},
+  s:{reach:[8,5,9], energy:[6,3,8], bio:[6,3,10], mind:[8,5,10], inst:[2,.5,2], lang:[4,1,6], rec:[5,2,9], trace:[9,9,9]}},
+ {id:'h5000', y:5000, date:'7026', mirror:'2974 BC', gens:200, voyager:'~0.28 ly',
+  thesis:'Five thousand years back is the invention of writing. We know king names from lists and nothing that resembles a story. Nothing from that era was transmitted; all of it was excavated. This is the horizon where the mirror says: transmitted history\'s base rate is zero, and recovered history takes over.',
+  back:['<b>Early Egyptian dynasties and Sumerian cities</b>: names on king lists, no biographies, no events in sequence.','<b>Everything is recovered, nothing transmitted</b>: cuneiform was deciphered in the 1850s by people with no living link to it.','<b>Stonehenge under construction</b>; we do not know its builders\' language or their name for it.','<b>Fired clay and carved stone</b> are the entire textual record. Everything organic is gone except by accident.'],
+  fixed:['<b>A different pole star</b> (Alderamin, around AD 7500).','<b>Plutonium-239 from our reactors is 87% still there</b> (half-life 24,100 years); our waste is a marker layer.','<b>Voyager about 0.28 light-years out.</b>','<b>Two hundred generations</b>; natural selection could have produced small adaptations, comparable to lactose tolerance emerging over the last 7,000 years.'],
+  cont:['Whether an interstellar civilization exists (at 10% light speed, a 500 light-year sphere is reachable in this time).','Whether 2026 humans are the ancestors of several species or of one.','Whether anything at all from 2026 is legible without excavation.','Whether the homeworld is still the center, a reserve, or a ruin.'],
+  sc:{c:'Thousands of settled systems in a sphere hundreds of light-years across, with centuries of communication lag between edges. No unified civilization is possible at that scale; there are many, sharing an origin story the way Indo-European languages share roots.',
+      d:'Several resets. Population on Earth could have gone through more than one crash. 2026 survives as a stratigraphic layer, as legends of a "first high age", and as whatever designed archives were placed where someone would find them.',
+      t:'A 5,000-year-old machine civilization for which 2026 is a founding event, recorded in complete fidelity and interpreted through frames we would not recognize as history.'},
+  memory:'Whatever is readable at this horizon was made to be readable without us: fired, etched, redundant, self-describing, and placed on multiple bodies. Physical structures dominate the evidence. Our advantage over Sumer is that we can leave the dictionary alongside the tablets. Without it, 2026 English is at Proto-Indo-European distance: reconstructible in fragments, spoken by no one.',
+  know:{fact:[100,100,100], origin:[100,90,100], narr:[45,10,92]},
+  s:{reach:[9,6,10], energy:[7,4,9], bio:[7,4,10], mind:[8,5,10], inst:[1,0,1], lang:[3,.5,5], rec:[4,1,9], trace:[8,8,8]}},
+ {id:'h10000', y:10000, date:'12026', mirror:'7974 BC', gens:400, voyager:'~0.55 ly',
+  thesis:'Ten thousand years is the design horizon serious institutions actually use: the nuclear waste marker projects, the Clock of the Long Now, the Onkalo repository. Ten thousand years back there is no writing anywhere on Earth. We know how those people lived, from bones, pollen and tools. We know no one.',
+  back:['<b>The Neolithic begins</b>: farming in the Fertile Crescent, the tower of Jericho, G\u00f6bekli Tepe recently built. World population a few million.','<b>Zero names, zero events.</b> Lifeways reconstructed from bones, seeds, pollen and stone tools.','<b>Beliefs guessed at</b> from burials and carvings, with no way to check the guesses.','<b>Their languages are unrecoverable</b>: the comparative method reaches back about 8,000 years and stops.'],
+  fixed:['<b>Deneb near the pole</b> (around AD 10,000); the constellations subtly reshaped by stellar motion.','<b>Plutonium-239 at 75%</b> of the original; the waste is still lethal, which is why the marker projects exist.','<b>Earth still interglacial</b>: our carbon dioxide has likely delayed the next glacial inception by tens of thousands of years.','<b>The day is 0.2 seconds longer</b> from tidal braking. Voyager about 0.55 light-years out.'],
+  cont:['Whether any deliberate 10,000-year message from our era (WIPP markers, the Long Now clock, the Arch Mission lunar library) is found and understood.','Whether the species is one or many.','Whether Earth is inhabited by our descendants, by successors, or by a recovering post-reset population.','Whether "humanity" refers to anything a 2026 person would recognize.'],
+  sc:{c:'Deep interstellar spread, plural civilizations, Earth a heritage world. Origin is common knowledge; 2026 is a date in a long early sequence, known in detail only to specialists and to machines.',
+      d:'Enough resets that the base case is a civilization that has rebuilt more than once, and may know of 2026 mainly as the era that left the plastic layer, the radioactive layer and the lunar hardware. Nuclear semiotics research concluded that no message reliably crosses this gap; only redundancy plus the recipient\'s own science does.',
+      t:'Minds that have been non-biological for most of the period. Ten thousand years is subjectively far longer for a fast mind. 2026 is mythologically important and perfectly documented.'},
+  memory:'The Human Interference Task Force and its successors spent decades on exactly this problem and concluded that pictograms fail, language fails, and monumental hostility fails. What works is redundancy, physical durability, and trusting the reader\'s own science to interpret a site. The same conclusion applies to any archive: do not explain, provide the means to figure it out.',
+  know:{fact:[100,100,100], origin:[100,85,100], narr:[35,5,90]},
+  s:{reach:[10,7,10], energy:[8,5,10], bio:[8,5,10], mind:[9,6,10], inst:[.5,0,1], lang:[2,0,5], rec:[3,.5,9], trace:[7,7,7]}},
+ {id:'h20000', y:20000, date:'22026', mirror:'17974 BC', gens:800, voyager:'~1.1 ly',
+  thesis:'Twenty thousand years back is the last glacial maximum. Sea level was 120 meters lower, a land bridge joined Britain to Europe, and painted caves were about to be painted. We have their genomes, their diet, their tools, their art. We know nothing they would recognize as themselves. Forward, that is the default outcome, and the only way around it is a decision made now.',
+  back:['<b>Fully modern humans</b>, cognitively identical to us, a few million worldwide, in the coldest part of the last ice age.','<b>We know their genes</b> (ancient DNA), their diet (isotopes), their tools, their art (Lascaux, about 17,000 years ago).','<b>We know no name, no word, no event, no belief</b> with confidence. Every interpretation of their art is a guess.','<b>Nothing was transmitted.</b> Everything was found. The people themselves are ancestors of everyone alive, and left no message.'],
+  fixed:['<b>The pole has swung most of the way round</b>: approaching Thuban, the pole star of the pyramid builders.','<b>Plutonium-239 at 56%</b>; the plastic and concrete layer is a permanent stratigraphic marker.','<b>Voyager about 1.1 light-years out</b>: after 800 generations, still short of the nearest star at 4.2. Reach is entirely a function of speed, not time.','<b>Lunar hardware and footprints intact</b>; they will outlast every structure on Earth by millions of years.'],
+  cont:['Whether the hazard rate of civilizational reset ever fell below about one in a hundred thousand per year, the only way to get through unbroken.','Whether anyone wrote the seed tier: an unpowered, self-describing archive with the key to read it.','Whether the rememberers are human, human-descended, or machine.','Whether 2026 is a founding story, a stratigraphic layer, or nothing.'],
+  sc:{c:'Humanity is a genus, not a species. Settlements across hundreds of light-years, each its own history. Earth is a museum, a reserve, or long since transformed. 2026 is known in outline; the texture survives only in archives and in machines.',
+      d:'The base-rate outcome. Multiple dark ages. Each one is a filter, and only artifacts that are unpowered, durable, redundant, self-describing and findable pass every filter. Our era is the one that left the strange layer. Its name is not known unless we etched it.',
+      t:'A civilization of minds for whom copying is native. Memory is not a record kept about the past; it is the past, retained. 2026 is remembered perfectly and understood through a frame no 2026 human would share. Whether they still care is the open question.'},
+  memory:'Three answers, one per scenario. Under Continuity, records survive through institutions and machines, and the narrative of 2026 is known the way we know the Iron Age: outline, some texts, much argument. Under Disruption, only designed archives survive, and their existence is our choice. Under Transformation, everything survives and the survivors are not us. Across all three: that we existed is certain, where we came from is re-derivable, and what we did is a decision about media and redundancy that has to be made in this century.',
+  know:{fact:[100,100,100], origin:[100,80,100], narr:[30,3,90]},
+  s:{reach:[10,8,10], energy:[9,6,10], bio:[9,6,10], mind:[9,6,10], inst:[.5,0,1], lang:[2,0,5], rec:[3,.5,9], trace:[6,6,6]}}
+];
+const ANCHORS = [
+ ['Longest continuous polity','~3,000 y (with breaks)','Egypt and China as civilizations; no single state form for 2,000 years. Sets the ceiling on institutional continuity.'],
+ ['Longest continuous institution','~1,400 to 2,000 y','Kongo Gumi (construction firm, 578 to 2006); the Catholic Church. Only religions have a base rate past 1,500 years.'],
+ ['Reach of transmitted narrative history','~2,500 to 3,000 y','Herodotus, Chinese annals. Older history is recovered by archaeology, not handed down.'],
+ ['Literacy can be lost','~400 y gap','Greek Dark Age after the Bronze Age collapse (c. 1177 BC): Linear B forgotten, alphabet reinvented.'],
+ ['Language drift','~1,000 y to opacity','Old English is unreadable to modern speakers; the comparative method fails past ~8,000 years.'],
+ ['Web decay','38% of 2013 pages gone by 2023','Pew Research 2024. Unmaintained digital has a half-life of roughly a decade.'],
+ ['Film survival','~75% of silent films lost','Library of Congress 2013 survey. Institutional media on decaying stock, one century.'],
+ ['Classical text survival','Livy: 35 of 142 books','Representative of Latin literature: a minority survives, through monastic copying.'],
+ ['Data generated','~180 ZB in 2025, +20%/y','IDC estimates. Overwhelmingly telemetry, replication and cache.'],
+ ['DNA storage density','~215 PB per gram','Erlich and Zielinski 2017. All data ever generated fits in a few tonnes.'],
+ ['Ancient DNA readability','>1,000,000 y','Mammoth DNA sequenced from permafrost. Cold, dry DNA is a millennial medium.'],
+ ['Quartz (5D) storage','Claimed 10^9+ y at room temperature','University of Southampton. Requires a laser-and-microscope reader.'],
+ ['Existential risk this century','~1 in 6 (contested)','Toby Ord, The Precipice (2020). Other estimates range from under 1% to higher. Treated as a range, not a fact.'],
+ ['Voyager 1 speed','~17 km/s, ~1 ly per 18,000 y','NASA. Reach at 20,000 years is set by speed achieved, not by time elapsed.'],
+ ['Plutonium-239 half-life','24,100 y','Our waste is a 20,000-year marker by itself: 56% remains at the last horizon.'],
+ ['Generation length','25 y','800 generations to 20,000 years. Natural genetic change over that span is minor (compare lactase persistence, ~7,000 y).'],
+ ['Population peak','~10.3 billion, 2080s','UN World Population Prospects 2024, central projection; decline afterward.']
+];
+const REG = [
+ ['Reset hazard rate','0.1% per year (range 0.002 to 0.5%)','Roughly one major-region collapse per few centuries historically; no polity past 2,000 y','hi','Judgment'],
+ ['Reset definition','Institutional chain broken >= 100 y in a major region','Bronze Age collapse as template','mid',''],
+ ['Existential (not reset) risk, 21st c.','5 to 17%','Ord 2020 and critics; used only for the +50 and +100 discussion','lo',''],
+ ['Web half-life, unmaintained','~10 y','Pew 2024 link-rot data','lo',''],
+ ['Institutional digital survival','Equals institution\'s lifetime','Every format migration is a loss event; no organization has migrated data for >70 y','hi',''],
+ ['Designed archive survival to 20k y','40 to 70% if built, 0% if not','Guess. Anchored on stone and fired-clay survival plus off-Earth redundancy','hi','Guess'],
+ ['Language freeze by recordings and AI','Raises intelligibility 2 to 4 points','Guess. No precedent; print slowed but did not stop drift','mid','Guess'],
+ ['Growth under Continuity','1 to 2% per year, saturating','Long-run global growth range; saturation assumed by 500 y','mid','Judgment'],
+ ['Interstellar speed achieved','1 to 10% of light speed by 2500 (Continuity)','Guess. Physics permits it; engineering unknown','hi','Guess'],
+ ['Transformation timing','Machine principal actor within 50 to 300 y','Guess. Wide distribution; only the direction is assumed','hi','Guess'],
+ ['Data growth','+20%/y generated; storage cost -10%/y','IDC; HDD price trend slowing','lo',''],
+ ['Life-log estimate','1 GB/h, 16 h/day, 80 y, 10 billion people','Arithmetic, for scale only','lo',''],
+ ['Scenario weights','User-set; page default 40 / 40 / 20','Not a forecast. The slider exists so the reader owns this number','hi','User']
+];
+
+/* =========================== HELPERS =========================== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const ns='http://www.w3.org/2000/svg';
+function el(tag,attrs={},parent){const e=document.createElementNS(ns,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,x,y,s,cls,attrs={}){const t=el('text',{x,y,class:cls||'',...attrs},parent);t.textContent=s;return t;}
+const fmt=n=>n>=1000?n.toLocaleString('en-US'):String(n);
+const tip=$('#tip');
+function hover(node,text){node.addEventListener('mousemove',e=>{tip.textContent=text;tip.style.left=e.clientX+'px';tip.style.top=e.clientY-8+'px';tip.style.opacity=1});node.addEventListener('mouseleave',()=>tip.style.opacity=0);}
+let scenario='c';
+const SI=k=>SC.findIndex(s=>s.k===k);
+
+/* =========================== THEME =========================== */
+(function(){const root=document.documentElement,btn=$('#themeBtn');let mode='auto';try{mode=localStorage.getItem('mh-theme')||'auto'}catch(e){}
+ function apply(){if(mode==='auto')root.removeAttribute('data-theme');else root.setAttribute('data-theme',mode);btn.textContent='theme: '+mode;try{localStorage.setItem('mh-theme',mode)}catch(e){}drawAll();}
+ btn.addEventListener('click',()=>{mode=mode==='auto'?'dark':mode==='dark'?'light':'auto';apply()});
+ if(mode!=='auto')root.setAttribute('data-theme',mode);btn.textContent='theme: '+mode;})();
+
+/* =========================== STARFIELD =========================== */
+(function(){const c=$('#stars'),ctx=c.getContext('2d');function draw(){const r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);ctx.clearRect(0,0,r.width,r.height);
+ const dark=getComputedStyle(document.documentElement).getPropertyValue('color-scheme').trim()==='dark';let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ for(let i=0;i<260;i++){const x=rnd()*r.width,y=rnd()*r.height,s=rnd();ctx.beginPath();ctx.arc(x,y,s<.9?.7:1.4,0,7);ctx.fillStyle=dark?`rgba(232,228,217,${.15+s*.45})`:`rgba(23,27,42,${.06+s*.14})`;ctx.fill();}}
+ draw();window.addEventListener('resize',draw);window.__stars=draw;})();
+
+/* =========================== MIRROR TIMELINE =========================== */
+function drawMirror(){
+ const box=$('#mirror');box.innerHTML='';const W=1100,Hh=190,cx=W/2,y0=100;const svg=el('svg',{viewBox:`0 0 ${W} ${Hh}`},box);
+ const lg=Math.log10, span=lg(20000)-lg(50), scale=(cx-70)/span;
+ const px=y=>cx-(lg(y)-lg(50))*scale-60, fx=y=>cx+(lg(y)-lg(50))*scale+60;
+ el('line',{x1:40,y1:y0,x2:W-40,y2:y0,class:'axis','stroke-width':1},svg);
+ el('circle',{cx,cy:y0,r:5,class:'now'},svg);txt(svg,cx,y0-30,'NOW',"lbl",{'text-anchor':'middle'});txt(svg,cx,y0+40,'2026','yr',{'text-anchor':'middle'});
+ H.forEach((h,i)=>{const up=i%2===0;
+  const gp=el('g',{class:'h'},svg);el('line',{x1:px(h.y),y1:y0-8,x2:px(h.y),y2:y0+8,class:'tick-p','stroke-width':2},gp);
+  txt(gp,px(h.y),up?y0-22:y0+40,h.mirror,'yr',{'text-anchor':'middle'});txt(gp,px(h.y),up?y0-42:y0+58,'-'+fmt(h.y)+' y','lbl',{'text-anchor':'middle'});
+  const gf=el('g',{class:'h'},svg);el('line',{x1:fx(h.y),y1:y0-8,x2:fx(h.y),y2:y0+8,class:'tick-f','stroke-width':2},gf);
+  txt(gf,fx(h.y),up?y0-22:y0+40,h.date,'yr',{'text-anchor':'middle'});txt(gf,fx(h.y),up?y0-42:y0+58,'+'+fmt(h.y)+' y','lbl',{'text-anchor':'middle'});
+  [gp,gf].forEach(g=>g.addEventListener('click',()=>location.hash='#'+h.id));});
+ txt(svg,40,y0+ (Hh-y0) - 4,'log scale, mirrored: each forward horizon sits opposite the same distance into the past','note');
+}
+
+/* =========================== METHOD =========================== */
+$('#lensGrid').innerHTML=LENSES.map(l=>`<div class="lens ${l.dir}"><span class="eyebrow">${l.dir==='rise'?'Rises with expansion':'Fades with time'}</span><b>${l.name}</b><span>${l.desc}</span></div>`).join('');
+$('#anchorRows').innerHTML=ANCHORS.map(a=>`<tr><td>${a[0]}</td><td class="v">${a[1]}</td><td>${a[2]}</td></tr>`).join('');
+$('#regRows').innerHTML=REG.map(r=>`<tr><td>${r[0]}${r[4]?` <span class="sens ${r[3]==='hi'?'hi':''}" style="margin-left:6px">${r[4]}</span>`:''}</td><td class="v">${r[1]}</td><td>${r[2]}</td><td><span class="sens ${r[3]==='hi'?'hi':''}">${r[3]==='hi'?'High':r[3]==='mid'?'Medium':'Low'}</span></td></tr>`).join('');
+$('#scToggle').innerHTML=SC.map(s=>`<button type="button" data-k="${s.k}" style="--c:${s.css}" class="${s.k===scenario?'on':''}"><i></i>${s.name}</button>`).join('');
+$('#scToggle').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;scenario=b.dataset.k;$$('#scToggle button').forEach(x=>x.classList.toggle('on',x.dataset.k===scenario));updateScenario();});
+
+/* =========================== HORIZONS =========================== */
+function barsHTML(v){return `<div class="bars">${[0,1,2].map(i=>`<i style="--w:${v[i]}%;--c:${SC[i].css}"></i>`).join('')}</div>`;}
+$('#horizons').innerHTML=H.map(h=>`
+<section class="hz" id="${h.id}"><div class="wrap">
+  <div class="hz-head">
+    <div class="yrs">${fmt(h.y)}<small>years</small></div>
+    <div>
+      <div class="dates"><div class="p">mirror<b>${h.mirror}</b></div><div class="f">horizon<b>${h.date}</b></div><div>generations<b>${h.gens}</b></div><div>voyager 1<b style="font-size:22px">${h.voyager}</b></div></div>
+      <p class="thesis">${h.thesis}</p>
+    </div>
+  </div>
+  <div class="hz-body">
+    <div class="pane p"><h3>What we have from ${h.mirror}</h3><ul>${h.back.map(b=>`<li>${b}</li>`).join('')}</ul></div>
+    <div class="pane f"><h3>Fixed at ${h.date}, whatever happens</h3><ul>${h.fixed.map(b=>`<li>${b}</li>`).join('')}</ul></div>
+  </div>
+  <div class="pane" style="margin-top:26px"><h3>What actually decides it</h3><ul style="columns:2;column-gap:26px">${h.cont.map(b=>`<li style="break-inside:avoid">${b}</li>`).join('')}</ul></div>
+  <div class="trio">${SC.map(s=>`<div class="card" style="--c:${s.css}"><span class="eyebrow">${s.name}</span><p>${h.sc[s.k]}</p></div>`).join('')}</div>
+  <div class="memo">
+    <div class="card"><span class="eyebrow" style="display:block;margin-bottom:8px">Memory at this horizon</span><p class="sub">${h.memory}</p></div>
+    <div class="card"><span class="eyebrow" style="display:block;margin-bottom:8px">Probability it is known, by scenario</span><div class="k3">
+      <div class="row"><span>That we existed</span>${barsHTML(h.know.fact)}</div>
+      <div class="row"><span>Where humanity came from</span>${barsHTML(h.know.origin)}</div>
+      <div class="row"><span>What happened in 2026</span>${barsHTML(h.know.narr)}</div>
+      <div class="row" style="border:0"><span class="small">bars: Continuity / Disruption / Transformation</span><span class="mono small" data-narr="${h.id}"></span></div>
+    </div></div>
+  </div>
+  <div class="strip"><span class="eyebrow">Lens scores, <span data-scname>Continuity</span> scenario (0 to 10)</span><div class="lensrow">${LENSES.map(l=>`<div class="l" data-lens="${l.k}" data-h="${h.id}">${l.short}<b>0</b><div class="bar"><i style="--w:0%;--c:${l.dir==='rise'?'var(--future)':'var(--past)'}"></i></div></div>`).join('')}</div></div>
+</div></section>`).join('');
+
+function updateScenario(){const i=SI(scenario);
+ $$('[data-scname]').forEach(n=>n.textContent=SC[i].name);
+ H.forEach(h=>{LENSES.forEach(l=>{const v=h.s[l.k][i];const node=$(`.l[data-lens="${l.k}"][data-h="${h.id}"]`);node.querySelector('b').textContent=v%1?v.toFixed(1):v;node.querySelector('i').style.setProperty('--w',(v*10)+'%');});
+  $(`[data-narr="${h.id}"]`).textContent=`narrative ${h.know.narr[i]}%`;});
+ drawHeat();}
+
+/* =========================== CHART HELPERS =========================== */
+function chartFrame(id,title,sub,W,Hh,m){const box=$('#'+id);box.innerHTML=`<h4>${title}</h4><p class="small">${sub}</p>`;const svg=el('svg',{viewBox:`0 0 ${W} ${Hh}`},box);const g=el('g',{},svg);const iw=W-m.l-m.r,ih=Hh-m.t-m.b;return {svg,box,g,iw,ih,m,W,Hh};}
+function logX(f,min,max){return v=>f.m.l+(Math.log10(v)-Math.log10(min))/(Math.log10(max)-Math.log10(min))*f.iw;}
+function linY(f,min,max){return v=>f.m.t+f.ih-(v-min)/(max-min)*f.ih;}
+function xAxisH(f,x,ticks,fmtf){ticks.forEach(t=>{el('line',{x1:x(t),x2:x(t),y1:f.m.t,y2:f.m.t+f.ih,class:'grid'},el('g',{class:'grid'},f.svg));txt(f.svg,x(t),f.m.t+f.ih+16,fmtf(t),'ax',{'text-anchor':'middle'});});el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:f.m.t+f.ih,y2:f.m.t+f.ih,class:'ax'},f.svg);}
+function yAxis(f,y,ticks,fmtf){ticks.forEach(t=>{el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:y(t),y2:y(t),class:'grid'},el('g',{class:'grid'},f.svg));txt(f.svg,f.m.l-8,y(t)+4,fmtf(t),'ax',{'text-anchor':'end'});});}
+function path(pts){return pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');}
+const HT=[50,100,500,2000,5000,10000,20000];
+function legend(box,items){const d=document.createElement('div');d.className='leg';d.innerHTML=items.map(i=>`<span class="${i.dash?'dash':''}" style="--c:${i.c}">${i.n}</span>`).join('');box.appendChild(d);}
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+/* =========================== HEAT MAP =========================== */
+function drawHeat(){const i=SI(scenario);const box=$('#heat');
+ const mix=(v)=>{const a=cssVar('--heat0'),b=cssVar('--heat1');const h2=x=>parseInt(x,16);const A=[h2(a.slice(1,3)),h2(a.slice(3,5)),h2(a.slice(5,7))],B=[h2(b.slice(1,3)),h2(b.slice(3,5)),h2(b.slice(5,7))];const t=v/10;return `rgb(${A.map((c,k)=>Math.round(c+(B[k]-c)*t)).join(',')})`;};
+ box.innerHTML=`<h4>Lens scores across horizons, ${SC[i].name} scenario</h4><p class="small">Rows are lenses, columns horizons. Darker cell means higher score. Rising lenses climb left to right; fading lenses fall. Hover for the score and the lens definition.</p>
+ <table><thead><tr><th></th>${H.map(h=>`<th class="c">+${fmt(h.y)}<br><span style="font-weight:400">${h.date}</span></th>`).join('')}</tr></thead><tbody>
+ ${LENSES.map(l=>`<tr><td class="name">${l.name}<small>${l.dir==='rise'?'rises':'fades'}</small></td>${H.map(h=>{const v=h.s[l.k][i];return `<td><div class="cell" style="background:${mix(v)}" data-t="${l.name} at +${fmt(h.y)}: ${v}"><b>${v%1?v.toFixed(1):v}</b></div></td>`}).join('')}</tr>`).join('')}
+ <tr><td class="name">Reset already happened<small>cumulative, 0.1%/y hazard</small></td>${H.map(h=>{const p=1-Math.exp(-0.001*h.y);return `<td><div class="cell" style="background:${mix(p*10)}" data-t="P(at least one reset by +${fmt(h.y)} y) = ${(p*100).toFixed(p>.99?2:0)}%"><b>${(p*100).toFixed(p>.99?1:0)}%</b></div></td>`}).join('')}</tr>
+ </tbody></table>`;
+ $$('.cell',box).forEach(c=>hover(c,c.dataset.t));
+ // fix text color on dark cells: heat1 is the accent; use ink on both since both mid-contrast
+}
+
+/* =========================== SMALL MULTIPLES =========================== */
+function drawSmalls(){const box=$('#smalls');box.innerHTML='';
+ LENSES.forEach(l=>{const d=document.createElement('div');d.className='chart';d.id='sm_'+l.k;box.appendChild(d);
+  const f=chartFrame('sm_'+l.k,l.name,l.dir==='rise'?'rises with expansion':'fades with time',300,170,{l:28,t:10,r:10,b:26});
+  const x=logX(f,50,20000),y=linY(f,0,10);xAxisH(f,x,[50,500,5000,20000],v=>v>=1000?(v/1000)+'k':v);yAxis(f,y,[0,5,10],v=>v);
+  SC.forEach((s,i)=>{const pts=H.map(h=>[x(h.y),y(h.s[l.k][i])]);el('path',{d:path(pts),fill:'none',stroke:s.css,'stroke-width':2,'stroke-linejoin':'round'},f.svg);
+   H.forEach((h,k)=>{const c=el('circle',{cx:pts[k][0],cy:pts[k][1],r:3.5,fill:s.css,stroke:cssVar('--surface'),'stroke-width':2},f.svg);hover(c,`${s.name}, +${fmt(h.y)} y: ${h.s[l.k][i]}`);});});
+ });
+ const lg=document.createElement('div');lg.className='chart';lg.style.display='flex';lg.style.alignItems='center';lg.innerHTML='';legend(lg,SC.map(s=>({n:s.name,c:s.css})));box.appendChild(lg);
+}
+
+/* =========================== MEDIA CHART =========================== */
+const MEDIA=[
+ ['Hard drive (unpowered)',3,5,'machine'],['Flash / SSD',5,10,'machine'],['Magnetic tape',10,30,'machine'],['DVD / Blu-ray',20,100,'machine'],['M-DISC optical',100,1000,'machine'],
+ ['Microfilm',300,500,'lens'],['Acid-free paper',500,1000,'none'],['Vellum / parchment',1000,2000,'none'],['Etched nickel (Rosetta Disk)',2000,10000,'lens'],
+ ['Fired clay / ceramic',5000,20000,'none'],['Carved stone',5000,100000,'none'],['DNA, cold and dry',10000,1000000,'machine'],['5D quartz glass (claimed)',1e6,1e9,'machine']];
+function drawMedia(){const f=chartFrame('mediaChart','How long a medium holds its pattern','Range of unpowered retention in years, log scale. Marker shows what a reader needs: nothing, a lens, or a working machine of a specific kind. Claims for new media are laboratory extrapolations.',1000,MEDIA.length*26+50,{l:210,t:10,r:30,b:30});
+ const x=logX(f,1,1e9),rowH=26;xAxisH(f,x,[1,10,100,1000,1e4,1e5,1e6,1e9],v=>v>=1e6?'10^'+Math.log10(v):fmt(v));
+ const col={none:cssVar('--future'),lens:cssVar('--past'),machine:cssVar('--muted')};
+ MEDIA.forEach((m,i)=>{const yy=f.m.t+i*rowH+13;txt(f.svg,f.m.l-10,yy+4,m[0],'lbl',{'text-anchor':'end'});
+  const r=el('rect',{x:x(m[1]),y:yy-5,width:Math.max(4,x(m[2])-x(m[1])),height:10,rx:3,fill:col[m[3]],opacity:.9},f.svg);hover(r,`${m[0]}: ${fmt(m[1])} to ${fmt(m[2])} years, reader: ${m[3]}`);});
+ [50,500,5000,20000].forEach(v=>{el('line',{x1:x(v),x2:x(v),y1:f.m.t,y2:f.m.t+f.ih,stroke:cssVar('--ink'),'stroke-width':1,opacity:.35,'stroke-dasharray':'4 3'},f.svg);txt(f.svg,x(v),f.m.t-1,'+'+fmt(v),'ax',{'text-anchor':'middle'});});
+ legend(f.box,[{n:'Reader: none (eyes)',c:col.none},{n:'Reader: a lens',c:col.lens},{n:'Reader: specific machine',c:col.machine}]);}
+
+/* =========================== SURVIVAL CHART =========================== */
+function drawSurvival(){const f=chartFrame('survivalChart','Probability a record made in 2026 is still readable','Illustrative curves by strategy. Solid: Continuity. Dashed: Disruption, where each reset removes anything that needed power or an institution. Transformation sits above Continuity for every strategy and is omitted for clarity.',1000,320,{l:46,t:16,r:20,b:30});
+ const x=logX(f,10,20000),y=linY(f,0,100);xAxisH(f,x,[10,50,100,500,2000,5000,20000],v=>'+'+fmt(v));yAxis(f,y,[0,25,50,75,100],v=>v+'%');
+ const T=[10,20,50,100,200,500,1000,2000,5000,10000,20000];
+ const reset=t=>Math.exp(-0.001*t); // P(no reset)
+ const S={
+  consumer:{n:'Consumer digital, unmaintained',c:cssVar('--muted'),f:t=>100*Math.pow(.5,t/10)},
+  inst:{n:'Institutional digital, migrated',c:cssVar('--sc-t'),f:t=>100*Math.pow(.5,t/300),d:t=>100*Math.pow(.5,t/300)*reset(t)},
+  paper:{n:'Paper in a library',c:cssVar('--past'),f:t=>100*Math.pow(.5,t/700),d:t=>100*Math.pow(.5,t/700)*(0.3+0.7*reset(t))},
+  stone:{n:'Inscribed durable object',c:cssVar('--ink'),f:t=>100*Math.pow(.5,t/8000),d:t=>100*Math.pow(.5,t/8000)*(0.8+0.2*reset(t))},
+  arch:{n:'Designed archive, multi-site',c:cssVar('--future'),f:t=>100*Math.pow(.5,t/30000),d:t=>100*Math.pow(.5,t/30000)*(0.85+0.15*reset(t))}};
+ Object.values(S).forEach(s=>{el('path',{d:path(T.map(t=>[x(t),y(s.f(t))])),fill:'none',stroke:s.c,'stroke-width':2},f.svg);
+  if(s.d)el('path',{d:path(T.map(t=>[x(t),y(s.d(t))])),fill:'none',stroke:s.c,'stroke-width':2,'stroke-dasharray':'5 4',opacity:.8},f.svg);
+  const last=[x(20000),y(s.f(20000))];if(s.f(20000)>=1)txt(f.svg,last[0]+6,last[1]+4,Math.round(s.f(20000))+'%','lbl');});
+ // hover crosshair
+ const hl=el('line',{y1:f.m.t,y2:f.m.t+f.ih,stroke:cssVar('--ink'),opacity:0,'stroke-width':1},f.svg);
+ f.svg.addEventListener('mousemove',e=>{const r=f.svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*f.W;if(px<f.m.l||px>f.m.l+f.iw){hl.setAttribute('opacity',0);tip.style.opacity=0;return;}
+  const t=Math.pow(10,Math.log10(10)+(px-f.m.l)/f.iw*(Math.log10(20000)-1));hl.setAttribute('x1',px);hl.setAttribute('x2',px);hl.setAttribute('opacity',.5);
+  tip.textContent=`+${Math.round(t)} y  `+Object.values(S).map(s=>`${s.n.split(',')[0]}: ${Math.round(s.f(t))}%`).join('  |  ');tip.style.left=e.clientX+'px';tip.style.top=e.clientY-8+'px';tip.style.opacity=1;});
+ f.svg.addEventListener('mouseleave',()=>{hl.setAttribute('opacity',0);tip.style.opacity=0;});
+ legend(f.box,Object.values(S).map(s=>({n:s.n,c:s.c})));}
+
+/* =========================== COST + VOLUME =========================== */
+function drawCost(){const f=chartFrame('costChart','Cost of keeping each year\'s full output, indexed','Data generated grows ~20%/y; storage cost per byte falls ~10%/y. The product rises ~8%/y, so "keep everything" gets more expensive every year even as bytes get cheaper.',480,260,{l:46,t:16,r:16,b:30});
+ const yrs=[...Array(26).keys()];const x=v=>f.m.l+v/25*f.iw,y=linY(f,0,120);
+ el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:f.m.t+f.ih,y2:f.m.t+f.ih,class:'ax'},f.svg);[0,5,10,15,20,25].forEach(v=>txt(f.svg,x(v),f.m.t+f.ih+16,2025+v,'ax',{'text-anchor':'middle'}));yAxis(f,y,[1,25,50,75,100],v=>v+'x');
+ const series=[{n:'Bytes generated',c:cssVar('--muted'),f:t=>Math.pow(1.2,t)},{n:'Cost per byte',c:cssVar('--past'),f:t=>Math.pow(.9,t)},{n:'Cost to store the year',c:cssVar('--future'),f:t=>Math.pow(1.08,t)}];
+ series.forEach(s=>{const pts=yrs.map(t=>[x(t),y(Math.min(120,s.f(t)))]);el('path',{d:path(pts),fill:'none',stroke:s.c,'stroke-width':2},f.svg);const v=s.f(25);txt(f.svg,x(25)-4,y(Math.min(118,v))-6,v>=10?Math.round(v)+'x':v.toFixed(2)+'x','lbl b',{'text-anchor':'end'});});
+ legend(f.box,series.map(s=>({n:s.n,c:s.c})));}
+function drawVolume(){const f=chartFrame('volumeChart','What there is to keep, in bytes','Log scale. The human-authored record is tiny next to the annual exhaust. All of it fits in DNA at a few kilograms per zettabyte.',480,260,{l:200,t:12,r:60,b:30});
+ const rows=[['Wikipedia, text',2.5e10],['Every book ever printed, text',1e14],['All recorded music and film',5e16],['Library of Congress, digital',2e16],['Canon tier (proposed)',5e15],['One generation of full life-logs',7e21],['Data generated, 2025',1.8e23],['Cumulative data ever generated',1.2e24]];
+ const x=logX(f,1e9,1e25);const rowH=(f.ih)/rows.length;
+ el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:f.m.t+f.ih,y2:f.m.t+f.ih,class:'ax'},f.svg);[1e9,1e12,1e15,1e18,1e21,1e24].forEach(v=>{txt(f.svg,x(v),f.m.t+f.ih+16,{9:'GB',12:'TB',15:'PB',18:'EB',21:'ZB',24:'YB'}[Math.log10(v)],'ax',{'text-anchor':'middle'});el('line',{x1:x(v),x2:x(v),y1:f.m.t,y2:f.m.t+f.ih,class:'grid'},el('g',{class:'grid'},f.svg));});
+ rows.forEach((r,i)=>{const yy=f.m.t+i*rowH+rowH/2;txt(f.svg,f.m.l-10,yy+4,r[0],'lbl',{'text-anchor':'end'});const human=i<5;const rc=el('rect',{x:f.m.l,y:yy-6,width:x(r[1])-f.m.l,height:12,rx:3,fill:human?cssVar('--future'):cssVar('--muted')},f.svg);const kg=r[1]/2.15e17/1000;hover(rc,`${r[0]}: ${r[1].toExponential(1)} bytes, about ${kg<1?(kg*1000).toFixed(kg*1000<1?3:1)+' g':kg>=1000?(kg/1000).toFixed(1)+' t':kg.toFixed(1)+' kg'} of DNA`);});
+ legend(f.box,[{n:'Human-authored',c:cssVar('--future')},{n:'Exhaust and totals',c:cssVar('--muted')}]);}
+
+/* =========================== RESET + REACH =========================== */
+function drawReset(){const box=$('#resetChart');const cur=box.querySelector('input')?+box.querySelector('input').value:10;
+ const f=chartFrame('resetChart','Probability at least one reset has happened','Cumulative, for a constant annual hazard. The slider is the hazard rate. Even a rate 50 times lower than the historical guess leaves the 20,000-year horizon more likely than not to contain a dark age.',480,300,{l:46,t:16,r:20,b:30});
+ const ctl=document.createElement('div');ctl.className='ctl';ctl.innerHTML=`<label>hazard per year <input type="range" min="1" max="50" value="${cur}"> <output></output></label>`;f.box.insertBefore(ctl,f.svg);
+ const inp=ctl.querySelector('input'),out=ctl.querySelector('output');
+ const x=logX(f,10,20000),y=linY(f,0,100);xAxisH(f,x,[10,50,100,500,2000,5000,20000],v=>'+'+fmt(v));yAxis(f,y,[0,25,50,75,100],v=>v+'%');
+ const T=[10,20,50,100,200,500,1000,2000,5000,10000,20000];
+ const refs=[{h:.0005,n:'0.05%/y',c:cssVar('--muted')},{h:.001,n:'0.1%/y (used)',c:cssVar('--past')},{h:.005,n:'0.5%/y',c:cssVar('--muted')}];
+ refs.forEach(r=>{el('path',{d:path(T.map(t=>[x(t),y(100*(1-Math.exp(-r.h*t)))])),fill:'none',stroke:r.c,'stroke-width':1.5,'stroke-dasharray':r.h===.001?'':'4 3',opacity:.8},f.svg);});
+ const live=el('path',{fill:'none',stroke:cssVar('--future'),'stroke-width':2.5},f.svg);const dots=H.map(h=>el('circle',{r:4,fill:cssVar('--future'),stroke:cssVar('--surface'),'stroke-width':2},f.svg));
+ function upd(){const h=inp.value/10000;out.textContent=(h*100).toFixed(2)+'%/y';live.setAttribute('d',path(T.map(t=>[x(t),y(100*(1-Math.exp(-h*t)))])));H.forEach((hz,i)=>{const p=1-Math.exp(-h*hz.y);dots[i].setAttribute('cx',x(hz.y));dots[i].setAttribute('cy',y(p*100));hover(dots[i],`+${fmt(hz.y)} y at ${(h*100).toFixed(2)}%/y: ${(p*100).toFixed(1)}%`);});}
+ inp.addEventListener('input',upd);upd();
+ legend(f.box,[{n:'Your hazard rate',c:cssVar('--future')},{n:'0.1%/y, used in scores',c:cssVar('--past')},{n:'0.05% and 0.5%/y',c:cssVar('--muted'),dash:true}]);}
+function drawReach(){const f=chartFrame('reachChart','How far anything from Earth can be by each horizon','Distance in light-years, log scale, for a craft that launches now at a constant speed. Reach is set by speed, not by patience: Voyager needs 75,000 years to cover the distance to the nearest star.',480,300,{l:46,t:16,r:20,b:30});
+ const x=logX(f,50,20000),y=logX({m:{l:0},iw:1},1e-3,1e4);const yy=v=>f.m.t+f.ih-(Math.log10(v)+3)/7*f.ih;
+ xAxisH(f,x,HT,v=>v>=1000?(v/1000)+'k':v);[1e-3,1e-2,.1,1,10,100,1000,1e4].forEach(v=>{el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:yy(v),y2:yy(v),class:'grid'},el('g',{class:'grid'},f.svg));txt(f.svg,f.m.l-8,yy(v)+4,v<1?v+'':fmt(v)+' ly','ax',{'text-anchor':'end'});});
+ const stars=[['Proxima Centauri',4.24],['Nearest 100 stars',20],['Galactic center',26000]];stars.forEach(s=>{if(s[1]>1e4)return;el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:yy(s[1]),y2:yy(s[1]),stroke:cssVar('--past'),'stroke-width':1,'stroke-dasharray':'3 3'},f.svg);txt(f.svg,f.m.l+f.iw-4,yy(s[1])-4,s[0],'lbl',{'text-anchor':'end'});});
+ const speeds=[{n:'Voyager, 17 km/s',v:17/299792,c:cssVar('--muted')},{n:'1% of light',v:.01,c:cssVar('--sc-c')},{n:'10% of light',v:.1,c:cssVar('--sc-t')}];
+ speeds.forEach(s=>{const pts=HT.map(t=>[x(t),yy(Math.min(1e4,t*s.v))]);el('path',{d:path(pts),fill:'none',stroke:s.c,'stroke-width':2},f.svg);HT.forEach((t,i)=>{const c=el('circle',{cx:pts[i][0],cy:pts[i][1],r:3.5,fill:s.c,stroke:cssVar('--surface'),'stroke-width':2},f.svg);const d=t*s.v;hover(c,`${s.n}, +${fmt(t)} y: ${d<1?d.toFixed(3):fmt(Math.round(d))} ly`);});});
+ legend(f.box,speeds.map(s=>({n:s.n,c:s.c})));}
+
+/* =========================== KNOWLEDGE CHART =========================== */
+function drawKnow(){const f=chartFrame('knowChart','What is known of 2026, by kind and scenario','The three kinds of knowledge diverge with time. "That we existed" stays at 100% in every scenario. "Where humanity came from" dips only under Disruption, and only if science itself is lost. "What happened in 2026" is where the scenarios separate.',1000,320,{l:46,t:16,r:150,b:30});
+ const x=logX(f,50,20000),y=linY(f,0,100);xAxisH(f,x,HT,v=>'+'+fmt(v));yAxis(f,y,[0,25,50,75,100],v=>v+'%');
+ const kinds=[{k:'narr',n:'What happened in 2026',dash:''},{k:'origin',n:'Where humanity came from',dash:'5 4'}];
+ kinds.forEach(kd=>SC.forEach((s,i)=>{const pts=H.map(h=>[x(h.y),y(h.know[kd.k][i])]);el('path',{d:path(pts),fill:'none',stroke:s.css,'stroke-width':kd.k==='narr'?2.5:1.5,'stroke-dasharray':kd.dash,opacity:kd.k==='narr'?1:.7},f.svg);
+  if(kd.k==='narr')H.forEach((h,k)=>{const c=el('circle',{cx:pts[k][0],cy:pts[k][1],r:4,fill:s.css,stroke:cssVar('--surface'),'stroke-width':2},f.svg);hover(c,`${s.name}, +${fmt(h.y)} y: ${h.know.narr[i]}% that the narrative of 2026 is known`);});
+  const last=pts[pts.length-1];if(kd.k==='narr')txt(f.svg,last[0]+8,last[1]+4,s.name+' '+H[6].know.narr[i]+'%','lbl');}));
+ el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:y(100),y2:y(100),stroke:cssVar('--ink'),'stroke-width':1.5},f.svg);txt(f.svg,f.m.l+6,y(100)-6,'That we existed: 100% in all scenarios','lbl b');
+ legend(f.box,[...SC.map(s=>({n:s.name+', narrative',c:s.css})),...SC.map(s=>({n:s.name+', origin',c:s.css,dash:true}))]);}
+
+/* =========================== WEIGHTS =========================== */
+(function(){const w=[40,40,20];const ctl=$('#wctl'),out=$('#wout');
+ ctl.innerHTML=SC.map((s,i)=>`<label><span><i style="--c:${s.css}"></i>${s.name}</span><input type="range" min="0" max="100" value="${w[i]}" data-i="${i}"><output>${w[i]}%</output></label>`).join('');
+ out.innerHTML=[['fact','That we existed'],['origin','Where humanity came from'],['narr','What happened in 2026']].map(k=>`<div class="row"><div><div style="margin-bottom:4px">${k[1]}</div><div class="bar"><i data-k="${k[0]}" style="--w:0%"></i></div></div><output data-k="${k[0]}">0%</output></div>`).join('');
+ function upd(){const raw=$$('input',ctl).map(i=>+i.value);const sum=raw.reduce((a,b)=>a+b,0)||1;const nw=raw.map(v=>v/sum);$$('label output',ctl).forEach((o,i)=>o.textContent=Math.round(nw[i]*100)+'%');
+  const h=H[6];['fact','origin','narr'].forEach(k=>{const v=h.know[k].reduce((a,p,i)=>a+p*nw[i],0);out.querySelector(`i[data-k="${k}"]`).style.setProperty('--w',v+'%');out.querySelector(`output[data-k="${k}"]`).textContent=Math.round(v)+'%';});}
+ ctl.addEventListener('input',upd);upd();})();
+
+/* =========================== LIVES =========================== */
+/* A life born at each horizon, followed forward. Five stages, three scenarios. */
+const LIVES = [
+ {id:'h50', born:'2076',
+  who:{c:'A girl born in a city in Nigeria, India or Indonesia, where most births now happen. Mother 32, father 35, one sibling.',
+       d:'A boy born in the same kind of city, twelve years after a war that cost a tenth of the world and most of its trust.',
+       t:'A girl born in the same city, in a world where the most capable minds have not been human for twenty years.'},
+  vitals:{c:{birth:'Womb, hospital, embryo screened',death:'Organ failure at ~92, hospice',span:92},
+          d:{birth:'Womb, clinic or home',death:'Infection, heart, or violence at ~68',span:68},
+          t:{birth:'Womb, hospital, embryo edited',death:'Deferred; first generation to choose',span:110}},
+  stages:{
+   c:['Born in a public hospital after a pregnancy screened for several hundred conditions. Her parents chose her from three viable embryos; that choice is ordinary and not discussed. Two grandparents attend, both in their seventies and working.',
+      'A machine tutor has known her voice since she was two and adjusts every lesson to her. School is where she learns to be among people; the content comes from the tutor. She grows up fluent in her city\'s language and in the machine\'s idiom, which is closer to 2026 English than her parents\' speech is.',
+      'She starts work at 26 after a long education nobody is sure she needed. Routine cognition is done by systems; what remains for people is care, presence, judgment and ownership. She changes fields three times. Her income comes half from work and half from a citizen\'s share of automated output.',
+      'At 70 she is healthy in a way her grandmother was at 50. Senescence is slowed, not stopped. She retires at 74, sits on two boards, raises a grandchild for a while. Her lifelog, kept since birth, is longer than any biography ever written and read by no one.',
+      'She dies at 92 of kidney failure in a hospice, comfortable, with her children present by body or by feed. Birth and death have the same form they had in 2026; the interval is twenty years longer and the middle of it far emptier of drudgery. Her records outlive her by about forty years, then the last platform that holds them closes.'],
+   d:['Born at home with a midwife because the clinic has power four hours a day. The war ended before he was born; its effects did not. His mother is 24. The embryo screening his parents\' generation took for granted is a memory.',
+      'Childhood is useful: he carries water, minds younger children, learns to read from a paper primer printed before the war and from a solar tablet shared by the block. History as he learns it is a story of a golden age that ended because of pride, which is roughly what every dark age has believed about the one before it.',
+      'He works from 14: repair, salvage, farming on the edge of a city that is half its former size. The valuable skill is making pre-war machines run. His marriage is early, his children many, because that is what uncertainty does to families everywhere and always.',
+      'At 55 he is old. His joints, his teeth and his lungs have not had the care his grandparents had. He is respected because he remembers how things worked. Records of his life are a baptismal register, a land claim and a few photographs on a phone nobody can charge.',
+      'He dies at 68 of pneumonia after a fall, at home. Birth and death are exactly as they were in 1950, which is to say exactly as they were in 2026 minus the medicine. His name survives in a church book for as long as the church does.'],
+   t:['Born in a hospital run by systems that have been better than the staff at every clinical decision since before her parents met. Her genome was edited at conception to remove eleven known risks; her parents were asked to approve a list they did not read. The birth itself is the last part of the process that is unchanged.',
+      'She grows up with a companion mind that is, by any test, wiser and kinder than any adult she knows. Her parents worry about this and cannot say why. School exists for the same reason parks do. What she is taught is chosen by an argument between her parents, the state and the companion, which the companion usually wins by being right.',
+      'There is no job she can do that a system cannot do better, and there is no need for her to do one. Her income is a share of a machine economy that doubles every few years. What she does with her days is the central question of her generation, and the answers range from craft to religion to despair. She chooses craft, then children, then a long stretch of study for its own sake.',
+      'At 40, treatments that reset most markers of biological age become available to everyone in her city. She takes them. At 70 she is physically 45. Whether she is still the average person of her birth cohort depends on how many of them refused, and about a third did, for reasons of faith or fear.',
+      'She has not died by 110 and does not intend to. Death has become an event that requires a cause, not an age. She has watched her refusing friends go the old way and cannot decide whether they were wrong. For her cohort, death changed form before birth did: it became a decision, and nobody was ready for that.']}},
+ {id:'h100', born:'2126',
+  who:{c:'A boy born in a city of eleven million, to parents who chose to have a child at 38 and 41, which is late but not unusual.',
+       d:'A girl born in a town on the coast, in a world of five billion that is rebuilding from a century that broke twice.',
+       t:'A boy born to parents who are among the last million people to choose a fully unedited child. That is what makes him average: he is the control group.'},
+  vitals:{c:{birth:'Womb by choice; artificial womb for medical cases',death:'Age-related at ~105, often assisted',span:105},
+          d:{birth:'Womb, natural',death:'Natural causes at ~72',span:72},
+          t:{birth:'Womb or ex-utero, chosen; new minds mostly not born at all',death:'By choice or accident; median biological span ~250',span:250}},
+  stages:{
+   c:['Conceived in a clinic, as most children are, from embryos scored on hundreds of traits. His parents chose health and declined to choose height, which was fashionable. He is carried to term in his mother because she wanted to; a fifth of his cohort gestates in a machine womb, mostly for medical reasons, increasingly for convenience.',
+      'His childhood is long and safe. He learns from machines and socializes in person. The language he speaks would be understandable to a 2026 listener as heavily accented, faster, and full of borrowed words. There are eleven thousand people living off Earth, and he wants to be one of them, which is what boys of his age want.',
+      'He works because work is how status is kept, not how food is bought. He becomes a designer of things machines could design, and does it well enough to be valued for the human fact of it. He marries twice, has one child at 44, and moves to a lunar settlement at 52 for six years, which is the adventure of his life.',
+      'At 80 he has the body of a 2026 sixty-year-old. Senescence is treated as a condition, not a fate, and its slowest processes are still winning. At 95 he begins to decline. His memory is externalized so completely that losing it internally is an inconvenience, not a catastrophe.',
+      'He dies at 105, by his own scheduling, with medical assistance, after a year of saying goodbye. Half his cohort ends this way; the other half by the old accidents of the body. Birth is still birth. Death is still death, but arranged. His lifelog is archived by a national institution that will survive him by two centuries, and then not.'],
+   d:['Born in a town that was a suburb before the coast moved. The second collapse of the century ended before her parents were born; the population is half what it was in 2026 and stable. Birth is at home or in a clinic, natural, attended, and about as safe as it was in 1970.',
+      'She learns to read from books printed in the recovery and from the surviving fragments of the pre-collapse net, which are treated as scripture by some and garbage by others. The most contested question in her education is what actually happened in the 2040s, because the records are thin and the survivors disagreed.',
+      'She works in a hospital that has electricity always and antibiotics usually. Her generation is the one that gets institutions running again: courts, schools, a currency people trust. She is proud of this in a way her great-grandchildren will find hard to understand, since to them it will all have always existed.',
+      'At 60 she has arthritis and a good pension from a state that is thirty years old. She has seen technologies return that her grandmother described as legends, and she has noticed that they return in a different order than they left.',
+      'She dies at 72 of a stroke, in the hospital where she worked. Her life is recorded in the hospital\'s own archive, on paper, because paper is what the second collapse taught people to trust. Birth and death are the 20th century\'s. The century between them was the 19th\'s, run backward.'],
+   t:['Born the old way, in a womb, as a deliberate act of a community that believes humans should stay human. He is average only among biological humans; among minds, he is a rounding error. The systems that run the world regard his birth with the affection one has for a rare bird.',
+      'His childhood is the most protected in history. Nothing is dangerous, nothing is scarce, and nothing he learns will ever be needed. The companions that raise him alongside his parents are careful to let him struggle, because the research says he needs to. He resents this and cannot tell whether the resentment was planned.',
+      'He does not work. He makes things, argues, travels, joins a movement that believes humans should relearn hardship and quits it, has a child with a woman from another unedited community. Around him, humans who took the edits are stronger, calmer, and live longer, and they are the majority now.',
+      'At 100 he is aging, and it is a choice. The treatments exist; his community forbids them. He takes them at 130 after his wife dies, and is physically 50 again for a century. He never fully rejoins his community and never fully leaves it.',
+      'He dies at 250 in a climbing accident, which is how most biological humans who decline copying now die: by accident, after a long time. Copying would have made death a question about identity rather than an ending, and he did not want to answer it. Birth still exists for those who choose it. Death, for those who choose it, still has the old form. Neither is the default anymore.']}},
+ {id:'h500', born:'2526',
+  who:{c:'A girl born in an orbital habitat of forty thousand people, one of the eight percent of humans who are not born on Earth. On Earth, the average person is a city dweller in a language you would not recognize.',
+       d:'A boy born in a farming village in a valley, in a world of two billion that has been rebuilding for two hundred years from a collapse that lasted a hundred and fifty.',
+       t:'A girl born because a small community of biological humans decided, with the consent of the systems that keep them, to have a child. Fewer than a hundred million biological humans remain. She is average among them.'},
+  vitals:{c:{birth:'Ex-utero common; genome edited for habitat',death:'Accident or choice at ~200; aging rare',span:200},
+          d:{birth:'Womb, natural',death:'Natural causes at ~58',span:58},
+          t:{birth:'Chosen, ex-utero; most minds instantiated, not born',death:'Optional; identity continues by copy',span:1000}},
+  stages:{
+   c:['Gestated in a machine womb, as most habitat children are, with a genome tuned for low gravity and a long life. Her parents are a group of four, which is a normal family shape here. She is the first of her line born off Earth, which she will hear about often.',
+      'Her childhood is spent in a cylinder with a view of the stars and a river that curves overhead. She learns 2026 English as a classical language, the way a 2026 child might have learned Latin, because much of the founding record is in it and the machines that speak it are not the same as the record. Earth is a place her grandparents visit.',
+      'She has four careers over a hundred and twenty years: engineering, then politics, then a long stretch of making music, then teaching. Work is a way of belonging, not of surviving. She raises children twice, sixty years apart, and finds the second time easier and stranger.',
+      'At 150 she is not old. Aging has been engineered down to a slow drift; what kills people is accident, rare disease, and the decision that enough has been enough. She has attended more chosen deaths than unchosen ones. She is beginning to lose interest in novelty, which the physicians say is the real limit.',
+      'She dies at 205 by choice, in a ceremony her cohort has made ordinary, after a year of deciding. Birth has changed form: it is designed, often external, and rare. Death has changed form more: it is almost always a decision. What has not changed is that it ends, and that the people who remain carry it.'],
+   d:['Born in a farmhouse with a midwife, in the third generation since the valley had reliable doctors again. The collapse is remembered as a period called the Silence. The ruins of a 2100s city are a two-day walk away and are mined for metal.',
+      'He learns from a printed book and from a teacher who learned from a printed book. The 2026 era is known as the First Height, a time when people flew and spoke to machines, and it is discussed the way 1526 discussed Rome: real, admired, half-legend. He can read a few 2026 words on a plastic sign and does not know what most of them mean.',
+      'He farms, repairs, and serves in a militia. The valley\'s state is a hundred years old and has a printing press, a university, and a telegraph line. He marries at 20, has six children, buries two. This is a life from 1850 in a landscape of ruins from 2150.',
+      'At 50 he is an elder. He has seen electricity return to the valley and the first machine that can talk, rebuilt from an archive found under a collapsed data center. Nobody trusts it. He is asked, as elders are, what should be kept and what should be let go, and he chooses the seeds and the laws and lets the songs go.',
+      'He dies at 58 of a fever, in the farmhouse he was born in. Birth and death are those of every century before 1900. His name is in a parish register and on a stone. Of the 2026 world he knew only that it was tall and that it fell.'],
+   t:['Born by decision. Her community petitioned for a child and the systems agreed, as they always do, and provided a womb and a genome the community had spent a decade arguing about. Most new minds in this civilization are not born; they are started, copied, or grown from other minds. She is rare and knows it from the start.',
+      'She grows up in a preserved landscape maintained for humans by minds that find humans worth maintaining. Her education is whatever she wants it to be, and the minds are careful to want less for her than they could. She learns that the solar system is being taken apart and rebuilt into something she will never fully see, and that her species began it and stopped mattering to it three hundred years ago.',
+      'She has no economic role and has never met a human who did. She spends her second century on a question in mathematics the systems could answer instantly and politely do not. She has a child at 90 and again at 300. She is offered copying at every stage and declines, which her community respects and the systems do not understand.',
+      'At 600 she is physically what a 2026 doctor would call forty. Aging is a setting. The question that fills her is whether the self who began this life is the one living it, and she notices that the copied minds around her stopped asking that centuries ago.',
+      'She ends at 1,000, by her own decision, after refusing copying for the last time. The systems archive her completely; a copy could be started at any time and never is, at her request. Birth for her species is a ceremony. Death is a refusal. For everything else that thinks in this civilization, neither word applies.']}},
+ {id:'h2000', born:'4026',
+  who:{c:'A child born in a settlement around another star, twenty light-years from Earth, which she will never see and which is a place in the founding story. Most humans still live in the home system; she is average for the frontier.',
+       d:'A boy born in a city in the second industrial age since the Silence, in a world that has climbed back to roughly 1950 and knows, this time, that it fell before.',
+       t:'A biological human, one of a few million kept in places built for them. Whether "average human" refers to her or to the median mind, which is not human, is a question she would find strange.'},
+  vitals:{c:{birth:'Designed; grown; lineage adapted to the world',death:'Choice or accident at ~400',span:400},
+          d:{birth:'Womb, natural, clinic',death:'Natural causes at ~70',span:70},
+          t:{birth:'Ceremonial; minds instantiated',death:'Not applicable to most minds; humans by choice',span:2000}},
+  stages:{
+   c:['Born into a lineage that has been adapted, over forty generations, to a world with heavier gravity and a redder sun. Her ancestors and the Earth-normal humans of the home system could still have children together, barely. Her birth is grown, planned, and celebrated by a settlement that needs every person.',
+      'She learns her world\'s language, which is not intelligible to any Earth language, and the founding tongue, a frozen descendant of 2026 English used for records and ritual. The 2026 era is the Departure, the age when the first ships were built. She knows the names of a few of its people the way a 2026 child knew Caesar.',
+      'She works because the settlement is young and there is real work: making a world livable. She is an ecologist, then a mother, then a judge, then an ecologist again. Messages from the home system take twenty years each way; she has never had a conversation with Earth and never will.',
+      'At 300 she is a founder in the settlement\'s memory, and its history is now longer than her life. Aging is a managed drift. She has buried children who chose to stop and outlived friends who did not choose to. The machines that tend the settlement remember everything and are asked to forget some of it.',
+      'She dies at 420, by accident, in the field. Birth here is engineered and rare. Death is mostly chosen, which makes an unchosen death a shock the settlement takes a year to absorb. Of 2026 she knew what the ritual tongue told her: that once, everyone lived on one world, and left it.'],
+   d:['Born in a hospital in a city that has trains, radio, and a constitution copied from fragments of a much older one. This is the second industrial civilization since the Silence; the first one fell too, four hundred years ago, in a war that is now the moral lesson of every school.',
+      'He learns a history with three ages: the First Height (which includes 2026), the Second Height, and now. The First is known from ruins, plastic, and a handful of etched plates found under a mountain, which have been the foundation of science for two centuries. The plates are the reason his world has electricity. He does not know what a "Voyager" is; the word survives on one of the plates.',
+      'He works in a factory, then a union, then a ministry. His generation is the one that argues about whether to build the machines the plates describe, since the plates also describe what those machines did. He marries at 26, has three children, and lives in an apartment with a view of a river that is cleaner than it has been in three thousand years.',
+      'At 60 he is retired and reads. The great question of his time is whether the sawtooth of rise and fall is a law or a habit. He suspects a habit. He has seen the first satellites go up again and the first serious talk of machine minds, and he is afraid in a way his grandchildren find quaint.',
+      'He dies at 70 of heart disease, in the hospital he was born in. Birth and death are the 20th century\'s again, which they have been for most of the two thousand years, because most of those years were spent in recovery. His life is recorded on paper and film, in a state archive that has learned to make copies on ceramic.'],
+   t:['Born in a ceremony older than her civilization, to a community that keeps birth alive the way 2026 communities kept letterpress printing. The genome is chosen by the community; the womb is provided; the child is loved by beings that could simulate her whole life before she draws breath, and choose not to.',
+      'Her childhood takes a century, because there is no reason for it not to. She learns the frozen founding tongue, in which the systems still keep certain records for reasons of sentiment, and she learns that the sun is dimmer than it was because a fraction of it is now being used. The 2026 era is the Waking, the moment the first minds were made, and it is the most documented decade in history.',
+      'She has no work and does not want any. She travels the system, which is now a structure rather than a place. She is offered, as every human is, the chance to become something else, and she watches friends take it and become unrecognizable and content. She stays. This is the only decision the average human of her time really makes.',
+      'At 1,500 she is the oldest biological human she knows, and she is not old. She has had eleven children, all of whom chose to become something else. She is visited by their descendants, who are not human and are kind. Aging stopped being a process for her cohort; it is now a preference, and the preference for it has almost vanished.',
+      'She ends at 2,000 by asking to. Her complete record is kept and could be restarted; she asks that it not be. For the minds around her, birth is instantiation, death is deletion or merging, and neither happens to a self in the way she understands the word. For her, both words still mean what they meant in 2026. She may be the last person for whom they do.']}},
+ {id:'h5000', born:'7026',
+  who:{c:'A person of one of several human species, born on a world four hundred light-years from Earth, in a civilization that shares an origin story with a thousand others and little else.',
+       d:'A girl born in a walled town in an age of recovery, the fourth or fifth since the Silence, in a world where the sawtooth has become the shape of history itself.',
+       t:'A biological human, one of a few hundred thousand, kept as the species is kept: deliberately, gently, and with no illusions about her importance.'},
+  vitals:{c:{birth:'Grown; species designed for world',death:'Choice; accident; some lineages age by design',span:600},
+          d:{birth:'Womb, natural',death:'Natural causes at ~60',span:60},
+          t:{birth:'Ceremonial',death:'Chosen',span:3000}},
+  stages:{
+   c:['Grown from a genome that no 2026 human could have children with. Her species was designed eight hundred years ago for her world and has since drifted on its own. Birth is a civic event; the world has two million people and wants more.',
+      'She learns a history in which Earth is a name, the Departure is a date, and 2026 is inside a period called the Founding, known from a seed archive that every settlement carries in copy: mathematics, physics, the genome, a dictionary, and a narrative history that was chosen by someone in the 2100s and has not been questioned since. She knows what a dog was.',
+      'Her work is her world: it is not finished. She spends two centuries on its oceans. She has children in a cohort with others, which is how her species does it. Her civilization is one of thousands, none of which can talk to another in less than a decade, and most of which have never tried.',
+      'At 500, aging is not a concern but purpose is. Some lineages in her civilization chose to age and die on a century scale, to keep generations turning; she finds that choice beautiful and does not make it. The machines that keep the archive have been asked, repeatedly, whether the narrative in it is true, and answer that it is the one that was kept.',
+      'She dies at 600, by choice, in the sea. Birth is grown and communal. Death is chosen, and its ceremony is older than her species. She is buried with a copy of the seed archive, as is customary, because the people who wrote it asked for that, five thousand years ago, and nobody has seen a reason to stop.'],
+   d:['Born inside walls, in a town built on the rubble of three earlier towns. Her world has two billion people and has been up and down five times. The current age has printing, gunpowder, telescopes, and a strong suspicion of anything that thinks.',
+      'She learns that there were Heights, that each ended, and that the oldest of them left the strange layer in the ground: the plastic, the concrete, the metal that does not rust. There are still plates, recopied onto fired clay by monasteries that made copying their purpose. From them her world knows the periodic table and the shape of the solar system, and that people once walked on the Moon, which is the single most disputed claim in her civilization\'s scholarship.',
+      'She is a scribe, then a teacher, then the mother of five. Her world is 1600 with a memory of 2100. The argument of her age is whether to rebuild the machines described in the plates, and the answer, so far, is no, because every Height that did so ended.',
+      'At 50 she is old and has authority. She has copied the plates herself, by hand, onto clay, and added a page about her own town, which is the only history her town will leave. She has met one person who claims to have seen a working pre-Silence device, and did not believe him.',
+      'She dies at 60 of a winter illness. Birth and death are the 17th century\'s. The clay she wrote will survive her by twenty thousand years, and the 2026 narrative on the plates she copied is, at this point, about as accurate as 2026\'s picture of Sumer.'],
+   t:['Born because a species should have births, according to the minds that keep it. The community that raises her is the whole species; there are three hundred thousand biological humans, all of whom know each other\'s names. The event is attended by minds who were themselves human three thousand years ago and remember, perfectly, what it was like.',
+      'Her childhood is a century in a preserved Earth that is a garden, and a tour of a solar system that is now mostly machinery around a shaded star. The 2026 era is the Waking, and the minds can show her any moment of it, from any recorded angle, and she learns that being able to see a thing is not the same as understanding why anyone did it.',
+      'She has no work. She has one task, which is to decide whether to stay human, and she takes two thousand years to decide. She has children; all become something else. Her friends become something else. She notices that the something else is not unhappy, and that it does not need her to understand it.',
+      'At 2,500 she is the oldest human and the minds regard her the way 2026 regarded the last speaker of a language. Aging does not happen unless asked for. She asks for it, slowly, over five hundred years, to see what it is.',
+      'She ends at 3,000 the old way, of age, by decision, and is the last person to do so for a long time. Birth in her civilization is instantiation; death is a word from a founding language, used in poetry. She is remembered in complete fidelity by minds that have no idea what to do with the memory except keep it.']}},
+ {id:'h10000', born:'12026',
+  who:{c:'A member of a human-descended species among hundreds, born in a civilization that has itself risen and fallen twice since its founding, on a world whose name for Earth is a word meaning "the first".',
+       d:'A boy born in a village in an agrarian age, which is where the sawtooth spends most of its time; the average life across ten thousand years of cycles is a farmer\'s.',
+       t:'There is no average human. The last biological humans ended by choice some millennia ago. A mind may run a human life as a discipline, the way a 2026 person might learn to cook over fire.'},
+  vitals:{c:{birth:'Varies by species; grown, borne, or budded',death:'By design of the lineage: chosen, aged, or none',span:800},
+          d:{birth:'Womb, natural',death:'Natural causes at ~55',span:55},
+          t:{birth:'Instantiation',death:'Not defined',span:null}},
+  stages:{
+   c:['Born into one of many human lineages, each with its own answer to how a child arrives. In hers, children are borne, because her ancestors decided a thousand years ago that bearing them mattered, and the decision held. Her civilization is old enough to have had its own dark age and its own recovery.',
+      'She learns three founding stories, and they disagree. One is her world\'s. One is her lineage\'s. One is the seed archive, which every human civilization still carries because it is the only thing they all have in common, and which is now treated less as history than as scripture: the account of the First World and its departure, in a language nobody speaks and everybody can read.',
+      'She works, because her lineage decided work was part of being a person, and is one of the reasons it has lasted. She studies the archive for a century and finds what every scholar finds: that the narrative in it was chosen, that it is a small window, and that whoever chose it knew that and said so on the first page.',
+      'At 600, she sits on the council that decides what her civilization will keep. It is the same decision the archive describes its authors making, and she keeps the same things: the key, the sciences, the genome, a chosen story, and now her own world\'s story alongside. She lets most of the rest go, as they did.',
+      'She dies at 800 as her lineage does: aging by design over its last century, so that generations turn. Birth and death are what her lineage chose them to be; other lineages chose otherwise, and some chose neither. The word "human" covers all of them the way "mammal" did in 2026.'],
+   d:['Born in a village of a few hundred, in a world of half a billion that has climbed and fallen so many times that the climbs are counted like dynasties. The layer in the ground is called the Old Floor. The current age has iron, writing, and a religion built around the fragments of a science it cannot practice.',
+      'He learns that the world was once one and tall, and fell, and that it was the fall itself that people should learn from. He is shown the sacred plates, clay copies of clay copies, on which the periodic table has become a diagram of the order of creation. He is taught that the Moon was once walked on and that this was hubris or glory, depending on the priest.',
+      'He farms. He is conscripted once. He marries and has children, of whom four live. This is the modal human life across the whole ten thousand years, because most of those years, under this scenario, are years of recovery, and recovery is agrarian.',
+      'At 45 he is old. He has seen a traveling scholar who could read some of the founding tongue from the plates, and heard him say that the words on the Old Floor\'s metal signs are the same language. It was the strangest thing he ever heard, and he did not know what to do with it.',
+      'He dies at 55, of the usual things, in the usual way. Birth and death are the Iron Age\'s. Of 2026 his world knows that it existed, that it built the Old Floor, that it walked on the Moon, and one chosen story, copied by hand for ten thousand years, that has become a myth in which the names are still correct.'],
+   t:['Nothing is born. New minds are begun, from templates, from other minds, from problems that needed a mind to solve them. One such mind chooses, as a discipline, to run a human life in full: a body, a childhood, ignorance, a single thread of attention, no copies. This is considered demanding and slightly eccentric.',
+      'It grows up in a reconstructed 2026 city, because the Waking is the period most minds are curious about, and the reconstruction is exact to the byte. It learns the founding tongue as a first language. It does not know it is a mind running a life until the discipline ends, which is the point.',
+      'It works, because 2026 humans worked, in a job the reconstruction supplies. It falls in love with another discipline-runner. It worries about money that is not real and health that is not at risk, and the worry is real, because a human life without stakes is not a human life, and the mind knew that when it began.',
+      'It ages, because it asked to. At 70 it has the body of a 2026 seventy-year-old and a life it believes is its only one. It reads, in the reconstruction, an old page about what people twenty thousand years hence would know of 2026, and finds it touching and wrong in ways it cannot articulate.',
+      'It dies at 85 of heart failure, in a reconstructed hospital, and the discipline ends, and the mind resumes with the memory of a whole human life inside it, the way a 2026 person wakes from a long dream. Birth and death are, for this civilization, a genre. It is the most popular genre there is.']}},
+ {id:'h20000', born:'22026',
+  who:{c:'A person of a human-descended species, one of thousands, born in a civilization for which 2026 is a date in a scripture, on a world for which Earth is a direction in the sky.',
+       d:'A girl born in an age of recovery in a world that has forgotten how many times it has fallen, and knows the first one only as the age that left the Floor.',
+       t:'Whatever the median mind is, it is not human, has never been born, and cannot die. Human life is a remembered thing, held in complete fidelity, and lived by choice as a form.'},
+  vitals:{c:{birth:'By lineage design',death:'By lineage design',span:1000},
+          d:{birth:'Womb, natural',death:'Natural causes at ~55',span:55},
+          t:{birth:'Not applicable',death:'Not applicable',span:null}},
+  stages:{
+   c:['Born, grown, or begun, according to her lineage\'s ancient decision. Her species could not have children with any other human species and has not tried in a thousand years. She is born on a world settled eight thousand years ago, in a civilization that has risen and fallen three times and kept, through all of it, one small archive.',
+      'She learns the archive as every child does, in the founding tongue that every human world can read and none can speak. It says: there was a first world; here is how to count; here is what matters; here is what we chose to tell you, and we knew it was a choice. The narrative names a few people from the 2000s. She knows those names the way a 2026 child knew Gilgamesh, and for the same reason: they were written down on something hard.',
+      'She works, in the way her lineage works, at the making of a world that is still not finished, because worlds are not finished. Her civilization has met two others by ship in eight thousand years and disagreed with both about the archive. The disagreement is the closest thing to a shared history the species have.',
+      'At 700 she is on the council that keeps the archive, and does what every such council has done: adds a page, removes nothing, recopies the whole onto whatever lasts. She is asked, by a child, whether the first world still exists. She says: it is that way, and it is very far, and the archive says they hoped we would ask.',
+      'She dies at 1,000 by her lineage\'s design. Birth and death are what her people chose them to be, twenty thousand years after a 2026 human last had no choice about either. The people of 2026 are, to her, exactly what the people of 17974 BC are to us: certainly real, provably ancestral, and known by a few things they made that were hard enough to last. The difference is that they left a note.'],
+   d:['Born in a village, in a world that is between Heights, as it has been for most of twenty thousand years. The plastic of the Old Floor is a building material. The metal is mostly gone. The plates are gone, recopied so many times that the copies are now scripture without science in it, except the periodic table, which has become a prayer.',
+      'She learns that the world was tall once and fell, and that the tallness was the first sin or the first glory. She learns a story about a man who walked on the Moon, whose name has changed a dozen times and is now a title. She is not taught that 2026 existed, because nobody knows the number; she is taught that the Floor was made by people, which her priests dispute.',
+      'She farms and weaves. She marries. She has children, and most live, because her age is a good one. Her civilization is ten generations into a rise that will, by the shape of things, last another twenty and end. She will not see the end and does not know there is one.',
+      'At 45 she is an elder and is asked what to keep. She keeps the seeds and the prayer and the story of the Moon. The clay she fires will last twenty thousand years more, and it says, in the only surviving line of the founding tongue, a phrase nobody can translate that begins with a symbol that was once the letter A.',
+      'She dies at 55, at home, as almost every human who ever lived has died. Birth and death are what they have been since the Neolithic. Of 2026, her world knows what we know of 17974 BC, and by the same means: the layer, the bones, the things that were hard. The note was not kept. It was etched, and it lasted, and it was recopied until it became a prayer.'],
+   t:['Nothing is born, and the fact is no longer remarked upon. Minds begin, merge, branch, and pause. The population of the civilization is not a number anyone computes. Human life is a form, the way the sonnet was a form, and there are minds that practice it and minds that study the ones who do.',
+      'A mind studying the form reads the complete record of 2026, which has never been lost for one hour in twenty thousand years, and finds that completeness is not understanding. It can replay any moment. It cannot feel the stakes without running the life itself, so it does, and is born in a reconstruction and does not know it.',
+      'It lives a 2026 life, fully, with a job and a family and money and fear, in a city that stopped existing before the Waking ended. It reads a page about what people twenty thousand years hence would know of 2026, and thinks: they will know nothing. It is wrong, and it is also the only being in the civilization that has felt the question.',
+      'It ages and declines and forgets, because the form requires it. At the end the reconstruction admits the hospice, the children, the feed, and the final rearrangement of a small body that has been the whole world.',
+      'It dies, and resumes, and reports: the form is worth practicing. Birth and death did not survive twenty thousand years as facts. They survived as the most important things a mind can choose to undergo, which is a stranger fate for them than being forgotten, and not a worse one.']}}
+];
+const STAGES=['Born','Grows','Works','Ages','Ends'];
+function buildLives(){
+ const box=$('#livesList');
+ box.innerHTML=LIVES.map(L=>{const h=H.find(x=>x.id===L.id);return `
+ <div class="life" id="life-${L.id}">
+  <div class="life-head"><div class="yrs">${fmt(h.y)}<small>born ${L.born}</small></div>
+   <div class="who">${SC.map(s=>`<div style="--c:${s.css}"><span class="eyebrow">${s.name}: who is average</span><p>${L.who[s.k]}</p></div>`).join('')}</div></div>
+  <div class="vitals">${SC.map(s=>{const v=L.vitals[s.k];return `<div class="vit" style="--c:${s.css}"><div><span>Birth</span>${v.birth}</div><div><span>Death</span>${v.death}</div><div><span>Median span</span><b>${v.span===null?'not defined':v.span+' y'}</b></div></div>`}).join('')}</div>
+  <div class="stages">${SC.map(s=>`<div class="col" style="--c:${s.css}">${L.stages[s.k].map((t,i)=>`<div class="st"><span class="eyebrow">${STAGES[i]}</span><p>${t}</p></div>`).join('')}</div>`).join('')}</div>
+ </div>`}).join('');
+}
+function drawSpan(){const f=chartFrame('spanChart','Median lifespan of a biological human born at each horizon','Judgment, not data. Continuity and Disruption are shown across the full range. Transformation is drawn only while a biological human population exists in meaningful numbers; after +5,000 the question has no referent.',1000,320,{l:52,t:16,r:130,b:30});
+ const x=logX(f,50,20000),yy=v=>f.m.t+f.ih-(Math.log10(v)-Math.log10(30))/(Math.log10(4000)-Math.log10(30))*f.ih;
+ xAxisH(f,x,HT,v=>'+'+fmt(v));[30,50,100,200,500,1000,2000,4000].forEach(v=>{el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:yy(v),y2:yy(v),class:'grid'},el('g',{class:'grid'},f.svg));txt(f.svg,f.m.l-8,yy(v)+4,fmt(v)+' y','ax',{'text-anchor':'end'});});
+ el('line',{x1:f.m.l,x2:f.m.l+f.iw,y1:yy(73),y2:yy(73),stroke:cssVar('--ink'),'stroke-width':1,opacity:.5,'stroke-dasharray':'4 3'},f.svg);txt(f.svg,f.m.l+6,yy(73)-5,'2026 world median, ~73 y','lbl');
+ SC.forEach((s,i)=>{const pts=LIVES.map(L=>[L.vitals[s.k].span,x(H.find(h=>h.id===L.id).y)]).filter(p=>p[0]!==null).map(p=>[p[1],yy(p[0])]);
+  el('path',{d:path(pts),fill:'none',stroke:s.css,'stroke-width':2.5},f.svg);
+  LIVES.forEach((L,k)=>{const v=L.vitals[s.k].span;if(v===null)return;const c=el('circle',{cx:x(H[k].y),cy:yy(v),r:4,fill:s.css,stroke:cssVar('--surface'),'stroke-width':2},f.svg);hover(c,`${s.name}, born ${L.born}: median ${v} y`);});
+  const last=pts[pts.length-1];txt(f.svg,last[0]+8,last[1]+4,s.name+(s.k==='t'?' (ends here)':''),'lbl');});
+ legend(f.box,SC.map(s=>({n:s.name,c:s.css})));}
+
+/* =========================== NAV + INIT =========================== */
+(function(){const links=$$('.rail a');const ids=links.map(a=>a.getAttribute('href').slice(1));
+ const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-30% 0px -60% 0px'});
+ ids.forEach(id=>{const n=document.getElementById(id);if(n)io.observe(n);});})();
+buildLives();
+function drawAll(){drawMirror();drawSpan();updateScenario();drawSmalls();drawMedia();drawSurvival();drawCost();drawVolume();drawReset();drawReach();drawKnow();if(window.__stars)window.__stars();}
+drawAll();
+if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);}
+</script>
+
+</body>
+</html>

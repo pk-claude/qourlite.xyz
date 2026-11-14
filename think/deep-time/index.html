@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only dark">
+<title>Deep Time Atlas -- Qourlite Think QT-0926</title>
+<meta name="description" content="13.8 billion years folded onto one screen: 112 scientific records, three Escher folds, and a Blender-rendered plate built from the same data.">
+<style>
+  html,body{margin:0;height:100%;background:#0B0A12;overflow:hidden}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:#0B0A12}
+  noscript a{color:#C99552;font:14px monospace;position:fixed;top:40%;left:0;right:0;text-align:center}
+</style>
+</head>
+<body>
+<!-- The atlas is a 612 KB single file served from its own Vercel project (deep-time-atlas).
+     This page frames it so it lives at qourlite.xyz/think/deep-time/. Deep links (#skip&e=...) pass through. -->
+<iframe id="atlas" title="Deep Time Atlas" allow="fullscreen" src="https://deep-time-atlas.vercel.app/"></iframe>
+<noscript><a href="https://deep-time-atlas.vercel.app/">Open the Deep Time Atlas</a></noscript>
+<script>
+  var f = document.getElementById('atlas');
+  if (location.hash) f.src = 'https://deep-time-atlas.vercel.app/' + location.hash;
+  f.addEventListener('load', function(){ try { f.contentWindow.focus(); } catch (e) {} });
+</script>
+</body>
+</html>
