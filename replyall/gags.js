@@ -14,7 +14,8 @@
     {id: 'training', label: 'Mandatory training', hint: 'Module 1 of 47: Breathing at your desk.', ms: 6400},
     {id: 'wifi', label: 'Wifi down', hint: 'Buffering wheel over everything.', ms: 5600},
     {id: 'printer', label: 'Printer jam', hint: 'Paper jam in a tray that does not exist.', ms: 6000},
-    {id: 'share', label: 'Wrong screen shared', hint: 'Everyone sees your tabs. All of them.', ms: 6200}
+    {id: 'share', label: 'Wrong screen shared', hint: 'Everyone sees your tabs. All of them.', ms: 6200},
+    {id: 'mic', label: 'Not on mute', hint: 'Live captions of what nobody meant to say.', ms: 6400}
   ];
   var BY = {}; LIST.forEach(function (g) { BY[g.id] = g; });
   var api = {list: LIST.map(function (g) { return {id: g.id, label: g.label, hint: g.hint}; }), play: function () { return false; }, playing: function () { return null; }};
@@ -201,14 +202,14 @@
     '.g-wifi p{font-size:2.5cqw;font-weight:800;color:#ffe14d;margin:1.6cqh 0 0;min-height:3.4cqw}',
     '.g-wifi .frozen{position:absolute;left:2.4cqw;top:3cqh;font:800 1.5cqw var(--gm);letter-spacing:.14em;text-transform:uppercase;background:#e5263a;color:#fff;padding:.8cqh 1.2cqw;border-radius:.6cqw;animation:ggblink 1s infinite}',
     '.g-printer{background:radial-gradient(70cqw 70cqh at 50% 40%,#2b2768,#0a0a1f 75%)}',
-    '.g-printer .pr{position:relative;width:40cqw;height:24cqh;margin-top:-6cqh;border-radius:2cqw 2cqw 1.2cqw 1.2cqw;background:linear-gradient(180deg,#e9e4d8,#bdb6a6);border:.5cqw solid #0a0a1f;box-shadow:0 1.6cqh 0 rgba(0,0,0,.45);animation:ggpop .4s cubic-bezier(.3,1.5,.5,1),ggshake .18s .5s 14}',
+    '.g-printer .pr{position:relative;width:40cqw;height:24cqh;margin-top:-6cqh;border-radius:2cqw 2cqw 1.2cqw 1.2cqw;background:linear-gradient(180deg,#e9e4d8,#bdb6a6);border:.5cqw solid #0a0a1f;box-shadow:0 1.6cqh 0 rgba(0,0,0,.45);animation:ggpop .4s cubic-bezier(.3,1.5,.5,1),ggprshake .18s .5s 14}',
     '.g-printer .slot{position:absolute;left:12%;right:12%;top:30%;height:1.4cqh;border-radius:1cqw;background:#0a0a1f}',
     '.g-printer .lcd{position:absolute;right:6%;bottom:14%;width:46%;padding:1cqh 1cqw;border-radius:.6cqw;background:#13341f;color:#7dff9a;font:800 1.35cqw/1.25 var(--gm);text-align:left;letter-spacing:.06em;text-transform:uppercase;min-height:6.4cqh}',
     '.g-printer .led{position:absolute;left:8%;bottom:20%;width:2.2cqw;height:2.2cqw;border-radius:50%;background:#e5263a;box-shadow:0 0 2cqw #e5263a;animation:ggblink .5s infinite}',
     '.g-printer .sheet{position:absolute;left:50%;top:31%;width:24cqw;height:30cqh;margin-left:-12cqw;background:#fff8ea;border:.25cqw solid #0a0a1f;border-radius:.4cqw;z-index:-1;animation:ggsheet 1.1s cubic-bezier(.3,.7,.4,1) both}',
     '.g-printer .sheet:before{content:\'\';position:absolute;left:12%;right:12%;top:14%;height:40%;background:repeating-linear-gradient(180deg,rgba(10,10,31,.35) 0 .5cqh,transparent .5cqh 2cqh)}',
     '@keyframes ggsheet{0%{transform:translateY(6cqh);opacity:0}15%{transform:translateY(0) rotate(0);opacity:1}to{transform:translate(var(--dx),-52cqh) rotate(var(--dr));opacity:.95}}',
-    '@keyframes ggshake{50%{transform:translateX(.6cqw) rotate(.4deg)}}',
+    '@keyframes ggprshake{50%{transform:translateX(.6cqw) rotate(.4deg)}}',
     '.g-printer h1{font-family:var(--gd);font-weight:400;font-size:7.4cqw;line-height:1;margin:5cqh 0 0}',
     '.g-printer p{font-size:2.4cqw;font-weight:800;color:#ffe14d;margin:1.4cqh 0 0;min-height:3.2cqw}',
     '.g-share{background:#0a0a1f;padding:5cqh 5cqw 0}',
@@ -222,7 +223,20 @@
     '.g-share .url{margin:1.4cqh 1.6cqw;padding:1cqh 1.4cqw;border-radius:99px;background:#ece6d8;font:700 1.4cqw var(--gm)}',
     '.g-share .doc{margin:0;padding:1cqh 3cqw 1cqh 6.5cqw;font-size:2.4cqw;font-weight:800;line-height:1.5}',
     '.g-share .doc li{animation:ggup .35s backwards}',
-    '.g-share .cur{position:absolute;width:3cqw;height:3cqw;left:50%;top:60%;transition:left .5s cubic-bezier(.5,0,.3,1),top .5s cubic-bezier(.5,0,.3,1);z-index:3}'
+    '.g-share .cur{position:absolute;width:3cqw;height:3cqw;left:50%;top:60%;transition:left .5s cubic-bezier(.5,0,.3,1),top .5s cubic-bezier(.5,0,.3,1);z-index:3}',
+    '.g-mic{background:radial-gradient(70cqw 70cqh at 50% 38%,#3a1030,#0a0a1f 75%);justify-content:flex-start;padding-top:7cqh}',
+    '.g-mic .live{display:inline-flex;align-items:center;gap:1.2cqw;padding:1.2cqh 2.4cqw;border-radius:99px;background:#e5263a;font:800 2cqw var(--gm);letter-spacing:.14em;text-transform:uppercase;animation:ggpop .4s cubic-bezier(.3,1.5,.5,1)}',
+    '.g-mic .live i{width:1.4cqw;height:1.4cqw;border-radius:50%;background:#fff;animation:ggblink .6s infinite}',
+    '.g-mic .mic{position:relative;width:14cqw;height:14cqw;margin:4cqh auto 0;border-radius:50%;background:#fff8ea;border:.5cqw solid #0a0a1f;animation:ggpop .45s .15s cubic-bezier(.3,1.5,.5,1) both,ggmicring 1.1s .6s infinite}',
+    '.g-mic .mic svg{position:absolute;inset:18%}',
+    '@keyframes ggmicring{0%{box-shadow:0 0 0 0 rgba(229,38,58,.8)}100%{box-shadow:0 0 0 6cqw rgba(229,38,58,0)}}',
+    '.g-mic h1{font-family:var(--gd);font-weight:400;font-size:6.6cqw;line-height:1;margin:3.4cqh 0 0}',
+    '.g-mic .cc{width:72cqw;margin:3cqh auto 0;padding:1.6cqh 2cqw;border-radius:1cqw;background:rgba(0,0,0,.72);text-align:left;min-height:15cqh}',
+    '.g-mic .cc small{display:block;font:800 1.3cqw var(--gm);letter-spacing:.14em;color:#ffe14d;text-transform:uppercase;margin-bottom:.6cqh}',
+    '.g-mic .cc p{margin:0;font:700 2.5cqw/1.35 var(--gm);color:#fff8ea;animation:ggcc .3s backwards}',
+    '@keyframes ggcc{from{transform:translateY(1.6cqh);opacity:0}}',
+    '.g-mic .muted{position:absolute;left:50%;top:44%;margin-left:-28cqw;width:56cqw;white-space:nowrap;padding:1.6cqh 0;border:.6cqw solid #e5263a;border-radius:1cqw;color:#e5263a;background:rgba(255,248,234,.94);font:400 4.8cqw/1 var(--gd);opacity:0}',
+    '.g-mic .muted.on{opacity:1;animation:ggstamp .5s cubic-bezier(.3,1.4,.5,1) forwards}'
   ].join('\n');
 
   var root = null, timers = [], current = null, endT = null, teams = null;
@@ -323,6 +337,15 @@
       at(1600, function () { lcd.innerHTML = 'Tray 7<br>does not exist'; });
       at(2700, function () { lcd.innerHTML = 'Printing copy<br>3 of 412'; p.textContent = 'Q3 deck FINAL v9 (actual final), double-sided.'; });
       at(4300, function () { lcd.innerHTML = 'Toner low<br>since 2017'; });
+    },
+    mic: function () {
+      root.innerHTML = '<div class="gg g-mic"><div class="live"><i></i>Your microphone is on</div>' +
+        '<div class="mic"><svg viewBox="0 0 40 40"><rect x="14" y="4" width="12" height="21" rx="6" fill="#e5263a" stroke="#0a0a1f" stroke-width="2.4"/><path d="M9 19a11 11 0 0 0 22 0M20 30v6M13 36h14" fill="none" stroke="#0a0a1f" stroke-width="2.6" stroke-linecap="round"/></svg></div>' +
+        '<h1>YOU ARE NOT ON MUTE</h1><div class="cc"><small>Live captions (auto-generated, unfortunately accurate)</small><div class="ln"></div></div>' +
+        '<div class="muted">MUTED. TOO LATE.</div>' + chip('Transcript saved. And emailed. To everyone.', 4300) + '</div>';
+      var ln = q('.ln'), lines = ['...is this still going?', 'I have been nodding for forty minutes.', 'Wait. Why is the little light red?', '...hello? Can everyone hear me? Oh no.'];
+      lines.forEach(function (t, k) { at(700 + k * 900, function () { ln.innerHTML = '<p>' + esc(t) + '</p>'; }); });
+      at(4300, function () { q('.muted').classList.add('on'); });
     },
     share: function () {
       var tabs = ['Q3 deck FINAL v9', 'How to look busy - Search', 'Is it Friday yet', 'Fantasy league: my team', 'Recipes I will not cook', 'Draft: reply all to everyone', 'Chip, AI intern (unpaid)'];
