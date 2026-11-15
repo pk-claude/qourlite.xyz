@@ -338,14 +338,14 @@ const isDup = i => { const a = norm(S.la[0][i].t), b = norm(S.la[1][i].t); retur
 const itemsLine = () => 'For the minutes: I logged ' + S.items + ' action item' + (S.items === 1 ? '' : 's') + ' today. I will follow up on none of them.';
 
 // A double-click on Next (or a run-of-show button) must not skip a step: the button under the mouse changes after the first click.
-let lastScene = 0;
+let lastScene = 0, closeN = 0, openedAt = 0;
 const gate = () => { const n = Date.now(); if (n - lastScene < 600) return false; lastScene = n; return true; };
 const A = {
   open() { if (alive() && !confirm('The audience screen is already open and connected. Open a second one?')) return; win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
-  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; up({clear: 1}); },
+  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; up({clear: 1}); },
   next() { resumed = false; const n = nextStep(); if (n) n[1](); },
-  phase(p) { if (S.phase === p || !gate() || !leaveOk()) return; snap(); S.back = p === 'title' && S.phase !== 'winner' ? S.phase : null; S.phase = p; S.buzzOpen = false; up(); },
-  back() { if (!gate()) return; snap(); S.phase = S.back; S.back = null; up(); },
+  phase(p) { if (S.phase === p || !gate() || !leaveOk()) return; snap(); clearLater(); S.back = p === 'title' && S.phase !== 'winner' ? S.phase : null; S.phase = p; S.buzzOpen = false; up(); },   // follow-ups still queued for the old scene (takeover card, winner reveal) must not land on this one
+  back() { if (!gate()) return; snap(); clearLater(); S.phase = S.back; S.back = null; up(); },
   join() { S.join = !S.join; up(); },
   rx() { S.rx = !S.rx; up(); },
   hello() { chipLine('hello', true); },
@@ -355,8 +355,9 @@ const A = {
     cards.push(['Agenda item ' + (i + 1), 'ROUND ' + (i + 1), MODE(G.rounds[i].mult)]); up({cards}); later(() => chipLine('round'), cards.length * 2400 + 300); },
   showQ() { S.showQ = !S.showQ; up(); },
   read() { const r = cur(); S.showQ = true; up(); speak(r.id, r.q); },
-  async buzzOpen() { S.buzz = null; S.buzzPid = null; armed = false; S.buzzOpen = true; S.showQ = true; up(); if (document.activeElement) document.activeElement.blur(); await pollPhones(false); armed = true; },
-  buzzClear() { S.buzz = null; S.buzzPid = null; S.buzzOpen = false; up(); },
+  async buzzOpen() { openedAt = Date.now(); S.buzz = null; S.buzzPid = null; armed = false; S.buzzOpen = true; S.showQ = true; up(); if (document.activeElement) document.activeElement.blur(); await pollPhones(false); armed = true; },
+  buzzClear() { if (Date.now() - openedAt < 500) return;   // the second half of a double-click on Open buzzers lands on Close buzzers
+    S.buzz = null; S.buzzPid = null; S.buzzOpen = false; up(); },
   control(i) { snap(); S.control = i; S.buzz = null; up(); },
   // Click an answer to reveal it. Click it again to hide it (a misclick costs nothing).
   reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
@@ -390,9 +391,12 @@ const A = {
   sprep() { if (!gate() || !leaveOk()) return; snap(); const cards = standings(3); S.survey = {n: Date.now().toString(36), q: G.room[0], st: 'ready', count: 0, groups: null}; S.phase = 'survey'; S.buzzOpen = false; answers = []; note = ''; clearLater(); SFX.theme(true);
     cards.push(['Agenda item 4 / triple budget', 'YOU SAID', 'This one is about you']); up({cards}); later(() => chipLine('survey', true), cards.length * 2400 + 300); },
   sq(v) { S.survey.q = v; const el = document.getElementById('sq'); if (el && el.value !== v) el.value = v; },
-  sopen() { if (!S.survey.q.trim()) return; snap(); Object.assign(S.survey, {n: Date.now().toString(36), q: S.survey.q.trim(), st: 'open', count: 0, groups: null}); answers = []; note = ''; up(); },
-  async sclose() { snap(); polling = false; await pollPhones(false); S.survey.st = 'closed'; busy = true; up(); const g = await cluster(S.survey.q, answers); busy = false; if (S.phase !== 'survey' || S.survey.st !== 'closed') return; S.survey.groups = g; up(); },
-  sreopen() { snap(); S.survey.st = 'open'; S.survey.groups = null; up(); },
+  sopen() { if (S.survey.st !== 'ready' || !S.survey.q.trim()) return; lastScene = Date.now(); snap(); Object.assign(S.survey, {n: Date.now().toString(36), q: S.survey.q.trim(), st: 'open', count: 0, groups: null}); answers = []; note = ''; up(); },
+  // Close and count sits where Open the survey was, so the second half of a double-click must not close it. A repeated or undone close drops the older count.
+  async sclose() { if (!S.survey || S.survey.st !== 'open' || !gate()) return; const n = ++closeN, v = S.survey.n; snap(); polling = false; await pollPhones(false);
+    if (n !== closeN || S.phase !== 'survey' || S.survey.n !== v || S.survey.st !== 'open') return; S.survey.st = 'closed'; busy = true; up();
+    const g = await cluster(S.survey.q, answers); if (n !== closeN) return; busy = false; if (S.phase !== 'survey' || S.survey.n !== v || S.survey.st !== 'closed') return; S.survey.groups = g; up(); },
+  sreopen() { snap(); closeN++; S.survey.st = 'open'; S.survey.groups = null; up(); },
   sedit(i, f, v) { S.survey.groups[i][f] = f === 'count' ? Math.max(0, Math.floor(Number(v)) || 0) : v; push(); },
   sdel(i) { snap(); S.survey.groups.splice(i, 1); up(); },
   smerge(i) { snap(); const g = S.survey.groups; g[i - 1].count += g[i].count; g.splice(i, 1); up(); },
@@ -403,7 +407,8 @@ const A = {
     S.custom = {id: 'you', q: S.survey.q, mult: 3, n: S.survey.count, a: g.map(x => [x.label.trim().slice(0, 24), Math.max(1, Math.round(100 * x.count / total)), '', ''])};
     S.useCustom = true; resetRound(); S.phase = 'round'; SFX.theme(true); up({cards: [['You said', 'THE ROOM HAS SPOKEN', S.survey.count + ' answers / triple budget']]}); later(() => chipLine('round'), 2700); },
   // final round
-  lset(i) { snap(); S.li = Number(i); S.la = blankLa(); S.lp = 0; S.lq = null; S.lend = null; S.hideP1 = false; S.lreset++; A.tstop(); S.timer = 20; up(); },
+  lset(i) { snap(); S.la.forEach((row, p) => row.forEach(c => { if (c.sp) S.teams[p].score -= Number(c.p) || 0; }));   // points already revealed leave the team scores with their answers
+    S.li = Number(i); S.la = blankLa(); S.lp = 0; S.lq = null; S.lend = null; S.hideP1 = false; S.lreset++; A.tstop(); S.timer = 20; up(); },
   lstart() { if (!gate() || !leaveOk()) return; snap(); S.phase = 'lightning'; S.buzzOpen = false; clearLater(); SFX.theme(true); up({cards: [['Final round', 'THE 4:59 FRIDAY RUSH', 'One player per team. Every point counts for your team.', 3400]]}); },
   lplayer(p) { snap(); S.lp = p; A.tstop(); S.timer = p ? 25 : 20; S.hideP1 = p === 1; S.lq = null; up(); },
   lhide() { S.hideP1 = !S.hideP1; up(); },
@@ -512,7 +517,7 @@ const R = {
     const old = S; clearLater(); A.tstop(); stopVoice(); SFX.stop(); gagClose();
     REH = {keep: JSON.stringify(S), hist: hist.splice(0), said, pending, note, chipLast, answers, resumed, t: null, i: 0, label: 'Lobby', msgs: [], lend: 0, steps: []};
     S = fresh(); S.teams.forEach((t, i) => t.name = old.teams[i].name); S.allowed = Object.assign({}, old.allowed); S.rx = old.rx; S.sid = old.sid; S.joinUrl = old.joinUrl;
-    said = ''; pending = null; note = ''; answers = []; resumed = false; busy = false;
+    said = ''; pending = null; note = ''; answers = []; resumed = false; busy = false; closeN++;
     REH.steps = rehScript(); SFX.theme(); up({clear: 1}); REH.t = setTimeout(rehRun, 1500);
   },
   // Also runs when the demo reaches its end. Everything the demo started is cut off and the real game is put back.
@@ -555,7 +560,7 @@ function render() {
     ${STEPS.map((s, i) => `<button class="${s[0] === now ? 'cur' : i < at ? 'done' : ''}" onclick="${s[2]}" ${s[0] === 'you' && !ONLINE ? 'disabled' : ''}><i>${i < at ? '&#10003;' : i + 1}</i><span>${s[1]}</span></button>` +
       (s[0] === 'you' ? `<button class="sub ${now === 'r3' ? 'cur' : ''}" onclick="A.round(3)">or Round 4 backup</button>` : '')).join('')}
     <div class="cap">Spare rounds</div>
-    <select onchange="A.round(this.value)" aria-label="Spare rounds"><option value="">Pick a spare...</option>${spareOpts(now)}</select>
+    <select onchange="if(this.value)A.round(this.value);render()" aria-label="Spare rounds"><option value="">Pick a spare...</option>${spareOpts(now)}</select>
     <div class="grow"></div>
     <button id="aud" class="util ${alive() ? 'live' : 'need'}" onclick="A.open()">${alive() ? 'Big screen connected' : 'Open big screen'}</button>
     <button id="thinkBtn" class="util ${SFX.thinking() ? 'on' : ''}" onclick="SFX.think(!SFX.thinking());thinkLight()">${SFX.thinking() ? 'Thinking music: on' : 'Thinking music'}</button>
