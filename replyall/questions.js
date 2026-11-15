@@ -122,7 +122,11 @@ window.GAME = {
     "One word for a meeting that runs over.",
     "In one or two words: what does 'per our conversation' really mean?",
     "In one or two words: name the team group chat.",
-    "In one or two words: what does 'thoughts?' at the end of an email mean?"
+    "In one or two words: what does 'thoughts?' at the end of an email mean?",
+    "In one or two words: what does 'just checking in' really mean?",
+    "In one or two words: describe the last week of the quarter.",
+    "One word for the shared spreadsheet everyone edits.",
+    "In one or two words: rename the expense report."
   ],
 
   // FINAL ROUND ("The 4:59 Friday Rush"). Two sets. Each set must have exactly 5 questions.
@@ -147,6 +151,13 @@ window.GAME = {
       { id: "c3", q: "Name something people bring to the office kitchen that annoys everyone.", a: [["Fish", 40], ["Popcorn", 20], ["Dirty dishes", 16], ["Old leftovers", 12], ["Broccoli", 7], ["Eggs", 5]] },
       { id: "c4", q: "Name a reason people give for being late to a meeting.", a: [["Last meeting ran over", 36], ["Traffic", 22], ["Tech issues", 18], ["Could not find the room", 12], ["Wrong link", 7], ["Coffee", 5]] },
       { id: "c5", q: "Name something people put on their desk to look important.", a: [["A second monitor", 28], ["Awards", 22], ["A big plant", 17], ["Stacks of paper", 14], ["Books", 11], ["A name plate", 8]] }
+    ] },
+    { name: "Set D", qs: [
+      { id: "d1", q: "Name something people say to end a call that is running long.", a: [["I have a hard stop", 32], ["Let's take it offline", 22], ["I'll let you go", 17], ["My next meeting is starting", 13], ["Let's circle back", 10], ["You're breaking up", 6]] },
+      { id: "d2", q: "Name something that is always 'in the budget for next year'.", a: [["Raises", 30], ["New laptops", 22], ["The team offsite", 17], ["More hires", 14], ["Better coffee", 10], ["Training", 7]] },
+      { id: "d3", q: "Name a word people add to an email to sound polite but annoyed.", a: [["Kindly", 34], ["Just", 22], ["Gentle", 16], ["Again", 12], ["Per", 10], ["Thoughts?", 6]] },
+      { id: "d4", q: "Name something people do the moment a meeting gets cancelled.", a: [["Celebrate", 30], ["Get a snack", 22], ["Answer emails", 17], ["Take a nap", 13], ["Leave early", 11], ["Book another meeting", 7]] },
+      { id: "d5", q: "Name something on every expense report.", a: [["Coffee", 28], ["Taxi", 24], ["Hotel", 18], ["Lunch", 14], ["Parking", 10], ["A missing receipt", 6]] }
     ] }
   ],
 
