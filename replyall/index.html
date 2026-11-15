@@ -338,11 +338,11 @@ const isDup = i => { const a = norm(S.la[0][i].t), b = norm(S.la[1][i].t); retur
 const itemsLine = () => 'For the minutes: I logged ' + S.items + ' action item' + (S.items === 1 ? '' : 's') + ' today. I will follow up on none of them.';
 
 // A double-click on Next (or a run-of-show button) must not skip a step: the button under the mouse changes after the first click.
-let lastScene = 0, closeN = 0, openedAt = 0;
+let lastScene = 0, closeN = 0, openedAt = 0, struckAt = 0;
 const gate = () => { const n = Date.now(); if (n - lastScene < 600) return false; lastScene = n; return true; };
 const A = {
   open() { if (alive() && !confirm('The audience screen is already open and connected. Open a second one?')) return; win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
-  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; up({clear: 1}); },
+  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; struckAt = 0; up({clear: 1}); },
   next() { resumed = false; const n = nextStep(); if (n) n[1](); },
   phase(p) { if (S.phase === p || !gate() || !leaveOk()) return; snap(); clearLater(); S.back = p === 'title' && S.phase !== 'winner' ? S.phase : null; S.phase = p; S.buzzOpen = false; up(); },   // follow-ups still queued for the old scene (takeover card, winner reveal) must not land on this one
   back() { if (!gate()) return; snap(); clearLater(); S.phase = S.back; S.back = null; up(); },
@@ -365,7 +365,8 @@ const A = {
     S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (i === 0) SFX.top(); else SFX.reveal(i); up();
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
-  strike() { if (S.strikes >= 3 || S.phase !== 'round') return; snap(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; SFX.strike(); const a = said; said = '';
+  strike() { if (S.strikes >= 3 || S.phase !== 'round' || Date.now() - struckAt < 450) return; struckAt = Date.now(); snap();   // a double-click is one strike, not two
+    S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; SFX.strike(); const a = said; said = '';
     const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },

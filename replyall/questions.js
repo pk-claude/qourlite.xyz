@@ -98,7 +98,13 @@ window.GAME = {
     "In one or two words: rename the Monday morning meeting.",
     "One word that should be banned from every meeting.",
     "In one or two words: what does 'quick sync' really mean?",
-    "In one or two words: give the office printer a job title."
+    "In one or two words: give the office printer a job title.",
+    "In one or two words: what does 'let's take this offline' really mean?",
+    "In one or two words: describe the office coffee.",
+    "One word for a meeting that runs over.",
+    "In one or two words: what does 'per our conversation' really mean?",
+    "In one or two words: name the team group chat.",
+    "In one or two words: what does 'thoughts?' at the end of an email mean?"
   ],
 
   // FINAL ROUND ("The 4:59 Friday Rush"). Two sets. Each set must have exactly 5 questions.
@@ -116,6 +122,13 @@ window.GAME = {
       { id: "b3", q: "Name something that breaks only when you are presenting.", a: [["Screen share", 30], ["Wi-Fi", 24], ["Projector", 18], ["Clicker", 11], ["Microphone", 10], ["The demo", 7]] },
       { id: "b4", q: "Name something in every out-of-office reply.", a: [["Limited email access", 34], ["A return date", 26], ["Ask someone else", 18], ["On vacation", 12], ["Sorry for the delay", 6], ["A palm tree", 4]] },
       { id: "b5", q: "Name something a reorg always changes.", a: [["Your boss", 34], ["The org chart", 22], ["The team name", 16], ["Your desk", 12], ["Job titles", 10], ["Nothing", 6]] }
+    ] },
+    { name: "Set C", qs: [
+      { id: "c1", q: "Name something people do during a meeting instead of listening.", a: [["Answer emails", 32], ["Check their phone", 24], ["Online shopping", 15], ["Doodle", 12], ["Eat lunch", 10], ["Plan the weekend", 7]] },
+      { id: "c2", q: "Name a word that appears in every job posting.", a: [["Fast-paced", 30], ["Team player", 24], ["Self-starter", 17], ["Passionate", 13], ["Dynamic", 9], ["Rockstar", 7]] },
+      { id: "c3", q: "Name something people bring to the office kitchen that annoys everyone.", a: [["Fish", 40], ["Popcorn", 20], ["Dirty dishes", 16], ["Old leftovers", 12], ["Broccoli", 7], ["Eggs", 5]] },
+      { id: "c4", q: "Name a reason people give for being late to a meeting.", a: [["Last meeting ran over", 36], ["Traffic", 22], ["Tech issues", 18], ["Could not find the room", 12], ["Wrong link", 7], ["Coffee", 5]] },
+      { id: "c5", q: "Name something people put on their desk to look important.", a: [["A second monitor", 28], ["Awards", 22], ["A big plant", 17], ["Stacks of paper", 14], ["Books", 11], ["A name plate", 8]] }
     ] }
   ],
 
