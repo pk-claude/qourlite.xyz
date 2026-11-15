@@ -70,6 +70,9 @@ main{display:flex;flex-direction:column;min-width:0;height:100vh}
 .card p{margin:8px 0}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .row+.row{margin-top:8px}
+.vol{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
+.vol input{flex:1;min-width:0;accent-color:var(--violet)}
+.vol b{flex:none;width:40px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 .status{display:block;text-align:center;font-weight:700;padding:6px 9px;border-radius:8px;background:#f1eff8;margin-top:8px}
 .status.hot{background:var(--pink);color:#fff}
 .status.warn{background:#fff3c4}
@@ -456,6 +459,13 @@ function phonesHtml(full) {
 }
 function setPhones() { const el = document.getElementById('phonesBox'); if (!el) return; const h = phonesHtml(el.dataset.full === '1'); if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } }
 let more = false;
+// Spare menu: rounds 5 and up, grouped by their pack (in file order), with the question cut short so the list stays readable.
+function shortQ(q) { q = String(q || '').replace(/^Name /, ''); q = q.charAt(0).toUpperCase() + q.slice(1); if (q.length <= 52) return q; const c = q.slice(0, 50), k = c.lastIndexOf(' '); return (k > 30 ? c.slice(0, k) : c).replace(/[\s,.:;'-]+$/, '') + '...'; }
+function spareOpts(now) { const groups = [];
+  G.rounds.forEach((x, i) => { if (i < 4) return; const name = x.pack || 'Spares'; let g = groups.find(y => y[0] === name); if (!g) groups.push(g = [name, '']);
+    g[1] += `<option value="${i}" title="${esc(x.q)}" ${now === 'spare' && S.ri === i ? 'selected' : ''}>${i + 1}. ${esc(shortQ(x.q))}</option>`; });
+  return groups.map(g => `<optgroup label="${esc(g[0])}">${g[1]}</optgroup>`).join(''); }
+function setVol(v) { const n = SFX.volume(Number(v) / 100), el = document.getElementById('volPct'); if (el) el.textContent = Math.round(n * 100) + '%'; }
 function stepNow() { const p = S.phase; return p === 'title' ? 'title' : p === 'survey' ? 'you' : p === 'lightning' ? 'final' : p === 'winner' ? 'winner' : S.useCustom ? 'you' : S.ri < 3 ? 'r' + S.ri : S.ri === 3 ? 'r3' : 'spare'; }
 const STEPS = [['title', 'Setup', "A.phase('title')"], ['r0', 'Round 1', 'A.round(0)'], ['r1', 'Round 2', 'A.round(1)'], ['r2', 'Round 3 <span class="muted">x2</span>', 'A.round(2)'], ['you', 'You said <span class="muted">x3</span>', 'A.sprep()'], ['final', 'Final round', 'A.lstart()'], ['winner', 'Winner', 'A.winner()']];
 
@@ -469,7 +479,7 @@ function render() {
     ${STEPS.map((s, i) => `<button class="${s[0] === now ? 'cur' : i < at ? 'done' : ''}" onclick="${s[2]}" ${s[0] === 'you' && !ONLINE ? 'disabled' : ''}><i>${i < at ? '&#10003;' : i + 1}</i><span>${s[1]}</span></button>` +
       (s[0] === 'you' ? `<button class="sub ${now === 'r3' ? 'cur' : ''}" onclick="A.round(3)">or Round 4 backup</button>` : '')).join('')}
     <div class="cap">Spare rounds</div>
-    <select onchange="A.round(this.value)" aria-label="Spare rounds"><option value="">Pick a spare...</option>${G.rounds.map((x, i) => i < 4 ? '' : `<option value="${i}" ${now === 'spare' && S.ri === i ? 'selected' : ''}>${i + 1}. ${esc(x.q)}</option>`).join('')}</select>
+    <select onchange="A.round(this.value)" aria-label="Spare rounds"><option value="">Pick a spare...</option>${spareOpts(now)}</select>
     <div class="grow"></div>
     <button id="aud" class="util ${alive() ? 'live' : 'need'}" onclick="A.open()">${alive() ? 'Big screen connected' : 'Open big screen'}</button>
     <button id="thinkBtn" class="util ${SFX.thinking() ? 'on' : ''}" onclick="SFX.think(!SFX.thinking());thinkLight()">${SFX.thinking() ? 'Thinking music: on' : 'Thinking music'}</button>
@@ -489,6 +499,7 @@ function render() {
         <p class="muted">The button at the bottom left turns green when both windows are linked. They relink by themselves after a refresh.</p></div>
       <div class="card"><h2><b>2</b>Sound and Chip</h2>
         <div class="row"><button onclick="SFX.theme()">Test sound</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
+        <label class="vol" title="Volume of the music and sound effects"><span aria-hidden="true">&#x1F50A;</span> Volume <input type="range" min="0" max="100" step="5" value="${Math.round(SFX.volume() * 100)}" oninput="setVol(this.value)" aria-label="Volume"><b id="volPct">${Math.round(SFX.volume() * 100)}%</b></label>
         <p><label>Voice <select onchange="setPref('voice',this.value)" style="max-width:100%"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></p>
         <p><label>Chip speaks out loud <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Big moments</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label></p>
         <p class="muted">Keys in a round: <kbd>1</kbd>-<kbd>8</kbd> reveal, <kbd>X</kbd> strike. In the final: <kbd>Space</kbd> reveals the next item.</p></div>

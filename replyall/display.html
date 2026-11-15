@@ -504,6 +504,91 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
 .rib{position:absolute;right:-5vw;top:-4.6vh;font:400 2.5vw/1 var(--disp);font-style:normal;text-transform:uppercase;color:#fff;background:var(--red);border:.3vw solid var(--ink);padding:.9vh 1.6vw .9vh 1.2vw;transform:rotate(9deg);box-shadow:.3vw .5vh 0 var(--ink);clip-path:polygon(0 0,100% 0,calc(100% - 1vw) 50%,100% 100%,0 100%);animation:mslam .4s 4.95s backwards cubic-bezier(.2,1.5,.4,1)}
 .lat{position:absolute;left:50%;bottom:-2.4vh;transform:translateX(-50%) rotate(-3deg);font:800 1.4vw var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;background:var(--ink);color:#ff8a96;border:.2vw solid #ff8a96;border-radius:99px;padding:.3vh 1vw;animation:latin .4s 5.1s backwards cubic-bezier(.3,1.6,.5,1)}
 @keyframes latin{from{transform:translateX(-50%) scale(0);opacity:0}}
+/* pre-show lobby: while people arrive, the title steps aside into a side panel (logo, teams, the QR stays big enough to scan) and a window of "pre-meeting" office software rotates beside it. Everything moves with transform and opacity only */
+.tl>*{transition:opacity .5s,transform .5s cubic-bezier(.4,0,.2,1),visibility 0s}
+.tl.away>*:not(.storm){opacity:0;transform:scale(.92);visibility:hidden;transition:opacity .5s,transform .5s cubic-bezier(.4,0,.2,1),visibility 0s .5s}
+.tl .storm{transition:opacity .6s}.tl.away .storm{opacity:0}
+.tl.away .logo,.tl.away .nb,.tl.away .re:before{animation-play-state:paused}
+.lobby{position:absolute;inset:0;pointer-events:none}
+.lside{position:absolute;right:3vw;top:4.5vh;bottom:4.5vh;width:29vw;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;gap:1vh;text-align:center;padding:1.6vh 1.4vw;background:#14123a;border:.15vw solid rgba(255,255,255,.24);border-radius:1.6vw;opacity:0;visibility:hidden;transform:translateX(10vw);transition:opacity .5s,transform .6s cubic-bezier(.2,1.1,.3,1),visibility 0s .6s}
+.lobby.on .lside{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.llogo{position:relative;font-family:var(--disp);line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.llogo i{position:absolute;left:.2vw;top:.25vw;font-style:normal;color:rgba(108,76,255,.9)}
+.llogo b{position:relative;font-weight:400;background:linear-gradient(100deg,var(--paper) 20%,var(--yellow) 50%,var(--pink) 85%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lsub{font-size:1.05vw;color:var(--cyan)}
+.lvs{display:flex;flex-direction:column;align-items:center;gap:.5vh;max-width:100%;font-family:var(--disp);line-height:1.05}
+.lvs span{overflow-wrap:anywhere}
+.lvs em{font-style:normal;font-size:1.1vw;background:var(--pink);border-radius:99px;padding:.3vh 1vw}
+.lside .qr{width:17vw;height:17vw}
+.ljt{font-size:1.55vw;font-weight:700;line-height:1.35}
+.ljt b{color:var(--yellow);font-family:var(--mono);letter-spacing:.08em}
+.ljt .cd{font-size:2.4vw}
+.lstage{position:absolute;left:3vw;top:4.5vh;width:61.5vw;height:79vh}
+.lw{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);border-radius:1.6vw;box-shadow:0 2vh 0 rgba(10,10,31,.4),0 0 0 .3vw rgba(255,255,255,.25);text-align:left;transition:opacity .45s,transform .55s cubic-bezier(.2,1.2,.3,1)}
+.lw.pre{opacity:0;transform:translateY(7vh) scale(.94)}
+.lw.out{opacity:0;transform:translateX(-6vw) rotate(-2deg);transition:opacity .4s,transform .45s cubic-bezier(.6,0,.9,.4)}
+.lw .ibar{flex:none}.lw .ibar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lw .ibar em{font-style:normal;opacity:.65;white-space:nowrap}
+.lb{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.6vh;padding:3vh 3vw}
+.lb h2{font-family:var(--disp);font-weight:400;font-size:3.7vw;line-height:1.04;margin:0}
+.lfo{margin-top:auto;font:800 1.3vw var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(10,10,31,.6)}
+.lhid{opacity:0;transition:opacity .5s}.lhid.on{opacity:1}
+.lag{list-style:none;margin:.6vh 0 0;padding:0;display:flex;flex-direction:column;gap:1.5vh}
+.lag li{position:relative;display:flex;align-items:center;gap:1.6vw;font-size:2.7vw;font-weight:900;line-height:1.1;padding:1.6vh 1.4vw;border-radius:1vw;background:#fff;border:.15vw solid rgba(10,10,31,.12)}
+.lag li>i{flex:none;width:3.2vw;height:3.2vw;border:.3vw solid var(--ink);border-radius:.7vw;display:flex;align-items:center;justify-content:center;font-style:normal}
+.lag svg{width:2.1vw;height:2.1vw;opacity:0}.lag path{fill:none;stroke:var(--ink);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.lag small{font-size:1.9vw;font-weight:700;color:rgba(10,10,31,.6);margin-left:.5vw}
+.lag li.ok>i{background:var(--cyan)}.lag li.ok svg{opacity:1;animation:pop .4s cubic-bezier(.3,1.7,.5,1)}
+.lag li.ok>span{opacity:.6}
+.lag .lst{position:absolute;right:1.4vw;top:50%;margin-top:-2.4vh;font:400 1.5vw/1 var(--disp);text-transform:uppercase;color:var(--yellow);background:var(--ink);border:.3vw solid var(--yellow);border-radius:.7vw;padding:1vh 1vw;rotate:-5deg;opacity:0}
+.lag li.pend .lst{opacity:1;animation:mslam .4s cubic-bezier(.2,1.5,.4,1)}
+.lpo{display:flex;flex-direction:column;gap:2vh;margin-top:.6vh}
+.lpr{display:grid;grid-template-columns:18vw 1fr 7.5vw;align-items:center;gap:1.2vw;font-size:2.1vw;font-weight:900;line-height:1.05}
+.lpr u{display:block;height:6vh;border-radius:.7vw;background:rgba(10,10,31,.08);overflow:hidden}
+.lpr u i{display:block;height:100%;background:var(--violet);transform-origin:0 50%;transform:scaleX(var(--p));animation:lgrow 1.1s var(--dl) backwards cubic-bezier(.25,1,.35,1)}
+.lpr:first-child u i{background:var(--pink)}
+.lpr b{font:400 2.9vw/1 var(--disp);text-align:right}
+@keyframes lgrow{from{transform:scaleX(0)}}
+.let{list-style:none;counter-reset:r;margin:.6vh 0 0;padding:0;display:flex;flex-direction:column;gap:1.5vh}
+.let li{counter-increment:r;display:flex;align-items:center;gap:1.4vw;font-size:2.35vw;font-weight:800;line-height:1.12;animation:lrow .45s var(--dl) backwards cubic-bezier(.2,1.2,.35,1)}
+.let li:before{content:counter(r);flex:none;width:3.8vw;height:3.8vw;border-radius:50%;background:var(--ink);color:var(--cyan);font:400 1.9vw/3.8vw var(--disp);text-align:center}
+.let mark{background:var(--yellow);color:inherit;padding:0 .4vw;border-radius:.3vw}
+@keyframes lrow{from{opacity:0;transform:translateX(-4vw)}}
+.lhr{flex:1;min-height:0;display:flex;align-items:center;gap:2.6vw}
+.lhr>i{flex:none;width:9vw;height:9vw;border-radius:50%;background:var(--violet);color:#fff;font:400 6vw/8.2vw var(--disp);text-align:center;border:.4vw solid var(--ink);box-shadow:.4vw .6vh 0 var(--pink)}
+.lhq{font-family:var(--disp);font-size:3.3vw;line-height:1.14;transition:opacity .4s,transform .4s}
+.lhq.sw{opacity:0;transform:translateY(2vh)}
+.llo{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:2.2vh}
+.llb{position:relative;height:8.5vh;border-radius:99px;background:rgba(10,10,31,.1);border:.3vw solid var(--ink);overflow:hidden}
+.llb i{position:absolute;inset:0;background:linear-gradient(90deg,var(--violet),var(--pink));transform-origin:0 50%;transform:scaleX(0);transition:transform 1.1s cubic-bezier(.3,.9,.3,1)}
+.llp{display:flex;align-items:baseline;justify-content:space-between;gap:2vw}
+.llp b{flex:none;font:400 6.4vw/1 var(--disp);color:var(--violet)}
+.llp span{font:800 1.9vw/1.25 var(--mono);text-align:right}
+.lnp{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:1.4vh;font:800 2.25vw/1.25 var(--mono);background:#fff;border:.15vw solid rgba(10,10,31,.14);border-left:.6vw solid var(--violet);border-radius:1vw;padding:2vh 2.2vw}
+.lnp div{opacity:0;transform:translateX(-2vw);transition:opacity .4s,transform .4s}
+.lnp div.on{opacity:1;transform:none}
+.lnp .c{color:rgba(10,10,31,.55)}.lnp .p{color:var(--violet)}
+.ljn{display:flex;align-items:center;gap:2vw}
+.ljn b{flex:none;font:400 9vw/.9 var(--disp);color:var(--pink)}
+.ljn span{font-size:2.6vw;font-weight:900;line-height:1.12}
+.ljn small{display:block;font-size:1.7vw;font-weight:700;color:rgba(10,10,31,.6);margin-top:.6vh}
+.ldots i{display:inline-block;width:.8vw;height:.8vw;margin-left:.35vw;border-radius:50%;background:var(--ink);opacity:.25;animation:ldot 1.2s steps(6,jump-none) infinite}
+@keyframes ldot{30%{opacity:1}60%{opacity:.25}}
+.ldots i+i{animation-delay:.2s}.ldots i+i+i{animation-delay:.4s}
+.ljl{display:flex;flex-direction:column;gap:1.2vh}
+.ljr{display:flex;align-items:center;gap:1.2vw;height:7.6vh;padding:0 1.3vw;border-radius:.9vw;background:#fff;border:.15vw solid rgba(10,10,31,.12);border-left:.6vw solid currentColor;white-space:nowrap;overflow:hidden;opacity:0;transform:translateX(6vw);transition:opacity .4s,transform .45s cubic-bezier(.2,1.3,.35,1)}
+.ljr.on{opacity:1;transform:none}
+.ljr u{flex:none;width:1.3vw;height:1.3vw;border-radius:50%;background:#1fbf6b}
+.ljr b{font-size:1.95vw;font-weight:900;color:var(--ink)}.ljr span{font-size:1.7vw;font-weight:700;color:rgba(10,10,31,.62)}
+.lw.rec{background:#0c0b24;color:var(--paper)}
+.lrc{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2vh;text-align:center;padding:0 4vw}
+.lrc>u{position:absolute;width:4vw;height:4vw;border:solid rgba(255,255,255,.75);border-width:.4vw 0 0 .4vw}
+.lrc>u:nth-of-type(1){left:0;top:0}.lrc>u:nth-of-type(2){right:0;top:0;rotate:90deg}.lrc>u:nth-of-type(3){right:0;bottom:0;rotate:180deg}.lrc>u:nth-of-type(4){left:0;bottom:0;rotate:270deg}
+.lrec{position:absolute;left:5.4vw;top:1vh;display:flex;align-items:center;gap:1vw;font:800 2.8vw/1 var(--mono);letter-spacing:.12em;color:#ff5a6c}
+.lrec i{width:2.2vw;height:2.2vw;border-radius:50%;background:var(--red);animation:caret 1.2s steps(1) infinite}
+.ltc{position:absolute;right:5.4vw;top:1vh;font:800 2.6vw/1 var(--mono);letter-spacing:.06em}
+.lbat{position:absolute;right:5.4vw;bottom:1vh;font:800 1.5vw/1 var(--mono);letter-spacing:.1em;color:#ff8a96}
+.lrl{position:absolute;left:5.4vw;bottom:1vh;font:800 1.5vw/1 var(--mono);letter-spacing:.1em;color:rgba(255,255,255,.6)}
+.lrc p{margin:0;font-size:2.5vw;font-weight:800;color:var(--yellow)}
 #joinbox{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(10,10,31,.93)}#joinbox.on{display:flex}
 .hint{position:fixed;bottom:1vh;right:1vw;font-size:1.2vw;opacity:.5;z-index:8;transition:opacity 1s}
 @media (prefers-reduced-motion:reduce){
@@ -516,6 +601,7 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
   .face .hs,.face .arc,.upb i,.dim{transition:none}
   #chip *{animation:none!important}.chp .x-w.tr{display:none!important}.chh,.chl{transition:none}
   .ks,.kb i,.kn,.kst,.kch{animation:none!important}
+  .lw *,.ldots i,.lrec i{animation:none!important}.lw,.lw.out,.lside,.tl>*,.tl.away>*:not(.storm){transition-duration:1s,0s,0s}.lw.pre,.lw.out,.lside,.tl.away>*:not(.storm),.lhq.sw,.lnp div,.ljr{transform:none}.llb i{transition:none}
   .cal8,.org,.fly{display:none}.cer .cert,.cer .meets,.cer .mst,.mr,.unr b,.lip,.stack .e2,.sort i,.sq.dr:after,.sv .ibar em:before{animation:none!important}
 }
 @keyframes rfade{0%{opacity:0}8%{opacity:1}86%{opacity:1}100%{opacity:0}}
@@ -583,12 +669,16 @@ function sceneKey() {
 }
 
 function build() {
-  let h = ''; stormStop(); cerT.splice(0).forEach(clearTimeout); svT.splice(0).forEach(clearTimeout); document.querySelectorAll('.fly').forEach(e => e.remove());
+  let h = ''; stormStop(); lobbyStop(); cerT.splice(0).forEach(clearTimeout); svT.splice(0).forEach(clearTimeout); document.querySelectorAll('.fly').forEach(e => e.remove());
   if (S.phase === 'title') {
-    h = `<div class="center${CALM ? '' : ' cold'}"><div class="storm"></div><div class="re mono">RE: RE: RE: FWD: mandatory fun</div><div class="logow"><div class="logo"><i aria-hidden="true">${esc(G.title)}</i><b>${esc(G.title)}</b></div><div class="nb">${CALM ? '9,999' : '1'}</div></div><div class="sub">${esc(G.subtitle)}</div>
+    const lt = String(G.title || ''), su = shortUrl();
+    h = `<div class="center tl${CALM ? '' : ' cold'}"><div class="storm"></div><div class="re mono">RE: RE: RE: FWD: mandatory fun</div><div class="logow"><div class="logo"><i aria-hidden="true">${esc(G.title)}</i><b>${esc(G.title)}</b></div><div class="nb">${CALM ? '9,999' : '1'}</div></div><div class="sub">${esc(G.subtitle)}</div>
       <div class="tag mono">${esc(G.tagline || '')}</div>
       <div class="vs"><span id="n0"></span><em>VS</em><span id="n1"></span></div>
-      ${S.phones ? `<div class="join">${qr(S.joinUrl)}<div>Scan to play along on your phone<br>or open <b>${esc(shortUrl())}</b><br>and enter code <b>${esc(S.sid)}</b></div></div>` : ''}</div>`;
+      ${S.phones ? `<div class="join">${qr(S.joinUrl)}<div>Scan to play along on your phone<br>or open <b>${esc(shortUrl())}</b><br>and enter code <b>${esc(S.sid)}</b></div></div>` : ''}</div>
+      <div class="lobby"><div class="lstage"></div><div class="lside"><div class="llogo" style="font-size:${Math.min(4.2, 36 / (lt.length || 1))}vw"><i aria-hidden="true">${esc(lt)}</i><b>${esc(lt)}</b></div><div class="lsub mono">Meeting starts soon(ish)</div>
+        <div class="lvs"><span id="ln0"></span><em>VS</em><span id="ln1"></span></div>
+        ${S.phones ? `${qr(S.joinUrl)}<div class="ljt">Scan to play along, or open<br><b style="font-size:${Math.min(1.55, 34 / (su.length || 1))}vw">${esc(su)}</b><br>code <b class="cd">${esc(S.sid)}</b></div>` : `<div class="ljt">${esc(G.tagline || '')}</div>`}</div></div>`;
   } else if (S.phase === 'round') {
     const r = cur();
     h = `<div class="bar">${teamHtml(0)}<div class="mid"><div><div class="mono">The budget</div><div class="pot" data-v="${S.pot}">${S.pot}</div></div><div class="rc"><div class="mono rcl">Strikes</div><div class="slots"><i>X</i><i>X</i><i>X</i></div></div></div>${teamHtml(1)}</div>
@@ -638,12 +728,12 @@ function build() {
     }
   }
   stage.innerHTML = h; stage.className = ''; void stage.offsetWidth; stage.className = 'in deal'; built = key; document.body.dataset.phase = S.phase;
-  if (S.phase === 'title') storm();
+  if (S.phase === 'title') { storm(); lobby(); }
   if (S.phase === 'survey') survSet(Math.max(0, S.survey.count | 0));
 }
 
 function sync() {
-  if (S.phase === 'title') { const len = Math.max(S.teams[0].name.length, S.teams[1].name.length); $('.vs').style.fontSize = Math.min(3.4, 48 / len) + 'vw'; [0, 1].forEach(i => { const el = $('#n' + i); if (el) el.textContent = S.teams[i].name; }); }
+  if (S.phase === 'title') { const len = Math.max(S.teams[0].name.length, S.teams[1].name.length); $('.vs').style.fontSize = Math.min(3.4, 48 / len) + 'vw'; [0, 1].forEach(i => { const el = $('#n' + i), le = $('#ln' + i), nm = S.teams[i].name; if (el) el.textContent = nm; if (le) { le.textContent = nm; le.style.fontSize = Math.max(1.2, Math.min(2.3, 34 / (nm.length || 1))) + 'vw'; } }); }
   if (S.phase === 'round') {
     [0, 1].forEach(i => { const t = $('#t' + i), tn = t.querySelector('.tn'); tn.textContent = S.teams[i].name; tn.style.fontSize = Math.max(1.15, Math.min(2.2, 31 / (S.teams[i].name.length || 1))) + 'vw'; tween(t.querySelector('.ts'), S.teams[i].score);
       t.classList.toggle('ctl', S.control === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); });
@@ -805,6 +895,67 @@ function storm() {
   }, 2600));
 }
 
+// ---------- pre-show lobby ----------
+// The title can sit for a long time while people arrive. Once the storm has settled the title steps aside into a side panel
+// (the QR never leaves the screen) and a window of pre-meeting office software rotates next to it; every full lap the big logo
+// comes back for a moment. It runs by itself, restarts on every title entry and stops the instant the phase changes.
+const LTICK = '<svg viewBox="0 0 40 40"><path d="M6 21l10 10L34 9"/></svg>';
+const LFACTS = ['The average "quick sync" lasts 47 minutes.', '9 out of 10 printers can smell fear.', '"Per my last email" is the politest known way to yell.', 'The office fridge holds a yogurt older than the intern.', '"Let us take this offline" means it will never be discussed again.', 'A meeting with no agenda expands to fill the whole calendar.', 'The mute button was invented right after the first hot mic.', 'Every shared drive has a folder called "New folder (2)". Nobody knows why.'];
+const LJOIN = ['joined the meeting', 'is connecting to audio...', 'joined (camera off, obviously)', 'is still looking for the link', 'joined from a moving vehicle', 'joined twice, somehow', 'is sharing the wrong screen', 'joined on mute. Forever.'];
+let lobT = [], lobI = 0, lobF = 0, lobJ = 0, lobChip = false;
+const lobAt = (ms, f) => lobT.push(setTimeout(f, ms));
+function chipHush() { clearTimeout(chipT); clearInterval(typeT); clearTimeout(talkT); clearTimeout(moodT); moodT = 0; chipSaying = false; chipBox.classList.remove('say', 'talk'); chipBox.dataset.mood = chipRest(); chipVis(); }
+function lobbyStop() { lobT.forEach(clearTimeout); lobT = []; if (lobChip) { lobChip = false; chipHush(); } }
+const LSEGS = [
+  { bar: 'Calendar / today', em: 'Starts soon(ish)', ms: 13000,
+    html: () => `<div class="ilab">Pre-meeting</div><h2>Today's agenda</h2><ol class="lag">${[['Fun', '(mandatory)'], ['More fun', ''], ['Action items', '(none)'], ['Leave early', '']].map(a => `<li><i>${LTICK}</i><span>${a[0]}${a[1] ? `<small>${a[1]}</small>` : ''}</span><b class="lst">Pending approval</b></li>`).join('')}</ol><div class="lfo lhid">Expected to run 40 minutes over</div>`,
+    run: (el, at) => { const li = el.querySelectorAll('.lag li'); [1900, 3900, 5900].forEach((t, i) => at(t, () => li[i].classList.add('ok'))); at(8100, () => li[3].classList.add('pend')); at(9600, () => el.querySelector('.lfo').classList.add('on')); } },
+  { bar: 'Office poll / while you wait', em: 'Results are in', ms: 13000,
+    html: () => `<div class="ilab">While you wait</div><h2>How many meetings could have been emails?</h2><div class="lpo">${[['All of them', 87], ['Most of them', 9], ['This one, probably', 3], ['Sorry, I was on mute', 1]].map((r, i) => `<div class="lpr"><span>${r[0]}</span><u><i style="--p:${r[1] / 100};--dl:${.7 + i * .35}s"></i></u><b data-to="${r[1]}">${CALM ? r[1] : 0}%</b></div>`).join('')}</div><div class="lfo">Sample size: one intern / margin of error: yes</div>`,
+    run: (el, at) => { if (!CALM) el.querySelectorAll('.lpr b').forEach((b, i) => at(700 + i * 350, () => { const t0 = performance.now(), to = Number(b.dataset.to); (function st(t) { const k = Math.min(1, Math.max(0, t - t0) / 1000); b.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + '%'; if (k < 1 && b.isConnected) requestAnimationFrame(st); })(t0); })); } },
+  { bar: 'joke_draft_v14_FINAL.txt', em: 'Rehearsal / pretend not to hear', ms: 16000,
+    html: () => `<div class="ilab">Open mic check</div><h2>Chip is rehearsing</h2><div class="lnp"><div class="c">&gt; opening_joke --draft 14</div><div>Q: Why did the email go to therapy?</div><div>A: Too many attachments.</div><div class="p">[pause for laughter]</div><div class="p">[laughter is mandatory]</div></div>`,
+    run: (el, at) => { const ln = el.querySelectorAll('.lnp div'), show = i => ln[i].classList.add('on'); lobChip = !chipSaying;
+      const say = (t, m) => { if (!lobChip) return; if (m) chipMood(m, 3200); chipSay(t); };
+      at(700, () => { show(0); say('Ahem. Testing my opening joke. Do not listen.'); }); at(4600, () => { show(1); say('Why did the email go to therapy?'); });
+      at(7800, () => { show(2); say('Too many attachments!', 'star'); }); at(9300, () => show(3)); at(10800, () => { show(4); say('...I will circle back with a better one.', 'wince'); }); } },
+  { bar: 'Onboarding.pptx', em: 'Slide 3 of 212', ms: 13500,
+    html: () => `<div class="ilab">Mandatory reading</div><h2>Meeting etiquette</h2><ol class="let">${['Unmute before speaking.', 'Mute before snacking.', '<span>Do not reply all. <mark>This is the only exception.</mark></span>', 'Cameras optional. Enthusiasm mandatory.', 'If you can read this, you are early. Suspicious.'].map((r, i) => `<li style="--dl:${.7 + i * .75}s">${r}</li>`).join('')}</ol>`, run: () => {} },
+  { bar: 'Installer / mandatory-fun.exe', em: 'Do not unplug', ms: 14000,
+    html: () => `<div class="ilab">Now loading</div><h2>Mandatory fun</h2><div class="llo"><div class="llb"><i></i></div><div class="llp"><b>0%</b><span></span></div></div><div class="lfo">Time remaining: 2 minutes (it has said that for an hour)</div>`,
+    run: (el, at) => { const bar = el.querySelector('.llb i'), pc = el.querySelector('.llp b'), st = el.querySelector('.llp span');
+      [[8, 'Aligning stakeholders...'], [23, 'Reticulating synergies...'], [41, 'Circling back...'], [57, 'Moving the needle...'], [72, 'Picking low-hanging fruit...'], [88, 'Booking a meeting about this bar...'], [99, 'Stuck at 99%. As is tradition.']].forEach((s, i) => at(600 + i * 1650, () => { bar.style.transform = 'scaleX(' + s[0] / 100 + ')'; pc.textContent = s[0] + '%'; st.textContent = s[1]; })); } },
+  { bar: 'HR portal / did you know', em: 'Not verified by Legal', ms: 13000,
+    html: () => `<div class="ilab">Fun fact from HR</div><div class="lhr"><i>i</i><div class="lhq">${esc(LFACTS[lobF++ % LFACTS.length])}</div></div><div class="lfo">Source: trust us</div>`,
+    run: (el, at) => { const q = el.querySelector('.lhq'); at(6500, () => q.classList.add('sw')); at(6950, () => { q.textContent = LFACTS[lobF++ % LFACTS.length]; q.classList.remove('sw'); }); } },
+  { bar: 'Lobby / attendees', em: 'Doors open', ms: 13000,
+    html: () => { const n = S && S.allowed ? Object.keys(S.allowed).filter(k => S.allowed[k]).length : 0;
+      return `<div class="ilab">People are joining</div><div class="ljn"><b>${n || 47}</b><span>${n ? (n === 1 ? 'buzzer has' : 'buzzers have') + ' checked in<small>Room for more. Scan the code on the right.</small>' : 'people are typing<span class="ldots"><i></i><i></i><i></i></span><small>Nobody has hit send. Phones out, scan the code.</small>'}</span></div><div class="ljl">${[0, 1, 2, 3].map(i => { const k = lobJ++; return `<div class="ljr" style="color:${['var(--cyan)', 'var(--pink)', 'var(--yellow)', 'var(--violet)'][k % 4]}"><u></u><b>${WHO[(k * 5 + 2) % WHO.length]}</b><span>${LJOIN[k % LJOIN.length]}</span></div>`; }).join('')}</div>`; },
+    run: (el, at) => el.querySelectorAll('.ljr').forEach((r, i) => at(900 + i * 1900, () => r.classList.add('on'))) },
+  { bar: 'Camera 1 / conference room B', em: 'Live', cls: 'rec', ms: 13000,
+    html: () => `<div class="lrc"><u></u><u></u><u></u><u></u><div class="lrec"><i></i>REC</div><div class="ltc">00:59:52</div><div class="lrl">Tape 1 of 1</div><div class="lbat">Battery 1%</div><h2>This meeting is being recorded</h2><p class="lhid">For quality and training purposes.</p><p class="lhid">Nobody will ever watch it.</p><p class="lhid">Smile anyway.</p></div>`,
+    run: (el, at) => { const tc = el.querySelector('.ltc'), p = el.querySelectorAll('p'), f = n => String(n).padStart(2, '0'); [2200, 5000, 7800].forEach((t, i) => at(t, () => p[i].classList.add('on')));
+      for (let i = 1; i < 15; i++) at(i * 1000, () => { const s = 3592 + i; tc.textContent = f(Math.floor(s / 3600)) + ':' + f(Math.floor(s / 60) % 60) + ':' + f(s % 60); }); } }
+];
+function lobby() { lobbyStop(); lobAt(CALM ? 8000 : 12500, lobbyIn); }
+function lobbyIn() {
+  const lo = $('.lobby'), c = $('.tl'); if (!lo || !S || S.phase !== 'title') return;
+  lobT = []; c.classList.add('away'); lo.classList.add('on'); lobAt(450, () => lobSeg(0));
+}
+function lobSeg(k) {
+  const host = $('.lstage'), lo = $('.lobby'); if (!host || !S || S.phase !== 'title') return;
+  const old = host.lastElementChild; if (old) { old.classList.add('out'); setTimeout(() => old.remove(), CALM ? 1000 : 500); }
+  if (lobChip) { lobChip = false; chipHush(); }
+  if (k >= LSEGS.length) {   // a full lap: the big title comes back for a breather
+    lo.classList.remove('on'); $('.tl').classList.remove('away'); lobAt(10000, lobbyIn); return;
+  }
+  const sg = LSEGS[lobI++ % LSEGS.length], el = document.createElement('div'), ms = sg.ms * (CALM ? 1.4 : 1);
+  el.className = 'lw pre ' + (sg.cls || ''); el.innerHTML = `<div class="ibar mono"><i></i><i></i><i></i><span>${sg.bar}</span><em>${sg.em}</em></div><div class="lb">${sg.html()}</div>`;
+  host.appendChild(el); lobAt(old ? 280 : 60, () => el.classList.remove('pre'));
+  sg.run(el, (t, f) => lobAt(t, () => { if (el.isConnected) f(); }));
+  lobAt(ms, () => lobSeg(k + 1));
+}
+
 let overT, cardQ = [], cardBusy = false, cardEl = null, cardGen = 0, busyT = 0, busyEnd = 0;
 // ambient motion rests while something big is on screen (see body.busy in the styles)
 function busy(ms) { const end = performance.now() + ms; if (end < busyEnd) return; busyEnd = end; document.body.classList.add('busy'); clearTimeout(busyT); busyT = setTimeout(() => document.body.classList.remove('busy'), ms); }
@@ -818,7 +969,7 @@ function effects(fx) {
   if (fx.stamp) chipMood('wince'); else if (/TAKEOVER (COMPLETE|DENIED)/.test(heads) || fx.banner) chipMood('money'); else if (/HOSTILE TAKEOVER|WINNER IS/.test(heads)) chipMood('shock'); else if (fx.confetti || /ROOM HAS SPOKEN/.test(heads)) chipMood('happy');
   if (fx.banner) { over.innerHTML = `<div class="banner">${esc(fx.banner)}</div>`; confetti(140); clearOver(2800); }
   if (fx.confetti) confetti(fx.confetti);
-  if (fx.chip) chipSay(fx.chip);
+  if (fx.chip) { lobChip = false; chipSay(fx.chip); }
   (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 6) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (Math.random() < .5 ? Math.random() * 2 : 95 + Math.random() * 2) + 'vw'; d.style.fontSize = '3vw'; document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 120));
 }
 // Undo on the host: whatever was still playing for the undone step (title cards, a stamp, a banner) goes away at once.
@@ -948,7 +1099,7 @@ function draw() {
 function recv(d) {
   if (!d || !d.S || !G) return; if (d.seq && d.seq <= last) return; if (d.seq) last = d.seq;
   S = d.S; const fx = d.fx || {}, k = sceneKey();
-  if (k !== key) { key = k; clearTimeout(buildT); if (fx.cards && fx.cards.length) buildT = setTimeout(() => { build(); sync(); }, 380); else build(); }   // under a title card, swap the scene once the card covers it
+  if (k !== key) { key = k; lobbyStop(); clearTimeout(buildT); if (fx.cards && fx.cards.length) buildT = setTimeout(() => { build(); sync(); }, 380); else build(); }   // under a title card, swap the scene once the card covers it
   if (built === key) sync();
   if (!moodT && chipBox.dataset.mood !== chipRest()) chipBox.dataset.mood = chipRest(); chipLook(); chipVis();
   const jb = document.getElementById('joinbox'), on = !!(S.join && S.phones); if (on !== jb.classList.contains('on')) { jb.classList.toggle('on', on); jb.innerHTML = on ? `<div class="how">${qr(S.joinUrl, 1)}<div>Join on your phone.<br>Scan, or open <b>${esc(shortUrl())}</b><br>code <b>${esc(S.sid)}</b></div></div>` : ''; }
