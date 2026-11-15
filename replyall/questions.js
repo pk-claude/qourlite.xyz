@@ -26,12 +26,12 @@ window.GAME = {
     { id: "r02", mult: 1, q: "Name something at work that takes 'two minutes' but never does.",
       a: [["A computer update", 28, "restart, reboot, install", "Do not turn off your computer. Or your hopes."], ["Joining the video call", 22, "logging in, audio, camera, password"], ["The printer", 18, "printing, scanning, copying"],
           ["A quick question", 14, "quick chat, got a minute, quick call"], ["Finding a meeting room", 10, "booking a room, conference room"], ["An expense report", 8, "expenses, timesheet, forms"]] },
-    { id: "r03", mult: 2, q: "Name the unofficial second job everyone here actually has.",
-      a: [["Tech support", 30, "IT, fixing computers, help desk", "Have you tried turning the team off and on again?"], ["Therapist", 22, "listener, counselor, shoulder to cry on"], ["Party planner", 16, "events, birthdays, potluck, celebrations"],
-          ["Snack supplier", 13, "candy bowl, baker, feeds everyone"], ["Printer whisperer", 11, "fixes the printer, copier"], ["Human calendar", 8, "reminders, scheduler, knows the deadlines"]] },
+    { id: "r03", mult: 2, q: "Besides your real job, name a job you somehow ended up doing at work.",
+      a: [["Tech support", 30, "IT, fixing computers, help desk, printer fixer", "Have you tried turning the team off and on again?"], ["Therapist", 22, "listener, counselor, shoulder to cry on"], ["Party planner", 16, "events, birthdays, potluck, celebrations"],
+          ["Snack supplier", 13, "candy bowl, baker, feeds everyone"], ["Human calendar", 11, "reminders, scheduler, knows the deadlines"], ["Plant waterer", 8, "plants, office gardener"]] },
     { id: "r04", mult: 3, q: "Name a sound that means it is going to be a good day at work.",
-      a: [["Coffee brewing", 32, "coffee machine, espresso"], ["Meeting canceled", 25, "calendar ping, canceled notification", "Music. Pure music."], ["People laughing", 16, "laughter, laughing down the hall"],
-          ["A pizza box opening", 12, "food arriving, lunch delivery, donuts"], ["A quiet inbox", 9, "silence, no emails, no notifications"], ["Go home early", 6, "boss says leave early"]] },
+      a: [["Coffee brewing", 32, "coffee machine, espresso, kettle"], ["People laughing", 22, "laughter, laughing down the hall"], ["A 'canceled' ping", 16, "meeting canceled notification, calendar ping", "Music. Pure music."],
+          ["A pizza box opening", 13, "food arriving, lunch delivery, donut box"], ["Your favorite song", 10, "music, playlist, headphones, radio"], ["Laptops closing at five", 7, "laptop shutting, end of day, packing up"]] },
 
     // SPARE ROUNDS
     { id: "r05", mult: 1, q: "If the office printer could talk, what would it say?",
@@ -51,8 +51,8 @@ window.GAME = {
   // "YOU SAID" ROUND. The audience answers one of these on their phones, live,
   // and the board is built from what this room actually said. Keep them answerable in one or two words.
   room: [
-    "In one or two words: the best snack to find in the break room?",
     "In one or two words: what should our team mascot be?",
+    "In one or two words: your go-to lunch order?",
     "One word that describes this team.",
     "In one or two words: what would you rename the Monday meeting?"
   ],
@@ -80,7 +80,7 @@ window.GAME = {
   chip: {
     hello: ["Hi. I am Chip, the AI intern. I was told there would be snacks.", "Welcome, everyone. Attendance is mandatory. Fun is strongly encouraged.", "I have reviewed the agenda. It is one item. The item is winning.", "Hello. I will be taking notes. I will also be losing them."],
     round: ["New agenda item. Please hold your questions until never.", "Moving on. I have a hard stop at fun o'clock.", "Next item. Somebody take notes. Not me, I am an intern.", "Round incoming. Hydrate accordingly.", "New item. This one counts. They all count. This one counts more.", "Next up. I have a good feeling. I am not qualified to have feelings."],
-    top: ["Number one answer. Somebody promote this person.", "Top of the board. That is what we call a quick win.", "Nailed it. I am adding that to your performance review.", "The number one answer. Synergy achieved.", "Number one. I would high five you, but I am a rectangle.", "Top answer. Frame it. Put it in the lobby.", "First place answer. This team has range.", "That is the big one. Somebody ring a bell.", "Number one. I am telling everyone I know. It is three people.", "Top answer. You have peaked. Enjoy it."],
+    top: ["Number one answer. Somebody promote this person.", "Top of the board. That is what we call a quick win.", "Nailed it. I am adding that to your performance review.", "The number one answer. Synergy achieved.", "Number one. I would high five you, but I have no hands.", "Top answer. Frame it. Put it in the lobby.", "First place answer. This team has range.", "That is the big one. Somebody ring a bell.", "Number one. I am telling everyone I know. It is three people.", "Top answer. You have peaked. Enjoy it."],
     good: ["It is on the board. Low-hanging fruit, successfully picked.", "Approved. No further sign-off required.", "Correct. I will loop in the team.", "That tracks. Great alignment, everyone.", "On the board. Let's not overthink it.", "Yes. Filing that under wins.", "Good answer. Adding it to the slide deck.", "Confirmed. The data agrees with you.", "On the board. Somebody is paying attention.", "Solid. That is a deliverable.", "Correct. Morale is up two percent.", "That works. Ship it."],
     strike: ["Bold. Wrong, but bold.", "Let's put a pin in that. Forever.", "I checked with the team. The team said no.", "Thank you for your input. It was input.", "Not on the board. Great energy, though.", "That one is going in the parking lot.", "I love the confidence. The board does not.", "Close. In the sense that it was also words.", "I will add that to my list of action items.", "The survey has spoken. It said no thank you.", "Nice try. I am rooting for you quietly.", "Not this time. We learn. We grow.", "I asked the board twice. Still no.", "That answer is ahead of its time."],
     takeover: ["Hostile takeover time. Legal has been notified.", "The other team smells opportunity. And budget.", "Three strikes. The other side would like a word.", "Takeover attempt. Everyone act natural."],
