@@ -375,7 +375,8 @@ const A = {
   takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
   award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award']();
-    up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n});
+    const x = {kind, i, pot};
+    up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n, 3200, x]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot, 3200, x]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n, payout: i});
     later(() => chipLine(kind || 'award', !!kind), kind ? 2500 : 900); },
   rest() { const left = cur().a.map((_, i) => i).filter(i => !S.revealed[i]).reverse(); if (!left.length) return; snap(); chipLine('rest');
     left.forEach((i, k) => later(() => { S.revealed[i] = true; SFX.reveal(i); up(); }, 900 + k * 1300)); },
