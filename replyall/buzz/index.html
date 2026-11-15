@@ -2,66 +2,252 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#0a0a1f">
 <title>REPLY ALL - Phone</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
 <style>
-*{box-sizing:border-box}
+:root{--ink:#0a0a1f;--violet:#6c4cff;--pink:#ff3d8b;--cyan:#2de2e6;--yellow:#ffe14d;--paper:#fff8ea;--green:#1fbf6b;--red:#e5263a;--line:#d9d0bb;--mute:#5b5870;
+  --disp:"Archivo Black","Arial Black","Segoe UI",sans-serif;--body:"Archivo","Segoe UI",system-ui,Arial,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;margin:0}
-body{background:radial-gradient(circle at 20% 0,#3a2a9a,#0a0a1f 65%) fixed;color:#fff8ea;font-family:"Segoe UI",system-ui,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center}
-h1{margin:0;font:900 38px "Arial Black","Segoe UI",sans-serif;letter-spacing:-.03em;color:#ffe14d;text-shadow:3px 3px 0 #6c4cff}
-p{margin:4px 0}
-input{font:inherit;font-size:22px;text-align:center;width:100%;max-width:340px;padding:10px;border-radius:12px;border:0}
-#code{text-transform:uppercase;width:170px;font-size:28px;letter-spacing:.1em}
-button{font:inherit;font-weight:700;font-size:19px;border:0;border-radius:14px;padding:14px 18px;background:#2de2e6;color:#0a0a1f;width:100%;max-width:340px;touch-action:manipulation}
-button.aud{background:#fff8ea}
-#buzz{margin-bottom:18px;width:min(66vw,40vh);height:min(66vw,40vh);max-width:none;border-radius:50%;background:#55527a;color:#cfcbe8;font:900 30px "Arial Black","Segoe UI",sans-serif;box-shadow:0 12px 0 #2c2a48;transition:background .15s}
-#buzz.open{background:#ff3d8b;color:#fff;box-shadow:0 12px 0 #a31450;animation:pulse .6s infinite}
-#buzz.sent{background:#ffe14d;color:#0a0a1f;box-shadow:0 12px 0 #9c8718}
-#buzz.first{background:#1fbf6b;color:#fff;box-shadow:0 12px 0 #0f6b3a}
-#buzz.slow{background:#e5263a;color:#fff;box-shadow:0 12px 0 #8a1220}
-#buzz:active{transform:translateY(8px);box-shadow:0 4px 0 #2c2a48}
-@keyframes pulse{50%{transform:scale(1.04)}}
-.rx{display:flex;gap:10px;justify-content:center}
-.rx button{width:68px;height:68px;padding:0;font-size:32px;border-radius:50%;background:rgba(255,255,255,.12)}
-.rx button:active{transform:scale(1.25)}
-#survey{background:rgba(255,255,255,.1);border:2px solid #ffe14d;border-radius:16px;padding:14px;width:100%;max-width:372px}
-#survey b{display:block;font-size:20px;margin-bottom:10px}
-#survey button{margin-top:8px;background:#ffe14d}
-#msg{min-height:22px;color:#ffe14d}
-#live{font-weight:700;color:#ffe14d;max-width:360px}
+body{background:var(--ink);background-image:radial-gradient(circle at 15% -5%,#3a2a9a 0,rgba(58,42,154,0) 55%),radial-gradient(circle at 100% 100%,#4a1238 0,rgba(74,18,56,0) 45%);background-attachment:fixed;color:var(--paper);font:500 16px/1.35 var(--body);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center}
+p{margin:0}
+button{font:inherit;border:0;cursor:pointer;touch-action:manipulation;color:var(--ink);-webkit-user-select:none;user-select:none}
+input{font:inherit}
+a{color:var(--cyan)}
 .hide{display:none!important}
-a{color:#2de2e6}
+.mono{font-family:var(--mono)}
+
+/* Chip, the AI intern */
+.chip{position:relative;flex:none;width:36px;height:36px;border-radius:11px;background:var(--cyan);border:3px solid var(--ink)}
+.chip:before,.chip:after{content:"";position:absolute;top:9px;width:6px;height:8px;border-radius:3px;background:var(--ink);animation:blink 4.2s infinite}
+.chip:before{left:6px}.chip:after{right:6px}
+.chip i{position:absolute;left:50%;bottom:5px;width:12px;height:5px;margin-left:-6px;border-radius:0 0 7px 7px;background:var(--ink)}
+.chip b{position:absolute;left:50%;top:-10px;width:3px;height:8px;margin-left:-1.5px;background:var(--ink)}
+.chip b:after{content:"";position:absolute;left:-3px;top:-6px;width:9px;height:9px;border-radius:50%;background:var(--pink);border:2px solid var(--ink)}
+@keyframes blink{0%,46%,50%,100%{transform:scaleY(1)}48%{transform:scaleY(.1)}}
+
+/* ---------- sign in ---------- */
+#join{width:100%;max-width:430px;padding:18px 14px 24px;margin:auto 0}
+.sso{background:var(--paper);color:var(--ink);border-radius:22px;border:3px solid var(--ink);box-shadow:7px 7px 0 var(--violet);padding:20px 18px 16px;animation:rise .45s cubic-bezier(.2,.9,.3,1.2) both}
+.brand{display:flex;align-items:center;gap:10px;margin-top:6px}
+.brand h1{margin:0;font:400 27px/1 var(--disp);letter-spacing:-.03em}
+.brand h1 span{color:var(--violet)}
+.brand small{display:block;font:500 10px/1.3 var(--mono);color:var(--mute);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.sso h2{margin:16px 0 2px;font:400 23px/1.1 var(--disp);letter-spacing:-.02em}
+.sso h2 em{font-style:normal;white-space:nowrap;background:var(--yellow);padding:0 5px;border-radius:5px;box-shadow:2px 2px 0 var(--ink)}
+.sub{font-size:13.5px;color:var(--mute)}
+label{display:block;font-size:12.5px;font-weight:700;margin:14px 0 5px;text-align:left}
+label small{font-weight:500;color:var(--mute);font-size:12px}
+.sso input{display:block;width:100%;height:52px;padding:0 14px;border-radius:12px;border:2.5px solid var(--ink);background:#fff;color:var(--ink);font-size:19px;outline:0;transition:box-shadow .15s}
+.sso input:focus{box-shadow:4px 4px 0 var(--cyan)}
+#code{text-transform:uppercase;font:800 27px/1 var(--mono);letter-spacing:.34em;text-align:center;padding-left:.34em}
+#mstat{display:flex;align-items:center;gap:7px;min-height:20px;margin-top:7px;font:500 11.5px/1.3 var(--mono);color:var(--mute);text-align:left}
+#mstat:before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:#b9b3c9}
+#mstat.ok{color:#0c6b3a}#mstat.ok:before{background:var(--green);box-shadow:0 0 0 3px rgba(31,191,107,.25)}
+#mstat.bad{color:#a3101f}#mstat.bad:before{background:var(--red)}
+#mstat.look:before{background:var(--violet);animation:dot 1s infinite}
+.or{display:flex;align-items:center;gap:10px;margin:16px 0 10px;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.or:before,.or:after{content:"";flex:1;height:2px;background:var(--line)}
+.jb{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 14px;margin-top:9px;border-radius:14px;border:2.5px solid var(--ink);box-shadow:0 5px 0 var(--ink);text-align:left;transition:transform .08s,box-shadow .08s}
+.jb:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.jb i{flex:none;width:34px;height:34px;border-radius:10px;background:var(--ink);color:var(--paper);font:400 17px/34px var(--disp);text-align:center;font-style:normal}
+.jb span{display:block;min-width:0;flex:1}
+.jb small{display:block;font:500 10.5px/1.2 var(--mono);letter-spacing:.07em;text-transform:uppercase;opacity:.75}
+.jb b{display:block;font:400 18px/1.15 var(--disp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jb u{flex:none;text-decoration:none;font:400 20px var(--disp)}
+#j0{background:var(--cyan)}#j1{background:var(--pink)}
+.jb.aud{background:#fff;box-shadow:0 5px 0 var(--line)}.jb.aud:active{box-shadow:0 1px 0 var(--line)}
+.fine{margin-top:15px;font-size:11.5px;line-height:1.45;color:var(--mute);text-align:center}
+.fine b{color:var(--ink)}
+.foot{margin-top:14px;text-align:center;font:500 10.5px/1.5 var(--mono);color:#a9a4c6;letter-spacing:.03em}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.97)}}
+
+/* ---------- in the meeting ---------- */
+#play{width:100%;max-width:430px;flex:1;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--violet);border-bottom:3px solid var(--ink)}
+#av{flex:none;width:38px;height:38px;border-radius:12px;background:var(--yellow);border:2.5px solid var(--ink);color:var(--ink);font:400 18px/33px var(--disp);text-align:center;position:relative}
+#av:after{content:"";position:absolute;right:-5px;bottom:-5px;width:13px;height:13px;border-radius:50%;background:var(--green);border:2.5px solid var(--violet)}
+#av.off:after{background:#b9b3c9}
+.bar .id{flex:1;min-width:0}
+.bar .ch{font:400 16px/1.1 var(--disp);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#who{font:500 11px/1.3 var(--mono);color:#e4dcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec{flex:none;display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:99px;background:var(--ink);font:800 10px/1 var(--mono);letter-spacing:.08em;color:#fff}
+.rec:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--red);animation:dot 1.4s infinite}
+@keyframes dot{50%{opacity:.25}}
+.main{flex:1;display:flex;flex-direction:column;gap:12px;padding:12px 14px 14px}
+#sc{display:flex;gap:8px}
+#sc div{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:7px 10px;border-radius:12px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22)}
+#sc div.me{border-color:var(--yellow);background:rgba(255,225,77,.14)}
+#sc span{min-width:0;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sc b{font:400 21px/1 var(--disp);color:var(--yellow)}
+#mail{display:flex;gap:10px;align-items:flex-start;background:var(--paper);color:var(--ink);border-radius:14px;border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--cyan);padding:10px 12px;animation:rise .35s both}
+#mail .chip{width:30px;height:30px;border-radius:9px;margin-top:7px}
+#mail .chip:before,#mail .chip:after{top:6px;width:5px;height:7px}#mail .chip:before{left:4px}#mail .chip:after{right:4px}
+#mail .chip i{bottom:3px;width:10px;margin-left:-5px;height:4px}
+#mail small{display:block;font:500 10px/1.3 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+#live{font-weight:700;font-size:16.5px;line-height:1.25}
+
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:150px;text-align:center}
+.card{width:100%;background:var(--paper);color:var(--ink);border-radius:18px;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--violet);padding:20px 16px;text-align:center;animation:rise .4s both}
+.card h3{margin:12px 0 4px;font:400 21px/1.15 var(--disp);letter-spacing:-.02em}
+.card .chip{margin:8px auto 0;width:54px;height:54px;border-radius:16px}
+.card .chip:before,.card .chip:after{top:14px;width:9px;height:12px;border-radius:4px}.card .chip:before{left:9px}.card .chip:after{right:9px}
+.card .chip i{bottom:8px;width:18px;height:7px;margin-left:-9px}
+.card p{font-size:14px;color:var(--mute)}
+.dots{display:inline-flex;gap:6px;margin-top:14px;padding:11px 15px;border-radius:18px 18px 18px 5px;background:#ebe3cf}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--ink);animation:type 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes type{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
+#quip{margin-top:auto;min-height:38px;font:500 12.5px/1.45 var(--mono);color:#cfc8ee;text-align:center;padding:0 6px}
+#quip.in{animation:quip .45s both}
+.card #lq{min-height:36px;margin-top:10px;font:500 12.5px/1.45 var(--mono);color:var(--ink)}
+.card #lq.in{animation:quip .45s both}
+@keyframes quip{from{opacity:0;transform:translateY(7px)}}
+
+/* the hand */
+.pad{position:relative;width:min(64vw,36vh,270px);height:min(64vw,36vh,270px);min-width:170px;min-height:170px;margin:6px 0 16px}
+#buzz{position:relative;width:100%;height:100%;border-radius:50%;padding:0 12px;overflow:hidden;background:#55527a;color:#d8d4f0;border:4px solid var(--ink);box-shadow:0 13px 0 #26243f,0 13px 0 4px var(--ink);transition:transform .07s,box-shadow .07s,background .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;z-index:1}
+#buzz u{text-decoration:none;font-size:40px;line-height:1.05;pointer-events:none}
+#bl{font:400 clamp(21px,7.4vw,31px)/1 var(--disp);letter-spacing:-.01em;pointer-events:none}
+#bs{font:800 10.5px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.85;pointer-events:none;max-width:82%}
+#buzz:active,#buzz.down{transform:translateY(10px);box-shadow:0 3px 0 #26243f,0 3px 0 4px var(--ink)}
+#buzz.open{background:var(--pink);color:#fff;box-shadow:0 13px 0 #a31450,0 13px 0 4px var(--ink);animation:pulse .7s infinite}
+#buzz.open:active,#buzz.open.down{animation:none;box-shadow:0 3px 0 #a31450,0 3px 0 4px var(--ink)}
+#buzz.open u{animation:wave .7s infinite;transform-origin:50% 90%}
+#buzz.sent{background:var(--yellow);color:var(--ink);box-shadow:0 13px 0 #9c8718,0 13px 0 4px var(--ink)}
+#buzz.first{background:var(--green);color:#fff;box-shadow:0 13px 0 #0f6b3a,0 13px 0 4px var(--ink);animation:win .5s cubic-bezier(.2,1.6,.4,1) both}
+#buzz.slow{background:var(--red);color:#fff;box-shadow:0 13px 0 #8a1220,0 13px 0 4px var(--ink);animation:shake .4s both}
+#buzz.hold{background:#3a3857;color:#aaa5c8}
+#buzz.hold u{animation:dot 1.2s infinite}
+.pad:before,.pad:after{content:"";position:absolute;inset:0;border-radius:50%;border:4px solid var(--pink);opacity:0;pointer-events:none}
+.pad.open:before{animation:ring 1.4s infinite}.pad.open:after{animation:ring 1.4s .7s infinite}
+.pad.first:before{border-color:var(--green);animation:ring .9s 3}
+@keyframes pulse{50%{transform:scale(1.045)}}
+@keyframes wave{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+@keyframes ring{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+@keyframes win{0%{transform:scale(.8)}100%{transform:scale(1)}}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.rip{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:rgba(255,255,255,.6);pointer-events:none;animation:rip .55s ease-out forwards}
+@keyframes rip{from{transform:scale(.2);opacity:.9}to{transform:scale(9);opacity:0}}
+.burst{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:2}
+.burst i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:3px;background:var(--yellow);transform:rotate(var(--a)) translateY(0);animation:burst .75s cubic-bezier(.1,.7,.3,1) forwards}
+.burst i:nth-child(3n){background:var(--cyan);border-radius:50%}.burst i:nth-child(3n+1){background:var(--pink)}
+.burst i:nth-child(4n){background:var(--paper);width:8px;height:16px}
+@keyframes burst{0%{transform:rotate(var(--a)) translateY(-40px) scale(.4);opacity:1}70%{opacity:1}100%{transform:rotate(var(--a)) translateY(calc(-1*var(--d))) scale(1);opacity:0}}
+#hint{font-weight:700;font-size:16px;line-height:1.3;min-height:21px;padding:0 4px}
+
+/* you said: chat thread */
+#survey{background:var(--paper);color:var(--ink);border-radius:18px;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--yellow);padding:12px 12px 10px;text-align:left;animation:rise .4s both}
+.th{display:flex;align-items:center;gap:6px;font:400 15px/1 var(--disp);padding-bottom:9px;margin-bottom:10px;border-bottom:2px dashed var(--line)}
+.th em{margin-left:auto;font:800 9.5px/1 var(--mono);font-style:normal;letter-spacing:.08em;background:var(--pink);color:#fff;padding:4px 7px;border-radius:99px}
+.m{display:flex;gap:9px;align-items:flex-start}
+.m .chip{width:32px;height:32px;border-radius:10px;margin-top:8px}
+.m .chip:before,.m .chip:after{top:7px;width:5px;height:7px}.m .chip:before{left:5px}.m .chip:after{right:5px}
+.m .chip i{bottom:4px;width:10px;height:4px;margin-left:-5px}
+.mn{font-size:12px;font-weight:700;margin-bottom:3px}
+.mn span{font:800 9px/1 var(--mono);letter-spacing:.07em;background:var(--ink);color:var(--cyan);padding:2px 5px;border-radius:4px;margin-left:4px;vertical-align:1px}
+.bub{display:inline-block;padding:9px 13px;border-radius:5px 16px 16px 16px;background:#ebe3cf;font-size:17px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+#sm{flex-direction:column;align-items:flex-end;margin-top:10px}
+#sm .bub{background:var(--violet);color:#fff;border-radius:16px 16px 5px 16px}
+#sm.pop .bub{animation:sent .4s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes sent{from{opacity:0;transform:translateY(26px) scale(.7)}}
+#sr{margin-top:4px;font:500 11px/1.2 var(--mono);color:var(--mute)}
+#sr b{color:#0c6b3a;font-weight:800}
+.comp{display:flex;gap:8px;align-items:center;margin-top:12px;padding:5px 5px 5px 14px;border-radius:99px;border:2.5px solid var(--ink);background:#fff;transition:box-shadow .15s}
+.comp:focus-within{box-shadow:4px 4px 0 var(--cyan)}
+#sa{flex:1;min-width:0;height:42px;border:0;outline:0;background:transparent;color:var(--ink);font-size:18px}
+#ss{flex:none;width:46px;height:46px;border-radius:50%;background:var(--pink);border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;transition:transform .1s}
+#ss:active{transform:scale(.88)}
+#ss svg{width:22px;height:22px;fill:#fff;transform:translateX(1px)}
+#ss.go svg{animation:fly .45s ease-in}
+@keyframes fly{50%{transform:translate(26px,-26px);opacity:0}51%{transform:translate(-20px,20px);opacity:0}}
+#sdone{min-height:16px;margin-top:7px;font-size:12px;color:var(--mute);text-align:center}
+#sdone.err{color:#a3101f;font-weight:700}
+
+#lv{align-self:center;font-size:12.5px;color:#b9b3d6;padding:6px 10px}
+/* reactions */
+.rxw{position:sticky;bottom:0;z-index:5;padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));background:#15142e;border-top:3px solid var(--ink);box-shadow:0 -1px 0 rgba(255,255,255,.14) inset}
+.rxw p{font:500 10px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:#a9a4c6;text-align:center;margin-bottom:7px}
+.rx{display:flex;gap:7px}
+.rx button{position:relative;flex:1;min-width:0;height:60px;padding:0;border-radius:15px;background:#2a2850;border:2px solid #47447a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .1s,background .15s}
+.rx button i{font-style:normal;font-size:25px;line-height:1.1}
+.rx button span{font-size:10.5px;font-weight:700;letter-spacing:.01em;white-space:nowrap}
+.rx button:active{transform:scale(.92)}
+.rx button.hit{background:var(--violet);border-color:var(--cyan);animation:hit .35s}
+.rx.cool button:not(.hit){opacity:.55}
+@keyframes hit{40%{transform:scale(1.14) rotate(-4deg)}}
+.rx em{position:absolute;right:-4px;top:-8px;font:800 10px/1 var(--mono);font-style:normal;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);border-radius:99px;padding:2px 5px}
+.fly{position:absolute;left:50%;top:0;margin-left:-16px;font-size:30px;pointer-events:none;animation:up .9s ease-out forwards;z-index:6}
+@keyframes up{0%{transform:translateY(0) scale(.6);opacity:1}100%{transform:translateY(-150px) translateX(var(--x)) scale(1.5) rotate(var(--r));opacity:0}}
+
+#msg{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9;max-width:406px;margin:0 auto;padding:11px 14px;border-radius:13px;background:var(--yellow);color:var(--ink);border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:700;font-size:14.5px;text-align:center}
+#msg:empty{display:none}
+@media (max-height:640px){.card{padding:14px}.card .chip{width:44px;height:44px}.pad{margin-bottom:12px}}
+@media (max-width:345px){.sso h2{font-size:20px}.jb u{display:none}.jb b{font-size:16.5px}.jb{gap:10px;padding:8px 10px}#sc div{padding:7px 8px}#sc span{font-size:11.5px}#sc b{font-size:18px}.main{padding:10px 10px 12px}.rx button span{font-size:9.5px}#code{font-size:24px}.brand h1{font-size:24px}.sso{padding:16px 14px}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.rip,.burst,.fly{display:none}}
 </style>
 </head>
 <body>
-<h1>REPLY ALL</h1>
 <div id="join">
-  <p>Code from the big screen</p>
-  <p><input id="code" maxlength="4" autocomplete="off" autocapitalize="characters" aria-label="Game code"></p>
-  <p><input id="name" maxlength="12" autocomplete="off" placeholder="Your first name" aria-label="Your first name"></p>
-  <p><button id="j0" onclick="join(0)">I play for team 1</button></p>
-  <p><button id="j1" onclick="join(1)">I play for team 2</button></p>
-  <p><button class="aud" onclick="join(2)">I am in the audience</button></p>
+  <div class="sso">
+    <div class="brand"><div class="chip"><b></b><i></i></div><div><h1>REPLY <span>ALL</span></h1><small>Single sign-on / all-hands portal</small></div></div>
+    <h2>Sign in to <em>Mandatory Fun</em></h2>
+    <p class="sub">Your attendance has been noted.</p>
+    <label for="code">Meeting ID <small>(on the big screen)</small></label>
+    <input id="code" maxlength="4" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="----" aria-label="Game code">
+    <div id="mstat" aria-live="polite">Enter the 4-character Meeting ID.</div>
+    <label for="name">Display name <small>(as it will appear in the meeting)</small></label>
+    <input id="name" maxlength="12" autocomplete="off" placeholder="Your first name" aria-label="Your first name">
+    <div class="or">Pick a department</div>
+    <button class="jb" id="j0" onclick="join(0)"><i>1</i><span><small>Join the call as</small><b id="j0n">Team Synergy</b></span><u>&gt;</u></button>
+    <button class="jb" id="j1" onclick="join(1)"><i>2</i><span><small>Join the call as</small><b id="j1n">Team Bandwidth</b></span><u>&gt;</u></button>
+    <button class="jb aud" onclick="join(2)"><i>?</i><span><small>Camera off, snacks on</small><b>Just the audience</b></span><u>&gt;</u></button>
+    <p class="fine">By joining you agree to <b>have fun</b>. This meeting is being recorded. (It is not.)</p>
+  </div>
+  <p class="foot">Forgot your password? So did we.<br>Secured by Chip, AI intern, unpaid.</p>
 </div>
 <div id="play" class="hide">
-  <p id="who"></p>
-  <p id="live"></p>
-  <button id="buzz">WAIT</button>
-  <p id="hint"></p>
-  <div id="survey" class="hide"><b id="sq"></b><input id="sa" maxlength="30" autocomplete="off" placeholder="One or two words" aria-label="Your answer"><button onclick="answer()">Send my answer</button><p id="sdone"></p></div>
-  <p>React on the big screen:</p>
-  <div class="rx">
-    <button onclick="react('clap')">&#x1F44F;</button><button onclick="react('laugh')">&#x1F602;</button><button onclick="react('groan')">&#x1F62C;</button><button onclick="react('fire')">&#x1F525;</button>
+  <div class="bar">
+    <div id="av">?</div>
+    <div class="id"><div class="ch"># all-hands</div><div id="who"></div></div>
+    <div class="rec" title="It is not">REC</div>
   </div>
-  <p><a href="#" onclick="leave();return false">Change team or code</a></p>
+  <div class="main">
+    <div id="sc" class="hide"><div id="sc0"><span></span><b></b></div><div id="sc1"><span></span><b></b></div></div>
+    <div id="mail" class="hide"><div class="chip"><b></b><i></i></div><div><small>Agenda item / from Chip</small><div id="live"></div></div></div>
+    <div class="stage" id="stage">
+      <div class="card hide" id="lobby"><div class="chip"><b></b><i></i></div><h3 id="lt">Waiting for the host to let you in</h3><p id="ls">The scorekeeper has to approve this phone.</p><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div><div id="lq"></div></div>
+      <div class="pad" id="pad"><button id="buzz"><u id="bi">&#x1F507;</u><span id="bl">MUTED</span><span id="bs">Host has the floor</span></button></div>
+      <p id="hint" aria-live="polite"></p>
+    </div>
+    <div id="survey" class="hide">
+      <div class="th"># you-said <em>LIVE SURVEY</em></div>
+      <div class="m"><div class="chip"><b></b><i></i></div><div><div class="mn">Chip <span>AI INTERN</span></div><div class="bub" id="sq"></div></div></div>
+      <div class="m hide" id="sm"><div class="bub" id="sb"></div><div id="sr"></div></div>
+      <div class="comp"><input id="sa" maxlength="30" autocomplete="off" enterkeyhint="send" placeholder="Reply all..." aria-label="Your answer"><button id="ss" onclick="answer()" aria-label="Send my answer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5 22 12 3 3.5v6.6L15 12 3 13.9z"/></svg></button></div>
+      <p id="sdone"></p>
+    </div>
+    <p id="quip" aria-hidden="true"></p>
+    <a id="lv" href="#" onclick="leave();return false">Leave meeting / change team or ID</a>
+  </div>
+  <div class="rxw">
+    <p>React on the big screen</p>
+    <div class="rx" id="rx">
+      <button onclick="react('clap',this)"><i>&#x1F44F;</i><span>Kudos</span></button><button onclick="react('laugh',this)"><i>&#x1F602;</i><span>LOL</span></button><button onclick="react('groan',this)"><i>&#x1F62C;</i><span>Yikes</span></button><button onclick="react('fire',this)"><i>&#x1F525;</i><span>Fire</span></button>
+    </div>
+  </div>
 </div>
-<div id="msg"></div>
+<div id="msg" role="status"></div>
 <script>
-const $ = id => document.getElementById(id), msg = $('msg'), b = $('buzz'), LS = 'replyall_phone';
+const $ = id => document.getElementById(id), msg = $('msg'), b = $('buzz'), LS = 'replyall_phone', DEF = ['Team Synergy', 'Team Bandwidth'];
+const set = (el, t) => { if (el.textContent !== t) el.textContent = t; }, cls = (el, c) => { if (el.className !== c) el.className = c; };
+const buzzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} };
 // This phone keeps one id, so a refresh keeps its team and its approval.
 let pid = localStorage.getItem('replyall_pid'); if (!/^[a-z0-9]{8}$/.test(pid || '')) { pid = Math.random().toString(36).slice(2, 10).padEnd(8, '0'); localStorage.setItem('replyall_pid', pid); }
-let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {};
+let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {}, sentAt = 0, lastMode = '', ctx = '', qi = 0;
 try { answered = JSON.parse(sessionStorage.getItem('replyall_ans')) || {}; } catch (e) {}
 const code = () => (sid || $('code').value.trim().toUpperCase()), api = k => '/api/relay?room=ra-' + code().toLowerCase() + '&k=' + k;
 function send(k, extra) {
@@ -75,45 +261,119 @@ async function poll() {
   try { const r = await fetch(api('state'), {cache: 'no-store'}), m = (await r.json()).msgs[0], s = m ? JSON.parse(m) : null; st = s && s.sid === code() ? s : null; known = !!st; } catch (e) { known = null; }   // known: true = game found, false = no such game, null = could not check
   show();
 }
+// Office small talk, by what the phone is doing.
+const QUIPS = {
+  lobby: ['The host can see you waiting. Probably.', 'Chip is checking your badge...', 'Wave at the scorekeeper. Politely.', 'Your call is important to us.', 'Fun fact: this could have been an email.', 'Estimated wait: one more agenda item.'],
+  wait: ['Status: looking busy.', 'Status: nodding thoughtfully.', 'Status: on mute, saying something brilliant.', 'Status: circling back.', 'Status: taking this offline.', 'Status: definitely not checking another tab.', 'Status: aligning stakeholders.', 'Status: thumb hovering. Professionally.'],
+  aud: ['Status: camera off, snacks on.', 'Status: silently judging the answers.', 'Status: here for the free lunch.', 'Status: will reply all later.', 'Status: heckling is a core competency.', 'Status: per my last reaction...', 'Status: multitasking (badly).'],
+  survey: ['Chip is reading every answer. All of them.', 'No wrong answers. Only unpopular ones.', 'Keep it to one or two words. Like a good email.'],
+  conn: ['Reconnecting... have you tried turning it off and on?', 'Looking for signal near the good conference room...', 'IT has been notified. IT is at lunch.'],
+  ended: ['This meeting has ended. It could have been an email.', 'Status: out of office.', 'Please take the survey about this meeting. (Kidding.)', 'Action items: none. Snacks: recommended.']
+};
+function quip(now) { const a = QUIPS[ctx]; if (!a) { set($('quip'), ''); return; } if (now) qi = Math.floor(Math.random() * a.length); else qi++;
+  const el = ctx === 'lobby' ? $('lq') : $('quip'), other = ctx === 'lobby' ? $('quip') : $('lq'); other.textContent = ''; el.textContent = a[qi % a.length]; el.className = ''; void el.offsetWidth; el.className = 'in'; }
+setInterval(() => { if (joined && !document.hidden) quip(); }, 4200);
+function burst() { const d = document.createElement('div'); d.className = 'burst'; for (let i = 0; i < 14; i++) { const p = document.createElement('i'); p.style.setProperty('--a', (i * 26 + (i % 3) * 7) + 'deg'); p.style.setProperty('--d', (150 + (i % 4) * 22) + 'px'); p.style.animationDelay = (i % 3) * 40 + 'ms'; d.appendChild(p); } $('pad').appendChild(d); setTimeout(() => d.remove(), 1100); }
+const BTN = {   // icon, label, small print, hint under the button
+  hold: ['\u{1F4F6}', 'ON HOLD', 'Reconnecting', 'Connecting to the meeting...'],
+  ended: ['\u{1F4F4}', 'CALL ENDED', 'Out of office', 'The host has left the meeting.'],
+  wait: ['\u{1F507}', 'MUTED', 'Host has the floor', 'Hands down. Wait for the host to open the floor.'],
+  open: ['\u270B', 'RAISE HAND', 'Tap! Tap! Tap!', 'The floor is open. Go!'],
+  sent: ['\u{1F4E8}', 'SENT', 'Checking who was first', 'Hand raised. Hold that thought...'],
+  first: ['\u{1F3A4}', 'YOU ARE UP', 'Unmuted', 'You were first. Answer out loud!'],
+  slow: ['\u{1F422}', 'TOO SLOW', 'Hand lowered by host', 'Someone else circled back faster.']
+};
 function show() {
-  const names = st && st.names || ['team 1', 'team 2'];
-  $('j0').textContent = 'I play for ' + names[0]; $('j1').textContent = 'I play for ' + names[1];
-  if (!joined) return;
-  $('live').textContent = st && st.scores ? (st.q ? st.q + '  ' : '') + st.names[0] + ' ' + st.scores[0] + ' / ' + st.names[1] + ' ' + st.scores[1] : '';
-  $('who').textContent = (name ? name + ' / ' : '') + (team === 2 ? 'Audience' : names[team]) + ' / game ' + sid;
-  b.classList.toggle('hide', team === 2); $('hint').classList.toggle('hide', team === 2);
-  if (team !== 2) {
-    const ok = st && st.ok.includes(pid), mine = st && st.first === pid, done = st && !st.open && st.buzz !== null && Date.now() - pressed < 15000;
-    const sent = st && st.open && Date.now() - pressed < 2500, mode = !st ? 'wait' : !ok ? 'wait' : sent ? 'sent' : st.open ? 'open' : mine ? 'first' : done && pressed ? 'slow' : 'wait';
-    b.className = mode === 'wait' ? '' : mode;
-    b.textContent = mode === 'sent' ? 'SENT' : mode === 'open' ? 'BUZZ' : mode === 'first' ? 'FIRST!' : mode === 'slow' ? 'TOO SLOW' : 'WAIT';
-    $('hint').textContent = !st ? 'Connecting to the game...' : !ok ? 'Waiting for the scorekeeper to approve this phone.' : mode === 'open' ? 'Buzzers are open. Go!' : mode === 'first' ? 'You buzzed first. Answer out loud.' : mode === 'slow' ? 'Someone else got there first.' : 'Buzzers are closed. Wait for the host.';
+  const names = st && st.names || DEF, cv = $('code').value.trim(), ms = $('mstat');
+  set($('j0n'), names[0]); set($('j1n'), names[1]);
+  if (!joined) {
+    if (!/^[A-Za-z0-9]{4}$/.test(cv)) { cls(ms, ''); set(ms, 'Enter the 4-character Meeting ID.'); }
+    else if (known === true) { cls(ms, 'ok'); set(ms, 'Meeting found. The host is nearly ready.'); }
+    else if (known === false) { cls(ms, 'bad'); set(ms, 'No meeting with that ID. Check the big screen.'); }
+    else { cls(ms, 'look'); set(ms, 'Looking for the meeting...'); }
+    return;
   }
-  const v = st && st.survey; $('survey').classList.toggle('hide', !v);
-  if (v) { $('sq').textContent = v.q; if (answered.q !== v.n) { answered = {q: v.n, a: ''}; $('sa').value = ''; } else if (answered.a && !$('sa').value) $('sa').value = answered.a; $('sdone').textContent = answered.a ? 'Sent: ' + answered.a + '. You can change it until the survey closes.' : ''; }
+  const gone = !st && known === false;
+  $('sc').classList.toggle('hide', !(st && st.scores));
+  if (st && st.scores) [0, 1].forEach(i => { const d = $('sc' + i); set(d.firstChild, names[i]); set(d.lastChild, String(st.scores[i])); cls(d, team === i ? 'me' : ''); });
+  $('mail').classList.toggle('hide', !(st && st.q)); set($('live'), st && st.q || '');
+  set($('who'), (name ? name + ' / ' : '') + (team === 2 ? 'Audience' : names[team]) + ' / ID ' + sid);
+  set($('av'), (name || (team === 2 ? 'A' : '?')).charAt(0).toUpperCase()); cls($('av'), st ? '' : 'off');
+  const ok = st && st.ok.includes(pid), lobby = team !== 2 && st && !ok, v = st && st.survey;
+  let mode = '';
+  $('pad').classList.toggle('hide', team === 2 || !!lobby); $('hint').classList.toggle('hide', team === 2 || !!lobby);
+  $('lobby').classList.toggle('hide', !(lobby || team === 2));
+  if (team === 2) {
+    set($('lt'), gone ? 'This meeting has ended' : !st ? 'Dialing in...' : v ? 'The room wants your input' : 'You are on mute');
+    set($('ls'), gone ? 'Or the host changed the Meeting ID. Check the big screen.' : !st ? 'Connecting to the meeting.' : v ? 'Reply to the thread below.' : 'Audience seat confirmed. React loudly below.');
+  } else if (lobby) { set($('lt'), 'Waiting for the host to let you in'); set($('ls'), 'The scorekeeper has to approve this phone.'); }
+  else {
+    const mine = st && st.first === pid, done = st && !st.open && st.buzz !== null && Date.now() - pressed < 15000;
+    const sent = st && st.open && Date.now() - pressed < 2500;
+    mode = !st ? (gone ? 'ended' : 'hold') : sent ? 'sent' : st.open ? 'open' : mine ? 'first' : done && pressed ? 'slow' : 'wait';
+    const t = BTN[mode], bc = mode === 'wait' ? '' : mode === 'ended' ? 'hold' : mode;
+    if (b.className.replace(/ ?down/, '') !== bc) b.className = bc;
+    cls($('pad'), 'pad' + (mode === 'open' || mode === 'first' ? ' ' + mode : ''));
+    set($('bi'), t[0]); set($('bl'), t[1]); set($('bs'), t[2]); set($('hint'), t[3]);
+    b.setAttribute('aria-disabled', mode === 'open' || mode === 'hold' ? 'false' : 'true');
+    if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); } else if (mode === 'slow') buzzz(220); }
+  }
+  lastMode = mode;
+  $('survey').classList.toggle('hide', !v);
+  $('stage').classList.toggle('hide', !!v && !/^(open|sent|first|slow)$/.test(mode));   // the survey gets the whole screen unless a buzz is in play
+  if (v) {
+    set($('sq'), v.q);
+    if (answered.q !== v.n) { answered = {q: v.n, a: ''}; $('sa').value = ''; sentAt = 0; $('sdone').className = ''; }
+    $('sm').classList.toggle('hide', !answered.a); set($('sb'), answered.a || '');
+    if (answered.a) $('sr').innerHTML = Date.now() - sentAt < 1400 ? '<b>Delivered</b>' : '<b>Delivered</b> / Read by 0';
+    if (!$('sdone').classList.contains('err')) set($('sdone'), answered.a ? 'Regret it? Send again to replace it until the survey closes.' : 'One or two words. Everyone will see the top answers.');
+    $('sa').placeholder = answered.a ? 'Reply all again...' : 'Reply all...';
+  }
+  const c = gone ? 'ended' : !st ? 'conn' : lobby ? 'lobby' : v ? 'survey' : team === 2 ? 'aud' : mode === 'wait' ? 'wait' : '';
+  if (c !== ctx) { ctx = c; quip(true); }
 }
 function join(t) {
   sid = $('code').value.trim().toUpperCase(); team = t; name = $('name').value.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 12);
-  if (!/^[A-Z0-9]{4}$/.test(sid)) { sid = ''; msg.textContent = 'Type the 4-character code first.'; return; }
-  if (t !== 2 && !name) { sid = ''; msg.textContent = 'Type your first name so the scorekeeper can approve your buzzer.'; return; }
-  if (known === false) { sid = ''; msg.textContent = 'No game is using that code. Check the big screen.'; return; }
+  if (!/^[A-Z0-9]{4}$/.test(sid)) { sid = ''; msg.textContent = 'Type the 4-character Meeting ID first.'; $('code').focus(); return; }
+  if (t !== 2 && !name) { sid = ''; msg.textContent = 'Type your first name so the scorekeeper can approve your buzzer.'; $('name').focus(); return; }
+  if (known === false) { sid = ''; msg.textContent = 'No meeting is using that ID. Check the big screen.'; return; }
   send('join').then(() => {
     joined = true; localStorage.setItem(LS, JSON.stringify({sid, team, name}));
-    $('join').className = 'hide'; $('play').className = ''; msg.textContent = ''; timer(); poll();
+    $('join').className = 'hide'; $('play').className = ''; msg.textContent = ''; ctx = ''; lastMode = ''; window.scrollTo(0, 0); timer(); show(); poll();
   }).catch(() => { sid = ''; msg.textContent = 'Could not connect. Check your signal and try again.'; });
 }
-function leave() { joined = false; sid = ''; localStorage.removeItem(LS); $('play').className = 'hide'; $('join').className = ''; timer(); }
-function react(e) { const now = Date.now(); if (now - lastReact < 700) return; lastReact = now; send('react', {e}).catch(() => {}); }
-function answer() { const a = $('sa').value.trim().slice(0, 30), v = st && st.survey; if (!a || !v) return; send('ans', {q: v.n, a}).then(() => { answered = {q: v.n, a}; try { sessionStorage.setItem('replyall_ans', JSON.stringify(answered)); } catch (e) {} show(); }).catch(() => { $('sdone').textContent = 'Not sent. Check your signal and try again.'; }); }
+function leave() { joined = false; sid = ''; st = null; known = null; localStorage.removeItem(LS); $('play').className = 'hide'; $('join').className = ''; timer(); show(); poll(); }
+function react(e, el) {
+  const now = Date.now(); if (now - lastReact < 700) return; lastReact = now; send('react', {e}).catch(() => {}); buzzz(15);
+  if (!el) return;
+  const f = document.createElement('span'), r = $('rx'); f.className = 'fly'; f.textContent = el.firstChild.textContent; f.style.setProperty('--x', (Math.random() * 60 - 30) + 'px'); f.style.setProperty('--r', (Math.random() * 50 - 25) + 'deg'); el.appendChild(f); setTimeout(() => f.remove(), 950);
+  let c = el.querySelector('em'); if (!c) { c = document.createElement('em'); el.appendChild(c); } c.textContent = '+' + (el.dataset.n = (+el.dataset.n || 0) + 1);
+  el.classList.add('hit'); r.classList.add('cool'); setTimeout(() => { el.classList.remove('hit'); r.classList.remove('cool'); }, 700);
+}
+function answer() {
+  const a = $('sa').value.trim().slice(0, 30), v = st && st.survey, d = $('sdone'); if (!a || !v) return;
+  const ss = $('ss'); ss.className = ''; void ss.offsetWidth; ss.className = 'go'; d.className = '';
+  send('ans', {q: v.n, a}).then(() => {
+    answered = {q: v.n, a}; sentAt = Date.now(); try { sessionStorage.setItem('replyall_ans', JSON.stringify(answered)); } catch (e) {}
+    $('sa').value = ''; const m = $('sm'); m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); buzzz(25); show(); setTimeout(show, 1500);
+  }).catch(() => { d.className = 'err'; d.textContent = 'Not sent. Check your signal and try again.'; });
+}
 $('sa').addEventListener('keydown', e => { if (e.key === 'Enter') answer(); });
+// The press: ripple and a short buzz straight away, so the button feels instant even on a slow network.
+b.addEventListener('pointerdown', e => {
+  b.classList.add('down'); if (st && !st.open) return;
+  const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px'; b.appendChild(s); setTimeout(() => s.remove(), 600); buzzz(30);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach(k => b.addEventListener(k, () => b.classList.remove('down')));
 b.addEventListener('click', () => { if (st && !st.open) return; pressed = Date.now(); show(); send('buzz').catch(() => { msg.textContent = 'Not sent. Check your signal.'; setTimeout(() => msg.textContent = '', 2000); }); });
 // Team phones check once a second (buzzer feedback); audience phones every four seconds (survey only).
 let pt; function timer() { clearInterval(pt); pt = setInterval(poll, joined && team !== 2 ? 1000 : 4000); }
 // A scanned QR code carries the game code. A phone that joined before goes straight back in.
 const c = (new URLSearchParams(location.search).get('c') || '').toUpperCase(); let saved = null; try { saved = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
 $('code').value = /^[A-Z0-9]{4}$/.test(c) ? c : saved && saved.sid || '';
-$('code').addEventListener('input', () => { known = null; if ($('code').value.trim().length === 4) poll(); });
-if (saved && saved.sid === $('code').value) { $('name').value = saved.name || ''; join(saved.team); } else { timer(); poll(); }
+$('code').addEventListener('input', () => { msg.textContent = ''; known = null; st = null; show(); if ($('code').value.trim().length === 4) poll(); });
+$('name').addEventListener('input', () => { if (msg.textContent) msg.textContent = ''; });
+if (saved && saved.sid === $('code').value) { $('name').value = saved.name || ''; join(saved.team); } else { timer(); show(); poll(); }
 </script>
 </body>
 </html>
