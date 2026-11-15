@@ -134,6 +134,7 @@ const MODE = m => m === 3 ? 'Bonus season: triple budget' : m === 2 ? 'Q4 crunch
 const STAMPS = [['NOTED.', 'PARKING LOT', 'NOT IN SCOPE', 'DEPRIORITIZED', 'NOTED WITH CONCERN'],
   ['SEE ME.', 'FLAGGED', 'CC: YOUR MANAGER', 'MOVED TO Q3', 'NEEDS ALIGNMENT'],
   ['PER MY LAST EMAIL', 'MEETING ENDED', 'INVITE DECLINED', 'ESCALATED', 'THIS COULD HAVE BEEN AN EMAIL']];
+const WRONG = ["LET'S CIRCLE BACK", 'TAKE IT OFFLINE', 'NOT ON THE AGENDA', 'OUT OF OFFICE', 'WRONG THREAD'];
 const STRIKE_SUB = ['strike 1 of 3 - gentle reminder', 'strike 2 of 3 - following up', 'strike 3 of 3 - final notice'];
 
 // ---------- question file check ----------
@@ -367,7 +368,7 @@ const A = {
     const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },
-  wrong() { snap(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: "LET'S CIRCLE BACK", sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
+  wrong() { snap(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: WRONG[S.items % WRONG.length], sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
   clearStrikes() { snap(); S.strikes = 0; up(); },
   takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget']]}); later(() => chipLine('takeover', true), 2500); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },

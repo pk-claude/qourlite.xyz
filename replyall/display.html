@@ -13,6 +13,9 @@
 /* The show is laid out for 16:9 and stretches happily to taller screens (16:10, 5:4, 4:3). On anything wider it is pillarboxed:
    body is a size container no wider than 16:9, every length below is in cqw/cqh (1% of that box) and fixed layers are held inside it */
 html{height:100%;margin:0;background:#07071a;overflow:hidden}
+/* on screens wider than 16:9 the side bars continue the office world: a dim week grid fading into the dark, no motion */
+html{background:radial-gradient(60vh 80vh at 50% 50%,rgba(108,76,255,.22),transparent 75%),linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px) 0 0/100% 8.3334vh,linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px) 50% 0/35.556vh 100%,linear-gradient(180deg,#0e0c2e,#07071a)}
+body{box-shadow:0 0 6vh 1vh rgba(0,0,0,.7)}
 body{position:relative;width:min(100vw,177.78vh);height:100vh;margin:0 auto;container-type:size;contain:layout paint;background:var(--ink);color:var(--paper);font-family:var(--body);overflow:hidden}
 /* ambient office layer: a calendar week grid, a "now" line, faint notification toasts and a typing cursor */
 #bg{position:fixed;inset:0;overflow:hidden;z-index:0;background:radial-gradient(90cqw 75cqh at 6% -12%,rgba(108,76,255,.55),transparent 66%),radial-gradient(75cqw 75cqh at 106% 112%,rgba(255,61,139,.32),transparent 62%),radial-gradient(45cqw 45cqh at 55% 52%,rgba(45,226,230,.06),transparent 70%),linear-gradient(180deg,#0e0c2e,var(--ink))}
