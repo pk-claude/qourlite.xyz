@@ -130,7 +130,11 @@ table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
 const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_state_v3';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE = m => m === 3 ? 'Bonus season: triple budget' : m === 2 ? 'Q4 crunch: double budget' : 'Regular business';
-const STAMPS = ['NOTED.', 'SEE ME.', 'PER MY LAST EMAIL'];
+// strike stamps escalate like an email thread going wrong: polite, then pointed, then on the record
+const STAMPS = [['NOTED.', 'PARKING LOT', 'NOT IN SCOPE', 'DEPRIORITIZED', 'NOTED WITH CONCERN'],
+  ['SEE ME.', 'FLAGGED', 'CC: YOUR MANAGER', 'MOVED TO Q3', 'NEEDS ALIGNMENT'],
+  ['PER MY LAST EMAIL', 'MEETING ENDED', 'INVITE DECLINED', 'ESCALATED', 'THIS COULD HAVE BEEN AN EMAIL']];
+const STRIKE_SUB = ['strike 1 of 3 - gentle reminder', 'strike 2 of 3 - following up', 'strike 3 of 3 - final notice'];
 
 // ---------- question file check ----------
 function problems() {
@@ -360,7 +364,7 @@ const A = {
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
   strike() { if (S.strikes >= 3 || S.phase !== 'round') return; snap(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; SFX.strike(); const a = said; said = '';
-    up({stamp: STAMPS[S.strikes - 1], sub: 'strike ' + S.strikes + ' of 3'});
+    const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },
   wrong() { snap(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: "LET'S CIRCLE BACK", sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
