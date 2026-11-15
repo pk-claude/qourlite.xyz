@@ -12,7 +12,9 @@
     {id: 'storm', label: 'Reply-all storm', hint: 'Dozens of "please remove me" emails.', ms: 6200},
     {id: 'reorg', label: 'Surprise reorg', hint: 'Team names spin. Nothing changes.', ms: 7000},
     {id: 'training', label: 'Mandatory training', hint: 'Module 1 of 47: Breathing at your desk.', ms: 6400},
-    {id: 'wifi', label: 'Wifi down', hint: 'Buffering wheel over everything.', ms: 5600}
+    {id: 'wifi', label: 'Wifi down', hint: 'Buffering wheel over everything.', ms: 5600},
+    {id: 'printer', label: 'Printer jam', hint: 'Paper jam in a tray that does not exist.', ms: 6000},
+    {id: 'share', label: 'Wrong screen shared', hint: 'Everyone sees your tabs. All of them.', ms: 6200}
   ];
   var BY = {}; LIST.forEach(function (g) { BY[g.id] = g; });
   var api = {list: LIST.map(function (g) { return {id: g.id, label: g.label, hint: g.hint}; }), play: function () { return false; }, playing: function () { return null; }};
@@ -197,7 +199,30 @@
     '.g-wifi h1{font-family:var(--gd);font-weight:400;font-size:7.4cqw;line-height:1;margin:4cqh 0 0}',
     '.g-wifi h1 span{display:inline-block;width:6cqw;text-align:left}',
     '.g-wifi p{font-size:2.5cqw;font-weight:800;color:#ffe14d;margin:1.6cqh 0 0;min-height:3.4cqw}',
-    '.g-wifi .frozen{position:absolute;left:2.4cqw;top:3cqh;font:800 1.5cqw var(--gm);letter-spacing:.14em;text-transform:uppercase;background:#e5263a;color:#fff;padding:.8cqh 1.2cqw;border-radius:.6cqw;animation:ggblink 1s infinite}'
+    '.g-wifi .frozen{position:absolute;left:2.4cqw;top:3cqh;font:800 1.5cqw var(--gm);letter-spacing:.14em;text-transform:uppercase;background:#e5263a;color:#fff;padding:.8cqh 1.2cqw;border-radius:.6cqw;animation:ggblink 1s infinite}',
+    '.g-printer{background:radial-gradient(70cqw 70cqh at 50% 40%,#2b2768,#0a0a1f 75%)}',
+    '.g-printer .pr{position:relative;width:40cqw;height:24cqh;margin-top:-6cqh;border-radius:2cqw 2cqw 1.2cqw 1.2cqw;background:linear-gradient(180deg,#e9e4d8,#bdb6a6);border:.5cqw solid #0a0a1f;box-shadow:0 1.6cqh 0 rgba(0,0,0,.45);animation:ggpop .4s cubic-bezier(.3,1.5,.5,1),ggshake .18s .5s 14}',
+    '.g-printer .slot{position:absolute;left:12%;right:12%;top:30%;height:1.4cqh;border-radius:1cqw;background:#0a0a1f}',
+    '.g-printer .lcd{position:absolute;right:6%;bottom:14%;width:46%;padding:1cqh 1cqw;border-radius:.6cqw;background:#13341f;color:#7dff9a;font:800 1.35cqw/1.25 var(--gm);text-align:left;letter-spacing:.06em;text-transform:uppercase;min-height:6.4cqh}',
+    '.g-printer .led{position:absolute;left:8%;bottom:20%;width:2.2cqw;height:2.2cqw;border-radius:50%;background:#e5263a;box-shadow:0 0 2cqw #e5263a;animation:ggblink .5s infinite}',
+    '.g-printer .sheet{position:absolute;left:50%;top:31%;width:24cqw;height:30cqh;margin-left:-12cqw;background:#fff8ea;border:.25cqw solid #0a0a1f;border-radius:.4cqw;z-index:-1;animation:ggsheet 1.1s cubic-bezier(.3,.7,.4,1) both}',
+    '.g-printer .sheet:before{content:\'\';position:absolute;left:12%;right:12%;top:14%;height:40%;background:repeating-linear-gradient(180deg,rgba(10,10,31,.35) 0 .5cqh,transparent .5cqh 2cqh)}',
+    '@keyframes ggsheet{0%{transform:translateY(6cqh);opacity:0}15%{transform:translateY(0) rotate(0);opacity:1}to{transform:translate(var(--dx),-52cqh) rotate(var(--dr));opacity:.95}}',
+    '@keyframes ggshake{50%{transform:translateX(.6cqw) rotate(.4deg)}}',
+    '.g-printer h1{font-family:var(--gd);font-weight:400;font-size:7.4cqw;line-height:1;margin:5cqh 0 0}',
+    '.g-printer p{font-size:2.4cqw;font-weight:800;color:#ffe14d;margin:1.4cqh 0 0;min-height:3.2cqw}',
+    '.g-share{background:#0a0a1f;padding:5cqh 5cqw 0}',
+    '.g-share .bar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:2cqw;padding:1.4cqh 0;background:#e5263a;font:800 1.6cqw var(--gm);letter-spacing:.12em;text-transform:uppercase;animation:ggup .35s}',
+    '.g-share .bar b{background:#fff8ea;color:#e5263a;border-radius:.6cqw;padding:.6cqh 1.4cqw;transition:transform .2s}',
+    '.g-share .bar b.hit{transform:scale(.9);background:#ffe14d;color:#0a0a1f}',
+    '.g-share .win{position:relative;width:84cqw;height:62cqh;margin-top:5cqh;border-radius:1.4cqw;background:#fff8ea;color:#0a0a1f;border:.4cqw solid #fff;overflow:hidden;text-align:left;animation:ggpop .4s cubic-bezier(.3,1.5,.5,1)}',
+    '.g-share .tabs{display:flex;gap:.4cqw;padding:1.2cqh 1cqw 0;background:#2b2768;overflow:hidden}',
+    '.g-share .tabs i{flex:0 0 auto;max-width:17cqw;font:700 1.2cqw var(--gm);font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff8ea;background:#3d388c;border-radius:.8cqw .8cqw 0 0;padding:1cqh 1cqw;animation:ggup .3s backwards}',
+    '.g-share .tabs i.on{background:#fff8ea;color:#0a0a1f}',
+    '.g-share .url{margin:1.4cqh 1.6cqw;padding:1cqh 1.4cqw;border-radius:99px;background:#ece6d8;font:700 1.4cqw var(--gm)}',
+    '.g-share .doc{margin:0;padding:1cqh 3cqw 1cqh 6.5cqw;font-size:2.4cqw;font-weight:800;line-height:1.5}',
+    '.g-share .doc li{animation:ggup .35s backwards}',
+    '.g-share .cur{position:absolute;width:3cqw;height:3cqw;left:50%;top:60%;transition:left .5s cubic-bezier(.5,0,.3,1),top .5s cubic-bezier(.5,0,.3,1);z-index:3}'
   ].join('\n');
 
   var root = null, timers = [], current = null, endT = null, teams = null;
@@ -289,6 +314,26 @@
       at(1700, function () { cc.textContent = '[calm narrator] Breathe in. Do not expense it.'; });
       at(3300, function () { cc.textContent = '[calm narrator] Now breathe out. Quietly.'; });
       at(4300, function () { var d = document.createElement('div'); d.className = 'quiz'; d.innerHTML = '<small>Knowledge check 1 of 212</small><b>Did you breathe?</b><span class="y">Yes</span><span>Let me circle back</span>'; q('.g-training').appendChild(d); });
+    },
+    printer: function () {
+      var sheets = ''; for (var k = 0; k < 7; k++) sheets += '<div class="sheet" style="animation-delay:' + (600 + k * 520) + 'ms;--dx:' + (k % 2 ? 1 : -1) * (6 + k * 5) + 'cqw;--dr:' + (k % 2 ? 1 : -1) * (8 + k * 6) + 'deg"></div>';
+      root.innerHTML = '<div class="gg g-printer"><div class="pr">' + sheets + '<div class="slot"></div><div class="led"></div><div class="lcd">Paper jam<br>in tray 7</div></div>' +
+        '<h1>PRINTER JAM</h1><p>Somebody printed the whole shared drive.</p>' + chip('I printed the agenda. All of it. Forever.', 3900) + '</div>';
+      var lcd = q('.lcd'), p = q('p');
+      at(1600, function () { lcd.innerHTML = 'Tray 7<br>does not exist'; });
+      at(2700, function () { lcd.innerHTML = 'Printing copy<br>3 of 412'; p.textContent = 'Q3 deck FINAL v9 (actual final), double-sided.'; });
+      at(4300, function () { lcd.innerHTML = 'Toner low<br>since 2017'; });
+    },
+    share: function () {
+      var tabs = ['Q3 deck FINAL v9', 'How to look busy - Search', 'Is it Friday yet', 'Fantasy league: my team', 'Recipes I will not cook', 'Draft: reply all to everyone', 'Chip, AI intern (unpaid)'];
+      root.innerHTML = '<div class="gg g-share"><div class="bar">You are sharing your entire screen <b>Stop sharing</b></div>' +
+        '<div class="win"><div class="tabs">' + tabs.map(function (t, i) { return '<i class="' + (i === 1 ? 'on' : '') + '" style="animation-delay:' + i * 90 + 'ms">' + esc(t) + '</i>'; }).join('') + '</div>' +
+        '<div class="url">search: how to look busy in a meeting without moving</div><ol class="doc"><li style="animation-delay:500ms">Nod slowly every 40 seconds</li><li style="animation-delay:900ms">Say "great point" to nobody in particular</li><li style="animation-delay:1300ms">Open a spreadsheet. Any spreadsheet.</li></ol>' +
+        '<svg class="cur" viewBox="0 0 40 40"><path d="M3 2l0 30 8-7 6 13 6-3-6-12 11 0z" fill="#fff" stroke="#0a0a1f" stroke-width="2.6" stroke-linejoin="round"/></svg></div>' +
+        chip('I saw nothing. I see everything.', 4200) + '</div>';
+      var c = q('.cur'), b = q('.bar b'), spots = [[20, 30], [80, 20], [35, 75], [70, 50]];
+      spots.forEach(function (xy, k) { at(1600 + k * 520, function () { c.style.left = xy[0] + '%'; c.style.top = xy[1] + '%'; }); });
+      at(3800, function () { b.classList.add('hit'); b.textContent = 'Stop sharing (clicked 9 times)'; });
     },
     wifi: function () {
       root.innerHTML = '<div class="gg g-wifi"><div class="px"></div><div class="frozen">Your connection is unstable</div><div class="wheel"><div class="ico"><i></i><i></i><i></i><u></u><b>!</b></div></div>' +
