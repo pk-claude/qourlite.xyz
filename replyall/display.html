@@ -54,6 +54,29 @@ body[data-phase=lightning] #bg .type,body[data-phase=winner] #bg .type{display:n
 .vs em{font-style:normal;font-size:2vw;background:var(--pink);border-radius:50%;width:5vw;height:5vw;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg)}
 .join{display:flex;align-items:center;gap:1.8vw;text-align:left;font-size:2.3vw;line-height:1.35;font-weight:700;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:1.2vw;padding:1.2vh 1.8vw 1.2vh 1.2vh}
 .join b{color:var(--yellow);font-family:var(--mono);letter-spacing:.1em}
+.join{background:rgba(20,18,58,.9)}
+.vs{text-shadow:0 .3vh 1vw var(--ink),0 0 .4vw var(--ink)}
+/* cold open: a reply-all storm. Notifications flood in behind the title, the unread badge climbs, then the logo slams in */
+.storm{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.st{position:absolute;width:21vw;display:flex;align-items:center;gap:.8vw;padding:1.1vh .9vw;border-radius:1vw;background:#211d5c;border:.12vw solid rgba(255,255,255,.3);box-shadow:0 1vh 2vw rgba(0,0,0,.5);font-size:1.3vw;line-height:1.25;white-space:nowrap;overflow:hidden;text-align:left;rotate:var(--rot,0deg);animation:stin .5s cubic-bezier(.2,1.2,.35,1) backwards;transition:transform .7s cubic-bezier(.4,0,.8,.4),opacity .7s}
+.st.pa{background:var(--paper)}.st.pa span{color:var(--ink)}
+.st i{flex:none;width:2.6vw;height:2.6vw;border-radius:.6vw;background:currentColor;display:flex;align-items:center;justify-content:center}
+.st i svg{width:1.7vw;height:1.3vw}.st i path{fill:none;stroke:var(--ink);stroke-width:5;stroke-linejoin:round}
+.st b{display:block;font:800 .85vw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:currentColor}
+.st.pa b{color:var(--violet)}
+.st span{color:var(--paper);font-weight:700}
+.st.out{transform:translate(var(--ox),var(--oy)) scale(.5);opacity:0}
+.st.idle{opacity:.6;animation:stdrift 7s ease-in-out infinite alternate}
+@keyframes stin{from{transform:translate(var(--fx),var(--fy)) scale(.7);opacity:0}}
+@keyframes stdrift{to{translate:0 -1.8vh}}
+.cold .logo{animation:lslam .55s 2.6s backwards cubic-bezier(.2,1.4,.4,1),bob 4s 3.2s ease-in-out infinite}
+.cold .nb{animation:nbfly .55s 2.6s backwards cubic-bezier(.3,1.3,.5,1),nb 2.6s 3.2s cubic-bezier(.3,1.6,.5,1) infinite}
+.cold .re,.cold .sub,.cold .tag{animation:cin .5s 2.95s backwards cubic-bezier(.3,1.6,.5,1)}
+.cold .sub{animation-delay:3.05s}.cold .tag{animation-delay:3.15s}
+@keyframes lslam{from{transform:scale(4.5) rotate(-6deg);opacity:0}60%{opacity:1}}
+@keyframes nbfly{from{transform:translate(var(--bx,-30vw),var(--by,8vh)) scale(2.3)}}
+#stage.rumble{animation:rumble .16s linear infinite}
+@keyframes rumble{25%{transform:translate(.22vw,-.2vh)}50%{transform:translate(-.2vw,.24vh) rotate(.12deg)}75%{transform:translate(.12vw,.16vh) rotate(-.1deg)}}
 .qr{background:#fff;border-radius:.8vw;padding:.6vw;width:15vw;height:15vw;flex:none}
 .qr svg{display:block;width:100%;height:100%}
 .qr.big{width:19vw;height:19vw}
@@ -195,23 +218,62 @@ body[data-phase=lightning] #bg .type,body[data-phase=winner] #bg .type{display:n
 .float{position:fixed;bottom:-8vh;z-index:4;font-size:5vw;animation:rise 3.2s ease-out forwards;pointer-events:none}
 @keyframes rise{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
 
-/* final round */
-.rush{display:flex;justify-content:space-between;align-items:center;height:9.5vh}
-.rush h1{font-family:var(--disp);font-size:3.4vw;margin:0}
-.rush .mono{font-size:1.4vw;color:var(--yellow)}
-.clock{font-family:var(--mono);font-weight:800;font-size:3.4vw;background:var(--ink);border:.25vw solid var(--cyan);color:var(--cyan);border-radius:1vw;padding:.4vh 1.4vw}
-.clock.hot{color:var(--red);border-color:var(--red);animation:pulse .5s infinite}
-.lq{height:7vh;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.6vw;font-weight:900;line-height:1.05;color:var(--yellow)}
+/* final round: the last minute of Friday. Ceiling lights go out bank by bank, a wall clock sweeps to 5:00, the weekend uploads */
+.lights{position:fixed;top:0;left:0;right:0;display:flex;gap:1.3vw;padding:0 2.4vw;z-index:-1;pointer-events:none}
+.lights i{position:relative;flex:1;height:1.3vh;border-radius:0 0 .6vw .6vw;background:#fffbe0;box-shadow:0 0 2.2vw .5vw rgba(255,244,190,.75);transition:background .5s,box-shadow .5s}
+.lights i:after{content:"";position:absolute;left:-12%;right:-12%;top:100%;height:30vh;background:linear-gradient(rgba(255,244,190,.2),transparent);clip-path:polygon(12% 0,88% 0,100% 100%,0 100%);transition:opacity .5s}
+.lights i.off{background:#26244c;box-shadow:none;animation:flick .55s steps(1)}
+.lights i.off:after{opacity:0;animation:flick .55s steps(1)}
+@keyframes flick{0%{opacity:1;background:#fffbe0}15%{opacity:.2}30%{opacity:1;background:#fffbe0}45%{opacity:.1}60%{opacity:.8;background:#fffbe0}75%{opacity:1}}
+.dim{position:fixed;inset:0;z-index:-2;pointer-events:none;background:#04040f;opacity:0;transition:opacity .8s}
+.rush{display:flex;justify-content:space-between;align-items:center;gap:2vw;height:20vh;flex:none;padding-top:1vh}
+.rl{min-width:0;flex:1}
+.rush h1{font-family:var(--disp);font-size:3.3vw;line-height:1;margin:.5vh 0 1vh}
+.rush .mono{font-size:1.3vw;color:var(--cyan)}
+.lq{min-height:6.4vh;display:flex;align-items:center;font-size:2.6vw;font-weight:900;line-height:1.05;color:var(--yellow)}
+.lq.pop{animation:cin .4s cubic-bezier(.3,1.6,.5,1)}
+.wall{flex:none;display:flex;align-items:center;gap:1.6vw}
+.dig{text-align:right}
+.clock{display:inline-block;font-family:var(--mono);font-weight:800;font-size:5.6vw;line-height:1;background:var(--ink);border:.3vw solid var(--cyan);color:var(--cyan);border-radius:1.1vw;padding:.8vh 1.2vw;margin-top:.6vh;min-width:13vw;text-align:center;text-shadow:0 0 1.2vw currentColor}
+.clock.hot{color:#ff5a6c;border-color:var(--red);animation:pulse .5s infinite;box-shadow:0 0 3vw rgba(229,38,58,.7)}
+.face{width:19vh;height:19vh;flex:none;overflow:visible;filter:drop-shadow(0 1vh 1.4vw rgba(0,0,0,.6))}
+.face .rim{fill:var(--paper);stroke:#2b2768;stroke-width:9}
+.face .tk{stroke:var(--ink);stroke-width:3;stroke-linecap:round}.face .tk.b{stroke-width:6}
+.face .arc{fill:none;stroke:var(--cyan);stroke-width:9;opacity:.9;transition:stroke-dashoffset 1s linear,stroke-dasharray 1s linear}
+.face .hh,.face .mh{stroke:var(--ink);stroke-linecap:round}
+.face .hs{transform-origin:100px 100px;transition:transform 1s linear}
+.face .hs line{stroke:var(--red);stroke-width:3.5;stroke-linecap:round}.face .hs circle{fill:var(--red)}
+.face text{font:800 15px var(--mono);fill:var(--ink);text-anchor:middle}
+.wall.hot .face{animation:pulse .5s infinite}
+.wall.hot .face .rim{stroke:var(--red);fill:#ffe1e1}.wall.hot .face .arc{stroke:var(--red)}
 table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-spacing:.9vw 1vh;font-size:2.5vw}
-.lt td{background:rgba(255,255,255,.07);border:.15vw solid rgba(255,255,255,.12);border-radius:1vw;padding:0 1.4vw;transition:.3s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.lt tr.lh td{background:none;border:0;font-size:2vw;font-weight:900;height:5vh}.lt tr.lh td>*{vertical-align:middle}.lt tr.lh b{font-family:var(--disp);color:var(--yellow);font-size:2.8vw;margin-left:1vw}
+.lt td{background:rgba(255,255,255,.07);border:.15vw solid rgba(255,255,255,.12);border-radius:1vw;padding:0 1.4vw;transition:background .3s,color .3s,border-color .3s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lt tr.lh td{background:none;border:0;border-bottom:.35vh solid transparent;border-radius:0;font-size:2vw;font-weight:900;height:5.4vh}.lt tr.lh td>*{vertical-align:middle}.lt tr.lh b{font-family:var(--disp);color:var(--yellow);font-size:2.8vw;margin-left:1vw}
+.lt tr.lh td.act{border-bottom-color:var(--cyan)}
+.lt tr.lh td.act:after{content:"on the clock";font:800 1.05vw var(--mono);letter-spacing:.12em;text-transform:uppercase;background:var(--cyan);color:var(--ink);border-radius:99px;padding:.3vh .9vw;margin-left:1.2vw;vertical-align:middle}
 .lt td.ln{width:5vw;background:none;border:0;color:var(--cyan);font-family:var(--disp);text-align:center}
-.lt tr.cur td.ln{color:var(--ink);background:var(--cyan)}
+.lt tr.lcur td.ln{color:var(--ink);background:var(--cyan);box-shadow:0 0 2vw rgba(45,226,230,.6)}
+.lt tr.lcur td{border-color:rgba(45,226,230,.55)}
 .lt td.lp{width:9vw;text-align:center;font-family:var(--disp);color:var(--yellow)}
-.lt td.on{background:var(--paper);color:var(--ink);font-weight:900}
-.lt td.lp.on{background:var(--ink);color:var(--yellow);border-color:var(--yellow)}
-.lfoot{height:9vh;display:flex;justify-content:flex-end;align-items:center;gap:3vw;font-size:2.4vw;font-weight:900}
-.lfoot .big{font-family:var(--disp);font-size:5.6vw;color:var(--yellow)}
+.lt td.on{background:var(--paper);color:var(--ink);font-weight:900;border-color:var(--paper);animation:lin .45s cubic-bezier(.2,1.4,.4,1)}
+.lt td.lp.on{background:var(--ink);color:var(--yellow);border-color:var(--yellow);animation:lpt .55s cubic-bezier(.3,1.7,.5,1);box-shadow:0 0 1.6vw rgba(255,225,77,.5)}
+.lt td.lp.on.zero{color:#ff8a96;border-color:var(--red);box-shadow:none}
+@keyframes lin{from{transform:translateX(-4vw) skewX(10deg);opacity:0}}
+@keyframes lpt{from{transform:scale(2.6) rotate(-14deg);opacity:0}}
+.lfoot{height:11.5vh;flex:none;display:flex;align-items:center;gap:2.6vw}
+.up{flex:1;min-width:0}
+.upl{display:flex;align-items:baseline;gap:1.6vw;font:800 1.75vw var(--mono);letter-spacing:.04em;margin-bottom:.9vh;white-space:nowrap}
+.upl #upt{flex:1;overflow:hidden;text-overflow:ellipsis}
+.upl #target{color:var(--yellow);text-transform:uppercase;letter-spacing:.12em}
+.upl b{font-family:var(--disp);font-size:2.8vw;line-height:1;color:var(--cyan);min-width:7vw;text-align:right}
+.upb{position:relative;height:4vh;border-radius:99px;background:rgba(10,10,31,.7);border:.22vw solid rgba(255,255,255,.35);overflow:hidden}
+.upb i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:repeating-linear-gradient(-45deg,var(--cyan) 0 1.2vw,#8df5f7 1.2vw 2.4vw);background-size:3.394vw 100%;transition:width .8s cubic-bezier(.2,.9,.2,1);animation:stripes .9s linear infinite;box-shadow:0 0 1.6vw rgba(45,226,230,.7)}
+@keyframes stripes{to{background-position-x:3.394vw}}
+.up.done .upb i{background:var(--yellow);animation:none;box-shadow:0 0 2vw var(--yellow)}
+.up.done .upl b{color:var(--yellow)}
+.tot{flex:none;display:flex;align-items:center;gap:1.2vw;font-size:2.2vw;font-weight:900}
+.lfoot .big{font-family:var(--disp);font-size:5.6vw;line-height:1;color:var(--yellow);min-width:9vw;text-align:right}
+.up.done+.tot .big{animation:pulse .5s 4}
 .won{color:var(--cyan)}
 
 /* certificate */
@@ -231,6 +293,8 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
   #stage.deal .tile,.iw,.ihero,.irow{animation:none!important}
   .ibg{-webkit-mask-image:none;mask-image:none;animation:rfade var(--d) forwards}.inv{animation:rfade var(--d) forwards}
   .card{animation-name:rfade}
+  .st,.cold .re,.cold .sub,.cold .tag,.lights i,.lights i:after,.lt td.on,.clock,.wall .face,.upb i,.lq,.big{animation:none!important}
+  .face .hs,.face .arc,.upb i,.dim{transition:none}
 }
 @keyframes rfade{0%{opacity:0}8%{opacity:1}86%{opacity:1}100%{opacity:0}}
 </style>
@@ -270,9 +334,9 @@ function sceneKey() {
 }
 
 function build() {
-  let h = '';
+  let h = ''; stormStop();
   if (S.phase === 'title') {
-    h = `<div class="center"><div class="re mono">RE: RE: RE: FWD: mandatory fun</div><div class="logow"><div class="logo">${esc(G.title)}</div><div class="nb">99+</div></div><div class="sub">${esc(G.subtitle)}</div>
+    h = `<div class="center${CALM ? '' : ' cold'}"><div class="storm"></div><div class="re mono">RE: RE: RE: FWD: mandatory fun</div><div class="logow"><div class="logo">${esc(G.title)}</div><div class="nb">${CALM ? '9,999' : '1'}</div></div><div class="sub">${esc(G.subtitle)}</div>
       <div class="tag mono">${esc(G.tagline || '')}</div>
       <div class="vs"><span id="n0"></span><em>VS</em><span id="n1"></span></div>
       ${S.phones ? `<div class="join">${qr(S.joinUrl)}<div>Scan to play along on your phone<br>or open <b>${esc(shortUrl())}</b><br>and enter code <b>${esc(S.sid)}</b></div></div>` : ''}</div>`;
@@ -291,15 +355,22 @@ function build() {
         ? `<div class="how">${qr(S.joinUrl, 1)}<div>Answer on your phone.<br>Scan, or open <b>${esc(shortUrl())}</b><br>code <b>${esc(S.sid)}</b><div class="cnt"><span data-v="${v.count}">${v.count}</span> answers in</div></div></div>`
         : `<div class="cnt"><span data-v="${v.count}">${v.count}</span> answers in. Counting them now.</div>`)) + '</div>';
   } else if (S.phase === 'lightning') {
-    h = `<div class="rush"><div><h1>The 4:59 Friday Rush</h1><div class="mono">${esc(G.finalStakes || 'Hit ' + G.lightningTarget + ' to win')}</div></div><div class="clock"></div></div>
-      <div class="lq"></div>
-      <table class="lt"><tr class="lh"><td class="ln"></td><td colspan="2"><span id="fn0"></span><b id="fs0" data-v="${S.teams[0].score}">${S.teams[0].score}</b></td><td colspan="2"><span id="fn1"></span><b id="fs1" data-v="${S.teams[1].score}">${S.teams[1].score}</b></td></tr>${[0,1,2,3,4].map(i => `<tr class="la"><td class="ln">${i + 1}</td><td></td><td class="lp"></td><td></td><td class="lp"></td></tr>`).join('')}</table>
-      <div class="lfoot"><div id="target"></div><div>Total <span class="big" data-v="0">0</span></div></div>`;
+    const tk = [...Array(60)].map((_, i) => { const r = i * 6 * Math.PI / 180, big = i % 5 === 0, a = big ? 70 : 77; return `<line class="tk${big ? ' b' : ''}" x1="${(100 + Math.sin(r) * a).toFixed(1)}" y1="${(100 - Math.cos(r) * a).toFixed(1)}" x2="${(100 + Math.sin(r) * 82).toFixed(1)}" y2="${(100 - Math.cos(r) * 82).toFixed(1)}"/>`; }).join('');
+    h = `<div class="lights">${'<i></i>'.repeat(NL)}</div><div class="dim"></div>
+      <div class="rush"><div class="rl"><div class="mono">Final round / ${esc(G.finalStakes || 'Hit ' + G.lightningTarget + ' to win')}</div><h1>The 4:59 Friday Rush</h1><div class="lq"></div></div>
+        <div class="wall"><div class="dig"><div class="mono">Seconds to 5:00 PM</div><div class="clock"></div></div>
+          <svg class="face" viewBox="0 0 200 200"><circle class="rim" cx="100" cy="100" r="92"/>${tk}<circle class="arc" cx="100" cy="100" r="92" transform="rotate(-90 100 100)"/>
+            <text x="100" y="58">FRI</text><text x="100" y="150">4:59 PM</text>
+            <line class="hh" x1="100" y1="100" x2="100" y2="56" stroke-width="8" transform="rotate(149.5 100 100)"/><line class="mh" x1="100" y1="100" x2="100" y2="34" stroke-width="5.5" transform="rotate(354 100 100)"/>
+            <g class="hs"><line x1="100" y1="118" x2="100" y2="24"/><circle cx="100" cy="100" r="7"/></g></svg></div></div>
+      <table class="lt"><colgroup><col style="width:5vw"><col><col style="width:9vw"><col><col style="width:9vw"></colgroup><tr class="lh"><td class="ln"></td><td colspan="2"><span id="fn0"></span><b id="fs0" data-v="${S.teams[0].score}">${S.teams[0].score}</b></td><td colspan="2"><span id="fn1"></span><b id="fs1" data-v="${S.teams[1].score}">${S.teams[1].score}</b></td></tr>${[0,1,2,3,4].map(i => `<tr class="la"><td class="ln">${i + 1}</td><td></td><td class="lp"></td><td></td><td class="lp"></td></tr>`).join('')}</table>
+      <div class="lfoot"><div class="up"><div class="upl"><span id="upt"></span><span id="target"></span><b id="upp"></b></div><div class="upb"><i></i></div></div><div class="tot"><span class="mono">Total</span><span class="big" data-v="0">0</span></div></div>`;
   } else if (S.phase === 'winner') {
     h = `<div class="center"><div class="cert"></div><div class="meets"></div></div>`;
     setTimeout(() => confetti(260), 300);
   }
   stage.innerHTML = h; stage.className = ''; void stage.offsetWidth; stage.className = 'in deal'; built = key; document.body.dataset.phase = S.phase;
+  if (S.phase === 'title') storm();
 }
 
 function sync() {
@@ -315,15 +386,23 @@ function sync() {
   if (S.phase === 'survey') { const c = $('.cnt span'); if (c) tween(c, S.survey.count); }
   if (S.phase === 'lightning') {
     let total = 0; const qs = G.lightning[S.li].qs;
-    $$('.lt tr.la').forEach((tr, i) => { tr.classList.toggle('cur', S.lq === i); [0, 1].forEach(p => { const a = S.la[p][i], hide = p === 0 && S.hideP1, c = tr.children;
-      const ta = c[1 + p * 2], tp = c[2 + p * 2]; ta.textContent = a.st && !hide ? a.t || '(no answer)' : ''; ta.classList.toggle('on', a.st && !hide);
-      tp.textContent = a.sp && !hide ? a.p : ''; tp.classList.toggle('on', a.sp && !hide); if (a.sp) total += Number(a.p) || 0; }); });
-    $('.lq').textContent = S.lq === null || !qs[S.lq] ? '' : (S.lq + 1) + '. ' + qs[S.lq].q;
-    const left = Math.max(0, S.timer), c = $('.clock');
-    c.textContent = left ? ':' + String(left).padStart(2, '0') : 'TIME'; c.classList.toggle('hot', left <= 5);
-    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; tween($('#fs' + i), S.teams[i].score); });
-    tween($('.lfoot .big'), total); const tg = $('#target'), hit = total >= G.lightningTarget;
+    $$('.lt tr.la').forEach((tr, i) => { tr.classList.toggle('lcur', S.lq === i); [0, 1].forEach(p => { const a = S.la[p][i], hide = p === 0 && S.hideP1, c = tr.children;
+      const ta = c[1 + p * 2], tp = c[2 + p * 2]; ta.textContent = a.st && !hide ? a.t || '(no answer)' : ''; ta.classList.toggle('on', a.st && !hide); ta.style.fontSize = Math.max(1.5, Math.min(2.5, 50 / (ta.textContent.length || 1))) + 'vw';
+      tp.textContent = a.sp && !hide ? a.p : ''; tp.classList.toggle('on', a.sp && !hide); tp.classList.toggle('zero', a.sp && !hide && !Number(a.p)); if (a.sp) total += Number(a.p) || 0; }); });
+    const lq = $('.lq'), qt = S.lq === null || !qs[S.lq] ? '' : (S.lq + 1) + '. ' + qs[S.lq].q;
+    if (lq.textContent !== qt) { lq.textContent = qt; lq.style.fontSize = Math.min(2.6, 175 / (qt.length || 1)) + 'vw'; lq.classList.remove('pop'); void lq.offsetWidth; lq.classList.add('pop'); }
+    // the clock: digits, a sweeping second hand that reaches 12 at 5:00, and ceiling lights that go out bank by bank
+    const max = S.lp ? 25 : 20, left = Math.max(0, S.timer), c = $('.clock'), hot = left <= 5, C = 2 * Math.PI * 92, len = C * left / 60;
+    c.textContent = left ? ':' + String(left).padStart(2, '0') : 'TIME'; c.classList.toggle('hot', hot); $('.wall').classList.toggle('hot', hot);
+    $('.face .hs').style.transform = `rotate(${(60 - left) * 6}deg)`;
+    const arc = $('.face .arc'); arc.style.strokeDasharray = len + ' ' + C; arc.style.strokeDashoffset = -(C - len);
+    const lit = Math.ceil(Math.min(1, left / max) * NL); $$('.lights i').forEach((el, i) => el.classList.toggle('off', i >= lit));
+    $('.dim').style.opacity = (1 - lit / NL) * .5;
+    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; tween($('#fs' + i), S.teams[i].score); $('#fn' + i).parentNode.classList.toggle('act', S.lp === i); });
+    tween($('.lfoot .big'), total); const tg = $('#target'), hit = total >= G.lightningTarget, pct = Math.max(0, Math.min(100, Math.round(total / (G.lightningTarget || 1) * 100)));
     tg.textContent = hit ? 'Target hit!' : 'Target ' + G.lightningTarget; tg.className = hit ? 'won' : '';
+    $('#upt').textContent = hit ? 'Weekend uploaded. Out of office: ON' : 'Uploading weekend.zip...'; $('#upp').textContent = pct + '%';
+    $('.upb i').style.width = pct + '%'; $('.up').classList.toggle('done', hit);
   }
   if (S.phase === 'winner') {
     const [a, b] = S.teams, tie = a.score === b.score, w = a.score >= b.score ? a : b, l = w === a ? b : a;
@@ -334,6 +413,45 @@ function sync() {
     const c = $('.cert'); if (c.dataset.h !== h) { c.dataset.h = h; c.innerHTML = h; }   // score edits update the text without replaying the scene
     const m = $('.meets'); m.style.display = tie ? 'none' : ''; m.textContent = l.name + ': Runner-up, Most Valuable Reply';
   }
+}
+
+// ---------- title cold open: the reply-all storm ----------
+const NL = 8;   // banks of ceiling lights in the final round
+const MAILS = [['Dave (Sales)', 'RE: RE: RE: Mandatory fun'], ['Priya', 'Please remove me from this list'], ['Unknown sender', 'Who is this?'], ['Greg', 'STOP REPLYING ALL'], ['Linda (Finance)', '+1'], ['Tom', 'Sent from my phone'], ['Everyone', 'Unsubscribe'], ['Legal', 'Per my last email'], ['Sam', 'Thanks!'], ['The host', 'Can everyone see my screen?'],
+  ['IT desk', 'You are on mute'], ['Greg', 'Replying all to say stop'], ['HR', 'Friendly reminder (it is not)'], ['Chip', 'Circling back on this'], ['Facilities', 'Whose lunch is this?'], ['Dana', 'Wrong thread, sorry'], ['Calendar', 'Meeting moved to: now'], ['Out of office', 'Back never. Regards'], ['The intern', 'Is this the right list?'], ['Bob', 'RE: Unsubscribe'],
+  ['Mailer daemon', 'Recall failed'], ['Linda (Finance)', '+1 to the +1'], ['Tom', 'Let us take this offline'], ['Priya', 'Quick question (not quick)'], ['Sam', 'Thanks for the thanks!'], ['Greg', 'RE: STOP REPLYING ALL']];
+const SLOTS = [[-2, 9], [-4, 31], [-5, 53], [-4, 74], [80, 7], [82, 29], [83, 51], [82, 73], [4, 90], [77, 91]];
+let stormT = [], stormRaf = 0, mailN = 0;
+function stormStop() { stormT.forEach(t => { clearTimeout(t); clearInterval(t); }); stormT = []; cancelAnimationFrame(stormRaf); stage.classList.remove('rumble'); }
+function mail(lay, x, y, keep) {
+  const m = MAILS[mailN++ % MAILS.length], el = document.createElement('div'), cols = ['var(--cyan)', 'var(--pink)', 'var(--yellow)', '#a493ff'], side = Math.random();
+  el.className = 'st' + (!keep && mailN % 5 === 3 ? ' pa' : ''); el.style.cssText = `left:${x}vw;top:${y}vh;color:${cols[mailN % 4]}`;
+  el.style.setProperty('--rot', ((Math.random() - .5) * (keep ? 6 : 16)).toFixed(1) + 'deg');
+  el.style.setProperty('--fx', (side < .7 ? (x < 40 ? -(x + 26) : 104 - x) : (Math.random() - .5) * 30) + 'vw'); el.style.setProperty('--fy', (side < .7 ? (Math.random() - .5) * 30 : y < 50 ? -(y + 16) : 106 - y) + 'vh');
+  el.style.setProperty('--ox', (x + 10 - 50) * 1.9 + 'vw'); el.style.setProperty('--oy', (y + 4 - 50) * 1.9 + 'vh');
+  el.innerHTML = `<i><svg viewBox="0 0 54 40"><path d="M3 5h48v30H3z"/><path d="M3 6l24 18L51 6"/></svg></i><div><b>${esc(m[0])}</b><span>${esc(m[1])}</span></div>`;
+  lay.appendChild(el); return el;
+}
+function storm() {
+  const lay = $('.storm'), nb = $('.nb'), lw = $('.logow'); if (!lay) return;
+  if (CALM) { SLOTS.forEach(p => mail(lay, p[0], p[1], 1).classList.add('idle')); return; }
+  // until the logo lands, the unread badge sits big in the middle of the screen
+  nb.style.setProperty('--bx', -(lw.offsetWidth / 2 + innerWidth * .034 - nb.offsetWidth / 2) + 'px'); nb.style.setProperty('--by', (lw.offsetHeight / 2 + innerHeight * .024 - nb.offsetHeight / 2) + 'px');
+  const N = 90, D = 2500, keeps = [], t0 = performance.now(), fmt = n => n.toLocaleString('en-US');
+  for (let i = 0; i < N; i++) stormT.push(setTimeout(() => {
+    if (i % 8 === 2 && keeps.length < SLOTS.length) { const p = SLOTS[keeps.length]; keeps.push(mail(lay, p[0], p[1], 1)); }
+    else mail(lay, -4 + Math.random() * 88, 1 + Math.random() * 90);
+  }, D * Math.pow(i / N, .62)));
+  (function count(t) { const k = t - t0; nb.textContent = k < 900 ? Math.round(1 + 98 * Math.pow(Math.max(0, k) / 900, 2)) : k < 1350 ? '99+' : k < D ? fmt(Math.round(100 * Math.pow(99.99, (k - 1350) / (D - 1350)))) : '9,999'; if (k < D) stormRaf = requestAnimationFrame(count); })(t0);
+  stormT.push(setTimeout(() => stage.classList.add('rumble'), 700));
+  // the logo slams in: loose mail is blown off the screen, a few stragglers stay and drift at the edges
+  stormT.push(setTimeout(() => {
+    stage.classList.remove('rumble', 'in'); stage.classList.add('shake'); stormT.push(setTimeout(() => stage.classList.remove('shake'), 500));
+    [...lay.children].forEach(el => { if (keeps.includes(el)) el.classList.add('idle'); else { el.classList.add('out'); stormT.push(setTimeout(() => el.remove(), 800)); } });
+    let n = 9999, k = 0;
+    stormT.push(setInterval(() => { const i = k++ % keeps.length, p = SLOTS[i], old = keeps[i], el = mail(lay, p[0], p[1], 1); keeps[i] = el;
+      old.classList.remove('idle'); old.classList.add('out'); setTimeout(() => old.remove(), 800); setTimeout(() => el.classList.add('idle'), 600); nb.textContent = fmt(++n); }, 3600));
+  }, 2600));
 }
 
 let overT, cardQ = [], cardBusy = false;
@@ -441,6 +559,7 @@ document.addEventListener('keydown', e => { toHost({key: e.code}); if (/^Page|^A
 const hint = document.getElementById('hint'); setTimeout(() => hint.style.opacity = 0, 10000);
 document.addEventListener('click', () => { hint.style.display = 'none'; if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); });
 </script>
+<script src="gags.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
