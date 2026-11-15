@@ -372,7 +372,7 @@ const A = {
     roast(a, cur().q); },
   wrong() { snap(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: WRONG[S.items % WRONG.length], sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
   clearStrikes() { snap(); S.strikes = 0; up(); },
-  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget']]}); later(() => chipLine('takeover', true), 2500); },
+  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
   award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award']();
     up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n});
