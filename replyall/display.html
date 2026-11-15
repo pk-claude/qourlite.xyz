@@ -694,7 +694,7 @@ const teamHtml = i => `<div class="team" id="t${i}"><small class="mono">has the 
 
 function sceneKey() {
   const p = S.phase;
-  return p + ':' + (p === 'round' ? (S.useCustom ? 'you' + S.custom.n : S.ri) : p === 'lightning' ? S.li + ':' + S.lreset : p === 'survey' ? S.survey.n + S.survey.st : '');
+  return p + ':' + (p === 'round' ? (S.useCustom ? 'you' + S.custom.n : S.ri) : p === 'lightning' ? S.li + ':' + S.lreset : p === 'survey' ? S.survey.n + S.survey.st : p === 'title' ? S.sid : '');   // a new join code redraws the title's QR
 }
 
 function build() {
@@ -789,7 +789,7 @@ function sync() {
     const arc = $('.face .arc'); arc.style.strokeDasharray = len + ' ' + C; arc.style.strokeDashoffset = -(C - len);
     const lit = Math.ceil(Math.min(1, left / max) * NL); $$('.lights i').forEach((el, i) => el.classList.toggle('off', i >= lit));
     $('.dim').style.opacity = (1 - lit / NL) * .5;
-    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; $('#fn' + i).style.fontSize = Math.max(1.1, Math.min(2, 30 / (S.teams[i].name.length || 1))) + 'cqw'; tween($('#fs' + i), S.teams[i].score); $('#fn' + i).parentNode.classList.toggle('act', S.lp === i); });
+    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; $('#fn' + i).style.fontSize = Math.max(1.1, Math.min(2, (S.lp === i ? 26 : 30) / (S.teams[i].name.length || 1))) + 'cqw'; tween($('#fs' + i), S.teams[i].score); $('#fn' + i).parentNode.classList.toggle('act', S.lp === i); });
     tween($('.lfoot .big'), total); const tg = $('#target'), hit = total >= G.lightningTarget, pct = Math.max(0, Math.min(100, Math.round(total / (G.lightningTarget || 1) * 100)));
     tg.textContent = hit ? 'Target hit!' : 'Target ' + G.lightningTarget; tg.className = hit ? 'won' : '';
     $('#upt').textContent = hit ? 'Weekend uploaded. Out of office: ON' : 'Uploading weekend.zip...'; $('#upp').textContent = pct + '%';
