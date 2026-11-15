@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only dark">
+<title>Apron Up -- Lunch Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.184.0/build/three.module.js"},"integrity":{"https://unpkg.com/three@0.184.0/build/three.module.js":"sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J","https://unpkg.com/three@0.184.0/build/three.core.js":"sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT"}}</script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:#141618 !important}
+  body{
+    margin:0;padding:0;background:#141618 !important;color:#EDEEEA;
+    font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:15px;line-height:1.45;
+    min-height:100vh;min-height:100dvh;
+    overscroll-behavior-y:none;
+  }
+  .wrap{
+    max-width:520px;margin:0 auto;background:#141618;
+    padding:calc(16px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom));
+  }
+  button{user-select:none;-webkit-user-select:none;touch-action:manipulation}
+
+  /* ---------- header ---------- */
+  .hdr{border:2px solid #363B40;background:#1A1D20;margin-bottom:14px}
+  .hdr-top{
+    display:flex;justify-content:space-between;align-items:center;
+    background:#F96302;color:#1A0D02;padding:5px 6px 5px 10px;
+    font-weight:600;font-size:11px;letter-spacing:.14em;
+  }
+  .mini{
+    width:auto;padding:5px 10px;font-size:10px;letter-spacing:.14em;
+    background:#1A0D02;color:#F96302;border:none;cursor:pointer;
+    font-family:inherit;font-weight:600;
+  }
+  .hdr-body{padding:12px 12px 14px}
+  .slim .hdr-body{display:none}
+  .slim .hdr{margin-bottom:10px}
+  h1{
+    font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;
+    font-size:clamp(34px,11.5vw,52px);
+    line-height:.95;letter-spacing:.01em;margin:0 0 6px;
+    text-transform:uppercase;color:#F96302;
+  }
+  .sub{color:#A6ADB5;font-size:12px;letter-spacing:.06em}
+  .barcode{
+    height:26px;margin-top:12px;opacity:.85;
+    background-image:repeating-linear-gradient(90deg,
+      #EDEEEA 0 2px, transparent 2px 4px,
+      #EDEEEA 4px 5px, transparent 5px 9px,
+      #EDEEEA 9px 12px, transparent 12px 13px,
+      #EDEEEA 13px 14px, transparent 14px 18px);
+  }
+
+  /* ---------- shared ---------- */
+  .panel{border:2px solid #363B40;background:#1A1D20;padding:14px;margin-bottom:14px;color:#EDEEEA}
+  .eyebrow{font-size:10px;letter-spacing:.2em;color:#F96302;font-weight:600;margin:0 0 8px;text-transform:uppercase}
+  ol.rules{margin:0;padding-left:20px;font-size:13.5px;color:#EDEEEA}
+  ol.rules li{margin-bottom:7px}
+  ol.rules li::marker{color:#F96302;font-weight:600}
+  label{display:block;font-size:10px;letter-spacing:.18em;color:#A6ADB5;margin-bottom:6px;text-transform:uppercase}
+  input[type=text]{
+    width:100%;padding:13px 12px;background:#141618;color:#EDEEEA;
+    border:2px solid #363B40;border-radius:0;font-family:inherit;font-size:16px;
+  }
+  input[type=text]:focus{outline:none;border-color:#F96302}
+  button.cta,button.ghost{
+    font-family:inherit;font-weight:600;font-size:14px;
+    letter-spacing:.1em;text-transform:uppercase;
+    padding:15px 16px;width:100%;cursor:pointer;border-radius:0;
+    transition:transform .06s ease;
+  }
+  button.cta{border:2px solid #F96302;background:#F96302;color:#1A0D02}
+  button.ghost{border:2px solid #363B40;background:#1A1D20;color:#EDEEEA}
+  button.cta:active,button.ghost:active{transform:scale(.97)}
+  button:focus-visible{outline:3px solid #D6F04B;outline-offset:2px}
+  .warn{color:#FF7A7E;font-size:11.5px;margin-top:8px;min-height:16px}
+  .hide{display:none !important}
+  .center{text-align:center}
+  .screen{animation:slidein .28s ease both}
+  @keyframes slidein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* ---------- dashboard ---------- */
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+  .stat{border:2px solid #363B40;background:#1F2226;padding:10px 6px;text-align:center}
+  .stat .v{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:26px;line-height:1;color:#F96302}
+  .stat .k{font-size:9px;letter-spacing:.12em;color:#A6ADB5;margin-top:6px;text-transform:uppercase}
+  .rank{
+    border:2px solid #F96302;background:#1F2226;padding:10px 12px;margin-bottom:14px;
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+  }
+  .rank .t{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:17px;color:#F96302}
+  .rank .k{font-size:9px;letter-spacing:.14em;color:#A6ADB5;text-transform:uppercase}
+  .rank .nm{font-size:11px;letter-spacing:.1em;color:#EDEEEA;text-align:right}
+  .waves{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .wave-row{
+    display:flex;justify-content:space-between;align-items:center;
+    border:2px solid #363B40;background:#1F2226;padding:10px 12px;font-size:12px;color:#EDEEEA;
+  }
+  .wave-row .nm{letter-spacing:.08em;font-weight:500}
+  .wave-row .nm small{color:#A6ADB5;font-size:10px;letter-spacing:.12em}
+  .wave-row .st{font-size:10px;letter-spacing:.12em;color:#A6ADB5}
+  .wave-row.done .st{color:#D6F04B}
+  .wave-row.next{border-color:#F96302}
+  .wave-row.next .st{color:#F96302}
+
+  /* ---------- question card (self-contained contrast) ---------- */
+  .qcard{border:2px solid #363B40;background:#1A1D20;padding:10px;color:#EDEEEA}
+  #scrQ{padding-bottom:86px}
+  .qmeta{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.1em;color:#A6ADB5;margin-bottom:8px;text-transform:uppercase}
+  .qmeta b{color:#F96302;font-weight:600}
+  .clock{height:10px;border:2px solid #363B40;background:#141618;margin-bottom:6px;position:relative;overflow:hidden}
+  .clock .fill{position:absolute;inset:0;background:#D6F04B;transform-origin:left}
+  .clock.mid .fill{background:#F96302}
+  .clock.hot .fill{background:#E5484D}
+  .clock.hot{animation:hotpulse .5s ease-in-out infinite}
+  @keyframes hotpulse{50%{box-shadow:0 0 0 3px rgba(229,72,77,.35)}}
+  .streak{
+    display:inline-block;margin-bottom:10px;padding:4px 10px;
+    border:2px solid #F96302;color:#F96302;background:#1A1D20;
+    font-size:10px;letter-spacing:.16em;font-weight:600;
+  }
+  .streak.bump{animation:bump .3s ease}
+  @keyframes bump{40%{transform:scale(1.25) rotate(-2deg)}}
+  .qtext{font-size:17px;line-height:1.35;font-weight:500;margin:6px 0 12px;color:#FFFFFF}
+  .opts{display:flex;flex-direction:column;gap:6px}
+  .opt{
+    font-family:inherit;text-align:left;text-transform:none;letter-spacing:.02em;
+    font-weight:500;font-size:14px;line-height:1.35;
+    background:#25292E;border:2px solid #454B52;color:#FFFFFF;
+    padding:11px 12px;width:100%;cursor:pointer;border-radius:0;
+    display:flex;gap:10px;align-items:baseline;
+    transition:transform .06s ease;
+  }
+  .opt:active{transform:scale(.98)}
+  .opt .tag{font-size:10px;letter-spacing:.12em;color:#A6ADB5;font-weight:600}
+  .opt.hit{background:#D6F04B;border-color:#D6F04B;color:#141608;animation:punch .34s ease}
+  .opt.hit .tag{color:#141608}
+  .opt.miss{background:#E5484D;border-color:#E5484D;color:#FFFFFF;animation:shake .32s ease}
+  .opt.miss .tag{color:#FFFFFF}
+  .opt.dim{opacity:.45}
+  @keyframes punch{30%{transform:scale(.96)}65%{transform:scale(1.03)}}
+  @keyframes shake{20%{transform:translateX(-6px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
+  .verdict{margin-top:10px;font-size:12.5px;letter-spacing:.05em;min-height:20px;font-weight:600;color:#EDEEEA}
+  .verdict b{color:#D6F04B}
+  .verdict.bad b{color:#FF7A7E}
+  .fact{color:#A6ADB5;font-size:11.5px;margin-top:6px;min-height:16px;letter-spacing:.03em}
+
+  /* ---------- results ---------- */
+  .bignum{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:clamp(60px,24vw,104px);line-height:.85;color:#F96302;margin:6px 0 2px}
+  .bignum small{font-size:.4em}
+  .stamp{animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes stamp{from{transform:scale(2.2) rotate(-12deg);opacity:0}65%{transform:scale(.94) rotate(2deg);opacity:1}to{transform:scale(1) rotate(-2deg)}}
+
+  /* ---------- dragon-cat ---------- */
+  #sky{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+  .drg{position:absolute;left:-170px;width:150px;animation:dragonfly 7s linear both}
+  @keyframes dragonfly{to{left:calc(100% + 60px)}}
+  .drg .bob{animation:drgbob 1.3s ease-in-out infinite alternate}
+  @keyframes drgbob{from{transform:translateY(-7px)}to{transform:translateY(7px)}}
+  .drg .wing{transform-origin:76px 40px;animation:flap .3s ease-in-out infinite alternate}
+  .drg .w2{animation-delay:.12s;opacity:.85}
+  @keyframes flap{from{transform:rotate(-34deg)}to{transform:rotate(14deg)}}
+  .drg .tailwag{transform-origin:46px 56px;animation:wag .5s ease-in-out infinite alternate}
+  @keyframes wag{from{transform:rotate(-9deg)}to{transform:rotate(10deg)}}
+  .prize{
+    border:3px solid #D6F04B;background:#1F2226;padding:12px;margin-bottom:14px;
+    text-align:center;font-weight:600;letter-spacing:.06em;font-size:14px;color:#EDEEEA;
+  }
+  .prize b{color:#D6F04B}
+  .prize .who{color:#F96302}
+  .hero3d{height:210px;margin-bottom:14px;display:flex;justify-content:center;align-items:center;overflow:hidden}
+  .hero3d canvas{display:block}
+  .lb-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:7px 8px;border:2px solid #363B40;background:#1F2226;margin-bottom:5px}
+  .lb-row.me{border-color:#D6F04B}
+  .lb-row .r{color:#A6ADB5;width:22px}
+  .lb-row .n{flex:1;letter-spacing:.06em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .lb-row .n small{color:#F96302;font-size:9.5px;letter-spacing:.1em;margin-left:6px}
+  .lb-row .p{color:#D6F04B;font-weight:600}
+  .lb-beat{font-size:13px;font-weight:600;letter-spacing:.06em;color:#F96302;margin-bottom:10px}
+  .lb-off{color:#A6ADB5;font-size:12px}
+
+  /* ---------- particles + chaos ---------- */
+  .nextbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:45;
+    display:flex;justify-content:center;
+    padding:14px 14px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(transparent,#141618 42%);
+  }
+  .nextbar button{max-width:492px}
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  #fx span{position:absolute;width:9px;height:9px;will-change:transform,opacity}
+  #chaos{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+  .ch-banner{
+    position:absolute;left:0;right:0;top:32%;
+    background:#F96302;color:#1A0D02;font-weight:600;letter-spacing:.1em;
+    font-size:13px;padding:14px 12px;text-align:center;
+    border-top:3px solid #1A0D02;border-bottom:3px solid #1A0D02;
+    animation:chslide 3.1s ease both;
+  }
+  .ch-banner.caution{
+    background:repeating-linear-gradient(45deg,#D6F04B 0 16px,#1A1D20 16px 32px);
+  }
+  .ch-banner.caution span{background:#D6F04B;color:#141608;padding:4px 10px;display:inline-block}
+  @keyframes chslide{0%{transform:translateX(112%)}14%{transform:none}84%{transform:none}100%{transform:translateX(-112%)}}
+  .ch-card{
+    position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);
+    background:#1A1D20;border:3px solid #D6F04B;color:#EDEEEA;
+    padding:18px 20px;text-align:center;font-size:13px;letter-spacing:.08em;font-weight:600;
+    animation:chpop 2.7s ease both;max-width:82%;
+  }
+  .ch-card b{color:#D6F04B}
+  @keyframes chpop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}86%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
+  .ch-fork{position:absolute;bottom:14%;left:-45%;width:150px;animation:drive 3s linear both}
+  @keyframes drive{to{left:112%}}
+  .quake{animation:quake .5s}
+  @keyframes quake{
+    20%{transform:translate(-7px,3px) rotate(-.5deg)}
+    40%{transform:translate(6px,-4px) rotate(.4deg)}
+    60%{transform:translate(-5px,2px) rotate(-.3deg)}
+    80%{transform:translate(4px,-2px)}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .screen,.opt.hit,.opt.miss,.streak.bump,.stamp,.clock.hot,.quake,
+    .ch-banner,.ch-card,.ch-fork,.drg,.drg .bob,.drg .wing,.drg .tailwag{animation:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="hdr">
+    <div class="hdr-top">
+      <span style="white-space:nowrap"><a href="/" style="color:#1A0D02;text-decoration:none">&larr; HUB</a> &nbsp;|&nbsp; LMS / LUNCH SHIFT</span>
+      <button class="mini" id="sndBtn" aria-pressed="true">SOUND ON</button>
+    </div>
+    <div class="hdr-body">
+      <h1>Apron<br>Up.</h1>
+      <div class="sub">30 TASKS. 15 SECONDS EACH. BEAT THE STANDARD.</div>
+      <div class="barcode" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <!-- CLOCK IN -->
+  <section id="scrStart" class="screen">
+    <div class="prize">HIGHEST SCORE AT END OF LUNCH<br><b>EATS FREE.</b> <span class="who">PAVEL PAYS.</span></div>
+    <div class="hero3d hide" id="hero3d" aria-hidden="true"></div>
+    <div class="panel">
+      <p class="eyebrow">Shift briefing</p>
+      <ol class="rules">
+        <li>Six waves, five questions each: movies, music, Home Depot, and warehouse literacy. Every card is dealt differently -- no copying your neighbor.</li>
+        <li>Every question has a 15-second engineered standard. Fast and right beats slow and right.</li>
+        <li>Over standard? You can still answer. It just goes in your file.</li>
+        <li>Do a wave, put the phone down, talk to a human. The next wave waits.</li>
+        <li>Things may happen on the floor mid-question. Stay focused. Or don't.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <label for="me">Associate name</label>
+      <input id="me" type="text" autocomplete="given-name" placeholder="First name" maxlength="24">
+      <div class="warn" id="startWarn"></div>
+      <div style="height:12px"></div>
+      <button class="cta" id="clockIn">Clock in</button>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="scrDash" class="screen hide">
+    <div class="stats">
+      <div class="stat"><div class="v" id="stPerf">--</div><div class="k">% to std</div></div>
+      <div class="stat"><div class="v" id="stStreak">0</div><div class="k">best streak</div></div>
+      <div class="stat"><div class="v" id="stWaves">0/6</div><div class="k">waves</div></div>
+    </div>
+    <div class="rank">
+      <div><div class="k">Current rating</div><div class="t" id="stRank">UNRATED</div></div>
+      <div class="nm" id="stName">--</div>
+    </div>
+    <div class="waves" id="waveList"></div>
+    <button class="cta" id="startWave">Start wave</button>
+    <div style="height:10px"></div>
+    <div class="sub center" id="dashHint"></div>
+  </section>
+
+  <!-- QUESTION -->
+  <section id="scrQ" class="screen hide">
+    <div class="qcard">
+      <div class="qmeta">
+        <span>TASK <b id="qNum">--</b>/30</span>
+        <span id="qCat">--</span>
+        <span>STD <b>15.0s</b></span>
+      </div>
+      <div class="clock" id="clock"><div class="fill" id="clockFill"></div></div>
+      <div class="streak hide" id="streakChip">STREAK x2</div>
+      <p class="qtext" id="qText"></p>
+      <div class="opts" id="opts"></div>
+      <div class="verdict" id="verdict"></div>
+      <div class="fact" id="fact"></div>
+    </div>
+  </section>
+
+  <!-- WAVE RESULT -->
+  <section id="scrWave" class="screen hide">
+    <div class="panel center">
+      <p class="eyebrow" id="wrTitle">Wave complete</p>
+      <div class="bignum" id="wrPerf">0<small>%</small></div>
+      <div class="sub">WAVE PERFORMANCE TO STANDARD</div>
+      <div style="height:14px"></div>
+      <div class="sub" id="wrDetail">--</div>
+    </div>
+    <button class="cta" id="wrBack">Put the phone down</button>
+    <div style="height:10px"></div>
+    <div class="sub center">Go talk. Aisle's open when you get back.</div>
+  </section>
+
+  <!-- END OF SHIFT -->
+  <section id="scrEnd" class="screen hide">
+    <div class="panel center">
+      <p class="eyebrow">End of shift</p>
+      <div class="bignum" id="endPerf">0<small>%</small></div>
+      <div class="sub">SHIFT PERFORMANCE TO STANDARD</div>
+      <div class="rank stamp" style="margin:16px 0 6px">
+        <div style="width:100%;text-align:center"><div class="k">Final rating</div><div class="t" id="endRank">--</div></div>
+      </div>
+      <div class="sub" id="endName">--</div>
+      <div class="sub" id="endBest" style="margin-top:6px"></div>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Floor leaderboard</p>
+      <div class="lb-beat" id="lbBeat"></div>
+      <div id="lbRows"><div class="lb-off">Loading the board...</div></div>
+      <div style="height:8px"></div>
+      <button class="ghost" id="lbRefresh" style="padding:10px">Refresh board</button>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Claim it</p>
+      <div style="font-size:13px;color:#A6ADB5">Show this screen to Pavel. Highest % to standard when lunch ends eats free -- on Pavel. Ties broken by best streak.</div>
+    </div>
+    <button class="ghost" id="overtime">Work overtime -- fresh questions</button>
+  </section>
+</div>
+
+<div id="sky" aria-hidden="true"></div>
+<div class="nextbar hide" id="qNextWrap"><button class="cta" id="qNext">Next task</button></div>
+<div id="fx" aria-hidden="true"></div>
+<div id="chaos" aria-hidden="true"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // [category, question, [options], correctIndex, optional fun fact]
+  var Q=[
+    // ---------------- MOVIES (22) ----------------
+    ["MOVIES","\"May the Force be with you\" comes from which film series?",["Star Trek","Star Wars","Dune","Guardians of the Galaxy"],1],
+    ["MOVIES","In \"Toy Story\", the cowboy doll is named...",["Buzz","Andy","Woody","Rex"],2],
+    ["MOVIES","\"Life is like a box of chocolates\" is a line from...",["Rain Man","Big","Forrest Gump","The Green Mile"],2,"Filmed largely in Georgia."],
+    ["MOVIES","In \"Home Alone\", the family flies off and forgets Kevin. Where were they headed?",["London","New York","Paris","Orlando"],2],
+    ["MOVIES","In \"Cast Away\", Tom Hanks works for which delivery company?",["UPS","DHL","USPS","FedEx"],3,"Co-starring Wilson, a volleyball."],
+    ["MOVIES","In \"The Lion King\", Simba's father is...",["Scar","Rafiki","Mufasa","Zazu"],2],
+    ["MOVIES","\"Jurassic Park\" (1993) was directed by...",["James Cameron","Steven Spielberg","Ridley Scott","George Lucas"],1],
+    ["MOVIES","In \"The Wizard of Oz\", Dorothy gets home by clicking together her...",["Ruby slippers","Silver bracelets","Emerald rings","Golden boots"],0],
+    ["MOVIES","The highest-grossing film of all time (not adjusted for inflation) is...",["Avengers: Endgame","Titanic","Avatar","Star Wars: The Force Awakens"],2],
+    ["MOVIES","\"Titanic\" is set aboard the ship's voyage in what year?",["1898","1905","1912","1923"],2],
+    ["MOVIES","\"Here's looking at you, kid\" is from...",["Gone with the Wind","Casablanca","Citizen Kane","Singin' in the Rain"],1],
+    ["MOVIES","The 1975 movie that made everyone afraid of the ocean:",["Jaws","The Deep","Orca","Piranha"],0],
+    ["MOVIES","In \"Back to the Future\", the time machine is built into a...",["Mustang","Camaro","DeLorean","VW Bus"],2],
+    ["MOVIES","\"The Godfather\" opens at a...",["Funeral","Wedding","Christening","Casino"],1],
+    ["MOVIES","In \"Finding Nemo\", Nemo is what kind of fish?",["Angelfish","Clownfish","Blue tang","Pufferfish"],1],
+    ["MOVIES","\"I'll be back\" was first made famous in...",["Predator","RoboCop","The Terminator","Rambo"],2],
+    ["MOVIES","In \"Rocky\", he famously trains by punching...",["Tractor tires","Slabs of beef","Sandbags","A wooden dummy"],1],
+    ["MOVIES","In \"The Avengers\" (2012), the big final battle happens in...",["Los Angeles","Chicago","Washington DC","New York"],3],
+    ["MOVIES","Shrek is a...",["Troll","Goblin","Ogre","Giant"],2],
+    ["MOVIES","In \"Speed\", the bus explodes if it drops below...",["40 mph","50 mph","60 mph","70 mph"],1],
+    ["MOVIES","In \"The Matrix\", Neo takes which pill?",["Blue","Green","Red","White"],2],
+    ["MOVIES","In \"Home Alone\", the burglars call themselves the ___ Bandits.",["Sticky","Wet","Slick","Window"],1],
+    // ---------------- MUSIC (22) ----------------
+    ["MUSIC","\"Thriller\", the best-selling album of all time, is by which artist?",["Prince","Whitney Houston","Michael Jackson","Madonna"],2],
+    ["MUSIC","\"Sweet Home Alabama\" is performed by...",["Lynyrd Skynyrd","The Allman Brothers","Creedence Clearwater Revival","The Eagles"],0],
+    ["MUSIC","Before going solo, Beyonce was in which group?",["TLC","En Vogue","Spice Girls","Destiny's Child"],3],
+    ["MUSIC","Elvis Presley's home, Graceland, is in which city?",["Nashville","Memphis","Tupelo","New Orleans"],1],
+    ["MUSIC","OutKast comes from which city?",["Houston","Atlanta","Detroit","Memphis"],1],
+    ["MUSIC","Johnny Cash recorded a famous live album at which prison?",["Alcatraz","Attica","Folsom","Sing Sing"],2],
+    ["MUSIC","Who sang \"Respect\" (1967)?",["Diana Ross","Aretha Franklin","Tina Turner","Etta James"],1],
+    ["MUSIC","Who holds the record for the most Grammy wins ever?",["Quincy Jones","Stevie Wonder","Beyonce","Taylor Swift"],2],
+    ["MUSIC","Which rapper co-founded Beats headphones?",["Jay-Z","Snoop Dogg","Kanye West","Dr. Dre"],3],
+    ["MUSIC","\"I Will Always Love You\" was written by Dolly Parton and made a mega-hit by...",["Mariah Carey","Whitney Houston","Celine Dion","Toni Braxton"],1],
+    ["MUSIC","The Beatles came from which city?",["London","Manchester","Liverpool","Dublin"],2],
+    ["MUSIC","\"Purple Rain\" is by...",["Prince","David Bowie","Lionel Richie","George Michael"],0],
+    ["MUSIC","\"Friends in Low Places\" is sung by...",["Alan Jackson","George Strait","Garth Brooks","Toby Keith"],2],
+    ["MUSIC","Bob Marley is the king of which genre?",["Ska","Reggae","Calypso","Dancehall"],1],
+    ["MUSIC","\"Rolling in the Deep\" is by...",["Adele","Amy Winehouse","Duffy","Sia"],0],
+    ["MUSIC","The \"King of Rock and Roll\" is...",["Chuck Berry","Little Richard","Elvis Presley","Jerry Lee Lewis"],2],
+    ["MUSIC","\"Hotel California\" is by...",["Fleetwood Mac","The Eagles","Steely Dan","America"],1],
+    ["MUSIC","Snoop Dogg hosts a cooking show with...",["Rachael Ray","Gordon Ramsay","Martha Stewart","Ina Garten"],2,"Potluck Dinner Party. It's real."],
+    ["MUSIC","\"Old Town Road\" is by...",["Post Malone","Lil Nas X","Jack Harlow","Drake"],1],
+    ["MUSIC","ABBA comes from which country?",["Norway","Germany","Denmark","Sweden"],3],
+    ["MUSIC","Willie Nelson's famous beat-up guitar is named...",["Trigger","Lucille","Dusty","Old Red"],0,"B.B. King's was Lucille."],
+    ["MUSIC","Michael Jackson's signature dance move:",["The Robot","The Moonwalk","The Worm","The Dougie"],1],
+    // ---------------- HOME DEPOT (14) ----------------
+    ["HOME DEPOT","The Home Depot was founded in what year?",["1968","1978","1985","1992"],1,"Doors opened June 22, 1979."],
+    ["HOME DEPOT","The first two Home Depot stores opened in 1979 in which city?",["Dallas","Atlanta","Charlotte","Orlando"],1],
+    ["HOME DEPOT","The Home Depot's mascot is named...",["Woody","Hank","Homer","Deppy"],2,"Full name: Homer D. Poe."],
+    ["HOME DEPOT","Home Depot co-founder Arthur Blank now owns which NFL team?",["Carolina Panthers","Atlanta Falcons","Tennessee Titans","Jacksonville Jaguars"],1,"And Atlanta United."],
+    ["HOME DEPOT","Which of these is an actual Home Depot slogan?",["Let's Build Something Together","Never Stop Improving","How Doers Get More Done","Save Big Money"],2,"The wrong ones belong to Lowe's and Menards."],
+    ["HOME DEPOT","The Home Depot's ticker symbol on the NYSE is...",["THD","HD","HOME","DEPO"],1,"Listed since 1981."],
+    ["HOME DEPOT","In 2024, The Home Depot made its biggest acquisition ever. Which company?",["Lowe's","SRS Distribution","Ace Hardware","Grainger"],1,"Roughly an 18 billion dollar deal."],
+    ["HOME DEPOT","Bernie Marcus co-founded The Home Depot with...",["Sam Walton","Arthur Blank","Frank Blake","Ken Langone only"],1,"Ken Langone helped raise the money."],
+    ["HOME DEPOT","Bernie Marcus and Arthur Blank started Home Depot after being fired from...",["Sears","Ace Hardware","Handy Dan","True Value"],2,"Best firing in retail history."],
+    ["HOME DEPOT","Home Depot's biggest home-improvement rival is...",["Menards","Ace Hardware","Tractor Supply","Lowe's"],3],
+    ["HOME DEPOT","At Kids Workshops, every kid famously gets a small orange...",["Hard hat","Apron","Toolbox","Cart"],1],
+    ["HOME DEPOT","Roughly how many Home Depot stores are there?",["800","1,500","2,300","4,600"],2],
+    ["HOME DEPOT","Which MLS team long played at a stadium called the Home Depot Center?",["Atlanta United","LA Galaxy","Seattle Sounders","Inter Miami"],1,"Carson, California. 2003 to 2013."],
+    ["HOME DEPOT","The Home Depot Foundation is best known for building housing for...",["Teachers","Veterans","Nurses","First responders"],1],
+    // ---------------- WAREHOUSE (14) ----------------
+    ["WAREHOUSE","In a DC, UPH stands for...",["Universal Pallet Height","Units Per Hour","Unloading Priority High","Uniform Pick Handling"],1,"Pavel will absolutely bring this up later."],
+    ["WAREHOUSE","FIFO stands for...",["First In, First Out","Fast In, Fast Out","Freight In, Freight Out","Final Inventory Falls Over"],0],
+    ["WAREHOUSE","SKU stands for...",["Stock Keeping Unit","Standard Kit Utility","Shipment Kept Undamaged","Stacked Kart Unit"],0],
+    ["WAREHOUSE","The most common pallet footprint in the US is...",["36 x 36 inches","40 x 40 inches","48 x 40 inches","60 x 48 inches"],2,"The GMA pallet. Respect it."],
+    ["WAREHOUSE","The first product ever scanned with a UPC barcode (1974) was...",["A can of soup","A pack of chewing gum","A gallon of milk","A carton of eggs"],1,"Juicy Fruit. Ohio, 1974."],
+    ["WAREHOUSE","LTL stands for...",["Less Than Truckload","Long Trailer Load","Late To Loading","Lift, Then Lower"],0],
+    ["WAREHOUSE","A \"53-footer\" refers to a trailer's...",["Height","Weight","Length","Turning radius"],2],
+    ["WAREHOUSE","In a warehouse, \"slotting\" means...",["Scheduling breaks","Deciding where each product lives","Stacking pallets higher","Booking dock doors"],1],
+    ["WAREHOUSE","BOL stands for...",["Box On Ledge","Bill of Lading","Back Of Line","Bulk Order List"],1],
+    ["WAREHOUSE","Cross-docking means...",["Parking two trucks together","Inbound to outbound with little or no storage","Loading from both sides","Doubling the dock crew"],1],
+    ["WAREHOUSE","OSHA exists to regulate...",["Overtime pay","Workplace safety","Shipping rates","Hiring quotas"],1],
+    ["WAREHOUSE","A \"cycle count\" is...",["Counting forklift battery cycles","Regularly counting a small slice of inventory","Counting steps per shift","An annual full shutdown count"],1],
+    ["WAREHOUSE","A \"reefer\" trailer hauls...",["Hazardous materials","Live animals","Refrigerated goods","Oversized loads"],2],
+    ["WAREHOUSE","WMS stands for...",["Warehouse Management System","Weekly Metrics Summary","Worker Motivation Standard","Wide Margin Shipping"],0],
+    // ---------------- PAVEL (7) ----------------
+    ["PAVEL","Where was Pavel born?",["Moscow","Irkutsk (Siberia)","St. Petersburg","Vladivostok"],1],
+    ["PAVEL","What is the name of Pavel's dog?",["Daisy","Luna","Charlotte","Biscuit"],2],
+    ["PAVEL","According to Pavel, the best game of all time is...",["World of Warcraft","StarCraft","The Legend of Zelda","Diablo 2"],3,"This is not up for debate."],
+    ["PAVEL","Which sport did Pavel do in college?",["Swimming","Rowing","Wrestling","Tennis"],1],
+    ["PAVEL","Where did Pavel get his MBA?",["Emory","UGA","Georgia Tech","Georgia State"],2],
+    ["PAVEL","What status does Charlotte (the dog) hold at Chick-fil-A?",["Silver status","Red status","Signature status","Banned"],1,"They know her by name."],
+    ["PAVEL","Charlotte's go-to Chick-fil-A order is...",["Chick-n-Minis","8-count nuggets","Side grilled breakfast chicken fillet","Spicy deluxe sandwich"],2]
+  ];
+
+  var DEPT=["LUMBER","PAINT","HARDWARE","GARDEN","ELECTRICAL","PRO DESK"];
+  var OK_LINES=["NAILED IT.","CONTRACTOR SPEED.","STRAIGHT OFF THE TOP SHELF.","MEASURED ONCE. STILL RIGHT.","CERTIFIED PRO MOVE.","THAT ONE'S GOING ON THE FRIDGE."];
+  var SLOW_LINES=["RIGHT, BUT THE TRUCK ALREADY LEFT.","CORRECT. EVENTUALLY.","GOOD ANSWER. SLOW FORKLIFT."];
+  var BAD_LINES=["WRONG AISLE.","THAT'S A RETURN. NO RECEIPT.","CLEANUP ON AISLE YOU.","NOT IN THE PLANOGRAM.","MEASURE TWICE NEXT TIME."];
+
+  var STD=15000, PER_WAVE=5, WAVES=6, TOTAL=30;
+  var LETTERS=["A","B","C","D"];
+  var REDUCED=false;
+  try{REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+
+  var S={me:"",seed:0,deal:[],scores:[],bp:0,bs:0,att:1,pid:"",
+         cur:-1,tAcc:0,tLast:0,ticker:null,answered:false,paused:false};
+
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/[<>&\"]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c];});}
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+  /* ---------- deal: seeded, stratified, options shuffled ---------- */
+  function makeDeal(seed){
+    var r=rng(seed);
+    function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+    var cats={};
+    Q.forEach(function(q,i){(cats[q[0]]=cats[q[0]]||[]).push(i);});
+    var M=shuf(cats["MOVIES"]),U=shuf(cats["MUSIC"]),H=shuf(cats["HOME DEPOT"]),W=shuf(cats["WAREHOUSE"]),P=shuf(cats["PAVEL"]);
+    var pw=shuf([0,1,2,3,4,5]).slice(0,4);
+    var deal=[];
+    for(var w=0;w<WAVES;w++){
+      var five=(pw.indexOf(w)>=0)?P.pop():(w%2?U.pop():M.pop());
+      var wave=[M.pop(),U.pop(),H.pop(),W.pop(),five];
+      wave=shuf(wave);
+      for(var k=0;k<wave.length;k++)deal.push({q:wave[k],o:shuf([0,1,2,3])});
+    }
+    return deal;
+  }
+  function newSeed(){return (Math.floor(Math.random()*2147483646)+1);}
+
+  /* ---------- persistence (URL hash) ---------- */
+  function enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,"");}
+  function dec(s){try{return JSON.parse(decodeURIComponent(escape(atob(s))));}catch(e){return null;}}
+  function save(){
+    var o={m:S.me,s:S.seed,r:S.scores,bp:S.bp,bs:S.bs,at:S.att,pi:S.pid};
+    try{history.replaceState(null,"","#"+enc(o));}
+    catch(e){try{location.hash=enc(o);}catch(e2){}}
+  }
+  function load(){
+    var h=location.hash.replace(/^#/,"");if(!h)return false;
+    var o=dec(h);if(!o||!o.m||!o.s)return false;
+    S.me=String(o.m).slice(0,24);S.seed=o.s;
+    S.bp=(typeof o.bp==="number")?o.bp:0;S.bs=(typeof o.bs==="number")?o.bs:0;
+    S.att=(typeof o.at==="number"&&o.at>0)?o.at:1;
+    S.pid=(typeof o.pi==="string"&&o.pi)?o.pi:"";
+    S.deal=makeDeal(S.seed);
+    S.scores=[];for(var i=0;i<TOTAL;i++)S.scores.push((Array.isArray(o.r)&&typeof o.r[i]==="number")?o.r[i]:-1);
+    return true;
+  }
+
+  /* ---------- derived stats ---------- */
+  function answeredCount(){var n=0;for(var i=0;i<TOTAL;i++)if(S.scores[i]>=0)n++;return n;}
+  function totalPts(){var t=0;for(var i=0;i<TOTAL;i++)if(S.scores[i]>0)t+=S.scores[i];return t;}
+  function perf(from,to){
+    var n=0,t=0;
+    for(var i=from;i<to;i++)if(S.scores[i]>=0){n++;t+=S.scores[i];}
+    return n?Math.round(t/n):null;
+  }
+  function streaks(){
+    var best=0,run=0;
+    for(var i=0;i<TOTAL;i++){
+      if(S.scores[i]>0){run++;if(run>best)best=run;}
+      else if(S.scores[i]===0)run=0;
+      else break;
+    }
+    return {cur:run,best:best};
+  }
+  function rank(p){
+    if(p===null)return "UNRATED";
+    if(p>=90)return "RATE BUSTER";
+    if(p>=75)return "ABOVE STANDARD";
+    if(p>=55)return "ON STANDARD";
+    return "COACHING OPPORTUNITY";
+  }
+
+  /* ---------- sound ---------- */
+  var AU={ctx:null,on:true};
+  function aInit(){
+    if(AU.ctx)return;
+    try{var C=window.AudioContext||window.webkitAudioContext;if(C)AU.ctx=new C();}catch(e){}
+  }
+  function tone(f,t0,dur,type,vol){
+    if(!AU.on||!AU.ctx)return;
+    try{
+      if(AU.ctx.state==="suspended")AU.ctx.resume();
+      var o=AU.ctx.createOscillator(),g=AU.ctx.createGain(),now=AU.ctx.currentTime;
+      o.type=type||"sine";o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,now+t0);
+      g.gain.exponentialRampToValueAtTime(vol||0.12,now+t0+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+t0+dur);
+      o.connect(g);g.connect(AU.ctx.destination);
+      o.start(now+t0);o.stop(now+t0+dur+0.05);
+    }catch(e){}
+  }
+  function sndOk(fast){tone(660,0,.09);tone(880,.09,.11);if(fast)tone(1175,.18,.13);}
+  function sndBad(){tone(150,0,.16,"square",.08);tone(110,.13,.2,"square",.08);}
+  function sndWave(){tone(523,0,.1);tone(659,.1,.1);tone(784,.2,.16);}
+  function sndHonk(){tone(392,0,.13,"square",.09);tone(392,.2,.16,"square",.09);}
+  function sndChime(){tone(880,0,.14);tone(660,.16,.2);}
+  function sndThud(){tone(75,0,.22,"sine",.22);tone(52,.05,.28,"sine",.2);}
+  function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+  $("sndBtn").addEventListener("click",function(){
+    aInit();AU.on=!AU.on;
+    this.textContent=AU.on?"SOUND ON":"SOUND OFF";
+    this.setAttribute("aria-pressed",AU.on?"true":"false");
+    if(AU.on)tone(784,0,.08);
+  });
+
+  /* ---------- particles ---------- */
+  var COLORS=["#F96302","#D6F04B","#EDEEEA","#C24A00"];
+  function burstAt(cx,cy,n,palette){
+    if(REDUCED)return;
+    var fx=$("fx");if(!fx)return;
+    for(var i=0;i<n;i++){
+      var s=document.createElement("span");
+      s.style.left=cx+"px";s.style.top=cy+"px";
+      s.style.background=(palette||COLORS)[i%(palette||COLORS).length];
+      fx.appendChild(s);
+      var ang=Math.random()*Math.PI*2,dist=50+Math.random()*90;
+      var dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist-40;
+      try{
+        var a=s.animate([
+          {transform:"translate(0,0) rotate(0deg)",opacity:1},
+          {transform:"translate("+dx+"px,"+(dy+70)+"px) rotate("+(Math.random()*300-150)+"deg)",opacity:0}
+        ],{duration:550+Math.random()*350,easing:"cubic-bezier(.15,.6,.4,1)"});
+        a.onfinish=(function(sp){return function(){if(sp.parentNode)sp.parentNode.removeChild(sp);};})(s);
+      }catch(e){if(s.parentNode)s.parentNode.removeChild(s);}
+    }
+    setTimeout(function(){while(fx.children.length>90)fx.removeChild(fx.firstChild);},1300);
+  }
+  function burst(el,n,palette){
+    var r=el.getBoundingClientRect();
+    burstAt(r.left+r.width/2,r.top+r.height/2,n,palette);
+  }
+
+  /* ---------- chaos events (visual only, never block taps) ---------- */
+  var CH={t:null};
+  function chEl(html,cls,life){
+    var c=$("chaos"),d=document.createElement("div");
+    d.className=cls;d.innerHTML=html;c.appendChild(d);
+    setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},life);
+    return d;
+  }
+  function quake(){
+    var w=$("wrap");
+    w.classList.remove("quake");void w.offsetWidth;w.classList.add("quake");
+    setTimeout(function(){w.classList.remove("quake");},600);
+  }
+  var FORK='<svg viewBox="0 0 150 90" xmlns="http://www.w3.org/2000/svg">'+
+    '<rect x="30" y="30" width="58" height="34" fill="#F96302"/>'+
+    '<rect x="40" y="12" width="34" height="22" fill="#1A1D20" stroke="#F96302" stroke-width="4"/>'+
+    '<rect x="92" y="6" width="7" height="62" fill="#A6ADB5"/>'+
+    '<rect x="99" y="60" width="42" height="6" fill="#A6ADB5"/>'+
+    '<rect x="102" y="30" width="26" height="26" fill="#8B5A2B"/>'+
+    '<circle cx="44" cy="70" r="12" fill="#25292E" stroke="#A6ADB5" stroke-width="4"/>'+
+    '<circle cx="82" cy="70" r="12" fill="#25292E" stroke="#A6ADB5" stroke-width="4"/></svg>';
+  var TAUNTS=[
+    "THE TABLE NEXT TO YOU IS PROBABLY BEATING YOU.",
+    "MANAGEMENT IS WATCHING. NOT REALLY. OR ARE THEY.",
+    "REMINDER: THIS COUNTS TOWARD ABSOLUTELY NOTHING.",
+    "A FINANCE GUY BUILT THIS. BLAME PAVEL."
+  ];
+  function evForklift(){chEl(FORK,"ch-fork",3100);sndHonk();buzz([20,60,20]);}
+  function evPA(){
+    var nm=(S.me||"ASSOCIATE").toUpperCase();
+    chEl("PA SYSTEM: "+esc(nm)+" TO THE PRO DESK. "+esc(nm)+" TO THE PRO DESK.","ch-banner",3200);
+    sndChime();
+  }
+  function evSpill(){
+    chEl("<span>CAUTION -- SPILL IN AISLE 4 -- KEEP ANSWERING</span>","ch-banner caution",3200);
+    sndChime();
+  }
+  function evPallet(){
+    quake();sndThud();buzz([70]);
+    burstAt(window.innerWidth/2,window.innerHeight*0.25,20,["#8B5A2B","#A6702F","#F96302","#6B4A22"]);
+  }
+  function evTaunt(){chEl(pick(TAUNTS),"ch-banner",3200);sndChime();}
+  function evSafety(){
+    S.paused=true;
+    chEl("SAFETY MOMENT.<br><b>TIMER PAUSED.</b><br>ROLL YOUR SHOULDERS. HYDRATE.","ch-card",2700);
+    sndChime();
+    setTimeout(function(){S.paused=false;},2700);
+  }
+  var DRG='<svg viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg"><g class="bob"><g class="tailwag"><path d="M46 56 Q22 50 14 60 Q26 60 20 68 L34 64 Z" fill="#C24A00"/></g><g class="wing w2"><path d="M76 40 Q52 2 30 14 Q52 22 48 30 Q62 28 60 38 Z" fill="#9E3D00"/></g><ellipse cx="82" cy="60" rx="38" ry="22" fill="#F96302"/><ellipse cx="88" cy="68" rx="24" ry="11" fill="#D6F04B"/><path d="M60 40 L66 30 L72 40 Z" fill="#D6F04B"/><path d="M74 37 L80 26 L86 37 Z" fill="#D6F04B"/><rect x="66" y="76" width="9" height="12" rx="4" fill="#C24A00"/><rect x="90" y="76" width="9" height="12" rx="4" fill="#C24A00"/><g class="wing"><path d="M78 40 Q56 -2 32 10 Q56 20 50 30 Q66 26 64 40 Z" fill="#C24A00"/></g><g><circle cx="128" cy="40" r="20" fill="#B9BEC6"/><path d="M112 28 L108 12 L122 22 Z" fill="#B9BEC6"/><path d="M116 24 L114 16 L121 21 Z" fill="#F2A9B4"/><path d="M144 28 L148 12 L134 22 Z" fill="#B9BEC6"/><path d="M140 24 L142 16 L135 21 Z" fill="#F2A9B4"/><circle cx="121" cy="37" r="6.5" fill="#FFFFFF"/><circle cx="136" cy="37" r="6.5" fill="#FFFFFF"/><circle cx="122" cy="38" r="2.4" fill="#141618"/><circle cx="137" cy="38" r="2.4" fill="#141618"/><path d="M128 44 L125 48 L131 48 Z" fill="#E8798A"/><circle cx="128" cy="53" r="3" fill="#6B3140"/><path d="M108 44 L96 42 M108 48 L97 49 M148 44 L160 42 M148 48 L159 49" stroke="#6E747C" stroke-width="1.6" fill="none"/></g></g></svg>';
+  var skyTimer=null;
+  function spawnDragon(dur){
+    if(REDUCED)return;
+    var sky=$("sky"),d=document.createElement("div");
+    d.className="drg";
+    d.style.top=(6+Math.random()*22)+"%";
+    if(dur)d.style.animationDuration=dur+"s";
+    d.innerHTML=DRG;
+    sky.appendChild(d);
+    setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},(dur||7)*1000+400);
+  }
+  function dragonLoop(on){
+    if(skyTimer){clearInterval(skyTimer);skyTimer=null;}
+    if(on&&!REDUCED){spawnDragon();skyTimer=setInterval(spawnDragon,9000);}
+  }
+  function sndMrrp(){tone(700,0,.07);tone(950,.08,.09);tone(620,.19,.12);}
+  function evDragon(){spawnDragon(4);sndMrrp();buzz([15,40,15]);}
+  var EVENTS=[evForklift,evPA,evSpill,evPallet,evTaunt,evSafety,evDragon];
+  function chaosMaybe(taskIdx){
+    if(REDUCED)return;
+    if(taskIdx%PER_WAVE===0&&taskIdx===0)return; // never on the very first task
+    if(Math.random()<0.38){
+      CH.t=setTimeout(function(){CH.t=null;if(!S.answered)pick(EVENTS)();},2200+Math.random()*6800);
+    }
+  }
+  function clearChaos(){if(CH.t){clearTimeout(CH.t);CH.t=null;}}
+  try{window.__fx={chaos:function(i){EVENTS[i||0]();}};}catch(e){}
+
+  /* ---------- shared leaderboard (textdb.online, best-effort) ---------- */
+  var LB_KEY="apronupie4hvjne6w9p8z";
+  function lbGet(cb){
+    try{
+      fetch("https://textdb.online/"+LB_KEY+"?_="+Date.now())
+        .then(function(r){return r.text();})
+        .then(function(t){var o=null;try{o=JSON.parse(t);}catch(e){}
+          cb((o&&Array.isArray(o.list))?o:{v:1,list:[]});})
+        ["catch"](function(){cb(null);});
+    }catch(e){cb(null);}
+  }
+  function lbPut(o,done){
+    try{
+      fetch("https://textdb.online/update",{method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:"key="+LB_KEY+"&value="+encodeURIComponent(JSON.stringify(o))})
+        .then(function(){done(true);})["catch"](function(){done(false);});
+    }catch(e){done(false);}
+  }
+  function lbRender(o){
+    var rows=$("lbRows"),beat=$("lbBeat");
+    if(!o){rows.innerHTML='<div class="lb-off">Board offline. Compare out loud.</div>';beat.textContent="";return;}
+    var L=o.list.slice().sort(function(a,b){return (b.p-a.p)||(b.s-a.s);});
+    if(!L.length){rows.innerHTML='<div class="lb-off">Nobody on the board yet. Set the bar.</div>';beat.textContent="";return;}
+    beat.textContent="SCORE TO BEAT: "+L[0].p+"% -- "+L[0].n.toUpperCase()+" (SHIFT "+(L[0].a||1)+")";
+    var html="";
+    for(var i=0;i<Math.min(L.length,8);i++){
+      var e=L[i];
+      html+='<div class="lb-row'+(e.id===S.pid?" me":"")+'"><span class="r">'+(i+1)+'</span>'+
+        '<span class="n">'+esc(e.n.toUpperCase())+'<small>S'+(e.a||1)+'</small></span>'+
+        '<span>x'+(e.s||0)+'</span><span class="p">'+e.p+'%</span></div>';
+    }
+    rows.innerHTML=html;
+  }
+  function lbSubmit(){
+    var mine={id:S.pid,n:S.me.slice(0,14),p:perf(0,TOTAL)||0,s:streaks().best,a:S.att};
+    lbGet(function(o){
+      if(!o){lbRender(null);return;}
+      var found=false;
+      for(var i=0;i<o.list.length;i++){
+        if(o.list[i].id===S.pid){
+          found=true;
+          if(mine.p>o.list[i].p||(mine.p===o.list[i].p&&mine.s>o.list[i].s))o.list[i]=mine;
+        }
+      }
+      if(!found)o.list.push(mine);
+      o.list.sort(function(a,b){return (b.p-a.p)||(b.s-a.s);});
+      o.list=o.list.slice(0,30);
+      lbPut(o,function(){lbRender(o);});
+    });
+  }
+  $("lbRefresh").addEventListener("click",function(){
+    $("lbRows").innerHTML='<div class="lb-off">Checking the floor...</div>';
+    lbGet(lbRender);
+  });
+
+  /* ---------- count-up ---------- */
+  function countup(el,to){
+    if(REDUCED){el.innerHTML=to+"<small>%</small>";return;}
+    var st=null;
+    function f(t){
+      if(st===null)st=t;
+      var k=Math.min((t-st)/750,1);k=1-Math.pow(1-k,3);
+      el.innerHTML=Math.round(to*k)+"<small>%</small>";
+      if(k<1)requestAnimationFrame(f);
+    }
+    requestAnimationFrame(f);
+  }
+
+  /* ---------- screens ---------- */
+  function show(id){
+    ["scrStart","scrDash","scrQ","scrWave","scrEnd"].forEach(function(s){$(s).classList.add("hide");});
+    var el=$(id);
+    el.classList.remove("hide");
+    el.classList.remove("screen");void el.offsetWidth;el.classList.add("screen");
+    $("wrap").classList.toggle("slim",id!=="scrStart");
+    if(id!=="scrQ")$("qNextWrap").classList.add("hide");
+    dragonLoop(id==="scrEnd"||(id==="scrStart"&&!window.__heroOK));
+    try{if(window.__heroVis)window.__heroVis(id==="scrStart");}catch(e){}
+    window.scrollTo(0,0);
+  }
+
+  function dash(){
+    var done=answeredCount(),wavesDone=Math.floor(done/PER_WAVE),p=perf(0,TOTAL),sk=streaks();
+    $("stPerf").textContent=(p===null)?"--":p;
+    $("stStreak").textContent=Math.max(sk.best,0);
+    $("stWaves").textContent=Math.min(wavesDone,WAVES)+"/"+WAVES;
+    $("stRank").textContent=rank(p);
+    $("stName").textContent=S.me.toUpperCase();
+    var list=$("waveList");list.innerHTML="";
+    for(var w=0;w<WAVES;w++){
+      var a=w*PER_WAVE,b=a+PER_WAVE,cnt=0;
+      for(var i=a;i<b;i++)if(S.scores[i]>=0)cnt++;
+      var row=document.createElement("div"),status,cls="wave-row";
+      if(cnt===PER_WAVE){status="DONE / "+perf(a,b)+"%";cls+=" done";}
+      else if(done>=a){status=cnt?("OPEN "+cnt+"/"+PER_WAVE):"READY";cls+=" next";}
+      else status="LOCKED";
+      row.className=cls;
+      row.innerHTML='<span class="nm">WAVE '+(w+1)+' <small>/ '+DEPT[w]+'</small></span><span class="st">'+status+'</span>';
+      list.appendChild(row);
+    }
+    if(done>=TOTAL){end();return;}
+    var mid=done%PER_WAVE!==0;
+    $("startWave").textContent=(mid?"Resume ":"Start ")+DEPT[wavesDone].toLowerCase();
+    $("dashHint").textContent=mid?"You left an aisle open. Finish it.":"One wave takes about 90 seconds.";
+    show("scrDash");
+  }
+
+  /* ---------- timing ---------- */
+  function tickStart(){
+    S.tAcc=0;S.tLast=performance.now();
+    if(S.ticker)clearInterval(S.ticker);
+    S.ticker=setInterval(tick,100);
+  }
+  function tick(){
+    if(S.answered)return;
+    var now=performance.now();
+    if(document.visibilityState==="visible"&&!S.paused){S.tAcc+=now-S.tLast;}
+    S.tLast=now;
+    var f=Math.min(S.tAcc/STD,1),c=$("clock");
+    $("clockFill").style.transform="scaleX("+(1-f)+")";
+    c.classList.toggle("mid",S.tAcc>=STD*0.5&&S.tAcc<STD-3000);
+    c.classList.toggle("hot",S.tAcc>=STD-3000);
+  }
+  document.addEventListener("visibilitychange",function(){S.tLast=performance.now();});
+
+  function ask(i){
+    S.cur=i;S.answered=false;S.paused=false;
+    var D=S.deal[i],qi=D.q;
+    $("qNum").textContent=i+1;
+    $("qCat").textContent=Q[qi][0];
+    $("qText").textContent=Q[qi][1];
+    var c=$("clock");c.classList.remove("mid","hot");
+    $("clockFill").style.transform="scaleX(1)";
+    $("verdict").textContent="";$("verdict").className="verdict";
+    $("fact").textContent="";
+    $("qNextWrap").classList.add("hide");
+    var sk=streaks(),chip=$("streakChip");
+    if(sk.cur>=2){chip.textContent="STREAK x"+sk.cur;chip.classList.remove("hide");}
+    else chip.classList.add("hide");
+    var box=$("opts");box.innerHTML="";
+    D.o.forEach(function(orig,j){
+      var b=document.createElement("button");
+      b.className="opt";
+      b.innerHTML='<span class="tag">'+LETTERS[j]+'</span><span>'+esc(Q[qi][2][orig])+'</span>';
+      b.addEventListener("click",function(){answer(j,b);});
+      box.appendChild(b);
+    });
+    show("scrQ");
+    tickStart();
+    chaosMaybe(i);
+  }
+
+  function answer(j){
+    if(S.answered)return;
+    S.answered=true;
+    clearChaos();S.paused=false;
+    if(S.ticker){clearInterval(S.ticker);S.ticker=null;}
+    $("clock").classList.remove("hot");
+    var i=S.cur,D=S.deal[i],qi=D.q;
+    var correctPos=D.o.indexOf(Q[qi][3]);
+    var ok=(j===correctPos),over=S.tAcc>=STD,pts;
+    if(!ok)pts=0;else if(over)pts=40;else pts=70+Math.round(30*(1-S.tAcc/STD));
+    S.scores[i]=pts;save();
+
+    var kids=$("opts").children;
+    for(var k=0;k<kids.length;k++){
+      kids[k].disabled=true;
+      if(k===correctPos)kids[k].classList.add("hit");
+      else if(k===j)kids[k].classList.add("miss");
+      else kids[k].classList.add("dim");
+    }
+    var v=$("verdict"),secs=(S.tAcc/1000).toFixed(1),sk=streaks();
+    if(ok&&!over){
+      v.innerHTML=pick(OK_LINES)+" <b>+"+pts+"</b> / "+secs+"s";
+      burst(kids[correctPos],sk.cur>=3?26:14);
+      sndOk(pts>=92);buzz(sk.cur>=3?[12,40,12,40,18]:[15]);
+      if(sk.cur>=2){
+        var chip=$("streakChip");
+        chip.textContent="STREAK x"+sk.cur;chip.classList.remove("hide");
+        chip.classList.remove("bump");void chip.offsetWidth;chip.classList.add("bump");
+      }
+    }else if(ok){
+      v.innerHTML=pick(SLOW_LINES)+" <b>+"+pts+"</b> / "+secs+"s";
+      sndOk(false);buzz([15]);
+    }else{
+      v.className="verdict bad";
+      v.innerHTML=pick(BAD_LINES)+" Answer: <b>"+esc(Q[qi][2][Q[qi][3]])+"</b>";
+      sndBad();buzz([60]);
+      $("streakChip").classList.add("hide");
+    }
+    if(Q[qi][4])$("fact").textContent=Q[qi][4];
+    $("qNextWrap").classList.remove("hide");
+    $("qNext").textContent=(answeredCount()%PER_WAVE===0)?"Close out the wave":"Next task";
+  }
+
+  $("qNext").addEventListener("click",function(){
+    var done=answeredCount();
+    if(done>=TOTAL){end();return;}
+    if(done%PER_WAVE===0)waveDone();
+    else ask(done);
+  });
+
+  function waveDone(){
+    var done=answeredCount(),w=done/PER_WAVE,a=(w-1)*PER_WAVE,b=a+PER_WAVE;
+    var p=perf(a,b),hits=0;
+    for(var i=a;i<b;i++)if(S.scores[i]>0)hits++;
+    $("wrTitle").textContent=DEPT[w-1]+" cleared";
+    $("wrDetail").textContent=hits+" of "+PER_WAVE+" correct | shift so far: "+perf(0,TOTAL)+"% | "+rank(perf(0,TOTAL));
+    show("scrWave");
+    countup($("wrPerf"),p);
+    sndWave();
+    if(hits===PER_WAVE)setTimeout(function(){burst($("wrPerf"),30);},500);
+  }
+
+  function end(){
+    var p=perf(0,TOTAL)||0,sk=streaks();
+    if(p>S.bp)S.bp=p;
+    if(sk.best>S.bs)S.bs=sk.best;
+    save();
+    show("scrEnd");
+    countup($("endPerf"),p);
+    $("endRank").textContent=rank(p);
+    $("endName").textContent="ASSOCIATE: "+S.me.toUpperCase()+" | SHIFT "+S.att+" | STREAK "+sk.best+" | "+totalPts()+" PTS";
+    lbSubmit();
+    $("endBest").textContent="ALL-TIME BEST: "+S.bp+"% / STREAK "+S.bs;
+    sndWave();
+    if(p>=75)setTimeout(function(){burst($("endPerf"),36);},600);
+  }
+
+  $("overtime").addEventListener("click",function(){
+    aInit();
+    S.att++;
+    S.seed=newSeed();S.deal=makeDeal(S.seed);
+    S.scores=[];for(var i=0;i<TOTAL;i++)S.scores.push(-1);
+    save();dash();
+  });
+
+  $("wrBack").addEventListener("click",dash);
+  $("startWave").addEventListener("click",function(){aInit();ask(answeredCount());});
+
+  $("clockIn").addEventListener("click",function(){
+    var v=$("me").value.trim();
+    if(!v){$("startWarn").textContent="Can't clock in without a name. HR checked.";return;}
+    aInit();
+    S.me=v;
+    if(!S.pid){S.pid=Math.random().toString(36).slice(2,10);}
+    if(!S.seed){S.seed=newSeed();S.deal=makeDeal(S.seed);}
+    save();dash();
+  });
+  $("me").addEventListener("keydown",function(e){if(e.key==="Enter")$("clockIn").click();});
+
+  if(load()&&S.me)dash();else if(!window.__heroOK)dragonLoop(true);
+})();
+</script>
+
+<script type="module">
+try{
+  const THREE=await import('three');
+  const host=document.getElementById('hero3d');
+  const W=Math.min(host.parentElement.clientWidth||360,492),H=210;
+  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(W,H);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(38,W/H,0.1,60);
+  cam.position.set(0,1.55,8.6);cam.lookAt(0,1.55,0);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x3a2c18,1.15));
+  const dl=new THREE.DirectionalLight(0xffffff,1.7);dl.position.set(3,5,4);scene.add(dl);
+  const pivot=new THREE.Group();pivot.position.y=-0.55;scene.add(pivot);
+  let vis=true;
+  window.__heroVis=function(on){vis=!!on;};
+  function __mount(grp){
+    pivot.add(grp);
+    host.appendChild(renderer.domElement);
+    host.classList.remove('hide');
+    window.__heroOK=true;
+  }
+  const XLIM=10.5;let px=-XLIM,pt=performance.now();
+  (function loop(){requestAnimationFrame(loop);const now=performance.now(),dt=Math.min((now-pt)/1000,0.05);pt=now;if(!vis||!window.__heroOK)return;px+=dt*2.3;if(px>XLIM)px=-XLIM;pivot.position.x=px;renderer.render(scene,cam);})();
+
+const mat = (name, color, rough, metal, flat) => {
+  const m = new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal ?? 0, flatShading: !!flat });
+  m.name = name; return m;
+};
+const M = {
+  red:      mat('scale_red',        0xd42b12, 0.55, 0.05),
+  redOr:    mat('scale_red_orange', 0xe4501a, 0.55, 0.05),
+  orange:   mat('scale_orange',     0xf07418, 0.55, 0.05),
+  amber:    mat('scale_amber',      0xf59c2a, 0.55, 0.05),
+  bone:     mat('bone',             0xe8ddc4, 0.6,  0.0, true),
+  membrane: mat('wing_membrane',    0xb33a10, 0.8,  0.0),
+  fur:      mat('cat_fur',          0xf3ead8, 1.0,  0.0),
+  furGray:  mat('cat_fur_gray',     0xd8cdbc, 1.0,  0.0),
+  pink:     mat('cat_pink',         0xd98a86, 0.8,  0.0),
+  gold:     mat('eye_gold',         0xf5c518, 0.12, 0.2),
+  white:    mat('cat_white',        0xffffff, 0.35, 0.0),
+  dark:     mat('cat_dark',         0x241d18, 0.55, 0.0)
+};
+M.glass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.22, roughness: 0.03, metalness: 0 });
+M.glass.name = 'eye_cornea';
+M.membrane.side = THREE.DoubleSide;
+
+// procedural imbricated-scale texture (grayscale; multiplied by material color)
+const scaleTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d');
+  x.fillStyle = '#dedede'; x.fillRect(0, 0, 256, 256);
+  const S = 32;
+  for (let row = 0; row <= 9; row++) {
+    const off = (row % 2) * S / 2;
+    for (let col = -1; col <= 8; col++) {
+      const cx = col * S + off + S / 2, cy = row * S;
+      const grd = x.createRadialGradient(cx, cy - 8, 2, cx, cy, S * 0.64);
+      grd.addColorStop(0, '#fafafa'); grd.addColorStop(0.7, '#e6e6e6'); grd.addColorStop(1, '#a8a8a8');
+      x.fillStyle = grd;
+      x.beginPath(); x.arc(cx, cy, S * 0.64, 0, Math.PI * 2); x.fill();
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+M.body = new THREE.MeshStandardMaterial({ map: scaleTex, bumpMap: scaleTex, bumpScale: 0.3, vertexColors: true, roughness: 0.55, metalness: 0.05 });
+const limbTex = scaleTex.clone(); limbTex.repeat.set(2, 2); limbTex.needsUpdate = true;
+for (const m of [M.red, M.redOr, M.orange, M.amber]) { m.map = limbTex; m.bumpMap = limbTex; m.bumpScale = 0.25; }
+M.body.name = 'dragon_scales';
+
+// fluff bump for the cat
+const furTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 1400; i++) {
+    const px = Math.random() * 128, py = Math.random() * 128, a = Math.random() * Math.PI;
+    x.strokeStyle = `rgba(${90 + Math.random() * 100 | 0},${90 + Math.random() * 100 | 0},${90 + Math.random() * 100 | 0},0.5)`;
+    x.lineWidth = 1;
+    x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * 5, py + Math.sin(a) * 5); x.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(3, 3);
+  return t;
+})();
+for (const m of [M.fur, M.furGray]) { m.bumpMap = furTex; m.bumpScale = 0.35; }
+
+const g = new THREE.Group();
+g.name = 'dragon_cat_rider';
+const V3 = (x,y,z=0) => new THREE.Vector3(x,y,z);
+
+// gradient: red at head (t=1) fading to orange/amber at tail (t=0)
+const gradeMat = t => t > 0.68 ? M.red : t > 0.48 ? M.redOr : t > 0.26 ? M.orange : M.amber;
+
+// ---- Spine: tail tip -> head base ----
+const ctrl = [
+  [-3.30,0.50,0.03], [-2.60,0.72,0.10], [-1.90,0.95,0.22], [-1.20,1.10,0.38],
+  [-0.60,1.15,0.48], [ 0.00,1.18,0.52], [ 0.60,1.20,0.46], [ 1.05,1.45,0.30],
+  [ 1.30,1.85,0.24], [ 1.45,2.20,0.22], [ 1.52,2.45,0.20]
+];
+const curve = new THREE.CatmullRomCurve3(ctrl.map(p => V3(p[0], p[1], p[2] * 0 )));
+// fix: curve points use x,y only; z stays 0
+const curvePts = ctrl.map(p => V3(p[0], p[1], 0));
+const spine = new THREE.CatmullRomCurve3(curvePts);
+const radiusAt = t => {
+  const f = t * (ctrl.length - 1), i = Math.min(Math.floor(f), ctrl.length - 2), u = f - i;
+  return ctrl[i][2] * (1 - u) + ctrl[i + 1][2] * u;
+};
+
+const N = 36;
+const spinePts = [];
+for (let i = 0; i <= N; i++) {
+  const t = i / N;
+  spinePts.push({ p: spine.getPoint(t), r: radiusAt(t), t });
+}
+
+// smooth continuous body: one tapered tube along the spine, vertex-colored
+// red (head) -> orange -> amber (tail), lighter toward the belly
+const stops = [[0, 0xf59c2a], [0.35, 0xf07418], [0.6, 0xe4501a], [0.85, 0xd42b12], [1, 0xd42b12]].map(s => [s[0], new THREE.Color(s[1])]);
+const bellyCol = new THREE.Color(0xf7c07a);
+const colorAt = t => {
+  let k = 0; while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
+  const u = (t - stops[k][0]) / (stops[k + 1][0] - stops[k][0]);
+  return stops[k][1].clone().lerp(stops[k + 1][1], Math.min(Math.max(u, 0), 1));
+};
+const RINGS = 72, SIDES = 26;
+const pos = [], uv = [], col = [], idx = [];
+const bz = V3(0, 0, 1);
+for (let i = 0; i <= RINGS; i++) {
+  const t = i / RINGS;
+  const c = spine.getPoint(t), r = radiusAt(t);
+  const tan = spine.getTangent(t).normalize();
+  const n = new THREE.Vector3().crossVectors(bz, tan).normalize();
+  const base = colorAt(t);
+  for (let j = 0; j <= SIDES; j++) {
+    const th = j / SIDES * Math.PI * 2;
+    const cx = Math.cos(th), sx = Math.sin(th);
+    pos.push(c.x + n.x * cx * r, c.y + n.y * cx * r, sx * r * 0.92);
+    uv.push(t * 9, j / SIDES * 3);
+    const belly = Math.max(0, -n.y * cx);
+    const cc = base.clone().lerp(bellyCol, belly * 0.55);
+    col.push(cc.r, cc.g, cc.b);
+  }
+}
+for (let i = 0; i < RINGS; i++) for (let j = 0; j < SIDES; j++) {
+  const a = i * (SIDES + 1) + j, b = a + SIDES + 1;
+  idx.push(a, b, a + 1, b, b + 1, a + 1);
+}
+const bodyGeo = new THREE.BufferGeometry();
+bodyGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+bodyGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+bodyGeo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+bodyGeo.setIndex(idx);
+bodyGeo.computeVertexNormals();
+const body = new THREE.Mesh(bodyGeo, M.body);
+body.name = 'dragon_body';
+g.add(body);
+
+// ---- Dorsal spikes (skip the saddle zone where the cat sits) ----
+const spike = (name, pos, h, r, tiltZ, mtl) => {
+  const s = new THREE.Mesh(new THREE.ConeGeometry(r, h, 6), mtl || M.bone);
+  s.name = name;
+  s.position.copy(pos);
+  s.rotation.z = tiltZ;
+  return s;
+};
+let spkN = 0;
+const animSpikes = [];
+for (let i = 2; i <= N - 1; i += 2) {
+  const { p, r, t } = spinePts[i];
+  if (p.x > -0.25 && p.x < 0.55) continue; // cat seat
+  const h = Math.max(r * 1.7, 0.08), tilt = 0.38 + (1 - t) * 0.25;
+  const s = spike('spine_spike_' + (++spkN), V3(p.x - r*0.15, p.y + r * 0.85 + h * 0.32, 0), h, r * 0.34, tilt);
+  g.add(s);
+  animSpikes.push({ m: s, t });
+}
+// tail tip spike cluster
+const tip = spinePts[0].p;
+for (const [nm, px, py, pz, hh, rr, tz] of [
+  ['tail_blade', -0.28, 0.10, 0, 0.55, 0.07, 1.35],
+  ['tail_spike_l', -0.10, 0.06, 0.07, 0.3, 0.045, 1.1],
+  ['tail_spike_r', -0.10, 0.06, -0.07, 0.3, 0.045, 1.1]
+]) {
+  const ts = spike(nm, V3(tip.x + px, tip.y + py, pz), hh, rr, tz);
+  g.add(ts);
+  animSpikes.push({ m: ts, t: 0 });
+}
+
+// ---- Head ----
+const HX = 1.62, HY = 2.52;
+const skull = new THREE.Mesh(new THREE.SphereGeometry(0.26, 24, 16), M.red);
+skull.name = 'skull';
+skull.position.set(HX, HY, 0);
+skull.scale.set(1.25, 0.95, 0.95);
+g.add(skull);
+
+const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.19, 0.52, 8, 1), M.red);
+snout.name = 'snout';
+snout.geometry.rotateY(Math.PI / 4);
+snout.rotation.z = -Math.PI / 2 - 0.12;
+snout.position.set(HX + 0.42, HY - 0.02, 0);
+g.add(snout);
+for (const side of [1, -1]) {
+  const no = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), M.dark);
+  no.name = 'nostril_' + (side > 0 ? 'l' : 'r');
+  no.position.set(HX + 0.60, HY + 0.03, side * 0.05);
+  g.add(no);
+}
+
+const jaw = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.13, 0.42, 8, 1), M.redOr);
+jaw.name = 'jaw';
+jaw.geometry.rotateY(Math.PI / 4);
+jaw.rotation.z = -Math.PI / 2 - 0.58;
+jaw.position.set(HX + 0.32, HY - 0.20, 0);
+g.add(jaw);
+
+// dark mouth interior behind the fangs
+const maw = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 10), M.dark);
+maw.name = 'mouth_interior';
+maw.position.set(HX + 0.38, HY - 0.14, 0);
+maw.scale.set(1.7, 0.6, 0.85);
+g.add(maw);
+
+// fangs: two long upper canines, graded rows behind, lower fangs jutting up
+for (const side of [1, -1]) {
+  const sd = side > 0 ? 'l' : 'r';
+  const upper = [[0.56, -0.10, 0.055, 0.13, 0.026], [0.44, -0.095, 0.072, 0.075, 0.019], [0.33, -0.085, 0.082, 0.06, 0.016], [0.23, -0.08, 0.088, 0.05, 0.014]];
+  upper.forEach((f, i) => {
+    const tth = new THREE.Mesh(new THREE.ConeGeometry(f[4], f[3], 6), M.bone);
+    tth.name = `fang_upper_${i}_${sd}`;
+    tth.rotation.x = Math.PI;
+    tth.rotation.z = i === 0 ? -0.15 : 0;
+    tth.position.set(HX + f[0], HY + f[1] - f[3] * 0.35, side * f[2]);
+    g.add(tth);
+  });
+  const lower = [[0.50, -0.20, 0.045, 0.09, 0.02], [0.38, -0.215, 0.06, 0.055, 0.015]];
+  lower.forEach((f, i) => {
+    const tth = new THREE.Mesh(new THREE.ConeGeometry(f[4], f[3], 6), M.bone);
+    tth.name = `fang_lower_${i}_${sd}`;
+    tth.rotation.z = 0.12;
+    tth.position.set(HX + f[0], HY + f[1] + f[3] * 0.35, side * f[2]);
+    g.add(tth);
+  });
+}
+
+// horns: swept back
+for (const side of [1, -1]) {
+  const horn = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.55, 8), M.bone);
+  horn.name = 'horn_' + (side > 0 ? 'l' : 'r');
+  horn.position.set(HX - 0.28, HY + 0.28, side * 0.12);
+  horn.rotation.z = 1.05;
+  horn.rotation.y = side * 0.18;
+  g.add(horn);
+  const brow = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 5), M.bone);
+  brow.name = 'brow_spike_' + (side > 0 ? 'l' : 'r');
+  brow.position.set(HX + 0.10, HY + 0.22, side * 0.13);
+  brow.rotation.z = 0.5;
+  g.add(brow);
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.048, 18, 14), M.gold);
+  eye.name = 'eye_' + (side > 0 ? 'l' : 'r');
+  eye.position.set(HX + 0.18, HY + 0.11, side * 0.20);
+  g.add(eye);
+  const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.02, 10, 8), M.dark);
+  pupil.name = 'pupil_' + (side > 0 ? 'l' : 'r');
+  pupil.scale.set(0.5, 1.4, 0.35);          // vertical slit
+  pupil.position.set(HX + 0.205, HY + 0.11, side * 0.228);
+  pupil.rotation.y = side * 0.35;
+  g.add(pupil);
+  const cornea = new THREE.Mesh(new THREE.SphereGeometry(0.056, 16, 12), M.glass);
+  cornea.name = 'cornea_' + (side > 0 ? 'l' : 'r');
+  cornea.position.set(HX + 0.18, HY + 0.11, side * 0.20);
+  g.add(cornea);
+  // heavy angled brow for the glare
+  const browRidge = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.04, 0.08), M.red);
+  browRidge.name = 'brow_ridge_' + (side > 0 ? 'l' : 'r');
+  browRidge.position.set(HX + 0.18, HY + 0.155, side * 0.15);
+  browRidge.rotation.z = -0.28;
+  browRidge.rotation.x = side * -0.2;
+  g.add(browRidge);
+  // cheek spikes
+  const cheek = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.22, 5), M.bone);
+  cheek.name = 'cheek_spike_' + (side > 0 ? 'l' : 'r');
+  cheek.position.set(HX - 0.18, HY - 0.02, side * 0.26);
+  cheek.rotation.x = side * 1.35;
+  cheek.rotation.z = 0.9;
+  g.add(cheek);
+}
+
+// ---- Legs ----
+const rod = (name, a, b, r1, r2, mtl) => {
+  const dir = new THREE.Vector3().subVectors(b, a), len = dir.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r2, r1, len, 12), mtl);
+  m.name = name;
+  m.position.copy(a).addScaledVector(dir, 0.5);
+  m.quaternion.setFromUnitVectors(V3(0, 1, 0), dir.normalize());
+  return m;
+};
+const leg = (prefix, hip, knee, ankle, footFwd, hipR, mtl) => {
+  const hipS = new THREE.Mesh(new THREE.SphereGeometry(hipR, 18, 14), mtl);
+  hipS.name = prefix + '_haunch';
+  hipS.position.copy(hip);
+  hipS.scale.set(0.95, 1.35, 0.8);
+  g.add(hipS);
+  g.add(rod(prefix + '_upper', hip, knee, hipR * 0.55, hipR * 0.42, mtl));
+  g.add(rod(prefix + '_lower', knee, ankle, hipR * 0.42, hipR * 0.3, mtl));
+  const foot = new THREE.Mesh(new THREE.SphereGeometry(hipR * 0.42, 14, 10), mtl);
+  foot.name = prefix + '_foot';
+  foot.position.set(ankle.x + footFwd * 0.1, 0.09, ankle.z);
+  foot.scale.set(1.7, 0.55, 1.1);
+  g.add(foot);
+  for (let c = -1; c <= 1; c++) {
+    const claw = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.11, 6), M.bone);
+    claw.name = `${prefix}_claw_${c + 2}`;
+    claw.position.set(ankle.x + footFwd * 0.1 + hipR * 0.68, 0.07, ankle.z + c * hipR * 0.32);
+    claw.rotation.z = -1.35;
+    g.add(claw);
+  }
+};
+for (const side of [1, -1]) {
+  const s = side > 0 ? 'l' : 'r';
+  leg('front_leg_' + s, V3(0.60, 1.12, side * 0.33), V3(0.55, 0.52, side * 0.44), V3(0.66, 0.12, side * 0.46), 1, 0.19, M.redOr);
+  leg('hind_leg_' + s, V3(-0.85, 1.10, side * 0.36), V3(-1.05, 0.48, side * 0.52), V3(-0.82, 0.12, side * 0.53), 1, 0.27, M.orange);
+  // elbow spikes
+  const es = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.2, 5), M.bone);
+  es.name = 'elbow_spike_' + s;
+  es.position.set(-1.12, 0.5, side * 0.56);
+  es.rotation.z = 2.3;
+  g.add(es);
+}
+
+// ---- Wings ----
+const wingShape = new THREE.Shape();
+wingShape.moveTo(0, -0.15);
+wingShape.quadraticCurveTo(0.5, 0.75, 1.3, 1.15);
+wingShape.quadraticCurveTo(1.9, 1.42, 2.45, 1.45);   // wingtip
+wingShape.lineTo(2.05, 0.72);                        // finger 1 valley
+wingShape.lineTo(2.15, 0.55);                        // spike
+wingShape.lineTo(1.55, 0.30);
+wingShape.lineTo(1.62, 0.10);
+wingShape.lineTo(0.95, 0.02);
+wingShape.lineTo(0.98, -0.18);
+wingShape.lineTo(0.40, -0.12);
+wingShape.lineTo(0, -0.15);
+const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.035, bevelEnabled: false });
+
+const buildWing = (s) => {
+  const wg = new THREE.Group();
+  wg.name = 'wing_group_' + s;
+  const memb = new THREE.Mesh(wingGeo, M.membrane);
+  memb.name = 'wing_membrane_' + s;
+  wg.add(memb);
+  const bone1 = rod('wing_bone1_' + s, V3(0, -0.1, 0.02), V3(1.3, 1.12, 0.02), 0.055, 0.04, M.redOr);
+  const bone2 = rod('wing_bone2_' + s, V3(1.3, 1.12, 0.02), V3(2.42, 1.42, 0.02), 0.04, 0.02, M.redOr);
+  wg.add(bone1, bone2);
+  const thumb = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.18, 6), M.bone);
+  thumb.name = 'wing_thumb_' + s;
+  thumb.position.set(1.32, 1.24, 0.02);
+  thumb.rotation.z = -0.3;
+  wg.add(thumb);
+  wg.position.set(0.45, 1.55, 0.30);
+  wg.rotation.order = 'YZX';
+  wg.rotation.y = -Math.PI / 2 + 0.55;
+  wg.rotation.z = 0.55;
+  return wg;
+};
+g.add(buildWing('l'));
+const mirror = new THREE.Group();
+mirror.name = 'wing_mirror';
+mirror.scale.z = -1;
+mirror.add(buildWing('r'));
+g.add(mirror);
+
+// ---- Fluffy cat rider ----
+const cat = new THREE.Group();
+cat.name = 'cat_rider';
+const catPart = (name, geo, mtl, x, y, z, sx=1, sy=1, sz=1) => {
+  const m = new THREE.Mesh(geo, mtl);
+  m.name = name;
+  m.position.set(x, y, z);
+  m.scale.set(sx, sy, sz);
+  cat.add(m);
+  return m;
+};
+// saddle pad
+catPart('saddle_pad', new THREE.CylinderGeometry(0.24, 0.26, 0.05, 16), mat('saddle_leather', 0x6b4226, 0.85, 0), 0.14, 1.70, 0);
+// haunches + body (sitting upright)
+catPart('cat_haunch', new THREE.SphereGeometry(0.17, 18, 14), M.fur, 0.10, 1.83, 0, 1.05, 0.9, 1.1);
+catPart('cat_body', new THREE.SphereGeometry(0.15, 18, 14), M.fur, 0.15, 1.96, 0, 1.0, 1.1, 1.0);
+// neck ruff -- the fluff
+catPart('cat_ruff', new THREE.SphereGeometry(0.15, 18, 14), M.furGray, 0.17, 2.09, 0, 1.25, 0.8, 1.25);
+catPart('cat_head', new THREE.SphereGeometry(0.12, 18, 14), M.fur, 0.20, 2.23, 0, 1, 0.95, 0.95);
+catPart('cat_muzzle', new THREE.SphereGeometry(0.05, 12, 10), M.fur, 0.30, 2.20, 0, 1, 0.75, 0.9);
+catPart('cat_nose', new THREE.SphereGeometry(0.016, 8, 6), M.pink, 0.345, 2.215, 0);
+// surprised open mouth
+catPart('cat_mouth', new THREE.SphereGeometry(0.02, 10, 8), M.dark, 0.33, 2.165, 0, 1, 1.25, 0.9);
+// ears
+for (const side of [1, -1]) {
+  const ear = catPart('cat_ear_' + (side > 0 ? 'l' : 'r'), new THREE.ConeGeometry(0.045, 0.10, 4), M.fur, 0.18, 2.34, side * 0.065);
+  ear.rotation.x = side * 0.25; ear.rotation.z = -0.45;
+  const iear = catPart('cat_inner_ear_' + (side > 0 ? 'l' : 'r'), new THREE.ConeGeometry(0.022, 0.06, 4), M.pink, 0.185, 2.335, side * 0.065);
+  iear.rotation.x = side * 0.25; iear.rotation.z = -0.45;
+  // wide startled eyes
+  catPart('cat_eye_' + (side > 0 ? 'l' : 'r'), new THREE.SphereGeometry(0.027, 12, 10), M.white, 0.283, 2.265, side * 0.052);
+  catPart('cat_pupil_' + (side > 0 ? 'l' : 'r'), new THREE.SphereGeometry(0.012, 8, 6), M.dark, 0.303, 2.268, side * 0.056);
+  // front legs bracing on the pad
+  catPart('cat_foreleg_' + (side > 0 ? 'l' : 'r'), new THREE.CylinderGeometry(0.028, 0.033, 0.24, 10), M.fur, 0.25, 1.83, side * 0.07);
+  catPart('cat_paw_' + (side > 0 ? 'l' : 'r'), new THREE.SphereGeometry(0.038, 10, 8), M.fur, 0.26, 1.72, side * 0.07, 1.2, 0.7, 1);
+  catPart('cat_hind_paw_' + (side > 0 ? 'l' : 'r'), new THREE.SphereGeometry(0.05, 10, 8), M.furGray, 0.20, 1.74, side * 0.12, 1.3, 0.6, 0.9);
+}
+// fluffy tail: curve of shrinking spheres
+const tailPts = [[-0.03,1.80],[-0.10,1.79],[-0.16,1.81],[-0.21,1.86],[-0.24,1.93],[-0.25,2.00]];
+tailPts.forEach((p, i) => {
+  catPart('cat_tail_' + (i + 1), new THREE.SphereGeometry(0.058 - i * 0.003, 10, 8), i > 2 ? M.furGray : M.fur, p[0], p[1], 0.02);
+});
+cat.scale.setScalar(1.25);
+cat.position.set(-0.035, -0.42, 0);
+g.add(cat);
+
+__mount(g);
+
+// ---- flight animation: flapping wings, undulating tail, hovering bob ----
+const wingL = g.getObjectByName('wing_group_l');
+const wingR = g.getObjectByName('wing_group_r');
+const basePos = bodyGeo.attributes.position.array.slice();
+for (const s of animSpikes) s.base = s.m.position.clone();
+const clock = new THREE.Clock();
+const FLAP = 6.5;
+(function animate() {
+  requestAnimationFrame(animate);
+  const T = clock.getElapsedTime();
+  const wz = 0.5 + Math.sin(T * FLAP) * 0.55;
+  if (wingL) wingL.rotation.z = wz;
+  if (wingR) wingR.rotation.z = wz;
+  const arr = bodyGeo.attributes.position.array;
+  for (let i = 0; i <= RINGS; i++) {
+    const t = i / RINGS, a = Math.pow(1 - t, 2.2);
+    const zoff = Math.sin(T * 3.2 - (1 - t) * 4.5) * 0.12 * a;
+    const yoff = Math.sin(T * FLAP - (1 - t) * 2.2) * 0.05 * a;
+    for (let j = 0; j <= SIDES; j++) {
+      const k = (i * (SIDES + 1) + j) * 3;
+      arr[k + 1] = basePos[k + 1] + yoff;
+      arr[k + 2] = basePos[k + 2] + zoff;
+    }
+  }
+  bodyGeo.attributes.position.needsUpdate = true;
+  for (const s of animSpikes) {
+    const a = Math.pow(1 - s.t, 2.2);
+    s.m.position.z = s.base.z + Math.sin(T * 3.2 - (1 - s.t) * 4.5) * 0.12 * a;
+    s.m.position.y = s.base.y + Math.sin(T * FLAP - (1 - s.t) * 2.2) * 0.05 * a;
+  }
+  g.position.y = 0.55 - Math.sin(T * FLAP - 0.9) * 0.12;   // rise on downstroke
+  g.rotation.z = Math.sin(T * FLAP - 1.3) * 0.035;          // gentle pitch
+  cat.rotation.z = -0.02 + Math.sin(T * FLAP) * 0.03;       // rider sway
+})();
+}catch(err){/* no WebGL or CDN blocked: 2D dragon flybys remain */}
+</script>
+</body>
+</html>

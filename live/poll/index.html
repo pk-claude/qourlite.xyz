@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only dark">
+<title>Say It -- Qourlite Live Poll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:#141618 !important}
+  body{margin:0;background:#141618 !important;color:#EDEEEA;font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;line-height:1.45;min-height:100vh;min-height:100dvh}
+  .wrap{max-width:520px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+  .hdr{border:2px solid #363B40;background:#1A1D20;margin-bottom:12px}
+  .hdr-top{display:flex;justify-content:space-between;background:#F96302;color:#1A0D02;padding:5px 10px;font-weight:600;font-size:11px;letter-spacing:.14em}
+  .hdr-top a{color:#1A0D02;text-decoration:none}
+  .hdr-body{padding:10px 12px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .hdr h1{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:30px;line-height:.95;margin:0;text-transform:uppercase;color:#F96302}
+  .sync{font-size:10px;letter-spacing:.14em;color:#A6ADB5;text-transform:uppercase;white-space:nowrap}
+  .sync b{color:#D6F04B;font-weight:600}
+  .sync.bad b{color:#F96302}
+  .card{border:2px solid #363B40;background:#1A1D20;padding:14px 12px 16px}
+  .tag{font-size:10px;letter-spacing:.18em;color:#A6ADB5;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between}
+  .tag b{color:#F96302;font-weight:600}
+  .q{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:clamp(24px,7.5vw,34px);line-height:1;text-transform:uppercase;color:#EDEEEA;margin:0 0 14px}
+  .opts{display:grid;gap:8px}
+  button.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#101214;color:#EDEEEA;border:2px solid #363B40;padding:13px 12px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .12s,background .12s}
+  button.opt .k{flex:0 0 auto;width:24px;height:24px;border:2px solid #363B40;display:flex;align-items:center;justify-content:center;font-size:11px;color:#A6ADB5}
+  button.opt.on{border-color:#F96302;background:#2A1A0E}
+  button.opt.on .k{border-color:#F96302;background:#F96302;color:#1A0D02;font-weight:600}
+  button.opt:active{transform:scale(.985)}
+  .inrow{display:flex;gap:8px}
+  input.txt{flex:1;min-width:0;background:#101214;color:#EDEEEA;border:2px solid #363B40;padding:12px;font:inherit;font-size:16px;outline:none}
+  input.txt:focus{border-color:#F96302}
+  button.add{flex:0 0 auto;background:#F96302;color:#1A0D02;border:2px solid #F96302;padding:12px 16px;font:inherit;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  button.add:disabled{opacity:.45}
+  .mine{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .mine span{display:inline-flex;align-items:center;gap:8px;border:2px solid #F96302;padding:6px 10px;font-size:13px;background:#2A1A0E}
+  .mine span i{font-style:normal;color:#A6ADB5;cursor:pointer;font-size:16px;line-height:1}
+  .hint{color:#A6ADB5;font-size:11.5px;letter-spacing:.06em;margin-top:10px}
+  .status{margin-top:12px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADB5;min-height:14px}
+  .status.ok{color:#D6F04B}.status.bad{color:#F96302}
+  .big{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:clamp(38px,13vw,64px);line-height:.95;text-transform:uppercase;color:#F96302;margin:4px 0 10px}
+  .sub{color:#A6ADB5;font-size:12px;letter-spacing:.06em}
+  .joke{font-size:17px;line-height:1.4;margin:6px 0 8px}
+  .links{display:grid;gap:8px;margin-top:14px}
+  .links a{display:block;text-align:center;background:#F96302;color:#1A0D02;text-decoration:none;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:13px}
+  .links a.ghost{background:transparent;color:#EDEEEA;border:2px solid #363B40}
+  .foot{margin-top:16px;text-align:center;color:#A6ADB5;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .pulse{display:inline-block;width:8px;height:8px;background:#D6F04B;border-radius:50%;margin-right:6px;animation:p 1.4s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr">
+    <div class="hdr-top"><span>QOURLITE / LIVE POLL</span><a href="/">&lt;- HUB</a></div>
+    <div class="hdr-body"><h1>Say it.</h1><div class="sync" id="sync">SYNC <b>...</b></div></div>
+  </header>
+  <div class="card" id="card"><div class="tag"><span>CONNECTING</span></div><div class="big">Hold on.</div><div class="sub">Looking for the screen.</div></div>
+  <div class="foot">No names. No wrong answers. Mostly.</div>
+</div>
+<script src="/live/poll/slides.js"></script>
+<script src="/live/poll/qp.js"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var card=$("card"), syncEl=$("sync");
+  var S={dev:null,session:null,idx:-1,ans:{},joined:false,stateFails:0};
+  var lastRenderKey="", saveTimer=null, saveAttempt=0, saving=false, dirty=false, statusText="", statusCls="";
+
+  /* ---------- identity + local persistence ---------- */
+  try{ S.dev=localStorage.getItem("qp.dev"); }catch(e){}
+  if(!S.dev||S.dev.length!==6){ S.dev=QP.rid(6); try{ localStorage.setItem("qp.dev",S.dev); }catch(e){} }
+  function loadSession(s){
+    S.session=s; S.ans={}; S.joined=false;
+    try{ var a=localStorage.getItem("qp.ans."+s); if(a) S.ans=JSON.parse(a)||{}; S.joined=localStorage.getItem("qp.join."+s)==="1"; }catch(e){}
+  }
+  function persist(){ try{ localStorage.setItem("qp.ans."+S.session,JSON.stringify(S.ans)); }catch(e){} }
+
+  /* ---------- state polling (what slide is the screen on) ---------- */
+  function pollState(){
+    QP.get(QP.stateKey()).then(function(st){
+      S.stateFails=0; setSync(true);
+      if(!st||!st.s){ S.idx=-1; render(); return; }
+      if(st.s!==S.session){ loadSession(st.s); if(!S.joined) join(0); }
+      S.idx=typeof st.i==="number"?st.i:0;
+      render();
+    })["catch"](function(){ S.stateFails++; if(S.stateFails>=2) setSync(false); })
+    .then(function(){ setTimeout(pollState,2500+Math.random()*600); });
+  }
+  function setSync(ok){ syncEl.className="sync"+(ok?"":" bad"); syncEl.innerHTML="SYNC <b>"+(ok?"OK":"LOST")+"</b>"; }
+
+  /* ---------- registry join: add this device id once per session, verify, repeat if lost ---------- */
+  function join(attempt){
+    var ses=S.session;
+    QP.get(QP.regKey(ses)).then(function(reg){
+      if(ses!==S.session) return;
+      var d=(reg&&reg.d)||[];
+      if(d.indexOf(S.dev)>=0){ S.joined=true; try{ localStorage.setItem("qp.join."+ses,"1"); }catch(e){} return; }
+      if(attempt>=6) return;
+      d.push(S.dev); if(d.length>400) d=d.slice(-400);
+      return QP.put(QP.regKey(ses),{d:d}).then(function(){ setTimeout(function(){ join(attempt+1); },1500+Math.random()*2500); });
+    })["catch"](function(){ if(attempt<6) setTimeout(function(){ join(attempt+1); },3000); });
+  }
+  setInterval(function(){ if(S.session&&S.joined) join(0); },45000);  /* read-only unless we dropped out */
+
+  /* ---------- saving answers (one key per device, debounced) ---------- */
+  function scheduleSave(){ dirty=true; setStatus("saving","" ); clearTimeout(saveTimer); saveTimer=setTimeout(doSave,900); }
+  function doSave(){
+    if(saving){ return; } saving=true; dirty=false; var ses=S.session;
+    QP.put(QP.devKey(ses,S.dev),{a:S.ans,t:Date.now()}).then(function(ok){
+      saving=false;
+      if(ses!==S.session) return;
+      if(ok){ saveAttempt=0; setStatus(dirty?"saving":"saved",dirty?"":"ok"); if(dirty) doSave(); if(!S.joined) join(0); }
+      else{
+        saveAttempt++;
+        if(saveAttempt<=4){ setStatus("not saved. retrying...","bad"); setTimeout(doSave,[2000,5000,10000,20000][saveAttempt-1]); }
+        else{ setStatus("not saved. say it out loud.","bad"); saveAttempt=0; }
+      }
+    });
+  }
+  function setStatus(t,c){ statusText=t; statusCls=c; var el=$("status"); if(el){ el.textContent=t; el.className="status "+c; } }
+
+  /* ---------- rendering ---------- */
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function render(){
+    var sl=S.idx>=0?QP_SLIDES[S.idx]:null;
+    var key=S.session+"|"+S.idx;
+    if(key===lastRenderKey){ return; } lastRenderKey=key;
+    var n=0,total=0; for(var i=0;i<QP_SLIDES.length;i++){ if(QP_SLIDES[i].id){ total++; if(i<=S.idx) n++; } }
+    var tagQ='<div class="tag"><span>QUESTION <b>'+n+'</b> / '+total+'</span><span>SLIDE '+(S.idx+1)+'/'+QP_SLIDES.length+'</span></div>';
+    if(!sl){ card.innerHTML='<div class="tag"><span><span class="pulse"></span>STANDING BY</span></div><div class="big">Eyes up.</div><div class="sub">The screen has not started yet. Keep this page open; it follows the screen by itself.</div>'; return; }
+    if(sl.t==="title"){ card.innerHTML='<div class="tag"><span><span class="pulse"></span>CONNECTED</span></div><div class="big">'+esc(sl.h)+'</div><div class="sub">'+esc(sl.sub)+' This page follows the screen. First question is coming.</div>'; return; }
+    if(sl.t==="end"){ card.innerHTML='<div class="tag"><span>THAT IS A WRAP</span></div><div class="big">'+esc(sl.h)+'</div><div class="sub">'+esc(sl.sub)+'</div><div class="links"><a href="/solo/cat/">Play Hiss &amp; Ship</a><a class="ghost" href="/solo/trivia/">Play Apron Up trivia</a></div>'; return; }
+    if(sl.t==="joke"){ card.innerHTML='<div class="tag"><span>INTERMISSION</span><span>DAD JOKE</span></div><div class="joke">'+esc(sl.s)+'</div><div class="sub">Punchline is on the screen. Groan accordingly.</div>'; return; }
+    if(sl.t==="meme"){ card.innerHTML='<div class="tag"><span>INTERMISSION</span><span>RON CLAWSON</span></div><div class="big">Look up.</div><div class="sub">Ron has something to say. It is on the screen.</div>'; return; }
+    if(sl.t==="mc"){
+      var sel=S.ans[sl.id]; var h=tagQ+'<div class="q">'+esc(sl.q)+'</div><div class="opts">';
+      for(var i=0;i<sl.o.length;i++){ h+='<button class="opt'+(sel===i?" on":"")+'" data-i="'+i+'"><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+esc(sl.o[i])+'</span></button>'; }
+      h+='</div><div class="status '+statusCls+'" id="status">'+(typeof sel==="number"?"locked in. tap another to change.":"")+'</div>';
+      card.innerHTML=h;
+      var bs=card.querySelectorAll("button.opt");
+      for(var j=0;j<bs.length;j++){ bs[j].onclick=function(){ var i=+this.getAttribute("data-i"); S.ans[sl.id]=i; persist(); lastRenderKey=""; render(); scheduleSave(); }; }
+      return;
+    }
+    if(sl.t==="text"){
+      var mine=S.ans[sl.id]||[]; var full=mine.length>=3;
+      var h2=tagQ+'<div class="q">'+esc(sl.q)+'</div><div class="inrow"><input class="txt" id="txt" maxlength="28" placeholder="'+esc(sl.hint||"type here")+'" autocomplete="off" autocapitalize="words"'+(full?" disabled":"")+'><button class="add" id="add"'+(full?" disabled":"")+'>Add</button></div>';
+      h2+='<div class="mine" id="mine">'; for(var k=0;k<mine.length;k++){ h2+='<span>'+esc(mine[k])+'<i data-k="'+k+'" title="remove">&times;</i></span>'; } h2+='</div>';
+      h2+='<div class="hint">'+(full?"Three is the limit. Tap x to swap one out.":"Up to three answers. Short ones read best on the screen.")+'</div><div class="status '+statusCls+'" id="status">'+esc(statusText)+'</div>';
+      card.innerHTML=h2;
+      var inp=$("txt"), add=$("add");
+      function submit(){ var v=QP.clean(inp.value); if(!v){ inp.value=""; return; } var arr=S.ans[sl.id]||[]; if(arr.length>=3) return; arr.push(v); S.ans[sl.id]=arr; persist(); lastRenderKey=""; render(); scheduleSave(); var ni=$("txt"); if(ni&&!ni.disabled) ni.focus(); }
+      if(add) add.onclick=submit;
+      if(inp) inp.onkeydown=function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } };
+      var xs=card.querySelectorAll(".mine i");
+      for(var m=0;m<xs.length;m++){ xs[m].onclick=function(){ var k=+this.getAttribute("data-k"); var arr=S.ans[sl.id]||[]; arr.splice(k,1); S.ans[sl.id]=arr; persist(); lastRenderKey=""; render(); scheduleSave(); }; }
+      return;
+    }
+  }
+
+  pollState();
+})();
+</script>
+</body>
+</html>

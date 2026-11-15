@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>Milk First vs Cereal First -- Qourlite Technical Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F4F5F7;--panel:#FFFFFF;--line:#D9DDE3;--line2:#EAEDF1;--ink:#1B1F24;--mut:#5B6470;--cf:#E85D04;--mf:#1D6FA5;--cfbg:#FDF0E6;--mfbg:#E7F0F7;--tiebg:#EEF0F3;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13.5px;line-height:1.45}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
+  .num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  /* header */
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:12px}
+  .top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .top h1 .cf{color:var(--cf)}.top h1 .mf{color:var(--mf)}.top h1 .vs{color:var(--mut);font-weight:500;padding:0 6px}
+  .top .meta{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;text-align:right}
+  .top .meta b{color:var(--ink)}
+  /* generic panel */
+  .panel{background:var(--panel);border:1px solid var(--line);margin-bottom:12px}
+  .ph{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
+  .ph b{color:var(--ink)}
+  @media (max-width:639px){.ph span:last-child:not(:first-child){display:none}.kpis .kpi:last-child:nth-child(odd){grid-column:1 / -1}}
+  .pb{padding:12px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr}
+  @media (min-width:860px){.g2{grid-template-columns:1fr 1fr}.g21{grid-template-columns:1.15fr .85fr}}
+  /* verdict block */
+  .verdict{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:860px){.verdict{grid-template-columns:300px 1fr}}
+  .vbig{border-right:1px solid var(--line);padding-right:12px}
+  @media (max-width:859px){.vbig{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}}
+  .vlabel{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
+  .vwin{font-size:30px;font-weight:700;line-height:1.05;margin:4px 0 2px}
+  .vwin.cf{color:var(--cf)}.vwin.mf{color:var(--mf)}.vwin.tie{color:var(--mut)}
+  .vj{font-family:var(--mono);font-size:13px;color:var(--mut)}
+  .meter{position:relative;height:14px;background:var(--line2);border:1px solid var(--line);margin:10px 0 4px}
+  .meter .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+  .meter .fill{position:absolute;top:0;bottom:0}
+  .mlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--mut)}
+  .mlab .l{color:var(--cf)}.mlab .r{color:var(--mf)}
+  .vtext{font-size:13.5px;margin-top:10px}
+  .vtext b.cf{color:var(--cf)}.vtext b.mf{color:var(--mf)}
+  /* KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  @media (min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  @media (min-width:1000px){.kpis{grid-template-columns:repeat(7,1fr)}}
+  .kpi{border:1px solid var(--line);padding:8px 9px;cursor:pointer;background:#fff;position:relative;transition:border-color .1s}
+  .kpi:hover{border-color:var(--ink)}
+  .kpi.on{outline:2px solid var(--ink);outline-offset:-2px}
+  .kpi .t{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .w{font-size:14px;font-weight:700;margin:3px 0 1px}
+  .kpi .w.cf{color:var(--cf)}.kpi .w.mf{color:var(--mf)}.kpi .w.tie{color:var(--mut)}
+  .kpi .v{font-family:var(--mono);font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .bar{position:relative;height:6px;background:var(--line2);margin-top:6px}
+  .kpi .bar i{position:absolute;top:0;bottom:0}
+  .kpi .bar .m{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--mut)}
+  .kpi .t{display:flex;justify-content:space-between;align-items:center;gap:4px}
+  .kpi .cf-tag{font-family:var(--mono);font-size:8.5px;color:var(--mut);border:1px solid var(--line);padding:0 3px;letter-spacing:0;flex:none}
+  /* tornado / heatmap */
+  canvas{display:block;width:100%}
+  .chartbox{position:relative}
+  .cap{font-size:11.5px;color:var(--mut);margin-top:6px}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--cf);vertical-align:middle;margin-right:5px}
+  .legend i.mf{border-top:3px dashed var(--mf)}
+  .legend i.sq{width:10px;height:10px;border:0;vertical-align:-1px}
+  /* scenario controls */
+  .presets{display:flex;gap:6px;flex-wrap:wrap}
+  .presets button{font-family:var(--sans);font-size:11.5px;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--ink);padding:5px 10px;cursor:pointer}
+  .presets button:hover{border-color:var(--ink)}
+  .presets button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .vars{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+  @media (min-width:640px){.vars{grid-template-columns:repeat(4,1fr)}}
+  @media (min-width:1000px){.vars{grid-template-columns:repeat(8,1fr)}}
+  .var{border:1px solid var(--line);padding:8px 9px 6px;background:#fff;position:relative}
+  .var .t{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:4px}
+  .var .t .i{font-family:var(--mono);font-size:9px;border:1px solid var(--line);color:var(--mut);padding:0 4px;cursor:help;text-transform:none;letter-spacing:0}
+  .var .v{font-family:var(--mono);font-size:17px;font-weight:600;margin:3px 0 0;white-space:nowrap}
+  .var .u{font-size:10px;color:var(--mut)}
+  .var input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--ink);height:18px}
+  .var select{width:100%;margin-top:6px;font-family:var(--sans);font-size:11.5px;border:1px solid var(--line);background:#fff;padding:4px}
+  .var .imp{height:4px;background:var(--line2);margin-top:5px;position:relative}
+  .var .imp i{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+  .var .rank{font-family:var(--mono);font-size:9.5px;color:var(--mut);margin-top:3px}
+  /* objective deep dive */
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+  .chips button{white-space:nowrap;font-family:var(--sans);font-size:11.5px;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--mut);padding:6px 10px;cursor:pointer}
+  .chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chips button:hover{border-color:var(--ink)}
+  .objbar{display:flex;gap:8px;align-items:stretch}
+  .objbar button.nav{background:#fff;border:1px solid var(--line);font-size:16px;padding:0 10px;cursor:pointer;color:var(--ink)}
+  h2{font-size:18px;font-weight:700;margin:12px 0 2px}
+  h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px;font-weight:600}
+  p{margin:0 0 8px}
+  .muted{color:var(--mut)}
+  .mirror{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .card{border:1px solid var(--line);padding:8px 10px}
+  .card.cf{border-top:3px solid var(--cf);background:var(--cfbg)}.card.mf{border-top:3px solid var(--mf);background:var(--mfbg)}
+  .card .t{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .card.cf .t{color:var(--cf)}.card.mf .t{color:var(--mf)}
+  .card .big{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.1;margin:2px 0}
+  .card .u{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:12px;margin-top:6px}
+  .kv span:nth-child(odd){color:var(--mut)}
+  .kv span:nth-child(even){text-align:right;font-family:var(--mono)}
+  .fx{background:#FAFBFC;border:1px solid var(--line);padding:8px 10px;font-size:13px;overflow-x:auto;font-family:var(--mono)}
+  .fx .eq{margin:3px 0;white-space:nowrap}
+  .fx .eq i{font-style:italic}
+  .fx .eq .k{color:var(--mut);font-family:var(--sans);font-size:11px}
+  details{border:1px solid var(--line);margin-top:10px;background:#fff}
+  details summary{cursor:pointer;padding:7px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600;list-style:none}
+  details summary::before{content:"+ ";font-family:var(--mono)}
+  details[open] summary::before{content:"- "}
+  details .in{padding:0 12px 12px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line)}
+  td.r,th.r{text-align:right;font-family:var(--mono)}
+  .w-cf{color:var(--cf);font-weight:600}.w-mf{color:var(--mf);font-weight:600}.w-tie{color:var(--mut);font-weight:600}
+  .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;border:1px solid var(--line);padding:1px 4px;color:var(--mut);white-space:nowrap}
+  .tag.lit{border-color:var(--mf);color:var(--mf)}.tag.est{border-color:var(--cf);color:var(--cf)}
+  .mini{font-size:11px;color:var(--mut)}
+  .bowls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .bowls svg{width:100%;height:auto;display:block}
+  .weights{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;margin-top:6px}
+  @media (min-width:860px){.weights{grid-template-columns:repeat(4,1fr)}}
+  .weights .c{font-size:11px}
+  .weights .c label{display:flex;justify-content:space-between;color:var(--mut)}
+  .weights .c input{width:100%;accent-color:var(--ink)}
+  .foot{margin-top:16px;text-align:center;color:var(--mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .foot a{color:var(--ink)}
+  /* tooltip */
+  #tt{position:fixed;z-index:50;max-width:300px;background:var(--ink);color:#fff;font-size:11.5px;line-height:1.4;padding:8px 10px;border-radius:2px;pointer-events:none;display:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  #tt b{color:#fff}#tt .cf{color:#FFB27A}#tt .mf{color:#9CCBEC}#tt .k{color:#B8C0CC;font-family:var(--mono);font-size:10.5px}
+  #tt hr{border:0;border-top:1px solid #4A5563;margin:5px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><span class="cf">Cereal First</span><span class="vs">vs</span><span class="mf">Milk First</span></h1>
+      <div class="mini">Physics-based adjudication of bowl assembly order. Seven objectives, one composite, eight scenario inputs. Hover anything for detail.</div>
+    </div>
+    <div class="meta">Report <b>QT-0828</b> &middot; Rev <b>B</b><br>Scenario: <b id="scen">Default</b></div>
+  </header>
+
+  <!-- 1. Verdict -->
+  <section class="panel">
+    <div class="ph"><span><b>01</b> &nbsp; Verdict</span><span id="vph">composite of 7 objectives at the current scenario</span></div>
+    <div class="pb verdict">
+      <div class="vbig">
+        <div class="vlabel">Composite verdict</div>
+        <div class="vwin" id="vwin"></div>
+        <div class="vj" id="vj"></div>
+        <div class="meter" data-tip="Composite J = weighted mean of each objective&#39;s normalized advantage a = tanh(delta/scale). Left of center favors cereal-first, right favors milk-first. |J| near 1 is decisive; near 0 is noise."><div class="fill" id="vfill"></div><div class="mid"></div></div>
+        <div class="mlab"><span class="l">&larr; cereal first</span><span>0</span><span class="r">milk first &rarr;</span></div>
+        <div class="vtext" id="vtext"></div>
+      </div>
+      <div>
+        <div class="vlabel" style="margin-bottom:6px">Objective scorecard &nbsp;<span class="mini" style="text-transform:none;letter-spacing:0;font-weight:400">click a tile to open its analysis; hover for the numbers</span></div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Drivers -->
+  <section class="panel">
+    <div class="ph"><span><b>02</b> &nbsp; What moves the verdict</span><span>sensitivity of composite J to each input, holding the others at the current scenario</span></div>
+    <div class="pb grid g21">
+      <div>
+        <div class="vlabel">Tornado: swing in J across each input&#39;s full range</div>
+        <div class="chartbox" id="tornado"></div>
+        <div class="cap">Bar spans J at the input&#39;s low and high setting (or its best and worst option). Inputs sorted by swing. A bar that stays on one side of zero cannot flip the verdict on its own.</div>
+      </div>
+      <div>
+        <div class="vlabel">Heat map: composite J over cereal mass &times; eating pace</div>
+        <div class="chartbox" id="heat"></div>
+        <div class="cap">The two most consequential inputs on one surface; other inputs held at the current scenario. Hover a cell for J and the objective split. Marker = current scenario.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Scenario -->
+  <section class="panel">
+    <div class="ph"><span><b>03</b> &nbsp; Scenario inputs</span><span>every number on this page recomputes as you move these</span></div>
+    <div class="pb">
+      <div class="presets" id="presets"></div>
+      <div class="vars" id="vars"></div>
+      <div class="mini" style="margin-top:8px">Importance bar under each input = its share of the largest swing in the tornado above. Fixed: room 22 C, bowl 12 cm equivalent diameter (113 cm<sup>2</sup>) and 5.5 cm deep (620 mL), pour rate 30 mL/s, 4 g dry cereal per spoonful, 3 s spoon dip before each bite, first bite 3 s after assembly.</div>
+    </div>
+  </section>
+
+  <!-- 4. Deep dive -->
+  <section class="panel">
+    <div class="ph"><span><b>04</b> &nbsp; Objective analysis</span><span>the physics behind each tile</span></div>
+    <div class="pb">
+      <div class="objbar">
+        <button class="nav" id="prev" aria-label="Previous objective">&lsaquo;</button>
+        <div class="chips" id="chips"></div>
+        <button class="nav" id="next" aria-label="Next objective">&rsaquo;</button>
+      </div>
+      <h2 id="otitle"></h2>
+      <p id="owhat" class="muted" style="font-size:12.5px"></p>
+      <div class="grid g2" style="margin-top:8px">
+        <div>
+          <h3 style="margin-top:0">Model output</h3>
+          <div id="ochart"></div>
+        </div>
+        <div>
+          <h3 style="margin-top:0">Results at current scenario</h3>
+          <div class="mirror">
+            <div class="card cf"><div class="t">Cereal first</div><div class="big" id="cf_big"></div><div class="u" id="cf_u"></div><div class="kv" id="cf_kv"></div></div>
+            <div class="card mf"><div class="t">Milk first</div><div class="big" id="mf_big"></div><div class="u" id="mf_u"></div><div class="kv" id="mf_kv"></div></div>
+          </div>
+          <div class="meter" style="margin-top:10px"><div class="fill" id="ofill"></div><div class="mid"></div></div>
+          <div class="mlab"><span class="l">&larr; cereal first</span><span>advantage</span><span class="r">milk first &rarr;</span></div>
+          <div class="vtext" id="otext" style="font-size:12.5px"></div>
+        </div>
+      </div>
+      <h3>Mechanism</h3>
+      <div id="omech" style="font-size:12.5px"></div>
+      <details><summary>Governing equations</summary><div class="in"><div class="fx" id="ofx"></div></div></details>
+    </div>
+  </section>
+
+  <!-- 5. Appendix -->
+  <details><summary>Appendix A &middot; Parameter provenance and limitations</summary><div class="in">
+    <div style="overflow-x:auto"><table id="prov"><thead><tr><th>Symbol</th><th>Meaning</th><th class="r">Value</th><th>Class</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+    <p class="mini" style="margin-top:8px"><span class="tag lit">LIT</span> literature-anchored order of magnitude &nbsp; <span class="tag est">EST</span> estimated, plausible range spans a factor of 2-3 &nbsp; <span class="tag">ASM</span> modeling assumption or calibration point. Nothing here was measured for this report.</p>
+    <h3>Known limitations</h3>
+    <p class="mini">Flakes are treated as a three-layer raft (submerged / capillary-bridged / dry) rather than as individuals. The raft does not thin as it is eaten. Spoon agitation wets neighbors; the model charges every bite the same 3 s dip and ignores collateral wetting. Within-flake moisture transport is lumped into one first-order rate. Pouring is treated as one continuous stream at a constant rate. Sensory crispness is a Fermi function of moisture, which reproduces the sharp loss reported in cereal texture studies but is not calibrated to any specific product. Composite weights are preferences, not physics.</p>
+  </div></details>
+
+  <div class="foot"><a href="/">&larr; Lunch Shift hub</a> &nbsp;|&nbsp; Report QT-0828 Rev B &nbsp;|&nbsp; No cereal was harmed</div>
+</div>
+<div id="tt"></div>
+
+<script>
+(function(){
+'use strict';
+// ---------- constants ----------
+var R=8.314, g=9.81, Tr=22;
+var rho_m=1.03, c_m=3.93, gamma=0.047, D_stream=0.008;
+var A_b=113, H_b=5.5;
+var Q=30, g_bite=4, t_dip=3, t_first=3, t_lag=13;
+var h_conv=10, A_surf=0.04;
+var Ea=25000;
+var m_eq=1.2, m_c=0.20, w_f=0.10, m_film=0.18, k_film=0.2;
+var r_eff=0.003, cap_rate=0.5;
+var t_react=0.25, t_vis=1.5, sig_lvl_mf=2.3, sig_judg_cf=25;
+var CEREAL={
+  flake:{n:'Corn flakes',      t50:150, rb:0.12, rf:0.45},
+  puff: {n:'Puffed rice',      t50:45,  rb:0.09, rf:0.25},
+  ring: {n:'Oat rings',        t50:120, rb:0.15, rf:0.35},
+  shred:{n:'Shredded wheat',   t50:240, rb:0.20, rf:0.50},
+  gran: {n:'Granola clusters', t50:480, rb:0.40, rf:0.90}
+};
+var BOWL={cer:{n:'Ceramic, room',m:350,c:0.85,T:22},cerc:{n:'Ceramic, chilled',m:350,c:0.85,T:4},pla:{n:'Plastic, room',m:60,c:1.9,T:22}};
+var CC=1.8;
+
+// ---------- inputs ----------
+var VARS=[
+ {id:'Tm',  lab:'Milk temp',      unit:'C',    min:1,  max:25, step:1,  def:4,   tip:'Temperature of the milk leaving the carton. Drives the Arrhenius uptake rate: every +20 C roughly doubles how fast flakes go soft, in both orders.'},
+ {id:'Vm',  lab:'Milk volume',    unit:'mL',   min:100,max:400,step:10, def:200, tip:'Milk poured. Sets the free-surface height, the thermal mass that resists warming, and the overflow headroom.'},
+ {id:'mc',  lab:'Cereal mass',    unit:'g dry',min:15, max:80, step:1,  def:35,  tip:'Dry cereal. Sets raft height, hence the dry-cap fraction milk-first can protect, and the number of bites (4 g each).'},
+ {id:'pace',lab:'Eating pace',    unit:'s/bite',min:4, max:40, step:1,  def:12,  tip:'Seconds between spoonfuls. The clock on sogginess. Slow eaters expose the difference between the orders; fast eaters erase it.'},
+ {id:'hp',  lab:'Pour height',    unit:'cm',   min:3,  max:30, step:1,  def:12,  tip:'Carton lip to bowl. Impact speed v = sqrt(2gh) and Weber number rise with it; only the splash term listens to this input.'},
+ {id:'K',   lab:'Batches', unit:'milk-first',min:1,max:6,step:1, def:1,   tip:'Milk-first only: cereal added in K batches, each restarting its own wetting clock. Cereal-first cannot stage (the first pour wets everything).'},
+ {id:'cer', lab:'Cereal type',    unit:'',     sel:CEREAL, def:'flake', tip:'Sets crispness half-life, bed density and flake density. Granola sinks and lasts; puffed rice floats and dies fast.'},
+ {id:'bowl',lab:'Bowl',           unit:'',     sel:BOWL,   def:'cer',   tip:'Thermal mass and starting temperature of the bowl. A room-temperature ceramic bowl warms the milk by about 5 C on contact, far more than the order does.'}
+];
+var PRESETS=[
+ {n:'Default',      p:{Tm:4,Vm:200,mc:35,pace:12,hp:12,K:1,cer:'flake',bowl:'cer'}},
+ {n:'Slow eater',   p:{Tm:4,Vm:200,mc:35,pace:30,hp:12,K:1,cer:'flake',bowl:'cer'}},
+ {n:'Big bowl',     p:{Tm:4,Vm:300,mc:70,pace:12,hp:12,K:1,cer:'flake',bowl:'cer'}},
+ {n:'Warm kitchen', p:{Tm:15,Vm:200,mc:35,pace:15,hp:12,K:1,cer:'flake',bowl:'cer'}},
+ {n:'Granola',      p:{Tm:4,Vm:200,mc:50,pace:12,hp:12,K:1,cer:'gran',bowl:'cer'}},
+ {n:'Puffed rice',  p:{Tm:4,Vm:200,mc:25,pace:12,hp:12,K:1,cer:'puff',bowl:'cer'}},
+ {n:'Staged, chilled bowl', p:{Tm:4,Vm:200,mc:35,pace:20,hp:6,K:3,cer:'flake',bowl:'cerc'}}
+];
+var P={};
+VARS.forEach(function(v){P[v.id]=v.def;});
+
+// ---------- core model ----------
+function fermi0(m){return 1/(1+Math.exp((m-m_c)/w_f));}
+var F0=fermi0(0);
+function fermi(m){return fermi0(m)/F0;}
+function model(){
+  var c=CEREAL[P.cer], b=BOWL[P.bowl];
+  var M={};
+  M.H_raft=P.mc/(c.rb*A_b);
+  M.s=Math.min(1,c.rf/rho_m);
+  M.h_cap=2*gamma/(rho_m*1000*g*r_eff)*100;
+  M.H_m=P.Vm/A_b;
+  M.floats = M.H_m >= M.s*M.H_raft;
+  var s_eff = M.floats? M.s : Math.min(1,M.H_m/M.H_raft);
+  M.s_eff=s_eff;
+  function layers(H){var cc=Math.min(1-s_eff,M.h_cap/H);return {s:s_eff,c:cc,d:1-s_eff-cc};}
+  M.L=layers(M.H_raft);
+  var mm=P.Vm*rho_m; var Cm=mm*c_m, Cc=P.mc*CC, Cb=b.m*b.c;
+  M.T_mix=(Cm*P.Tm+Cc*Tr+Cb*b.T)/(Cm+Cc+Cb);
+  M.tau=(Cm+Cb)/(h_conv*A_surf);
+  M.dT_cereal=(Cc*(Tr-P.Tm))/(Cm+Cc+Cb);
+  M.dT_bowl=(Cb*(b.T-P.Tm))/(Cm+Cc+Cb);
+  M.dT_order=(Tr-M.T_mix)*(1-Math.exp(-t_lag/M.tau));
+  function T(t){return Tr+(M.T_mix-Tr)*Math.exp(-t/M.tau);}
+  M.T=T;
+  var k0=-Math.log(1-m_c/m_eq)/c.t50;
+  M.k0=k0; M.t50=c.t50;
+  function k(Tc){return k0*Math.exp(-Ea/R*(1/(Tc+273.15)-1/(4+273.15)));}
+  M.k=k;
+  M.N=Math.max(1,Math.round(P.mc/g_bite));
+  var tEnd=Math.ceil(t_first+M.N*240+300);
+  var Kc=new Float64Array(tEnd+2); Kc[0]=0;
+  for(var i=1;i<=tEnd+1;i++) Kc[i]=Kc[i-1]+k(T(i-0.5));
+  function KI(t){if(t<=0)return 0; if(t>=tEnd+1)return Kc[tEnd+1]; var i=Math.floor(t); return Kc[i]+(t-i)*(Kc[i+1]-Kc[i]);}
+  M.KI=KI;
+  function bites(order, pace, Kb){
+    Kb = Kb||1; var N=M.N; var out=[]; var Lb=layers(M.H_raft/Kb);
+    var per=N/Kb;
+    for(var i=0;i<N;i++){
+      var j=Math.min(Kb-1,Math.floor(i/per));
+      var t=t_first+i*pace;
+      var tw=(order==='mf')? t_first+j*per*pace : 0;
+      var fi=((i - j*per)+0.5)/per; if(order==='cf'){fi=(i+0.5)/N;}
+      var L=(order==='mf')?Lb:M.L;
+      var layer= fi<L.d?'d':(fi<L.d+L.c?'c':'s');
+      var age=Math.max(0,KI(t)-KI(tw));
+      var m=0;
+      if(layer==='s') m=m_eq*(1-Math.exp(-age));
+      else if(layer==='c') m=m_eq*(1-Math.exp(-cap_rate*age));
+      else m=(order==='cf')? m_film*(1-Math.exp(-k_film*t)) : 0;
+      m=Math.min(m_eq, m + m_eq*(1-Math.exp(-t_dip*k(T(t)))));
+      out.push({t:t,m:m,C:fermi(m),layer:layer});
+    }
+    return out;
+  }
+  M.bites=bites;
+  M.cf=bites('cf',P.pace); M.mf=bites('mf',P.pace,P.K);
+  function mean(a){var s=0;a.forEach(function(x){s+=x.C;});return s/a.length;}
+  M.Ccf=mean(M.cf); M.Cmf=mean(M.mf);
+  M.crunchBites=function(a){return a.filter(function(x){return x.C>=0.7;}).length;};
+  var tmid=t_first+0.5*M.N*P.pace;
+  function snapshot(order,t){
+    var L=M.L, K1=KI(t), res=[];
+    res.push({f:L.s,C:fermi(m_eq*(1-Math.exp(-K1)))});
+    res.push({f:L.c,C:fermi(m_eq*(1-Math.exp(-cap_rate*K1)))});
+    res.push({f:L.d,C:(order==='cf')?fermi(m_film*(1-Math.exp(-k_film*t))):fermi(0)});
+    var mu=0;res.forEach(function(r){mu+=r.f*r.C;});
+    var v=0;res.forEach(function(r){v+=r.f*(r.C-mu)*(r.C-mu);});
+    return {layers:res,mean:mu,sd:Math.sqrt(v),t:t};
+  }
+  M.tmid=tmid; M.snapCf=snapshot('cf',tmid); M.snapMf=snapshot('mf',tmid);
+  M.os_mf=Q*t_react; M.os_cf=Q*t_vis;
+  M.sd_mf=Math.sqrt(Math.pow(sig_lvl_mf,2)+Math.pow(Q*0.05,2));
+  M.sd_cf=Math.sqrt(Math.pow(sig_judg_cf,2)+Math.pow(Q*0.3,2));
+  M.R=P.Vm/P.mc;
+  M.rmse_cf=Math.sqrt(M.os_cf*M.os_cf+M.sd_cf*M.sd_cf); M.rmse_mf=Math.sqrt(M.os_mf*M.os_mf+M.sd_mf*M.sd_mf);
+  var h=P.hp/100; M.v=Math.sqrt(2*g*h); M.We=rho_m*1000*M.v*M.v*D_stream/gamma;
+  var mmkg=mm/1000, mckg=P.mc/1000;
+  var cushion=Math.min(mmkg, A_b*1.0*rho_m/1000);
+  M.E_mf=(mmkg-cushion)*g*h + mckg*g*(h/2);
+  M.E_cf=0.3*mmkg*g*h;
+  function top(V){var Hm=(V+P.mc/rho_m)/A_b; return Hm+(1-M.s)*M.H_raft;}
+  M.top_cf=top(P.Vm+M.os_cf); M.top_mf=top(P.Vm+M.os_mf);
+  M.head_cf=H_b-M.top_cf; M.head_mf=H_b-M.top_mf;
+  M.Hm_cf=(P.Vm+M.os_cf+P.mc/rho_m)/A_b; M.Hm_mf=(P.Vm+M.os_mf+P.mc/rho_m)/A_b;
+  M.t_cer=3; M.t_milk=P.Vm/Q; M.ttfb=M.t_cer+M.t_milk+t_first;
+  function pacestar(order){var best=0;for(var p=2;p<=240;p+=2){var a=bites(order,p,order==='mf'?P.K:1);if(mean(a)>=0.6)best=p;else if(best>0)break;}return best;}
+  M.pace_cf=pacestar('cf'); M.pace_mf=pacestar('mf');
+  return M;
+}
+function withP(p,fn){var old=P;P=p;try{return fn();}finally{P=old;}}
+
+// ---------- objectives ----------
+function adv(delta,scale){return Math.tanh(delta/scale);}
+var OBJ=[
+ {id:'crunch',chip:'Crunch',title:'Crunch retention',conf:'MED',short:'Crunch',
+  what:'Mean sensory crispness across every bite of the meal, 0 (paste) to 1 (factory-fresh).',
+  mech:function(M){return '<p>Crispness is lost when the flake matrix takes up water. Each flake sits in one of three raft layers: <b>submerged</b> (fraction s = &rho;<sub>f</sub>/&rho;<sub>m</sub> = '+f2(M.s)+' by Archimedes), <b>capillary-bridged</b> (the '+f2(M.h_cap)+' cm band above the milk line that liquid bridges between flakes can reach), and <b>dry</b> (the rest, '+pct(M.L.d)+' of the raft at this cereal mass). The order changes only one thing: cereal-first pours milk <i>through</i> the raft, so every flake including the dry layer receives a surface film (m<sub>film</sub> = '+m_film+' g/g) at t = 0, and a dry flake wicks a surface film in seconds (Lucas-Washburn through 50 &mu;m pores gives well under 1 s per cm). That layer is immediately limp, crispness about '+f2(fermi(m_film))+'. Milk-first leaves the dry layer dry until the spoon pushes it under. Water uptake is first-order with an Arrhenius rate, so warmer milk (bowl mass, room lag) accelerates the loss in both orders. The eater consumes top-down; every bite gets the same 3 s spoon dip.</p><p>Milk-first also permits staged dosing (batches input): each batch restarts the wetting clock for its own flakes. Cereal-first cannot stage; pouring milk in batches still wets all the cereal at the first pour, and adding cereal to leftover milk <i>is</i> milk-first.</p>';},
+  fx:function(M){return eq('<i>k</i>(<i>T</i>) = <i>k</i><sub>0</sub> exp[ &minus;(<i>E</i><sub>a</sub>/<i>R</i>)(1/<i>T</i> &minus; 1/<i>T</i><sub>0</sub>) ]','Arrhenius; k<sub>0</sub> = '+M.k0.toExponential(2)+' s<sup>-1</sup> at 4 C, E<sub>a</sub> = 25 kJ/mol, k('+P.Tm+' C) = '+M.k(P.Tm).toExponential(2)+' s<sup>-1</sup>')
+   +eq('<i>m</i>(<i>t</i>) = <i>m</i><sub>eq</sub> [ 1 &minus; exp( &minus;&int; <i>k</i>(<i>T</i>(<i>t</i>&prime;)) d<i>t</i>&prime; ) ]','first-order uptake; m<sub>eq</sub> = 1.2 g/g submerged, capillary layer at half rate; cereal-first dry layer takes up its pour film (m<sub>film</sub> = 0.18 g/g) fast, &tau; = 5 s')
+   +eq('<i>C</i>(<i>m</i>) = 1 / [ 1 + exp( (<i>m</i> &minus; <i>m</i><sub>c</sub>) / <i>w</i> ) ]','Fermi crispness normalized to C(0) = 1; m<sub>c</sub> = 0.20 g/g, w = 0.10 g/g')
+   +eq('<i>s</i> = &rho;<sub>f</sub> / &rho;<sub>m</sub> = '+f2(M.s)+' &nbsp;&nbsp; <i>h</i><sub>cap</sub> = 2&gamma; cos&theta; / (&rho;<sub>m</sub> <i>g</i> <i>r</i><sub>eff</sub>) = '+f2(M.h_cap)+' cm','float depth and capillary bridging band; raft height H = m<sub>c</sub>/(&rho;<sub>b</sub>A) = '+f2(M.H_raft)+' cm')
+   +eq('<i>C&#772;</i> = (1/<i>N</i>) &Sigma;<sub>i</sub> <i>C</i>(<i>m</i><sub>i</sub>) &nbsp; over <i>N</i> = '+M.N+' bites at '+P.pace+' s each','bite i drawn top-down through layers d &rarr; c &rarr; s; age of wetting measured from its layer&#39;s wetting time');},
+  chart:function(M,el){lineChart(el,{x:function(i,a){return a.t;},series:[{name:'Cereal first',data:M.cf,cls:'cf'},{name:'Milk first',data:M.mf,cls:'mf'}],y:function(p){return p.C;},ymin:0,ymax:1,xlab:'time since assembly (s)',ylab:'crispness of the bite',fmt:function(p){return 'C = '+f2(p.C)+', m = '+f2(p.m)+' g/g, layer '+p.layer;}});},
+  cards:function(M){return {cf:[f2(M.Ccf),'mean crispness',[['Bites at C >= 0.7',M.crunchBites(M.cf)+' / '+M.N],['Last bite C',f2(M.cf[M.cf.length-1].C)],['Dry layer at t=0','film-wetted']]],mf:[f2(M.Cmf),'mean crispness',[['Bites at C >= 0.7',M.crunchBites(M.mf)+' / '+M.N],['Last bite C',f2(M.mf[M.mf.length-1].C)],['Dry layer at t=0',pct(M.L.d)+' stays dry']]]};},
+  verdict:function(M){var a=adv(M.Cmf-M.Ccf,0.15);return {a:a,text:'Mean crispness '+f2(M.Ccf)+' vs '+f2(M.Cmf)+'. '+(a>0.05?'Milk-first wins because its dry reserve ('+pct(M.L.d)+' of the raft) is wetted only at the spoon, 3 s before each bite, while cereal-first limps that same layer at t = 0. The submerged '+pct(M.L.s)+' ages identically in both orders. The margin grows with cereal mass (taller raft, larger dry fraction).':a<-0.05?'Cereal-first wins here, which means the raft has no dry cap at this cereal mass and the film penalty is smaller than the batching or dip effects.':'Effectively a tie at these settings; the dry layer is too small to matter.')};},
+  score:function(M){return [f2(M.Ccf),f2(M.Cmf),adv(M.Cmf-M.Ccf,0.15)];}},
+
+ {id:'thermal',chip:'Thermal',title:'Milk temperature at first bite',conf:'HIGH',short:'Thermal',
+  what:'Temperature of the milk when eating begins, and how fast it drifts toward room temperature.',
+  mech:function(M){return '<p>Three bodies thermalize on contact: milk at '+P.Tm+' C, cereal at room temperature, and the bowl. The energy balance is order-independent; the mix temperature is a heat-capacity-weighted mean. The bowl term dominates: a 350 g ceramic bowl at 22 C pulls the milk up by '+f2(M.dT_bowl)+' C, the cereal by only '+f2(M.dT_cereal)+' C. The only order-dependent term is the lag: milk-first milk starts its Newton-cooling clock about '+t_lag+' s earlier (while the cereal is fetched and poured). With a time constant of '+f0(M.tau)+' s that lag is worth '+f3(M.dT_order)+' C.</p><p>Conclusion the model forces: the order does not matter thermally. Pre-chilling the bowl matters ('+ (P.bowl==='cerc'?'currently on':'try the bowl input')+').</p>';},
+  fx:function(M){return eq('<i>T</i><sub>mix</sub> = &Sigma; <i>m</i><sub>j</sub><i>c</i><sub>j</sub><i>T</i><sub>j</sub> / &Sigma; <i>m</i><sub>j</sub><i>c</i><sub>j</sub> = '+f1(M.T_mix)+' C','milk '+f0(P.Vm*rho_m)+' g x 3.93, cereal '+P.mc+' g x 1.8, bowl '+BOWL[P.bowl].m+' g x '+BOWL[P.bowl].c+' J/gK')
+   +eq('<i>T</i>(<i>t</i>) = <i>T</i><sub>r</sub> + (<i>T</i><sub>mix</sub> &minus; <i>T</i><sub>r</sub>) e<sup>&minus;<i>t</i>/&tau;</sup>, &nbsp; &tau; = &Sigma;<i>mc</i> / (<i>hA</i>) = '+f0(M.tau)+' s','Newton cooling, free convection h = 10 W/m<sup>2</sup>K over A = 0.04 m<sup>2</sup>')
+   +eq('&Delta;<i>T</i><sub>order</sub> = (<i>T</i><sub>r</sub> &minus; <i>T</i><sub>mix</sub>)(1 &minus; e<sup>&minus;&Delta;<i>t</i><sub>lag</sub>/&tau;</sup>) = '+f3(M.dT_order)+' C','milk-first penalty from the '+t_lag+' s head start on warming');},
+  chart:function(M,el){var a=[],b=[];for(var t=0;t<=600;t+=10){a.push({t:t,T:M.T(t)});b.push({t:t,T:M.T(t+t_lag)});}lineChart(el,{x:function(i,p){return p.t;},series:[{name:'Cereal first',data:a,cls:'cf'},{name:'Milk first',data:b,cls:'mf'}],y:function(p){return p.T;},ymin:0,ymax:24,xlab:'time since assembly (s)',ylab:'milk temperature (C)',fmt:function(p){return f2(p.T)+' C';}});},
+  cards:function(M){return {cf:[f1(M.T_mix)+'&deg;','milk at first bite',[['Bowl contribution','+'+f2(M.dT_bowl)+' C'],['Cereal contribution','+'+f2(M.dT_cereal)+' C'],['After 5 min',f1(M.T(300))+' C']]],mf:[f1(M.T_mix+M.dT_order)+'&deg;','milk at first bite',[['Bowl contribution','+'+f2(M.dT_bowl)+' C'],['Lag penalty','+'+f3(M.dT_order)+' C'],['After 5 min',f1(M.T(300+t_lag))+' C']]]};},
+  verdict:function(M){var a=adv(-M.dT_order,1.0);return {a:a,text:'Order effect '+f3(M.dT_order)+' C in favor of cereal-first. Below any sensory threshold (about 1 C for liquids in the mouth). Verdict: tie. The lever that moves this number is the bowl: chilled ceramic vs room ceramic is a '+f1(Math.abs(BOWL.cer.m*BOWL.cer.c*(22-4)/(P.Vm*rho_m*c_m+P.mc*CC+BOWL.cer.m*BOWL.cer.c)))+' C swing.'};},
+  score:function(M){return [f1(M.T_mix)+' C',f1(M.T_mix+M.dT_order)+' C',adv(-M.dT_order,1.0)];}},
+
+ {id:'ratio',chip:'Ratio control',title:'Milk-to-cereal ratio control',conf:'LOW',short:'Ratio ctrl',
+  what:'How accurately the pourer lands the intended milk volume, hence the intended mL/g ratio.',
+  mech:function(M){return '<p>Pouring is a feedback loop: the eye senses the level, the hand stops the carton. Overshoot equals pour rate times sensing delay. Milk-first exposes a free surface in an empty bowl: the delay is one visual reaction time ('+t_react+' s), overshoot '+f1(M.os_mf)+' mL. Cereal-first hides the level inside a bed of porosity 1 &minus; &rho;<sub>b</sub>/&rho;<sub>f</sub> = '+pct(1-CEREAL[P.cer].rb/CEREAL[P.cer].rf)+'; the raft floats with the milk line fixed at '+pct(M.s)+' of raft height, so the pourer never sees the true level and waits for milk to appear at the rim annulus (assumed '+t_vis+' s), overshoot '+f1(M.os_cf)+' mL, plus a large judgment scatter.</p><p>The asymmetry is structural: milk is the irreversible input (it cannot be removed), cereal is the monotone-addable one. Milk-first doses the irreversible component under full observability, then trims with the reversible one.</p>';},
+  fx:function(M){return eq('<i>V</i><sub>os</sub> = <i>Q</i> &middot; <i>t</i><sub>d</sub>','overshoot = pour rate x sensing delay; Q = '+Q+' mL/s')
+   +eq('cereal first: <i>t</i><sub>d</sub> = <i>t</i><sub>vis</sub> = '+t_vis+' s &rArr; <i>V</i><sub>os</sub> = '+f1(M.os_cf)+' mL, &sigma; = '+f1(M.sd_cf)+' mL','occluded level, rim-annulus cue')
+   +eq('milk first: <i>t</i><sub>d</sub> = <i>t</i><sub>react</sub> = '+t_react+' s &rArr; <i>V</i><sub>os</sub> = '+f1(M.os_mf)+' mL, &sigma; = '+f1(M.sd_mf)+' mL','free surface, direct level cue')
+   +eq('<i>R</i> = <i>V</i>/<i>m</i><sub>c</sub>, &nbsp; &delta;<i>R</i>/<i>R</i> = &delta;<i>V</i>/<i>V</i>, &nbsp; RMSE = &radic;(<i>V</i><sub>os</sub><sup>2</sup> + &sigma;<sup>2</sup>)','target R = '+f2(M.R)+' mL/g');},
+  chart:function(M,el){var a=[],b=[];var lo=P.Vm-40,hi=P.Vm+120;for(var v=lo;v<=hi;v+=1){a.push({v:v,p:gauss(v,P.Vm+M.os_cf,M.sd_cf)});b.push({v:v,p:gauss(v,P.Vm+M.os_mf,M.sd_mf)});}lineChart(el,{x:function(i,p){return p.v;},series:[{name:'Cereal first',data:a,cls:'cf'},{name:'Milk first',data:b,cls:'mf'}],y:function(p){return p.p;},ymin:0,xlab:'milk actually delivered (mL); target '+P.Vm,ylab:'probability density',fmt:function(p){return p.v+' mL';},vline:P.Vm});},
+  cards:function(M){return {cf:[f0(M.rmse_cf)+' mL','RMSE on milk dose',[['Systematic overshoot','+'+f1(M.os_cf)+' mL'],['Random scatter','&plusmn;'+f1(M.sd_cf)+' mL'],['Ratio landed',f2((P.Vm+M.os_cf)/P.mc)+' vs '+f2(M.R)+' mL/g']]],mf:[f0(M.rmse_mf)+' mL','RMSE on milk dose',[['Systematic overshoot','+'+f1(M.os_mf)+' mL'],['Random scatter','&plusmn;'+f1(M.sd_mf)+' mL'],['Ratio landed',f2((P.Vm+M.os_mf)/P.mc)+' vs '+f2(M.R)+' mL/g']]]};},
+  verdict:function(M){var a=adv((M.rmse_cf-M.rmse_mf)/P.Vm,0.15);return {a:a,text:'Dose error '+f0(M.rmse_cf)+' mL vs '+f0(M.rmse_mf)+' mL ('+pct(M.rmse_cf/P.Vm)+' vs '+pct(M.rmse_mf/P.Vm)+' of target). Milk-first wins on observability. Confidence is low: the delays and scatters are assumptions, not measurements; the direction is robust, the magnitude is not.'};},
+  score:function(M){return [f0(M.rmse_cf)+' mL',f0(M.rmse_mf)+' mL',adv((M.rmse_cf-M.rmse_mf)/P.Vm,0.15)];}},
+
+ {id:'uniform',chip:'Uniformity',title:'Sogginess uniformity',conf:'MED',short:'Uniformity',
+  what:'Spread of crispness across the raft at mid-meal. Lower spread = every spoonful the same texture.',
+  mech:function(M){return '<p>Each order has its own source of non-uniformity, and they dominate at different times. Early in a meal the submerged layer is still crisp, so cereal-first&#39;s instantly-limp film layer is the outlier (C about '+f2(fermi(m_film))+' against a crisp bulk). Late in a meal the submerged layer has collapsed, so milk-first&#39;s untouched dry cap (C = 1) is the outlier and cereal-first&#39;s limp cap sits closer to the soggy bulk. The crossover falls near the submerged half-life, t<sub>1/2</sub> = '+M.t50+' s at 4 C, faster when the milk is warmer. The snapshot is taken at mid-meal (t = '+f0(M.tmid)+' s) across the whole raft, weighted by layer fraction; move the pace input across the crossover and the winner flips.</p>';},
+  fx:function(M){return eq('&sigma;<sub>C</sub> = &radic;( &Sigma;<sub>l</sub> <i>f</i><sub>l</sub> ( <i>C</i><sub>l</sub> &minus; <i>C&#772;</i> )<sup>2</sup> )','population spread over layers l = {s, c, d} with fractions f = {'+f2(M.L.s)+', '+f2(M.L.c)+', '+f2(M.L.d)+'}')
+   +eq('<i>C</i><sub>l</sub> = <i>C</i>( <i>m</i><sub>l</sub>(<i>t</i><sub>mid</sub>) ), &nbsp; <i>t</i><sub>mid</sub> = '+f0(M.tmid)+' s','same uptake and Fermi model as the crunch objective');},
+  chart:function(M,el){barPairChart(el,[{lab:'submerged ('+pct(M.L.s)+')',cf:M.snapCf.layers[0].C,mf:M.snapMf.layers[0].C},{lab:'capillary ('+pct(M.L.c)+')',cf:M.snapCf.layers[1].C,mf:M.snapMf.layers[1].C},{lab:'dry cap ('+pct(M.L.d)+')',cf:M.snapCf.layers[2].C,mf:M.snapMf.layers[2].C}],'crispness by raft layer at mid-meal');},
+  cards:function(M){return {cf:[f2(M.snapCf.sd),'std dev of crispness',[['Raft mean C',f2(M.snapCf.mean)],['Softest layer',f2(Math.min.apply(null,M.snapCf.layers.map(function(l){return l.C;})))],['Crispest layer',f2(Math.max.apply(null,M.snapCf.layers.map(function(l){return l.C;})))]]],mf:[f2(M.snapMf.sd),'std dev of crispness',[['Raft mean C',f2(M.snapMf.mean)],['Softest layer',f2(Math.min.apply(null,M.snapMf.layers.map(function(l){return l.C;})))],['Crispest layer',f2(Math.max.apply(null,M.snapMf.layers.map(function(l){return l.C;})))]]]};},
+  verdict:function(M){var a=adv(M.snapCf.sd-M.snapMf.sd,0.15);return {a:a,text:'Spread '+f2(M.snapCf.sd)+' vs '+f2(M.snapMf.sd)+'. '+(a<-0.05?'Cereal-first is more uniform at this mid-meal time: the submerged layer has gone soft enough that milk-first&#39;s pristine dry cap is now the outlier.':a>0.05?'Milk-first is more uniform at this mid-meal time: the bulk is still crisp, so cereal-first&#39;s instantly-limp cap is the outlier. Slow the pace past the half-life and this flips.':'Tie at this mid-meal time; the two sources of spread are of similar size.')};},
+  score:function(M){return [f2(M.snapCf.sd),f2(M.snapMf.sd),adv(M.snapCf.sd-M.snapMf.sd,0.15)];}},
+
+ {id:'spill',chip:'Spill risk',title:'Spill and overflow risk',conf:'MED',short:'Spill risk',
+  what:'Two failure modes: droplet ejection on impact (splash) and the raft or milk clearing the rim (overflow).',
+  mech:function(M){return '<p><b>Splash.</b> A milk stream from '+P.hp+' cm arrives at v = &radic;(2gh) = '+f2(M.v)+' m/s, Weber number '+f0(M.We)+': well inside the splashing regime (We above roughly 100 on a liquid film). What matters is how much of that kinetic energy lands on a free liquid surface, because that is what ejects droplets. Milk-first: after the first centimeter of milk cushions the bowl bottom, the rest of the stream hits a milk pool, then the cereal drop hits the pool again. Cereal-first: the stream lands on a porous raft which absorbs most of the momentum; the model credits 30% of the energy to free-surface impact.</p><p><b>Overflow.</b> The final geometry is the same in both orders (same V, same m<sub>c</sub>, same float). The difference comes through the ratio objective: cereal-first carries a larger systematic milk overshoot, which raises the free surface and lifts the raft. Headroom is computed with each order&#39;s own overshoot.</p>';},
+  fx:function(M){return eq('<i>v</i> = &radic;(2<i>gh</i>) = '+f2(M.v)+' m/s, &nbsp; We = &rho;<i>v</i><sup>2</sup><i>D</i>/&gamma; = '+f0(M.We),'stream diameter D = 8 mm, &gamma; = 47 mN/m')
+   +eq('<i>E</i><sub>splash</sub> = &Sigma; &eta;<sub>j</sub> <i>m</i><sub>j</sub> <i>g</i> <i>h</i><sub>j</sub>','energy delivered onto a free surface; &eta; = 1 for liquid-on-liquid, 0.3 for liquid-through-raft; flakes dropped from h/2')
+   +eq('<i>z</i><sub>top</sub> = (<i>V</i> + <i>m</i><sub>c</sub>/&rho;<sub>m</sub>)/<i>A</i> + (1 &minus; <i>s</i>)<i>H</i><sub>raft</sub>, &nbsp; headroom = <i>H</i><sub>b</sub> &minus; <i>z</i><sub>top</sub>','Archimedes: submerged solid volume m<sub>c</sub>/&rho;<sub>m</sub> raises the free surface; the dry part of the raft rides above it');},
+  chart:function(M,el){bowlDiagrams(M,el);},
+  cards:function(M){return {cf:[f0(M.E_cf*1000)+' mJ','splash energy on free surface',[['Headroom to rim',f2(M.head_cf)+' cm'],['Free surface at',f2(M.Hm_cf)+' cm'],['Raft top at',f2(M.top_cf)+' cm'+(M.head_cf<0?' OVER RIM':'')]]],mf:[f0(M.E_mf*1000)+' mJ','splash energy on free surface',[['Headroom to rim',f2(M.head_mf)+' cm'],['Free surface at',f2(M.Hm_mf)+' cm'],['Raft top at',f2(M.top_mf)+' cm'+(M.head_mf<0?' OVER RIM':'')]]]};},
+  verdict:function(M){var a_s=adv((M.E_cf-M.E_mf)/Math.max(M.E_cf,M.E_mf,1e-6),0.5), a_o=adv(M.head_mf-M.head_cf,0.6);var a=0.5*a_s+0.5*a_o;return {a:a,text:'Splash favors cereal-first ('+f0(M.E_cf*1000)+' vs '+f0(M.E_mf*1000)+' mJ: the raft is a cushion). Overflow headroom favors milk-first ('+f2(M.head_mf)+' vs '+f2(M.head_cf)+' cm, via the smaller dose overshoot). Weighted equally: '+(a>0.05?'milk-first':a<-0.05?'cereal-first':'tie')+'. Lower the pour height and the splash term vanishes; fill the bowl and the overflow term dominates.'};},
+  score:function(M){var a_s=adv((M.E_cf-M.E_mf)/Math.max(M.E_cf,M.E_mf,1e-6),0.5), a_o=adv(M.head_mf-M.head_cf,0.6);return [f0(M.E_cf*1000)+' mJ',f0(M.E_mf*1000)+' mJ',0.5*a_s+0.5*a_o];}},
+
+ {id:'ttfb',chip:'Time to bite',title:'Time to first bite',conf:'HIGH',short:'Time to bite',
+  what:'Wall-clock seconds from the first container touching the bowl to the first spoonful.',
+  mech:function(M){return '<p>Assembly is two serial pours plus a fixed reach for the spoon. Addition is commutative: '+M.t_cer+' s of cereal + '+f1(M.t_milk)+' s of milk equals '+f1(M.t_milk)+' s of milk + '+M.t_cer+' s of cereal. The model finds no order dependence, and there is no plausible mechanism for one short of parallel pouring, which the boundary conditions exclude (one pourer, two hands, one carton).</p><p>This objective is included because it is the most common argument made for cereal-first (&quot;it is faster&quot;). It is not.</p>';},
+  fx:function(M){return eq('<i>t</i><sub>FB</sub> = <i>t</i><sub>cereal</sub> + <i>V</i>/<i>Q</i> + <i>t</i><sub>first</sub> = '+M.t_cer+' + '+f1(M.t_milk)+' + '+t_first+' = '+f1(M.ttfb)+' s','identical for both orders by commutativity of addition');},
+  chart:function(M,el){ganttChart(el,[{name:'Cereal first',cls:'cf',segs:[['cereal',M.t_cer],['milk',M.t_milk],['spoon',t_first]]},{name:'Milk first',cls:'mf',segs:[['milk',M.t_milk],['cereal',M.t_cer],['spoon',t_first]]}]);},
+  cards:function(M){return {cf:[f1(M.ttfb)+' s','to first bite',[['Cereal pour',M.t_cer+' s'],['Milk pour',f1(M.t_milk)+' s'],['Spoon',t_first+' s']]],mf:[f1(M.ttfb)+' s','to first bite',[['Milk pour',f1(M.t_milk)+' s'],['Cereal pour',M.t_cer+' s'],['Spoon',t_first+' s']]]};},
+  verdict:function(M){return {a:0,text:'Exact tie: '+f1(M.ttfb)+' s either way. If speed is the objective, the order is irrelevant and the pour rate is the whole game.'};},
+  score:function(M){return [f1(M.ttfb)+' s',f1(M.ttfb)+' s',0];}},
+
+ {id:'life',chip:'Bowl life',title:'Bowl life (slow-eater tolerance)',conf:'MED',short:'Bowl life',
+  what:'The slowest eating pace at which the meal still averages crispness 0.6 or better. Higher = more tolerant of distraction.',
+  mech:function(M){return '<p>The crunch objective evaluates one pace; this one sweeps pace and asks where each order breaks. Cereal-first starts every flake&#39;s clock at t = 0, so its tolerable pace is bounded by the submerged layer&#39;s half-life divided by the number of bites. Milk-first holds a dry reserve whose clock does not start until the spoon, so its tolerance is set by the size of that reserve: with a large dry cap the meal can be arbitrarily slow. Batching extends milk-first further by resetting the clock for each batch.</p>';},
+  fx:function(M){return eq('pace<sup>*</sup> = max { <i>p</i> : <i>C&#772;</i>(<i>p</i>) &ge; 0.6 }','swept p = 2 ... 240 s per bite; same bite model as crunch retention')
+   +eq('cereal first: pace<sup>*</sup> = '+(M.pace_cf?M.pace_cf+' s':'none')+'; &nbsp; milk first: pace<sup>*</sup> = '+(M.pace_mf>=240?'&ge; 240 s':(M.pace_mf?M.pace_mf+' s':'none')),'meal length at pace* = N x pace*: '+(M.pace_cf?f0(M.N*M.pace_cf/60)+' min':'n/a')+' vs '+(M.pace_mf?f0(M.N*M.pace_mf/60)+' min':'n/a'));},
+  chart:function(M,el){var a=[],b=[];for(var p=2;p<=120;p+=2){var ca=M.bites('cf',p),cb=M.bites('mf',p,P.K);var ma=0,mb=0;ca.forEach(function(x){ma+=x.C;});cb.forEach(function(x){mb+=x.C;});a.push({p:p,C:ma/ca.length});b.push({p:p,C:mb/cb.length});}lineChart(el,{x:function(i,q){return q.p;},series:[{name:'Cereal first',data:a,cls:'cf'},{name:'Milk first',data:b,cls:'mf'}],y:function(q){return q.C;},ymin:0,ymax:1,xlab:'eating pace (s per bite)',ylab:'mean crispness of the meal',fmt:function(q){return 'pace '+q.p+' s: C = '+f2(q.C);},hline:0.6});},
+  cards:function(M){return {cf:[(M.pace_cf?M.pace_cf+' s':'--'),'max pace per bite',[['Meal length at limit',M.pace_cf?f1(M.N*M.pace_cf/60)+' min':'n/a'],['Mean C at current pace',f2(M.Ccf)]]],mf:[(M.pace_mf>=240?'240+ s':(M.pace_mf?M.pace_mf+' s':'--')),'max pace per bite',[['Meal length at limit',M.pace_mf?(M.pace_mf>=240?'> ':'')+f1(M.N*M.pace_mf/60)+' min':'n/a'],['Mean C at current pace',f2(M.Cmf)]]]};},
+  verdict:function(M){var a=adv((M.pace_mf-M.pace_cf)/Math.max(M.pace_cf,2),1.0);return {a:a,text:'Tolerable pace '+(M.pace_cf||0)+' s vs '+(M.pace_mf>=240?'240+':M.pace_mf||0)+' s. '+(a>0.05?'Milk-first is the choice for anyone who eats with a phone in the other hand.':a<-0.05?'Cereal-first tolerates the slower pace here.':'No difference at these settings.')};},
+  score:function(M){return [(M.pace_cf||0)+' s',(M.pace_mf>=240?'240+':M.pace_mf||0)+' s',adv((M.pace_mf-M.pace_cf)/Math.max(M.pace_cf,2),1.0)];}},
+
+ {id:'comp',chip:'Composite',title:'Weighted composite',conf:'--',short:'Composite',
+  what:'Every objective&#39;s normalized advantage, weighted by how much you care. Set the weights to your own priorities.',
+  mech:function(M){return '<p>Each objective yields a<sub>i</sub> in [&minus;1, 1] (positive = milk-first). The composite is the weight-normalized sum. The default weights reflect a crunch-dominant eater; a texture-uniformity purist or a splash-averse pourer will flip it. There is no objective answer to the composite because the weights are preferences, not physics. Everything upstream of the weights is.</p><div class="weights" id="weights"></div>';},
+  fx:function(M){return eq('<i>J</i> = &Sigma;<sub>i</sub> <i>w</i><sub>i</sub> <i>a</i><sub>i</sub> / &Sigma;<sub>i</sub> <i>w</i><sub>i</sub>, &nbsp; <i>a</i><sub>i</sub> = tanh( &Delta;<sub>i</sub> / scale<sub>i</sub> )','J &gt; 0 favors milk-first; |J| near 1 is decisive, near 0 is noise');},
+  chart:function(M,el){advChart(el,M);},
+  cards:function(M){var J=composite(M);return {cf:[(J.J<0?f2(-J.J):'0.00'),'composite share (cereal first)',[['Objectives won',J.cfWins],['Weighted score',f2(Math.max(0,-J.J))]]],mf:[(J.J>0?f2(J.J):'0.00'),'composite share (milk first)',[['Objectives won',J.mfWins],['Weighted score',f2(Math.max(0,J.J))]]]};},
+  verdict:function(M){var J=composite(M);return {a:J.J,text:'Composite J = '+(J.J>=0?'+':'')+f2(J.J)+'. '+(J.J>0.1?'Milk-first at these weights.':J.J<-0.1?'Cereal-first at these weights.':'Too close to call at these weights.')+' Ties ('+J.ties+' objectives) contribute zero.'};},
+  score:function(M){var J=composite(M);return [J.J<0?f2(-J.J):'0',J.J>0?f2(J.J):'0',J.J];}}
+];
+var W={crunch:4,thermal:1,ratio:2,uniform:1,spill:2,ttfb:1,life:2};
+function composite(M){var sw=0,s=0,cfW=0,mfW=0,ties=0;OBJ.forEach(function(o){if(o.id==='comp')return;var a=o.score(M)[2];sw+=W[o.id];s+=W[o.id]*a;if(a>0.05)mfW++;else if(a<-0.05)cfW++;else ties++;});return {J:sw?s/sw:0,cfWins:cfW,mfWins:mfW,ties:ties};}
+function Jof(p){return withP(p,function(){return composite(model()).J;});}
+
+// ---------- formatting ----------
+function f0(x){return Math.round(x).toString();}
+function f1(x){return (Math.round(x*10)/10).toFixed(1);}
+function f2(x){return (Math.round(x*100)/100).toFixed(2);}
+function f3(x){return (Math.round(x*1000)/1000).toFixed(3);}
+function pct(x){return Math.round(x*100)+'%';}
+function sgn(x){return (x>=0?'+':'')+f2(x);}
+function eq(a,b){return '<div class="eq">'+a+'</div>'+(b?'<div class="eq k" style="margin-bottom:8px">'+b+'</div>':'');}
+function gauss(x,mu,sd){return Math.exp(-0.5*Math.pow((x-mu)/sd,2))/(sd*Math.sqrt(2*Math.PI));}
+function winner(a){return a>0.05?'mf':a<-0.05?'cf':'tie';}
+function wname(a){return a>0.05?'Milk first':a<-0.05?'Cereal first':'Tie';}
+
+// ---------- tooltip ----------
+var tt=document.getElementById('tt');
+function showTip(html,x,y){tt.innerHTML=html;tt.style.display='block';var w=tt.offsetWidth,h=tt.offsetHeight;var vx=window.innerWidth,vy=window.innerHeight;var lx=x+14,ly=y+14;if(lx+w>vx-8)lx=x-w-14;if(ly+h>vy-8)ly=y-h-14;if(lx<4)lx=4;if(ly<4)ly=4;tt.style.left=lx+'px';tt.style.top=ly+'px';}
+function hideTip(){tt.style.display='none';}
+document.addEventListener('mousemove',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(el){showTip(el.getAttribute('data-tip'),e.clientX,e.clientY);}else if(!tt._canvas){hideTip();}});
+document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(el){var t=e.touches[0];showTip(el.getAttribute('data-tip'),t.clientX,t.clientY);setTimeout(hideTip,2500);}},{passive:true});
+
+// ---------- charts ----------
+var COL={cf:'#E85D04',mf:'#1D6FA5',grid:'#EAEDF1',axis:'#D9DDE3',text:'#5B6470',ink:'#1B1F24'};
+function mkCanvas(el,h,legend){el.innerHTML='<div class="chartbox"><canvas></canvas></div>'+(legend===false?'':'<div class="legend"><span><i></i>Cereal first</span><span><i class="mf"></i>Milk first</span></div>');var cv=el.querySelector('canvas');var dpr=window.devicePixelRatio||1;var W_=el.clientWidth||600;h=h||230;cv.style.height=h+'px';cv.width=W_*dpr;cv.height=h*dpr;var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.font='10.5px "IBM Plex Mono",monospace';return {cv:cv,ctx:ctx,W:W_,H:h};}
+function hover(cv,fn){cv.onmousemove=function(ev){var r=cv.getBoundingClientRect();var html=fn(ev.clientX-r.left,ev.clientY-r.top);if(html){tt._canvas=true;showTip(html,ev.clientX,ev.clientY);}else{tt._canvas=false;hideTip();}};cv.onmouseleave=function(){tt._canvas=false;hideTip();};}
+function lineChart(el,o){
+  var c=mkCanvas(el),ctx=c.ctx;var pad={l:44,r:10,t:10,b:32};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;
+  var xs=[],ys=[];o.series.forEach(function(s){s.data.forEach(function(p,i){xs.push(o.x(i,p));ys.push(o.y(p));});});
+  var xmin=Math.min.apply(null,xs),xmax=Math.max.apply(null,xs);var ymin=(o.ymin!=null)?o.ymin:Math.min.apply(null,ys),ymax=(o.ymax!=null)?o.ymax:Math.max.apply(null,ys)*1.08;
+  if(ymax===ymin)ymax=ymin+1;
+  function X(v){return pad.l+(v-xmin)/(xmax-xmin)*pw;}function Y(v){return pad.t+ph-(v-ymin)/(ymax-ymin)*ph;}
+  ctx.fillStyle=COL.text;ctx.strokeStyle=COL.grid;ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){var yv=ymin+(ymax-ymin)*i/4;ctx.beginPath();ctx.moveTo(pad.l,Y(yv));ctx.lineTo(pad.l+pw,Y(yv));ctx.stroke();ctx.textAlign='right';ctx.fillText(fmtTick(yv,ymax-ymin),pad.l-6,Y(yv)+3);}
+  for(i=0;i<=4;i++){var xv=xmin+(xmax-xmin)*i/4;ctx.textAlign='center';ctx.fillText(fmtTick(xv,xmax-xmin),X(xv),pad.t+ph+14);}
+  ctx.fillText(o.xlab,pad.l+pw/2,c.H-3);ctx.save();ctx.translate(10,pad.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(o.ylab,0,0);ctx.restore();
+  if(o.hline!=null){ctx.strokeStyle=COL.text;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(pad.l,Y(o.hline));ctx.lineTo(pad.l+pw,Y(o.hline));ctx.stroke();ctx.setLineDash([]);ctx.textAlign='left';ctx.fillText('threshold '+o.hline,pad.l+4,Y(o.hline)-4);}
+  if(o.vline!=null){ctx.strokeStyle=COL.text;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(X(o.vline),pad.t);ctx.lineTo(X(o.vline),pad.t+ph);ctx.stroke();ctx.setLineDash([]);ctx.textAlign='left';ctx.fillText('target',X(o.vline)+4,pad.t+10);}
+  o.series.forEach(function(s){ctx.strokeStyle=COL[s.cls];ctx.lineWidth=2.25;ctx.setLineDash(s.cls==='mf'?[7,4]:[]);ctx.beginPath();s.data.forEach(function(p,i){var x=X(o.x(i,p)),y=Y(o.y(p));if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();ctx.setLineDash([]);
+    var last=s.data[s.data.length-1];ctx.fillStyle=COL.ink;ctx.textAlign='right';var ly=Math.max(pad.t+10,Math.min(pad.t+ph-4,Y(o.y(last))+(s.cls==='mf'?-6:12)));ctx.fillText(s.name+' '+f2(o.y(last)),pad.l+pw-4,ly);});
+  hover(c.cv,function(mx){var xv=xmin+(mx-pad.l)/pw*(xmax-xmin);if(xv<xmin||xv>xmax)return null;var lines=[];o.series.forEach(function(s){var best=null,bd=1e18;s.data.forEach(function(p,i){var d=Math.abs(o.x(i,p)-xv);if(d<bd){bd=d;best=p;}});lines.push('<span class="'+s.cls+'">'+s.name+'</span>: '+o.fmt(best));});return lines.join('<br>');});
+}
+function fmtTick(v,range){if(range>=50)return Math.round(v).toString();if(range>=5)return (Math.round(v*10)/10).toString();return (Math.round(v*100)/100).toString();}
+function barPairChart(el,rows,lab){
+  var c=mkCanvas(el,190),ctx=c.ctx;var pad={l:130,r:44,t:12,b:22};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText(lab+' (0 = paste, 1 = fresh)',pad.l+pw/2,c.H-5);
+  ctx.strokeStyle=COL.grid;for(var i=0;i<=4;i++){var x=pad.l+pw*i/4;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();}
+  rows.forEach(function(r,i){var y=pad.t+i*rh;ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab,pad.l-8,y+rh/2+3);
+    var bh=Math.min(14,(rh-10)/2-1);
+    ctx.fillStyle=COL.cf;ctx.fillRect(pad.l,y+rh/2-bh-1,pw*r.cf,bh);ctx.fillStyle=COL.mf;ctx.fillRect(pad.l,y+rh/2+1,pw*r.mf,bh);
+    ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.fillText(f2(r.cf),pad.l+pw*r.cf+4,y+rh/2-bh/2+3);ctx.fillText(f2(r.mf),pad.l+pw*r.mf+4,y+rh/2+bh/2+4);});
+  el.querySelector('.legend').innerHTML='<span><i></i>Cereal first</span><span><i class="mf" style="border-top-style:solid"></i>Milk first</span>';
+}
+function ganttChart(el,rows){
+  var c=mkCanvas(el,110,false),ctx=c.ctx;var pad={l:90,r:50,t:8,b:22};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var tot=0;rows[0].segs.forEach(function(s){tot+=s[1];});
+  rows.forEach(function(r,i){var y=pad.t+i*ph/2+6,h=ph/2-12,x=pad.l;ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.name,pad.l-8,y+h/2+3);
+    r.segs.forEach(function(s){var w_=pw*s[1]/tot;ctx.fillStyle=(s[0]==='milk')?'#C9D3DD':(s[0]==='cereal'?COL[r.cls]:'#7A8794');ctx.fillRect(x,y,Math.max(0,w_-2),h);ctx.fillStyle=(s[0]==='milk')?COL.ink:'#fff';ctx.textAlign='center';if(w_>40)ctx.fillText(s[0]+' '+f1(s[1])+'s',x+w_/2,y+h/2+3);x+=w_;});
+    ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.fillText(f1(tot)+' s',pad.l+pw+6,y+h/2+3);});
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText('seconds from first container to first bite (grey-blue = milk, colored = cereal, grey = spoon)',pad.l+pw/2,c.H-5);
+}
+function advChart(el,M){
+  var rows=OBJ.filter(function(o){return o.id!=='comp';}).map(function(o){return {lab:o.title,a:o.score(M)[2],w:W[o.id]};});
+  var c=mkCanvas(el,rows.length*28+36,false),ctx=c.ctx;var pad={l:160,r:44,t:8,b:24};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;var mid=pad.l+pw/2;
+  ctx.strokeStyle=COL.grid;[-1,-0.5,0.5,1].forEach(function(v){var x=mid+v*pw/2;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();});
+  ctx.strokeStyle=COL.ink;ctx.beginPath();ctx.moveTo(mid,pad.t);ctx.lineTo(mid,pad.t+ph);ctx.stroke();
+  rows.forEach(function(r,i){var y=pad.t+i*rh+5,h=rh-10;ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab+' (w'+r.w+')',pad.l-8,y+h/2+3);var w_=r.a*pw/2;ctx.fillStyle=r.a>=0?COL.mf:COL.cf;if(r.a>=0)ctx.fillRect(mid+1,y,Math.max(0,w_-1),h);else ctx.fillRect(mid+w_,y,Math.max(0,-w_-1),h);ctx.fillStyle=COL.ink;ctx.textAlign=r.a>=0?'left':'right';ctx.fillText(sgn(r.a),r.a>=0?mid+w_+4:mid+w_-4,y+h/2+3);});
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText('normalized advantage a (left = cereal first, right = milk first)',pad.l+pw/2,c.H-5);
+}
+function bowlDiagrams(M,el){
+  function bowl(cls,Hm,top,head,title){var sc=22,W_=200,x0=30,y0=20,Hb=H_b*sc;var col=cls==='cf'?COL.cf:COL.mf;
+    var milkY=y0+Hb-Hm*sc, topY=y0+Hb-top*sc;var raftBot=milkY+(M.s*M.H_raft)*sc;
+    var s='<svg viewBox="0 0 260 170" role="img" aria-label="'+title+'">';
+    s+='<text x="130" y="12" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600" fill="'+col+'">'+title.toUpperCase()+'</text>';
+    s+='<rect x="'+x0+'" y="'+Math.max(y0,milkY)+'" width="'+W_+'" height="'+Math.max(0,y0+Hb-Math.max(y0,milkY))+'" fill="#C9D3DD"/>';
+    s+='<rect x="'+(x0+6)+'" y="'+topY+'" width="'+(W_-12)+'" height="'+Math.max(0,raftBot-topY)+'" fill="'+col+'" opacity=".75"/>';
+    s+='<path d="M'+x0+' '+y0+' V'+(y0+Hb)+' H'+(x0+W_)+' V'+y0+'" fill="none" stroke="#1B1F24" stroke-width="2.5"/>';
+    s+='<line x1="'+(x0-8)+'" y1="'+y0+'" x2="'+(x0+W_+8)+'" y2="'+y0+'" stroke="#5B6470" stroke-width="1" stroke-dasharray="3 3"/>';
+    s+='<text x="'+(x0+W_+2)+'" y="'+(y0-4)+'" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5B6470">RIM</text>';
+    s+='<text x="'+(x0+4)+'" y="'+(milkY+11)+'" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1B1F24">milk '+f1(Hm)+' cm</text>';
+    s+='<text x="130" y="162" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="'+(head<0?COL.cf:'#5B6470')+'">'+(head<0?'RAFT OVER RIM BY '+f2(-head)+' CM':'headroom '+f2(head)+' cm')+'</text>';
+    return s+'</svg>';}
+  el.innerHTML='<div class="bowls">'+bowl('cf',M.Hm_cf,M.top_cf,M.head_cf,'Cereal first, +'+f0(M.os_cf)+' mL overshoot')+bowl('mf',M.Hm_mf,M.top_mf,M.head_mf,'Milk first, +'+f0(M.os_mf)+' mL overshoot')+'</div><div class="cap">Cross-section, to scale (bowl 5.5 cm deep). Grey-blue = milk. Colored slab = raft; '+pct(M.s)+' of it sits below the milk line.'+(M.floats?'':' Raft is grounded (not enough milk to float it).')+'</div>';
+}
+// tornado
+function tornadoChart(el,rows,J0){
+  var c=mkCanvas(el,rows.length*30+36,false),ctx=c.ctx;var pad={l:c.W>=600?118:96,r:14,t:8,b:24};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;
+  var xmn=0,xmx=0;rows.forEach(function(r){xmn=Math.min(xmn,r.lo,r.hi,J0);xmx=Math.max(xmx,r.lo,r.hi,J0);});var span=Math.max(0.2,xmx-xmn);xmn-=span*0.28;xmx+=span*0.28;xmn=Math.max(-1.1,xmn);xmx=Math.min(1.1,xmx);
+  function X(v){return pad.l+(v-xmn)/(xmx-xmn)*pw;}
+  var step=(xmx-xmn)>1?0.5:0.25;ctx.strokeStyle=COL.grid;for(var gv=Math.ceil(xmn/step)*step;gv<=xmx+1e-9;gv+=step){ctx.beginPath();ctx.moveTo(X(gv),pad.t);ctx.lineTo(X(gv),pad.t+ph);ctx.stroke();ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText(sgn(gv),X(gv),c.H-5);}
+  ctx.strokeStyle=COL.axis;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(X(0),pad.t);ctx.lineTo(X(0),pad.t+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(J0),pad.t);ctx.lineTo(X(J0),pad.t+ph);ctx.stroke();ctx.lineWidth=1;
+  ctx.fillStyle=COL.ink;ctx.textAlign='center';ctx.fillText('J now '+sgn(J0),X(J0),pad.t-1);
+  var boxes=[];
+  rows.forEach(function(r,i){var y=pad.t+i*rh+6,h=rh-12;var a=Math.min(r.lo,r.hi),b=Math.max(r.lo,r.hi);
+    ctx.fillStyle='#C9D3DD';ctx.fillRect(X(a),y,Math.max(1,X(b)-X(a)),h);
+    // color the portions by side of zero
+    if(a<0){ctx.fillStyle=COL.cf;ctx.fillRect(X(a),y,X(Math.min(b,0))-X(a),h);} if(b>0){ctx.fillStyle=COL.mf;ctx.fillRect(X(Math.max(a,0)),y,X(b)-X(Math.max(a,0)),h);}
+    ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab,pad.l-8,y+h/2+3);
+    if(c.W>=600){ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.font='9.5px "IBM Plex Mono",monospace';ctx.fillText(r.loLab,X(a)-ctx.measureText(r.loLab).width-3,y+h/2+3);ctx.fillText(r.hiLab,X(b)+3,y+h/2+3);ctx.font='10.5px "IBM Plex Mono",monospace';}
+    boxes.push({y0:y,y1:y+h,r:r});});
+  hover(c.cv,function(mx,my){for(var i=0;i<boxes.length;i++){var b=boxes[i];if(my>=b.y0&&my<=b.y1){var r=b.r;return '<b>'+r.lab+'</b><br><span class="k">'+r.desc+'</span><hr>J at '+r.loLab+': <b>'+sgn(r.lo)+'</b> ('+wname(r.lo)+')<br>J at '+r.hiLab+': <b>'+sgn(r.hi)+'</b> ('+wname(r.hi)+')<br>Swing: <b>'+f2(Math.abs(r.hi-r.lo))+'</b>'+(r.flip?' &middot; can flip the verdict':' &middot; cannot flip the verdict alone');}}return null;});
+}
+// heatmap
+function heatChart(el,H){
+  var c=mkCanvas(el,H.ny*24+52,false),ctx=c.ctx;var pad={l:44,r:14,t:8,b:44};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var cw=pw/H.nx,ch=ph/H.ny;
+  function col(J){var t=Math.max(-1,Math.min(1,J));if(t>=0){return mix('#FFFFFF',COL.mf,Math.pow(t,0.7));}return mix('#FFFFFF',COL.cf,Math.pow(-t,0.7));}
+  for(var i=0;i<H.nx;i++)for(var j=0;j<H.ny;j++){var J=H.J[i][j];ctx.fillStyle=col(J);ctx.fillRect(pad.l+i*cw+1,pad.t+(H.ny-1-j)*ch+1,cw-2,ch-2);
+    ctx.fillStyle=Math.abs(J)>0.55?'#fff':COL.ink;ctx.textAlign='center';ctx.font='9.5px "IBM Plex Mono",monospace';ctx.fillText(sgn(J).replace('+0.','+.').replace('-0.','-.'),pad.l+i*cw+cw/2,pad.t+(H.ny-1-j)*ch+ch/2+3);}
+  ctx.font='10.5px "IBM Plex Mono",monospace';ctx.fillStyle=COL.text;
+  for(i=0;i<H.nx;i++){ctx.textAlign='center';ctx.fillText(H.xs[i],pad.l+i*cw+cw/2,pad.t+ph+13);}
+  for(j=0;j<H.ny;j++){ctx.textAlign='right';ctx.fillText(H.ys[j],pad.l-6,pad.t+(H.ny-1-j)*ch+ch/2+3);}
+  ctx.textAlign='center';ctx.fillText(H.xlab,pad.l+pw/2,c.H-5);ctx.save();ctx.translate(10,pad.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(H.ylab,0,0);ctx.restore();
+  // current marker
+  var ci=H.ci,cj=H.cj;if(ci>=0&&cj>=0){ctx.strokeStyle=COL.ink;ctx.lineWidth=2.5;ctx.strokeRect(pad.l+ci*cw+1.5,pad.t+(H.ny-1-cj)*ch+1.5,cw-3,ch-3);ctx.lineWidth=1;}
+  hover(c.cv,function(mx,my){var i=Math.floor((mx-pad.l)/cw),jj=H.ny-1-Math.floor((my-pad.t)/ch);if(i<0||i>=H.nx||jj<0||jj>=H.ny)return null;var d=H.detail(i,jj);return '<b>'+H.xlab+' '+H.xs[i]+' &middot; '+H.ylab+' '+H.ys[jj]+'</b><br>Composite J = <b>'+sgn(d.J)+'</b> &rarr; '+wname(d.J)+'<hr><span class="k">'+d.split+'</span>';});
+}
+function mix(a,b,t){function h(x){return [parseInt(x.substr(1,2),16),parseInt(x.substr(3,2),16),parseInt(x.substr(5,2),16)];}var A=h(a),B=h(b);var r=A.map(function(v,i){return Math.round(v+(B[i]-v)*t);});return 'rgb('+r.join(',')+')';}
+
+// ---------- analytics: sensitivity + heat ----------
+function sensitivity(J0){
+  var rows=[];
+  VARS.forEach(function(v){
+    var lo,hi,loLab,hiLab;
+    if(v.sel){var best=null,worst=null;Object.keys(v.sel).forEach(function(k){var p=Object.assign({},P);p[v.id]=k;var J=Jof(p);if(best===null||J>best.J)best={J:J,k:k};if(worst===null||J<worst.J)worst={J:J,k:k};});lo=worst.J;hi=best.J;loLab=v.sel[worst.k].n;hiLab=v.sel[best.k].n;}
+    else{var p1=Object.assign({},P);p1[v.id]=v.min;var p2=Object.assign({},P);p2[v.id]=v.max;lo=Jof(p1);hi=Jof(p2);loLab=v.min+(v.unit?' '+v.unit.split(' ')[0]:'');hiLab=v.max+(v.unit?' '+v.unit.split(' ')[0]:'');}
+    rows.push({id:v.id,lab:v.lab,lo:lo,hi:hi,loLab:loLab,hiLab:hiLab,desc:v.tip,swing:Math.abs(hi-lo),flip:(Math.min(lo,hi)<-0.05&&Math.max(lo,hi)>0.05)||(Math.sign(lo)!==Math.sign(J0)&&Math.abs(lo)>0.05)||(Math.sign(hi)!==Math.sign(J0)&&Math.abs(hi)>0.05)});
+  });
+  rows.sort(function(a,b){return b.swing-a.swing;});
+  return rows;
+}
+function heat(){
+  var xs=[15,25,35,45,55,65,80],ys=[4,8,12,16,20,28,40];
+  var J=[],det=[];
+  xs.forEach(function(x,i){J[i]=[];det[i]=[];ys.forEach(function(y,j){var p=Object.assign({},P);p.mc=x;p.pace=y;var r=withP(p,function(){var M=model();var c=composite(M);var parts=OBJ.filter(function(o){return o.id!=='comp';}).map(function(o){var a=o.score(M)[2];return o.short+' '+sgn(a);});return {J:c.J,split:parts.join(' &middot; ')};});J[i][j]=r.J;det[i][j]=r;});});
+  function nearest(arr,v){var bi=0,bd=1e9;arr.forEach(function(a,i){var d=Math.abs(a-v);if(d<bd){bd=d;bi=i;}});return bi;}
+  return {nx:xs.length,ny:ys.length,xs:xs,ys:ys,J:J,xlab:'cereal g',ylab:'s per bite',ci:nearest(xs,P.mc),cj:nearest(ys,P.pace),detail:function(i,j){return det[i][j];}};
+}
+
+// ---------- render ----------
+var cur=0, M, SENS=[], curPreset='Default';
+function renderVerdict(){
+  var J=composite(M);var w=winner(J.J);
+  var el=document.getElementById('vwin');el.className='vwin '+w;el.textContent=w==='mf'?'Milk first':w==='cf'?'Cereal first':'Too close to call';
+  document.getElementById('vj').textContent='J = '+sgn(J.J)+'  |  '+J.mfWins+' milk-first, '+J.cfWins+' cereal-first, '+J.ties+' tie';
+  fillMeter('vfill',J.J);
+  var mfList=[],cfList=[],tieList=[];OBJ.forEach(function(o){if(o.id==='comp')return;var a=o.score(M)[2];var t=o.short.toLowerCase();if(a>0.05)mfList.push(t);else if(a<-0.05)cfList.push(t);else tieList.push(t);});
+  var top=SENS[0];
+  var txt='<b class="mf">Milk first</b> takes '+(mfList.length?mfList.join(', '):'nothing')+'. <b class="cf">Cereal first</b> takes '+(cfList.length?cfList.join(', '):'nothing')+'.'+(tieList.length?' Order-indifferent: '+tieList.join(', ')+'.':'')+(top?' The verdict is most sensitive to <b>'+top.lab.toLowerCase()+'</b> (swing '+f2(top.swing)+' in J across its range'+(top.flip?', enough to flip it':', not enough to flip it')+').':'');
+  document.getElementById('vtext').innerHTML=txt;
+  document.getElementById('vph').textContent='composite of 7 objectives at the '+curPreset.toLowerCase()+' scenario';
+  document.getElementById('scen').textContent=curPreset;
+}
+function fillMeter(id,a){var f=document.getElementById(id);a=Math.max(-1,Math.min(1,a));if(a>=0){f.style.left='50%';f.style.width=(a*50)+'%';f.style.background=COL.mf;}else{f.style.left=(50+a*50)+'%';f.style.width=(-a*50)+'%';f.style.background=COL.cf;}}
+function renderKpis(){
+  var el=document.getElementById('kpis');el.innerHTML='';
+  OBJ.forEach(function(o,i){if(o.id==='comp')return;var s=o.score(M);var a=s[2];var w=winner(a);
+    var d=document.createElement('div');d.className='kpi'+(i===cur?' on':'');
+    d.setAttribute('data-tip','<b>'+o.title+'</b><br><span class="k">'+o.what+'</span><hr><span class="cf">Cereal first</span>: <b>'+s[0]+'</b><br><span class="mf">Milk first</span>: <b>'+s[1]+'</b><br>Advantage a = <b>'+sgn(a)+'</b> &middot; weight '+W[o.id]+' &middot; confidence '+o.conf+'<hr><span class="k">Click to open the analysis.</span>');
+    d.innerHTML='<div class="t"><span>'+o.short+'</span><span class="cf-tag">'+o.conf+'</span></div><div class="w '+w+'">'+(w==='tie'?'Tie':wname(a))+'</div><div class="v">'+s[0]+' / '+s[1]+'</div><div class="bar"><span class="m"></span></div>';
+    var bar=d.querySelector('.bar');var i_=document.createElement('i');var aa=Math.max(-1,Math.min(1,a));if(aa>=0){i_.style.left='50%';i_.style.width=(aa*50)+'%';i_.style.background=COL.mf;}else{i_.style.left=(50+aa*50)+'%';i_.style.width=(-aa*50)+'%';i_.style.background=COL.cf;}bar.appendChild(i_);
+    d.onclick=function(){cur=i;renderObjective();renderKpis();document.getElementById('otitle').scrollIntoView({behavior:'smooth',block:'start'});};
+    el.appendChild(d);});
+}
+function renderDrivers(){
+  var J0=composite(M).J;SENS=sensitivity(J0);
+  tornadoChart(document.getElementById('tornado'),SENS,J0);
+  heatChart(document.getElementById('heat'),heat());
+}
+function renderVars(){
+  var el=document.getElementById('vars');el.innerHTML='';var maxSw=SENS.length?SENS[0].swing:1;
+  VARS.forEach(function(v){var s=SENS.filter(function(r){return r.id===v.id;})[0];var rank=SENS.indexOf(s)+1;
+    var d=document.createElement('div');d.className='var';
+    var val=v.sel?v.sel[P[v.id]].n:P[v.id];
+    d.innerHTML='<div class="t"><span>'+v.lab+'</span><span class="i" data-tip="<b>'+v.lab+'</b><br><span class=k>'+v.tip.replace(/"/g,'&quot;')+'</span><hr>Sensitivity rank <b>#'+rank+' of 8</b>, swing '+f2(s?s.swing:0)+' in J'+(s&&s.flip?' (can flip the verdict)':'')+'">i</span></div>'
+      +'<div class="v">'+val+(v.unit&&!v.sel?' <span class="u">'+v.unit+'</span>':'')+'</div>'
+      +(v.sel?'<select>'+Object.keys(v.sel).map(function(k){return '<option value="'+k+'"'+(P[v.id]===k?' selected':'')+'>'+v.sel[k].n+'</option>';}).join('')+'</select>':'<input type="range" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+P[v.id]+'">')
+      +'<div class="imp"><i style="width:'+Math.round((s?s.swing:0)/maxSw*100)+'%"></i></div><div class="rank">#'+rank+' driver &middot; swing '+f2(s?s.swing:0)+'</div>';
+    var inp=d.querySelector('input,select');
+    inp.oninput=function(){P[v.id]=v.sel?inp.value:+inp.value;d.querySelector('.v').innerHTML=(v.sel?v.sel[P[v.id]].n:P[v.id])+(v.unit&&!v.sel?' <span class="u">'+v.unit+'</span>':'');curPreset='Custom';renderLight();scheduleHeavy();};
+    el.appendChild(d);});
+}
+function renderPresets(){var el=document.getElementById('presets');el.innerHTML='';PRESETS.forEach(function(pr){var b=document.createElement('button');b.textContent=pr.n;b.className=pr.n===curPreset?'on':'';b.setAttribute('data-tip','<b>'+pr.n+'</b><br><span class="k">'+Object.keys(pr.p).map(function(k){var v=VARS.filter(function(x){return x.id===k;})[0];return v.lab+': '+(v.sel?v.sel[pr.p[k]].n:pr.p[k]+(v.unit?' '+v.unit:''));}).join(' &middot; ')+'</span>');b.onclick=function(){Object.keys(pr.p).forEach(function(k){P[k]=pr.p[k];});curPreset=pr.n;renderAll();};el.appendChild(b);});}
+function renderChips(){var el=document.getElementById('chips');el.innerHTML='';OBJ.forEach(function(o,i){var b=document.createElement('button');b.textContent=o.chip;b.className=i===cur?'on':'';b.onclick=function(){cur=i;renderObjective();renderKpis();};el.appendChild(b);});}
+function renderObjective(){
+  renderChips();
+  var o=OBJ[cur];document.getElementById('otitle').textContent=o.title;document.getElementById('owhat').innerHTML=o.what;
+  document.getElementById('omech').innerHTML=o.mech(M);document.getElementById('ofx').innerHTML=o.fx(M);
+  if(o.id==='comp')renderWeights();
+  o.chart(M,document.getElementById('ochart'));
+  var cd=o.cards(M);
+  document.getElementById('cf_big').innerHTML=cd.cf[0];document.getElementById('cf_u').innerHTML=cd.cf[1];document.getElementById('cf_kv').innerHTML=cd.cf[2].map(function(r){return '<span>'+r[0]+'</span><span>'+r[1]+'</span>';}).join('');
+  document.getElementById('mf_big').innerHTML=cd.mf[0];document.getElementById('mf_u').innerHTML=cd.mf[1];document.getElementById('mf_kv').innerHTML=cd.mf[2].map(function(r){return '<span>'+r[0]+'</span><span>'+r[1]+'</span>';}).join('');
+  var v=o.verdict(M);fillMeter('ofill',v.a);
+  document.getElementById('otext').innerHTML='<b class="'+winner(v.a)+'">'+wname(v.a).toUpperCase()+'</b> <span class="tag">confidence '+o.conf+'</span><br>'+v.text;
+}
+function renderWeights(){var el=document.getElementById('weights');if(!el)return;el.innerHTML='';OBJ.forEach(function(o){if(o.id==='comp')return;var d=document.createElement('div');d.className='c';d.innerHTML='<label><span>'+o.title+'</span><output>'+W[o.id]+'</output></label><input type="range" min="0" max="5" step="1" value="'+W[o.id]+'">';var inp=d.querySelector('input');inp.oninput=function(){W[o.id]=+inp.value;d.querySelector('output').textContent=inp.value;renderLight();scheduleHeavy();};el.appendChild(d);});}
+function renderProv(){var rows=[
+ ['&rho;<sub>m</sub>, c<sub>m</sub>, &gamma;','milk density, specific heat, surface tension','1.03 g/mL, 3.93 J/gK, 47 mN/m','lit','standard dairy values'],
+ ['&rho;<sub>b</sub>','cereal bulk (bed) density','0.09 - 0.40 g/mL by type','lit','corn flakes about 0.1 g/mL is widely reported; other types scaled'],
+ ['&rho;<sub>f</sub>','single-flake apparent density','0.25 - 0.90 g/mL by type','est','sets the Archimedes float fraction s; not measured'],
+ ['t<sub>1/2</sub>','crispness half-life submerged at 4 C','45 - 480 s by type','est','sensory literature places corn-flake crispness loss at roughly 2 - 4 min; other types are guesses'],
+ ['E<sub>a</sub>','activation energy of water uptake','25 kJ/mol','lit','typical for water diffusion in starch matrices; doubles the rate from 4 C to 24 C'],
+ ['m<sub>eq</sub>, m<sub>c</sub>, w','uptake ceiling, Fermi midpoint and width','1.2, 0.20, 0.10 g/g','asm','crispness collapses near water activity 0.5 - 0.65; the exact numbers are a calibration'],
+ ['m<sub>film</sub>','retained film dose on pour-through','0.18 g/g','asm','a 0.03 mm drained film on both faces of a 0.8 mm flake'],
+ ['r<sub>eff</sub>','effective pore radius between flakes','3 mm','est','sets the capillary band to about 3 mm; flake-to-flake bridges, not within-flake pores'],
+ ['h, A','free-convection coefficient, exposed area','10 W/m<sup>2</sup>K, 0.04 m<sup>2</sup>','lit','order of magnitude for still air'],
+ ['bowl','ceramic 350 g x 0.85 J/gK; plastic 60 g x 1.9 J/gK','','lit','typical stoneware and polypropylene'],
+ ['Q, t<sub>react</sub>, t<sub>vis</sub>','pour rate, visual reaction, occluded-cue delay','30 mL/s, 0.25 s, 1.5 s','asm','Q and t<sub>react</sub> are plausible; t<sub>vis</sub> and the judgment scatter are the weakest numbers in the report'],
+ ['D, &eta;','stream diameter, splash coupling through raft','8 mm, 0.3','asm','&eta; is a guess; direction of the splash result does not depend on it unless &eta; &gt; 0.7'],
+ ['g<sub>bite</sub>, t<sub>dip</sub>','dry cereal per spoonful, spoon dwell in milk','4 g, 3 s','asm','both orders charged identically']];
+ document.querySelector('#prov tbody').innerHTML=rows.map(function(r){return '<tr><td class="mono">'+r[0]+'</td><td>'+r[1]+'</td><td class="r">'+r[2]+'</td><td><span class="tag '+r[3]+'">'+r[3].toUpperCase()+'</span></td><td class="mini">'+r[4]+'</td></tr>';}).join('');}
+// light = instant parts; heavy = sensitivity + heat (debounced)
+function renderLight(){M=model();renderVerdict();renderKpis();renderObjective();renderPresets();}
+var ht;function scheduleHeavy(){clearTimeout(ht);ht=setTimeout(function(){renderDrivers();renderVars();renderVerdict();},120);}
+function renderAll(){M=model();renderDrivers();renderVars();renderVerdict();renderKpis();renderObjective();renderPresets();}
+document.getElementById('prev').onclick=function(){cur=(cur+OBJ.length-1)%OBJ.length;renderObjective();renderKpis();};
+document.getElementById('next').onclick=function(){cur=(cur+1)%OBJ.length;renderObjective();renderKpis();};
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;if(e.key==='ArrowRight'){cur=(cur+1)%OBJ.length;renderObjective();renderKpis();}else if(e.key==='ArrowLeft'){cur=(cur+OBJ.length-1)%OBJ.length;renderObjective();renderKpis();}});
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(renderAll,150);});
+renderProv();renderAll();
+window.QC={model:model,P:P,OBJ:OBJ,W:W,composite:composite,sensitivity:sensitivity,heat:heat,VARS:VARS,PRESETS:PRESETS};
+})();
+</script>
+</body>
+</html>

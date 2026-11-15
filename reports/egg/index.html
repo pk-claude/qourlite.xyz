@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>Chicken vs Egg -- Qourlite Technical Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F4F5F7;--panel:#FFFFFF;--line:#D9DDE3;--line2:#EAEDF1;--ink:#1B1F24;--mut:#5B6470;--ch:#C2410C;--eg:#5B21B6;--chbg:#FBEDE6;--egbg:#EFEAF9;--tiebg:#EEF0F3;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13.5px;line-height:1.45}
+  .wrap{max-width:1180px;margin:0 auto;padding:14px 14px 40px}
+  .num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  /* header */
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:12px}
+  .top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .top h1 .ch{color:var(--ch)}.top h1 .eg{color:var(--eg)}.top h1 .vs{color:var(--mut);font-weight:500;padding:0 6px}
+  .top .meta{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase;text-align:right}
+  .top .meta b{color:var(--ink)}
+  /* generic panel */
+  .panel{background:var(--panel);border:1px solid var(--line);margin-bottom:12px}
+  .ph{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
+  .ph b{color:var(--ink)}
+  @media (max-width:639px){.ph span:last-child:not(:first-child){display:none}.kpis .kpi:last-child:nth-child(odd){grid-column:1 / -1}}
+  .pb{padding:12px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr}
+  @media (min-width:860px){.g2{grid-template-columns:1fr 1fr}.g21{grid-template-columns:1.15fr .85fr}}
+  /* verdict block */
+  .verdict{display:grid;grid-template-columns:1fr;gap:12px}
+  @media (min-width:860px){.verdict{grid-template-columns:300px 1fr}}
+  .vbig{border-right:1px solid var(--line);padding-right:12px}
+  @media (max-width:859px){.vbig{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}}
+  .vlabel{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
+  .vwin{font-size:30px;font-weight:700;line-height:1.05;margin:4px 0 2px}
+  .vwin.ch{color:var(--ch)}.vwin.eg{color:var(--eg)}.vwin.tie{color:var(--mut)}
+  .vj{font-family:var(--mono);font-size:13px;color:var(--mut)}
+  .meter{position:relative;height:14px;background:var(--line2);border:1px solid var(--line);margin:10px 0 4px}
+  .meter .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+  .meter .fill{position:absolute;top:0;bottom:0}
+  .mlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--mut)}
+  .mlab .l{color:var(--ch)}.mlab .r{color:var(--eg)}
+  .vtext{font-size:13.5px;margin-top:10px}
+  .vtext b.ch{color:var(--ch)}.vtext b.eg{color:var(--eg)}
+  /* KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  @media (min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  @media (min-width:1000px){.kpis{grid-template-columns:repeat(7,1fr)}}
+  .kpi{border:1px solid var(--line);padding:8px 9px;cursor:pointer;background:#fff;position:relative;transition:border-color .1s}
+  .kpi:hover{border-color:var(--ink)}
+  .kpi.on{outline:2px solid var(--ink);outline-offset:-2px}
+  .kpi .t{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .w{font-size:14px;font-weight:700;margin:3px 0 1px}
+  .kpi .w.ch{color:var(--ch)}.kpi .w.eg{color:var(--eg)}.kpi .w.tie{color:var(--mut)}
+  .kpi .v{font-family:var(--mono);font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .bar{position:relative;height:6px;background:var(--line2);margin-top:6px}
+  .kpi .bar i{position:absolute;top:0;bottom:0}
+  .kpi .bar .m{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--mut)}
+  .kpi .t{display:flex;justify-content:space-between;align-items:center;gap:4px}
+  .kpi .ch-tag{font-family:var(--mono);font-size:8.5px;color:var(--mut);border:1px solid var(--line);padding:0 3px;letter-spacing:0;flex:none}
+  /* tornado / heatmap */
+  canvas{display:block;width:100%}
+  .chartbox{position:relative}
+  .cap{font-size:11.5px;color:var(--mut);margin-top:6px}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--mut);margin-top:6px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--ch);vertical-align:middle;margin-right:5px}
+  .legend i.eg{border-top:3px dashed var(--eg)}
+  .legend i.sq{width:10px;height:10px;border:0;vertical-align:-1px}
+  /* scenario controls */
+  .presets{display:flex;gap:6px;flex-wrap:wrap}
+  .presets button{font-family:var(--sans);font-size:11.5px;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--ink);padding:5px 10px;cursor:pointer}
+  .presets button:hover{border-color:var(--ink)}
+  .presets button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .vars{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+  @media (min-width:640px){.vars{grid-template-columns:repeat(4,1fr)}}
+  @media (min-width:1000px){.vars{grid-template-columns:repeat(8,1fr)}}
+  .var{border:1px solid var(--line);padding:8px 9px 6px;background:#fff;position:relative}
+  .var .t{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:4px}
+  .var .t .i{font-family:var(--mono);font-size:9px;border:1px solid var(--line);color:var(--mut);padding:0 4px;cursor:help;text-transform:none;letter-spacing:0}
+  .var .v{font-family:var(--mono);font-size:17px;font-weight:600;margin:3px 0 0;white-space:nowrap}
+  .var .u{font-size:10px;color:var(--mut)}
+  .var input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--ink);height:18px}
+  .var select{width:100%;margin-top:6px;font-family:var(--sans);font-size:11.5px;border:1px solid var(--line);background:#fff;padding:4px}
+  .var .imp{height:4px;background:var(--line2);margin-top:5px;position:relative}
+  .var .imp i{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+  .var .rank{font-family:var(--mono);font-size:9.5px;color:var(--mut);margin-top:3px}
+  /* objective deep dive */
+  .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+  .chips button{white-space:nowrap;font-family:var(--sans);font-size:11.5px;font-weight:600;background:#fff;border:1px solid var(--line);color:var(--mut);padding:6px 10px;cursor:pointer}
+  .chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chips button:hover{border-color:var(--ink)}
+  .objbar{display:flex;gap:8px;align-items:stretch}
+  .objbar button.nav{background:#fff;border:1px solid var(--line);font-size:16px;padding:0 10px;cursor:pointer;color:var(--ink)}
+  h2{font-size:18px;font-weight:700;margin:12px 0 2px}
+  h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px;font-weight:600}
+  p{margin:0 0 8px}
+  .muted{color:var(--mut)}
+  .mirror{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .card{border:1px solid var(--line);padding:8px 10px}
+  .card.ch{border-top:3px solid var(--ch);background:var(--chbg)}.card.eg{border-top:3px solid var(--eg);background:var(--egbg)}
+  .card .t{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .card.ch .t{color:var(--ch)}.card.eg .t{color:var(--eg)}
+  .card .big{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.1;margin:2px 0}
+  .card .u{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:12px;margin-top:6px}
+  .kv span:nth-child(odd){color:var(--mut)}
+  .kv span:nth-child(even){text-align:right;font-family:var(--mono)}
+  .fx{background:#FAFBFC;border:1px solid var(--line);padding:8px 10px;font-size:13px;overflow-x:auto;font-family:var(--mono)}
+  .fx .eq{margin:3px 0;white-space:nowrap}
+  .fx .eq i{font-style:italic}
+  .fx .eq .k{color:var(--mut);font-family:var(--sans);font-size:11px}
+  details{border:1px solid var(--line);margin-top:10px;background:#fff}
+  details summary{cursor:pointer;padding:7px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600;list-style:none}
+  details summary::before{content:"+ ";font-family:var(--mono)}
+  details[open] summary::before{content:"- "}
+  details .in{padding:0 12px 12px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line)}
+  td.r,th.r{text-align:right;font-family:var(--mono)}
+  .w-ch{color:var(--ch);font-weight:600}.w-eg{color:var(--eg);font-weight:600}.w-tie{color:var(--mut);font-weight:600}
+  .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;border:1px solid var(--line);padding:1px 4px;color:var(--mut);white-space:nowrap}
+  .tag.lit{border-color:var(--eg);color:var(--eg)}.tag.est{border-color:var(--ch);color:var(--ch)}
+  .mini{font-size:11px;color:var(--mut)}
+  .bowls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .bowls svg{width:100%;height:auto;display:block}
+  .weights{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;margin-top:6px}
+  @media (min-width:860px){.weights{grid-template-columns:repeat(4,1fr)}}
+  .weights .c{font-size:11px}
+  .weights .c label{display:flex;justify-content:space-between;color:var(--mut)}
+  .weights .c input{width:100%;accent-color:var(--ink)}
+  .foot{margin-top:16px;text-align:center;color:var(--mut);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .foot a{color:var(--ink)}
+  /* tooltip */
+  #tt{position:fixed;z-index:50;max-width:300px;background:var(--ink);color:#fff;font-size:11.5px;line-height:1.4;padding:8px 10px;border-radius:2px;pointer-events:none;display:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+  #tt b{color:#fff}#tt .ch{color:#FFB48A}#tt .eg{color:#CDB9F7}#tt .k{color:#B8C0CC;font-family:var(--mono);font-size:10.5px}
+  #tt hr{border:0;border-top:1px solid #4A5563;margin:5px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><span class="ch">Chicken</span><span class="vs">vs</span><span class="eg">Egg</span></h1>
+      <div class="mini">Evidence-based adjudication of which came first. Seven lines of evidence, one composite, eight definitional inputs. Hover anything for detail.</div>
+    </div>
+    <div class="meta">Report <b>QT-0829</b> &middot; Rev <b>A</b><br>Scenario: <b id="scen">Default</b></div>
+  </header>
+
+  <!-- 1. Verdict -->
+  <section class="panel">
+    <div class="ph"><span><b>01</b> &nbsp; Verdict</span><span id="vph">composite of 7 lines of evidence at the current definitions</span></div>
+    <div class="pb verdict">
+      <div class="vbig">
+        <div class="vlabel">Composite verdict</div>
+        <div class="vwin" id="vwin"></div>
+        <div class="vj" id="vj"></div>
+        <div class="meter" data-tip="Composite J = weighted mean of each line of evidence&#39;s normalized advantage a in [-1, 1]. Left of center favors chicken-first, right favors egg-first. |J| near 1 is decisive; near 0 the question is ill-posed under these definitions."><div class="fill" id="vfill"></div><div class="mid"></div></div>
+        <div class="mlab"><span class="l">&larr; chicken first</span><span>0</span><span class="r">egg first &rarr;</span></div>
+        <div class="vtext" id="vtext"></div>
+      </div>
+      <div>
+        <div class="vlabel" style="margin-bottom:6px">Evidence scorecard &nbsp;<span class="mini" style="text-transform:none;letter-spacing:0;font-weight:400">click a tile to open its analysis; hover for the numbers</span></div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Drivers -->
+  <section class="panel">
+    <div class="ph"><span><b>02</b> &nbsp; What moves the verdict</span><span>sensitivity of composite J to each definition, holding the others at the current scenario</span></div>
+    <div class="pb grid g21">
+      <div>
+        <div class="vlabel">Tornado: swing in J across each input&#39;s full range</div>
+        <div class="chartbox" id="tornado"></div>
+        <div class="cap">Bar spans J at the input&#39;s low and high setting (or its best and worst option). Inputs sorted by swing. A bar that stays on one side of zero cannot flip the verdict on its own.</div>
+      </div>
+      <div>
+        <div class="vlabel">Heat map: composite J over egg definition &times; chicken definition</div>
+        <div class="chartbox" id="heat"></div>
+        <div class="cap">The two definitions that decide the question, on one surface; other inputs held at the current scenario. Hover a cell for J and the evidence split. Marker = current scenario.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Scenario -->
+  <section class="panel">
+    <div class="ph"><span><b>03</b> &nbsp; Definitional inputs</span><span>every number on this page recomputes as you change these</span></div>
+    <div class="pb">
+      <div class="presets" id="presets"></div>
+      <div class="vars" id="vars"></div>
+      <div class="mini" style="margin-top:8px">Importance bar under each input = its share of the largest swing in the tornado above. Fixed: incubation 21 days; first animal eggs 600 Ma; first amniote egg 312 Ma; first birds 150 Ma; oldest fossil bird egg 110 Ma; crown <i>Gallus</i> 4.5 Ma; <i>Gallus gallus</i> lineage 3 Ma; commercial breeds 70 years. Ma = million years ago.</div>
+    </div>
+  </section>
+
+  <!-- 4. Deep dive -->
+  <section class="panel">
+    <div class="ph"><span><b>04</b> &nbsp; Evidence analysis</span><span>the science behind each tile</span></div>
+    <div class="pb">
+      <div class="objbar">
+        <button class="nav" id="prev" aria-label="Previous line of evidence">&lsaquo;</button>
+        <div class="chips" id="chips"></div>
+        <button class="nav" id="next" aria-label="Next line of evidence">&rsaquo;</button>
+      </div>
+      <h2 id="otitle"></h2>
+      <p id="owhat" class="muted" style="font-size:12.5px"></p>
+      <div class="grid g2" style="margin-top:8px">
+        <div>
+          <h3 style="margin-top:0">Evidence</h3>
+          <div id="ochart"></div>
+        </div>
+        <div>
+          <h3 style="margin-top:0">Results at current definitions</h3>
+          <div class="mirror">
+            <div class="card ch"><div class="t">Chicken first</div><div class="big" id="ch_big"></div><div class="u" id="ch_u"></div><div class="kv" id="ch_kv"></div></div>
+            <div class="card eg"><div class="t">Egg first</div><div class="big" id="eg_big"></div><div class="u" id="eg_u"></div><div class="kv" id="eg_kv"></div></div>
+          </div>
+          <div class="meter" style="margin-top:10px"><div class="fill" id="ofill"></div><div class="mid"></div></div>
+          <div class="mlab"><span class="l">&larr; chicken first</span><span>advantage</span><span class="r">egg first &rarr;</span></div>
+          <div class="vtext" id="otext" style="font-size:12.5px"></div>
+        </div>
+      </div>
+      <h3>Reasoning</h3>
+      <div id="omech" style="font-size:12.5px"></div>
+      <details><summary>Scoring rule</summary><div class="in"><div class="fx" id="ofx"></div></div></details>
+    </div>
+  </section>
+
+  <!-- 5. Appendix -->
+  <details><summary>Appendix A &middot; Parameter provenance and limitations</summary><div class="in">
+    <div style="overflow-x:auto"><table id="prov"><thead><tr><th>Symbol</th><th>Meaning</th><th class="r">Value</th><th>Class</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+    <p class="mini" style="margin-top:8px"><span class="tag lit">LIT</span> literature-anchored value &nbsp; <span class="tag est">EST</span> estimated, plausible range spans a factor of 2-3 &nbsp; <span class="tag">ASM</span> scoring assumption or calibration point. Dates are the published estimates; the scoring rules that turn them into advantages are this report&#39;s.</p>
+    <h3>Known limitations</h3>
+    <p class="mini">The dated facts are not in dispute at the precision this question needs; the scoring rules are. Each line of evidence is mapped to a bounded advantage by a hand-written rule (Appendix rows tagged ASM), and the composite weights are preferences. The speciation input is a caricature: real species boundaries are population-level and fuzzy, and the &quot;single mutation&quot; options exist to make the possessive reading well-posed, not because anyone thinks a chicken appeared in one generation. Domestication dates carry a 3,500 - 9,500 year spread between the zooarchaeological and genomic estimates; the report exposes that as a slider rather than choosing. The amniote-origins line rests on one 2023 phylogenetic study whose authors flag taphonomic bias. Nothing here was measured for this report.</p>
+  </div></details>
+
+  <div class="foot"><a href="/">&larr; Lunch Shift hub</a> &nbsp;|&nbsp; Report QT-0829 Rev A &nbsp;|&nbsp; No chickens were consulted</div>
+</div>
+<div id="tt"></div>
+
+<script>
+(function(){
+'use strict';
+// ---------- constants (years before present unless noted) ----------
+var T_OVUM=6.0e8, T_AMN=3.12e8, T_AMN_SHIFT=5.0e7, T_BIRD=1.5e8, T_BIRD_EGG=1.1e8;
+var T_GALLUS=4.5e6, T_GGALLUS=3.0e6, T_BREED=70;
+var INC=21; // incubation, days
+var T_GALLOANS=7.0e7, T_PALAEO=1.0e8; // Ma, divergence of goose / ostrich lineages from the chicken lineage
+var EGG={
+  any: {n:'Any animal egg',            s:'any egg',t:'any egg',            tip:'An egg cell or laid egg of any animal. Multicellular animal eggs are at least 600 million years old.'},
+  amn: {n:'Amniote (shelled) egg',      s:'amniote egg',t:'amniote egg',        tip:'The land egg with an amnion and a shell, shared by reptiles, birds and the ancestors of mammals. Roughly 312 million years old.'},
+  bird:{n:'Bird egg',                   s:'bird egg',t:'bird egg',           tip:'A hard-shelled egg laid by a bird. Birds are about 150 million years old; the oldest fossil bird egg is about 110 million years old.'},
+  cont:{n:'Egg containing a chicken',   s:'egg holding a chicken',t:'holds chicken', tip:'The genomic reading: an egg is a chicken egg if the embryo inside is a chicken. Identity is fixed at fertilization, before the shell exists.'},
+  laid:{n:'Egg laid by a chicken',      s:'egg laid by a chicken',t:'laid by chicken', tip:'The possessive reading, as in the grocery aisle: an egg is a chicken egg if a chicken laid it. The mother decides, not the contents.'}
+};
+var CHK={
+  sp:   {n:'Gallus gallus, the species',   s:'the species',t:'species',   tip:'The species, wild red junglefowl included. Domestic chickens are the subspecies G. g. domesticus and interbreed freely with junglefowl. Lineage about 3 million years old.'},
+  dom:  {n:'Domestic chicken only',       s:'domestic chicken',t:'domestic', tip:'Only G. g. domesticus counts. Domestication is dated 3,500 years ago by zooarchaeology (Peters 2022) to about 9,500 years ago by genomics (Wang 2020); use the slider.'},
+  breed:{n:'Modern commercial breeds',    s:'modern breeds',t:'breeds', tip:'Only post-1950 broiler and layer lines count. Created by breeding programs from eggs of earlier breeds; about 70 years old.'}
+};
+var SPEC={
+  zyg: {n:'One mutation, in the zygote',    S:1.0,t:'zygote', tip:'Saltational caricature: the change that makes a chicken a chicken appears in one fertilized egg. Makes the possessive reading well-posed.'},
+  gam: {n:'One mutation, in a gamete',     S:0.9,t:'gamete', tip:'The defining change arises in a parent&#39;s sperm or ovum before fertilization. The ovum carrying it is itself an egg cell.'},
+  grad:{n:'Gradual population shift',      S:0.0,t:'gradual', tip:'The real biology: species are populations, boundaries are fuzzy, there is no first chicken. Any line of evidence that needs a first individual returns zero.'}
+};
+var RULE={
+  cont: {n:'Contents (embryo genome)',t:'contents', tip:'What is inside decides what kind of egg it is. The shell is packaging.'},
+  shell:{n:'Shell maker (the hen)',t:'shell maker',    tip:'Who built the shell decides. This is the premise behind the 2010 OC-17 press claim that the chicken came first.'},
+  both: {n:'Both required',t:'both',            tip:'Chicken inside and chicken-built shell. The strictest reading; the first chicken&#39;s egg fails it.'}
+};
+var HOR={
+  abs:{n:'Absolute (any egg ever)',t:'absolute',       tip:'&quot;Came first&quot; on the geological clock: was there an egg before there was a chicken. The 312-million-year answer.'},
+  loc:{n:'Lineage-local (this egg, this bird)',t:'lineage-local', tip:'&quot;Came first&quot; within the chicken lineage only: the specific egg the first chicken hatched from, and the first egg it laid. Discounts deep time.'}
+};
+
+// ---------- inputs ----------
+var VARS=[
+ {id:'egg', lab:'Egg definition',   unit:'',  sel:EGG,  def:'cont', tip:'What the word &quot;egg&quot; in the riddle refers to. This is the input that decides the question; everything else is detail.'},
+ {id:'chk', lab:'Chicken definition',unit:'', sel:CHK,  def:'sp',   tip:'What counts as a chicken. Species (3 Ma), domestic subspecies (3,500 - 9,500 years) or modern breed (70 years). Widens or narrows the gap to the egg dates.'},
+ {id:'spec',lab:'Speciation model', unit:'',  sel:SPEC, def:'zyg',  tip:'Whether a &quot;first chicken&quot; exists at all. The gradual option zeroes every line of evidence that needs one.'},
+ {id:'rule',lab:'Egg identity rule',unit:'',  sel:RULE, def:'cont', tip:'Whether an egg&#39;s identity comes from its contents, from the hen that built the shell, or both. Only the eggshell line listens to this.'},
+ {id:'hor', lab:'Time horizon',     unit:'',  sel:HOR,  def:'abs',  tip:'Absolute chronology versus the local chicken lineage. Discounts the deep-time lines under the lineage-local reading.'},
+ {id:'dom', lab:'Domestication',    unit:'yr ago',min:3500,max:9500,step:100,def:3500, tip:'When the domestic chicken appeared. Peters et al. 2022 (bones, Ban Non Wat, Thailand): 1650 - 1250 BCE. Wang et al. 2020 (863 genomes): roughly 9,500 years. Only matters if the chicken definition is domestic-only.'},
+ {id:'mat', lab:'Sexual maturity',  unit:'days',min:100,max:200,step:5,def:140, tip:'Age at which a hen lays her first egg. Sets how long a first chicken precedes its first egg under the possessive reading. 18 - 22 weeks is typical.'},
+ {id:'cred',lab:'Amniote egg credence',unit:'%',min:0,max:100,step:5,def:50, tip:'Credence that the first amniotes (320 Ma) laid eggs rather than retaining embryos. Jiang et al. 2023 argue for embryo retention; the traditional view is the shelled egg. Only the amniote-origins line and the amniote-egg date listen to this.'}
+];
+var PRESETS=[
+ {n:'Default',               p:{egg:'cont',chk:'sp',spec:'zyg',rule:'cont',hor:'abs',dom:3500,mat:140,cred:50}},
+ {n:'Paleontologist',        p:{egg:'amn', chk:'sp',spec:'zyg',rule:'cont',hor:'abs',dom:3500,mat:140,cred:50}},
+ {n:'Grocery aisle',         p:{egg:'laid',chk:'dom',spec:'zyg',rule:'shell',hor:'loc',dom:3500,mat:140,cred:50}},
+ {n:'Pedant',                p:{egg:'laid',chk:'sp',spec:'zyg',rule:'both',hor:'loc',dom:3500,mat:140,cred:50}},
+ {n:'Farmer',                p:{egg:'cont',chk:'dom',spec:'grad',rule:'cont',hor:'loc',dom:3500,mat:140,cred:50}},
+ {n:'2010 press release',    p:{egg:'cont',chk:'sp',spec:'zyg',rule:'shell',hor:'abs',dom:3500,mat:140,cred:50}},
+ {n:'Gradualist',            p:{egg:'cont',chk:'sp',spec:'grad',rule:'cont',hor:'abs',dom:3500,mat:140,cred:50}},
+ {n:'Live-bearing amniotes', p:{egg:'amn', chk:'sp',spec:'zyg',rule:'cont',hor:'abs',dom:3500,mat:140,cred:0}}
+];
+var P={};
+VARS.forEach(function(v){P[v.id]=v.def;});
+
+// ---------- core model ----------
+function model(){
+  var M={};
+  M.S=SPEC[P.spec].S;
+  M.deep=(P.egg==='any'||P.egg==='amn'||P.egg==='bird');
+  M.T_amn=T_AMN-T_AMN_SHIFT*(1-P.cred/100);
+  M.T_egg={any:T_OVUM,amn:M.T_amn,bird:T_BIRD}[P.egg]||0;
+  M.T_chk={sp:T_GGALLUS,dom:P.dom,breed:T_BREED}[P.chk];
+  M.hor=(P.hor==='abs')?1:0.35;
+  M.logGap=M.deep?Math.log10(M.T_egg/M.T_chk):0;
+  M.gapY=M.deep?(M.T_egg-M.T_chk):0;
+  // days-scale margins for the lineage-local readings
+  M.d_cont=INC;           // egg holding the first chicken precedes the hatch by INC days
+  M.d_laid=P.mat;         // first chicken precedes its first laid egg by mat days
+  M.a_chron = M.deep? Math.tanh(M.logGap/2.0)*M.hor : (P.egg==='cont'? Math.tanh(Math.log10(1+M.d_cont)/3)*M.S : -Math.tanh(Math.log10(1+M.d_laid)/3)*M.S);
+  M.a_gen = (P.spec==='grad')?0 : (P.egg==='laid'? -0.8*M.S : (P.spec==='gam'?0.85:1.0)*M.S);
+  if(P.spec==='gam'&&P.egg==='any') M.a_gen=1.0*M.S;
+  M.a_ont = (P.egg==='laid')? (P.spec==='grad'? 0.5 : -0.6*M.S) : 1.0;
+  if(P.egg==='laid'&&P.spec==='grad') M.a_ont=0.5;
+  var lineage=(P.egg==='cont'||P.egg==='laid');
+  M.a_shell = (P.rule==='cont')? 0.5 : (P.rule==='shell'? (lineage? -0.7*M.S : 0.6) : (lineage? -0.4*M.S : 0.55));
+  M.S_dom=(P.chk==='dom')?0.2:1;
+  if(P.chk==='sp')      M.a_tax = M.deep?0.9 : (P.egg==='cont'?0.7:-0.3*M.S);
+  else if(P.chk==='dom')M.a_tax = M.deep?0.9 : (P.egg==='cont'?0.5:-0.3*M.S_dom*M.S);
+  else                  M.a_tax = M.deep?0.9 : (P.egg==='cont'?0.7:-0.5);
+  M.a_amn = (P.egg==='amn')? 0.8*(P.cred-50)/50 : (P.egg==='any'?0.5:(P.egg==='bird'?0.5:0));
+  M.a_lang = {any:0.8,amn:0.6,bird:0.6,cont:0.7,laid:-0.7}[P.egg];
+  return M;
+}
+function withP(p,fn){var old=P;P=p;try{return fn();}finally{P=old;}}
+
+// ---------- lines of evidence ----------
+function yrs(y){if(y>=1e6)return f1(y/1e6)+' Ma';if(y>=1e3)return f0(y/1e3)+' kyr';if(y>=1)return f0(y)+' yr';return f0(y*365)+' d';}
+function gapText(M){return M.deep? yrs(M.gapY) : (P.egg==='cont'? INC+' d' : P.mat+' d');}
+var OBJ=[
+ {id:'chron',chip:'Chronology',title:'Chronology: which existed first on the clock',conf:'HIGH',short:'Chronology',
+  what:'Dated first appearance of the thing called &quot;egg&quot; versus the thing called &quot;chicken&quot;, under the current definitions.',
+  mech:function(M){var e=EGG[P.egg],c=CHK[P.chk];
+    if(M.deep) return '<p>Under the <b>'+e.s+'</b> definition the egg is dated at <b>'+yrs(M.T_egg)+'</b>'+(P.egg==='amn'?' (312 Ma, pulled '+f0(T_AMN_SHIFT*(1-P.cred/100)/1e6)+' Myr later in proportion to the credence that early amniotes retained embryos rather than laying)':P.egg==='bird'?' (first birds; the oldest fossil bird egg, an enantiornithine with an unlaid egg, is 110 Ma)':' (phosphatized animal embryos of the Ediacaran)')+'. Under the <b>'+c.s+'</b> definition the chicken is dated at <b>'+yrs(M.T_chk)+'</b>'+(P.chk==='sp'?' (the <i>Gallus gallus</i> lineage; crown <i>Gallus</i> is 4 - 5 Ma)':P.chk==='dom'?' (domestication slider)':' (post-war commercial lines)')+'. The gap is '+gapText(M)+', a ratio of 10<sup>'+f1(M.logGap)+'</sup>. No dating uncertainty in the literature is within a thousandfold of closing it.</p><p>'+(P.hor==='loc'?'The lineage-local horizon discounts this line to 35%: an egg laid by a Carboniferous reptile is an egg, but it is not the egg the riddle is asking about.':'The absolute horizon takes the dates at face value. If the riddle asks whether eggs existed before chickens, this line alone settles it.')+'</p>';
+    if(P.egg==='cont') return '<p>The egg holding a chicken and the chicken it holds are the same lineage event seen 21 days apart: fertilization fixes the genome, the shell forms over about 20 hours in the oviduct, the egg is laid, and hatching follows '+INC+' days of incubation. Whatever individual counts as the first chicken, an egg containing that individual existed '+INC+' days before it did. '+(P.spec==='grad'?'The gradual speciation model says no such individual exists, so this line is scaled to zero.':'Fossils cannot resolve a three-week margin; the advantage is principled, not observed, and is scored on a compressed log scale.')+'</p>';
+    return '<p>Under the possessive definition the first chicken egg is the first egg <i>laid</i> by a chicken. The first chicken hatched (from an egg laid by its non-chicken parent), reached sexual maturity at about '+P.mat+' days, and only then laid. The chicken precedes its own egg by '+P.mat+' days. '+(P.spec==='grad'?'The gradual speciation model says there is no first chicken, so there is no first laid egg either; this line is scaled to zero.':'This is the one reading under which chicken-first is a correct statement, and it is correct by about five months, against 312 million years the other way.')+'</p>';},
+  fx:function(M){return eq('deep definitions: <i>a</i> = tanh( log<sub>10</sub>(<i>T</i><sub>egg</sub> / <i>T</i><sub>chicken</sub>) / 2 ) &times; <i>h</i>','T<sub>egg</sub> = '+(M.deep?yrs(M.T_egg):'n/a')+', T<sub>chicken</sub> = '+yrs(M.T_chk)+', horizon factor h = '+M.hor)
+   +eq('egg holding a chicken: <i>a</i> = +tanh( log<sub>10</sub>(1 + '+INC+' d) / 3 ) &times; <i>S</i>','incubation margin; S = speciation sharpness = '+M.S)
+   +eq('egg laid by a chicken: <i>a</i> = &minus;tanh( log<sub>10</sub>(1 + '+P.mat+' d) / 3 ) &times; <i>S</i>','maturity margin; the only reading where chicken-first is literally true');},
+  chart:function(M,el){timelineChart(el,M,{lo:-2,hi:9.2});},
+  cards:function(M){var ef=M.a_chron>=0;return {ch:[ef?'--':gapText(M),ef?'no chicken-first margin':'chicken precedes its egg by',[['Chicken dated',yrs(M.T_chk)],['Definition',CHK[P.chk].s]]],eg:[ef?gapText(M):'--',ef?'egg precedes chicken by':'no egg-first margin',[['Egg dated',M.deep?yrs(M.T_egg):(P.egg==='cont'?INC+' d before hatch':'after hatch')],['Definition',EGG[P.egg].s]]]};},
+  verdict:function(M){var a=M.a_chron;return {a:a,text:(M.deep?'Egg '+yrs(M.T_egg)+' vs chicken '+yrs(M.T_chk)+': egg first by '+gapText(M)+'.':(P.egg==='cont'?'The egg holding the first chicken preceded it by '+INC+' days.':'The first chicken preceded its first laid egg by '+P.mat+' days.'))+' '+(M.S===0&&!M.deep?'Zeroed by the gradual speciation model: no first individual, no margin.':a>0.05?'The dates are not close and no published uncertainty changes the sign.':a<-0.05?'Chicken-first here is a five-month technicality that depends on the possessive reading and a saltational first bird.':'No margin under these definitions.')};},
+  score:function(M){var ef=M.a_chron>=0;return [ef?'--':gapText(M),ef?gapText(M):'--',M.a_chron];}},
+
+ {id:'gen',chip:'Genome',title:'Genome: where the first chicken genotype first existed',conf:'MED',short:'Genome',
+  what:'The DNA that makes a chicken a chicken is fixed at fertilization, before the egg is laid. Where was that DNA first assembled?',
+  mech:function(M){return '<p>Whatever genetic difference separates a chicken from its nearest non-chicken ancestor, it is present in the zygote. In birds, fertilization occurs in the infundibulum of the oviduct; the albumen, membranes and shell are deposited around the already-fertilized cell over the next 20 - 26 hours. So the first chicken genotype existed inside an egg, laid by a hen that did not carry that genotype, '+INC+' days before anything hatched. The parents contributed halves; neither parent was a chicken by the definition that makes the offspring one.</p><p>'+(P.spec==='zyg'?'The current model puts the defining change in the zygote (post-fertilization mutation): the egg is the first object in history to be a chicken, and it is an egg.':P.spec==='gam'?'The current model puts the defining change in a parental gamete. A haploid sperm or ovum is not an organism, so the first <i>chicken</i> is still the zygote; but the ovum carrying the mutation is itself an egg cell, which is why the &quot;any egg&quot; definition scores full marks here.':'The current model is gradual: no single genotype separates chicken from non-chicken, so this line has nothing to point at and returns zero. That is not a tie between chicken and egg; it is the question being ill-posed.')+'</p>'+(P.egg==='laid'?'<p>Under the possessive egg definition this line flips: the egg containing the first chicken genotype was laid by a non-chicken, so it is not a &quot;chicken egg&quot;, and the first chicken egg is the one that chicken lays later.</p>':'');},
+  fx:function(M){return eq('<i>a</i> = <i>S</i> &times; { +1.0 zygote, +0.85 gamete (+1.0 if any egg counts), &minus;0.8 possessive egg }','S = '+M.S+' ('+SPEC[P.spec].n+'); result a = '+sgn(M.a_gen))
+   +eq('fertilization &rarr; shell deposition (20 - 26 h) &rarr; lay &rarr; incubation ('+INC+' d) &rarr; hatch','the genotype exists at the first arrow; the organism at the last');},
+  chart:function(M,el){genomeDiagram(M,el);},
+  cards:function(M){return {ch:[M.a_gen<-0.05?'laid egg':'--',M.a_gen<-0.05?'first chicken egg comes after its layer':'genotype never existed in a chicken first',[['Parents','proto-chickens'],['Carry the genotype','no (half each)']]],eg:[M.a_gen>0.05?'zygote':'--',M.a_gen>0.05?'first chicken genotype sits in an egg':'no first genotype',[['Fixed at','fertilization'],['Shelled after','20 - 26 h']]]};},
+  verdict:function(M){var a=M.a_gen;return {a:a,text:a>0.05?'The first chicken genome existed as a fertilized egg '+INC+' days before it existed as a bird. Under the contents reading that egg is a chicken egg.':a<-0.05?'Same facts, possessive reading: that egg was laid by a non-chicken, so the first chicken egg is laid later by the first chicken.':'Zero under gradual speciation: there is no first genotype to locate.'};},
+  score:function(M){return [M.a_gen<-0.05?'laid':'--',M.a_gen>0.05?'zygote':'--',M.a_gen];}},
+
+ {id:'ont',chip:'Ontogeny',title:'Ontogeny: every chicken has an egg before it',conf:'HIGH',short:'Ontogeny',
+  what:'Development is one-directional: a chicken must come from an egg, but an egg need not come from a chicken.',
+  mech:function(M){return '<p>Every chicken that has ever lived began as an egg. No chicken has ever existed without an egg preceding it by about '+INC+' days. The reverse does not hold: eggs were being laid for hundreds of millions of years by animals that were not chickens, and an egg&#39;s existence does not require a chicken. The dependency is asymmetric, and asymmetric dependencies have an order.</p><p>'+(P.egg==='laid'?(P.spec==='grad'?'Under the possessive reading with gradual speciation: every individual chicken still hatched from an egg laid by a parent that was, to any test, a chicken. The line scores +0.5: per individual, egg first; the &quot;first&quot; egg is undefined.':'Under the possessive reading the egg that preceded the first chicken does not qualify as a chicken egg (its layer was not a chicken), so this line flips to &minus;0.6: the first chicken precedes the first chicken-laid egg.'):'Under the current egg definition the egg that preceded the first chicken counts as an egg, so this line is +1 regardless of speciation model: it needs no first individual, only the direction of development.')+'</p>';},
+  fx:function(M){return eq('<i>a</i> = +1.0 unless egg = laid-by-a-chicken; then &minus;0.6 &times; <i>S</i> (or +0.5 if gradual)','asymmetric dependency: chicken &rArr; prior egg; egg &nrArr; prior chicken')
+   +eq('per individual: egg ('+INC+' d) &rarr; chick &rarr; hen ('+P.mat+' d) &rarr; egg','the cycle has a fixed entry point');},
+  chart:function(M,el){lifeChart(el,M);},
+  cards:function(M){return {ch:[M.a_ont<-0.05?P.mat+' d':'--',M.a_ont<-0.05?'hen precedes her first egg by':'chicken never precedes its own egg',[['Requires an egg first','always'],['Egg requires a chicken','no']]],eg:[M.a_ont>0.05?INC+' d':'--',M.a_ont>0.05?'egg precedes every chicken by':'--',[['Chickens hatched from eggs','all of them'],['Eggs without chickens','~600 Myr of them']]]};},
+  verdict:function(M){var a=M.a_ont;return {a:a,text:a>0.5?'Chicken requires egg; egg does not require chicken. The dependency runs one way and so does the answer.':a>0.05?'Per individual, egg first; the first chicken-laid egg is undefined under gradual speciation.':'Possessive reading: the egg before the first chicken was not a chicken egg, so the chicken precedes the first chicken-laid egg by '+P.mat+' days.'};},
+  score:function(M){return [M.a_ont<-0.05?P.mat+' d':'--',M.a_ont>0.05?INC+' d':'--',M.a_ont];}},
+
+ {id:'shell',chip:'Eggshell',title:'Eggshell biochemistry: the OC-17 argument',conf:'MED',short:'Eggshell',
+  what:'The 2010 claim that the chicken came first because a chicken protein (ovocleidin-17) is needed to build a chicken eggshell.',
+  mech:function(M){return '<p>Ovocleidin-17 is a C-type lectin-like protein in the hen&#39;s shell gland that catalyzes calcite nucleation; a 2010 computational study (Freeman et al., Sheffield / Warwick) described its mechanism and the press release concluded the chicken must have preceded the egg, since the shell is built by the hen. Two problems. First, the argument only works if the identity of an egg is set by who built the shell (the current rule: <b>'+RULE[P.rule].n+'</b>). Under the contents rule it is irrelevant which protein made the packaging. Second, OC-17 is not uniquely chicken: geese have ansocalcin, ostriches struthiocalcin, emus dromaiocalcin, rheas rheacalcin, all homologs in the same family. Shell-building by this mechanism predates the chicken lineage by the goose - chicken divergence (about '+f0(T_GALLOANS/1e6)+' Ma) and the ostrich - chicken divergence (about '+f0(T_PALAEO/1e6)+' Ma). The first chicken&#39;s shell was built by a proto-chicken with a proto-OC-17 that worked fine.</p><p>'+(P.rule==='shell'?(M.deep?'With a deep egg definition the shell-maker rule still favors egg: shells were being made long before chickens, by non-chickens.':(M.S>0?'With a lineage egg definition and the shell-maker rule, the first chicken&#39;s egg has a non-chicken shell, so the first chicken-made shell comes after the first chicken: this line goes chicken-first at &minus;0.7.':'Shell-maker rule under gradual speciation: no first hen, no first shell; zero.')):P.rule==='both'?(M.deep?'The both-required rule with a deep egg definition: shells and contents both predate chickens; egg.':(M.S>0?'Both-required rule: the first chicken&#39;s egg fails on the shell half; &minus;0.4.':'Zero: no first hen under gradual speciation.')):'Contents rule: the shell is packaging. Homologs in other birds make the protein argument moot either way; +0.5.')+'</p>';},
+  fx:function(M){return eq('contents rule: <i>a</i> = +0.5; shell-maker: deep egg +0.6, lineage egg &minus;0.7 &times; <i>S</i>; both: +0.55 / &minus;0.4 &times; <i>S</i>','S = '+M.S+'; current a = '+sgn(M.a_shell))
+   +eq('OC-17 homologs: ansocalcin (goose, '+f0(T_GALLOANS/1e6)+' Ma split), struthiocalcin (ostrich, '+f0(T_PALAEO/1e6)+' Ma), dromaiocalcin (emu), rheacalcin (rhea)','shell-building by this protein family predates <i>Gallus</i> by 10<sup>'+f1(Math.log10(T_GALLOANS/T_GGALLUS))+'</sup>');},
+  chart:function(M,el){hbarChart(el,[{lab:'Chicken OC-17',v:T_GGALLUS/1e6,cls:'ch',note:'Gallus gallus lineage, 3 Ma'},{lab:'Goose ansocalcin',v:T_GALLOANS/1e6,cls:'eg',note:'Galloanserae split, ~70 Ma'},{lab:'Ostrich struthiocalcin',v:T_PALAEO/1e6,cls:'eg',note:'Palaeognath split, ~100 Ma'},{lab:'Emu dromaiocalcin',v:T_PALAEO/1e6,cls:'eg',note:'Palaeognath split, ~100 Ma'},{lab:'Rhea rheacalcin',v:T_PALAEO/1e6,cls:'eg',note:'Palaeognath split, ~100 Ma'}],'minimum age of the shell-protein lineage (Ma)');},
+  cards:function(M){return {ch:[M.a_shell<-0.05?'shell':'--',M.a_shell<-0.05?'first chicken-built shell comes after the first chicken':'protein argument does not bind',[['OC-17 unique to chickens','no'],['Rule',RULE[P.rule].n]]],eg:(M.a_shell>0.05?[f0(T_GALLOANS/1e6)+'+ Ma','shell machinery older than chickens by',[['Homologs','goose, ostrich, emu, rhea'],['Rule',RULE[P.rule].n]]]:['--','--',[['Rule',RULE[P.rule].n]]])};},
+  verdict:function(M){var a=M.a_shell;return {a:a,text:a>0.05?'The protein family that builds shells is tens of millions of years older than chickens. Under the '+RULE[P.rule].n.toLowerCase()+' rule the 2010 claim does not bind.':a<-0.05?'Under the '+RULE[P.rule].n.toLowerCase()+' rule, the first chicken hatched from a shell built by a non-chicken; its own first shell comes '+P.mat+' days later. This is the 2010 press-release position, and it depends entirely on the rule.':'Zero: the rule needs a first hen and the speciation model provides none.'};},
+  score:function(M){return [M.a_shell<-0.05?'shell rule':'--',M.a_shell>0.05?f0(T_GALLOANS/1e6)+'+ Ma':'--',M.a_shell];}},
+
+ {id:'tax',chip:'Taxonomy',title:'Taxonomy and domestication: is the chicken even a new thing',conf:'HIGH',short:'Taxonomy',
+  what:'Whether the wild-to-domestic boundary, or the breed boundary, creates a first chicken that the species boundary does not.',
+  mech:function(M){return '<p>The domestic chicken is <i>Gallus gallus domesticus</i>, a subspecies of the red junglefowl. The two interbreed freely and domestic genomes carry introgression from grey, Ceylon and green junglefowl. Genomically the ancestor is <i>G. g. spadiceus</i> of southwestern China, northern Thailand and Myanmar (Wang et al. 2020, 863 genomes). Zooarchaeologically the earliest unambiguous domestic chickens are from Ban Non Wat, central Thailand, 1650 - 1250 BCE (Peters et al. 2022, 600+ sites in 89 countries), with rice and millet cultivation drawing junglefowl into settlements. The genomic estimate is older, roughly 9,500 years; the slider spans the disagreement.</p><p>'+(P.chk==='sp'?'The current chicken definition is the species. Junglefowl are chickens, junglefowl eggs are chicken eggs, and the domestication question is moot: the species has been laying its own eggs for about 3 million years.':P.chk==='dom'?'The current definition is domestic-only. Domestication is a population process spanning centuries: junglefowl fed at rice fields, tolerated humans, were penned, were bred. No individual is the first domestic chicken, which is why this line is scaled by a sharpness of '+M.S_dom+' under the possessive reading. Under the contents reading the first &quot;domestic&quot; chicks hatched from eggs laid by wild or feral junglefowl: egg first.':'The current definition is modern commercial breeds. A breed is made by a breeding program: eggs from earlier breeds are hatched, selected, crossed. The first Cornish Cross hatched from an egg laid by a non-Cornish-Cross. Under the contents reading, egg; under the possessive reading, the breed exists before its first egg.')+'</p>';},
+  fx:function(M){return eq('species: deep egg +0.9, contents +0.7, possessive &minus;0.3 &times; <i>S</i>','junglefowl eggs are chicken eggs')
+   +eq('domestic-only: deep egg +0.9, contents +0.5, possessive &minus;0.3 &times; <i>S</i> &times; 0.2','domestication is a population process; sharpness 0.2')
+   +eq('modern breed: deep egg +0.9, contents +0.7, possessive &minus;0.5','breeds are defined by registry, i.e. by parents');},
+  chart:function(M,el){timelineChart(el,M,{lo:1,hi:7.2,focus:true});},
+  cards:function(M){return {ch:[M.a_tax<-0.05?'possessive':'--',M.a_tax<-0.05?'first '+CHK[P.chk].s+' precedes its first egg':'no chicken-first path',[['Ancestor','G. g. spadiceus'],['Domesticated',f0(P.dom/1000)+' kyr ago (slider)']]],eg:[M.a_tax>0.05?yrs(M.T_chk):'--',M.a_tax>0.05?CHK[P.chk].s+' dated; eggs older':'--',[['Species age','3 Ma'],['Interbreeds with junglefowl','yes']]]};},
+  verdict:function(M){var a=M.a_tax;return {a:a,text:a>0.5?'Chickens and junglefowl are one species; the species has laid its own eggs for 3 million years and domestication changes nothing.':a>0.05?'Even domestic-only or breed-only definitions hatch their first members from eggs laid by the prior population: egg first.':a<-0.05?'Possessive reading with a narrow chicken definition: the first '+CHK[P.chk].s+' precedes its first egg. Weak, because the narrow definitions are population-level.':'No first individual under this definition and speciation model.'};},
+  score:function(M){return [M.a_tax<-0.05?'possessive':'--',M.a_tax>0.05?yrs(M.T_chk):'--',M.a_tax];}},
+
+ {id:'amn',chip:'Amniote origins',title:'Amniote origins: did the reptile come before its egg',conf:'LOW',short:'Amniote origins',
+  what:'Whether the shelled land egg is as old as the first land vertebrates, or came later. Only bites when the egg definition is the amniote egg.',
+  mech:function(M){return '<p>The textbook story: the amniote egg (shell, amnion, allantois) is the innovation that let vertebrates breed on land, 312 - 320 Ma, so the egg is as old as the reptile. Jiang et al. 2023 (<i>Nature Ecology &amp; Evolution</i>) examined 80 extant and extinct amniotes and argue that the ancestral state was extended embryo retention, including live birth, with the shelled egg evolving later within the group; the fetal membranes would then be adaptations for managing a retained embryo, not for a dry nest. The authors flag taphonomic bias (pregnant mothers fossilize better than soft eggs) and thin Paleozoic data.</p><p>If they are right, the hard-shelled egg post-dates the first amniote, and the amniote-egg version of &quot;egg first&quot; loses its cleanest line: the animal came before this particular kind of egg. It does not touch the other definitions: egg cells predate amniotes by 300 million years, and bird eggs, hard-shelled in the theropod lineage, still predate <i>Gallus</i> by 10<sup>'+f1(Math.log10(T_BIRD/T_GGALLUS))+'</sup>. The credence slider (currently '+P.cred+'% that early amniotes laid eggs) also drags the amniote-egg date in the chronology line by up to '+f0(T_AMN_SHIFT/1e6)+' Myr; a 50 Myr shift on a 312 Myr margin does not move that verdict.</p>';},
+  fx:function(M){return eq('amniote egg: <i>a</i> = 0.8 &times; (credence &minus; 50) / 50; any egg: +0.5; bird egg: +0.5; lineage eggs: 0','credence '+P.cred+'% &rarr; a = '+sgn(M.a_amn))
+   +eq('<i>T</i><sub>amniote egg</sub> = 312 Ma &minus; 50 Myr &times; (1 &minus; credence)','= '+yrs(M.T_amn)+' at current credence');},
+  chart:function(M,el){var d=[];for(var c=0;c<=100;c+=5)d.push({c:c,a:0.8*(c-50)/50});lineChart(el,{x:function(i,q){return q.c;},series:[{name:'Amniote-egg line',data:d,cls:'eg'}],y:function(q){return q.a;},ymin:-1,ymax:1,xlab:'credence that early amniotes laid eggs (%)',ylab:'advantage a (egg first > 0)',fmt:function(q){return 'credence '+q.c+'%: a = '+sgn(q.a);},vline:P.cred,hline:0});},
+  cards:function(M){return {ch:[M.a_amn<-0.05?'EER':'--',M.a_amn<-0.05?'first amniotes retained embryos; shelled egg later':'does not favor chicken',[['Study','Jiang et al. 2023'],['Taxa','80']]],eg:[M.a_amn>0.05?yrs(M.T_amn):'--',M.a_amn>0.05?'amniote egg dated':'--',[['Credence eggs first',P.cred+'%'],['Shift applied',f0(T_AMN_SHIFT*(1-P.cred/100)/1e6)+' Myr']]]};},
+  verdict:function(M){var a=M.a_amn;return {a:a,text:P.egg==='amn'?(a>0.05?'At '+P.cred+'% credence the shelled egg is taken as ancestral to amniotes; egg first at the reptile level too.':a<-0.05?'At '+P.cred+'% credence the first amniotes bore live young and the shelled egg came later: the animal preceded this kind of egg. This is the one real scientific dent in the paleontological answer, and it only applies to the amniote-egg definition.':'Credence sits at 50%: the 2023 study and the textbook cancel.'):(P.egg==='any'||P.egg==='bird'?'Egg cells (600 Ma) and hard-shelled theropod eggs both predate chickens whatever the first amniote did.':'Not applicable to the lineage-level egg definitions.')};},
+  score:function(M){return [M.a_amn<-0.05?'EER':'--',M.a_amn>0.05?yrs(M.T_amn):'--',M.a_amn];}},
+
+ {id:'lang',chip:'Language',title:'Ordinary language: what &quot;the egg&quot; means in the riddle',conf:'LOW',short:'Language',
+  what:'The riddle says &quot;the egg&quot;, not &quot;the chicken egg&quot;. How a competent speaker fills in the ellipsis.',
+  mech:function(M){return '<p>The riddle is usually posed as a paradox because each side has a tautology. &quot;Every chicken came from an egg&quot; (egg first) and &quot;every chicken egg was laid by a chicken&quot; (chicken first) are both true; they use different senses of &quot;chicken egg&quot;. The contents sense is the biological one (an egg <i>of</i> a species is an egg that develops into it); the possessive sense is the commercial one (a carton of chicken eggs was laid by hens, whatever is inside). The riddle&#39;s bare &quot;the egg&quot; does not pick a side, and Aristotle&#39;s answer, that the sequence has no origin, is a refusal to pick one.</p><p>This line scores each reading by how much the word &quot;egg&quot; has to be qualified to reach it. The current reading, <b>'+EGG[P.egg].n.toLowerCase()+'</b>, scores '+sgn(M.a_lang)+'. It is weighted 1 by default because semantics decide what the question is, not what the answer is; the weight is there so the possessive reading can register its one legitimate point.</p>';},
+  fx:function(M){return eq('<i>a</i> = { any egg +0.8, amniote egg +0.6, bird egg +0.6, egg holding a chicken +0.7, egg laid by a chicken &minus;0.7 }','no dependence on speciation: both tautologies hold per individual');},
+  chart:function(M,el){readingsChart(el,M);},
+  cards:function(M){return {ch:[M.a_lang<0?'possessive':'--',M.a_lang<0?'every chicken egg was laid by a chicken':'--',[['Reading',EGG[P.egg].s]]],eg:[M.a_lang>0?'contents':'--',M.a_lang>0?'every chicken came from an egg':'--',[['Reading',EGG[P.egg].s]]]};},
+  verdict:function(M){var a=M.a_lang;return {a:a,text:a>0.05?'Under the '+EGG[P.egg].s+' reading the sentence &quot;every chicken came from an egg&quot; is the operative tautology.':'Under the possessive reading the operative tautology is &quot;every chicken egg was laid by a chicken&quot;. True, and the only footing chicken-first has.'};},
+  score:function(M){return [M.a_lang<0?'possessive':'--',M.a_lang>0?'contents':'--',M.a_lang];}},
+
+ {id:'comp',chip:'Composite',title:'Weighted composite',conf:'--',short:'Composite',
+  what:'Every line of evidence&#39;s normalized advantage, weighted by how much it should count. Set the weights to your own priorities.',
+  mech:function(M){return '<p>Each line yields a<sub>i</sub> in [&minus;1, 1] (positive = egg first). The composite is the weight-normalized sum. Default weights favor the dated record and the genome (3 each), then ontogeny and taxonomy (2), and give the eggshell claim, the amniote-origins study and semantics 1 each. The weights are preferences; the advantages upstream of them are the report&#39;s reading of the evidence.</p><div class="weights" id="weights"></div>';},
+  fx:function(M){return eq('<i>J</i> = &Sigma;<sub>i</sub> <i>w</i><sub>i</sub> <i>a</i><sub>i</sub> / &Sigma;<sub>i</sub> <i>w</i><sub>i</sub>','J &gt; 0 favors egg-first; |J| near 1 is decisive, near 0 the question is ill-posed');},
+  chart:function(M,el){advChart(el,M);},
+  cards:function(M){var J=composite(M);return {ch:[(J.J<0?f2(-J.J):'0.00'),'composite share (chicken first)',[['Lines won',J.chWins],['Weighted score',f2(Math.max(0,-J.J))]]],eg:[(J.J>0?f2(J.J):'0.00'),'composite share (egg first)',[['Lines won',J.egWins],['Weighted score',f2(Math.max(0,J.J))]]]};},
+  verdict:function(M){var J=composite(M);return {a:J.J,text:'Composite J = '+(J.J>=0?'+':'')+f2(J.J)+'. '+(J.J>0.1?'Egg first at these weights.':J.J<-0.1?'Chicken first at these weights.':'Too close to call at these weights.')+' Zeroed lines ('+J.ties+') contribute nothing.'};},
+  score:function(M){var J=composite(M);return [J.J<0?f2(-J.J):'0',J.J>0?f2(J.J):'0',J.J];}}
+];
+var W={chron:3,gen:3,ont:2,shell:1,tax:2,amn:1,lang:1};
+function composite(M){var sw=0,s=0,chW=0,egW=0,ties=0;OBJ.forEach(function(o){if(o.id==='comp')return;var a=o.score(M)[2];sw+=W[o.id];s+=W[o.id]*a;if(a>0.05)egW++;else if(a<-0.05)chW++;else ties++;});return {J:sw?s/sw:0,chWins:chW,egWins:egW,ties:ties};}
+function Jof(p){return withP(p,function(){return composite(model()).J;});}
+
+// ---------- formatting ----------
+function f0(x){return Math.round(x).toString();}
+function f1(x){return (Math.round(x*10)/10).toFixed(1);}
+function f2(x){return (Math.round(x*100)/100).toFixed(2);}
+function pct(x){return Math.round(x*100)+'%';}
+function sgn(x){return (x>=0?'+':'')+f2(x);}
+function eq(a,b){return '<div class="eq">'+a+'</div>'+(b?'<div class="eq k" style="margin-bottom:8px">'+b+'</div>':'');}
+function winner(a){return a>0.05?'eg':a<-0.05?'ch':'tie';}
+function wname(a){return a>0.05?'Egg first':a<-0.05?'Chicken first':'Tie';}
+
+// ---------- tooltip ----------
+var tt=document.getElementById('tt');
+function showTip(html,x,y){tt.innerHTML=html;tt.style.display='block';var w=tt.offsetWidth,h=tt.offsetHeight;var vx=window.innerWidth,vy=window.innerHeight;var lx=x+14,ly=y+14;if(lx+w>vx-8)lx=x-w-14;if(ly+h>vy-8)ly=y-h-14;if(lx<4)lx=4;if(ly<4)ly=4;tt.style.left=lx+'px';tt.style.top=ly+'px';}
+function hideTip(){tt.style.display='none';}
+document.addEventListener('mousemove',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(el){showTip(el.getAttribute('data-tip'),e.clientX,e.clientY);}else if(!tt._canvas){hideTip();}});
+document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(el){var t=e.touches[0];showTip(el.getAttribute('data-tip'),t.clientX,t.clientY);setTimeout(hideTip,2500);}},{passive:true});
+
+// ---------- charts ----------
+var COL={ch:'#C2410C',eg:'#5B21B6',grid:'#EAEDF1',axis:'#D9DDE3',text:'#5B6470',ink:'#1B1F24',pale:'#C9D3DD'};
+function mkCanvas(el,h,legend){el.innerHTML='<div class="chartbox"><canvas></canvas></div>'+(legend===false?'':'<div class="legend"><span><i></i>Chicken first</span><span><i class="eg"></i>Egg first</span></div>');var cv=el.querySelector('canvas');var dpr=window.devicePixelRatio||1;var W_=el.clientWidth||600;h=h||230;cv.style.height=h+'px';cv.width=W_*dpr;cv.height=h*dpr;var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.font='10.5px "IBM Plex Mono",monospace';return {cv:cv,ctx:ctx,W:W_,H:h};}
+function hover(cv,fn){cv.onmousemove=function(ev){var r=cv.getBoundingClientRect();var html=fn(ev.clientX-r.left,ev.clientY-r.top);if(html){tt._canvas=true;showTip(html,ev.clientX,ev.clientY);}else{tt._canvas=false;hideTip();}};cv.onmouseleave=function(){tt._canvas=false;hideTip();};}
+function lineChart(el,o){
+  var c=mkCanvas(el,null,false),ctx=c.ctx;var pad={l:44,r:10,t:10,b:32};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;
+  var xs=[],ys=[];o.series.forEach(function(s){s.data.forEach(function(p,i){xs.push(o.x(i,p));ys.push(o.y(p));});});
+  var xmin=Math.min.apply(null,xs),xmax=Math.max.apply(null,xs);var ymin=(o.ymin!=null)?o.ymin:Math.min.apply(null,ys),ymax=(o.ymax!=null)?o.ymax:Math.max.apply(null,ys)*1.08;
+  if(ymax===ymin)ymax=ymin+1;
+  function X(v){return pad.l+(v-xmin)/(xmax-xmin)*pw;}function Y(v){return pad.t+ph-(v-ymin)/(ymax-ymin)*ph;}
+  ctx.fillStyle=COL.text;ctx.strokeStyle=COL.grid;ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){var yv=ymin+(ymax-ymin)*i/4;ctx.beginPath();ctx.moveTo(pad.l,Y(yv));ctx.lineTo(pad.l+pw,Y(yv));ctx.stroke();ctx.textAlign='right';ctx.fillText(fmtTick(yv,ymax-ymin),pad.l-6,Y(yv)+3);}
+  for(i=0;i<=4;i++){var xv=xmin+(xmax-xmin)*i/4;ctx.textAlign='center';ctx.fillText(fmtTick(xv,xmax-xmin),X(xv),pad.t+ph+14);}
+  ctx.fillText(o.xlab,pad.l+pw/2,c.H-3);ctx.save();ctx.translate(10,pad.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(o.ylab,0,0);ctx.restore();
+  if(o.hline!=null){ctx.strokeStyle=COL.ink;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(pad.l,Y(o.hline));ctx.lineTo(pad.l+pw,Y(o.hline));ctx.stroke();ctx.setLineDash([]);}
+  if(o.vline!=null){ctx.strokeStyle=COL.ink;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(X(o.vline),pad.t);ctx.lineTo(X(o.vline),pad.t+ph);ctx.stroke();ctx.setLineDash([]);ctx.textAlign='left';ctx.fillStyle=COL.ink;ctx.fillText('current',X(o.vline)+4,pad.t+10);}
+  o.series.forEach(function(s){ctx.strokeStyle=COL[s.cls];ctx.lineWidth=2.25;ctx.setLineDash(s.cls==='eg'?[7,4]:[]);ctx.beginPath();s.data.forEach(function(p,i){var x=X(o.x(i,p)),y=Y(o.y(p));if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();ctx.setLineDash([]);});
+  hover(c.cv,function(mx){var xv=xmin+(mx-pad.l)/pw*(xmax-xmin);if(xv<xmin||xv>xmax)return null;var lines=[];o.series.forEach(function(s){var best=null,bd=1e18;s.data.forEach(function(p,i){var d=Math.abs(o.x(i,p)-xv);if(d<bd){bd=d;best=p;}});lines.push('<span class="'+s.cls+'">'+s.name+'</span>: '+o.fmt(best));});return lines.join('<br>');});
+}
+function fmtTick(v,range){if(range>=50)return Math.round(v).toString();if(range>=5)return (Math.round(v*10)/10).toString();return (Math.round(v*100)/100).toString();}
+function hbarChart(el,rows,lab){
+  var c=mkCanvas(el,rows.length*30+40,false),ctx=c.ctx;var pad={l:c.W>=600?175:130,r:60,t:10,b:26};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;var vmax=0;rows.forEach(function(r){vmax=Math.max(vmax,r.v);});vmax=Math.ceil(vmax*1.1/20)*20;
+  ctx.strokeStyle=COL.grid;for(var i=0;i<=4;i++){var x=pad.l+pw*i/4;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText(f0(vmax*i/4),x,c.H-14);}
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText(lab,pad.l+pw/2,c.H-3);
+  var boxes=[];
+  rows.forEach(function(r,i){var y=pad.t+i*rh+6,h=rh-12;ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab,pad.l-8,y+h/2+3);ctx.fillStyle=COL[r.cls];ctx.fillRect(pad.l,y,Math.max(2,pw*r.v/vmax),h);ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.fillText(f0(r.v)+' Ma',pad.l+pw*r.v/vmax+4,y+h/2+3);boxes.push({y0:y,y1:y+h,r:r});});
+  hover(c.cv,function(mx,my){for(var i=0;i<boxes.length;i++){var b=boxes[i];if(my>=b.y0&&my<=b.y1)return '<b>'+b.r.lab+'</b><br><span class="k">'+b.r.note+'</span>';}return null;});
+}
+function timelineChart(el,M,o){
+  var c=mkCanvas(el,250,false),ctx=c.ctx;var pad={l:14,r:14,t:16,b:30};var pw=c.W-pad.l-pad.r;var y0=pad.t+104;var dec=pw/(o.hi-o.lo);
+  var lo=o.lo,hi=o.hi;function X(y){var v=Math.log10(Math.max(y,Math.pow(10,lo)));return pad.l+pw*(1-(v-lo)/(hi-lo));}
+  ctx.strokeStyle=COL.grid;ctx.fillStyle=COL.text;ctx.textAlign='center';
+  for(var e=Math.ceil(lo);e<=Math.floor(hi);e++){var x=X(Math.pow(10,e));ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,y0+72);ctx.stroke();if(dec<58&&((e-Math.ceil(lo))%2)===1)continue;var lab=e>=6?('10'+sup(e)+' yr'):e>=3?(Math.pow(10,e-3)+' kyr'):e>=0?(Math.pow(10,e)+' yr'):(f0(Math.pow(10,e)*365)+' d');ctx.fillText(lab,x,y0+84);}
+  ctx.fillText('years before present (log scale, older to the left)',pad.l+pw/2,c.H-3);
+  ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pad.l,y0);ctx.lineTo(pad.l+pw,y0);ctx.stroke();ctx.lineWidth=1;
+  var marks=[
+    {y:T_OVUM,lab:'animal eggs',cls:'eg',id:'any',up:3},
+    {y:M.T_amn,lab:'amniote egg',cls:'eg',id:'amn',up:2},
+    {y:T_BIRD,lab:'first birds',cls:'eg',id:'bird',up:1},
+    {y:T_BIRD_EGG,lab:'fossil bird egg',cls:'eg',id:'',up:4},
+    {y:T_GALLUS,lab:'crown Gallus',cls:'ch',id:'',up:-1},
+    {y:T_GGALLUS,lab:'G. gallus',cls:'ch',id:'sp',up:-2},
+    {y:P.dom,lab:'domestication',cls:'ch',id:'dom',up:-1},
+    {y:T_BREED,lab:'modern breeds',cls:'ch',id:'breed',up:-2}
+  ];
+  if(!o.focus){marks.push({y:INC/365,lab:'egg holds chicken (+21 d)',cls:'eg',id:'cont',up:2});marks.push({y:P.mat/365,lab:'hen lays (+'+P.mat+' d)',cls:'ch',id:'laid',up:-3});}
+  var boxes=[];
+  marks.forEach(function(m){if(Math.log10(m.y)<lo-0.2||Math.log10(m.y)>hi)return;var x=X(m.y);var on=(m.id===P.egg||m.id===P.chk);var dir=m.up>0?-1:1;var len=10+Math.abs(m.up)*18;var col=COL[m.cls];
+    ctx.strokeStyle=col;ctx.lineWidth=on?2.5:1;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y0+dir*len);ctx.stroke();ctx.lineWidth=1;
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y0,on?5:3.5,0,Math.PI*2);ctx.fill();
+    ctx.font=(on?'600 ':'')+'10px "IBM Plex Mono",monospace';ctx.fillStyle=on?COL.ink:COL.text;ctx.textAlign=x>pad.l+pw*0.85?'right':(x<pad.l+pw*0.15?'left':'center');ctx.fillText(m.lab,x,y0+dir*(len+4)+(dir>0?8:0));ctx.font='10.5px "IBM Plex Mono",monospace';
+    boxes.push({x:x,m:m});});
+  hover(c.cv,function(mx,my){var best=null,bd=14;boxes.forEach(function(b){var d=Math.abs(b.x-mx);if(d<bd){bd=d;best=b;}});if(!best)return null;return '<b>'+best.m.lab+'</b><br>'+yrs(best.m.y)+' before present';});
+}
+function sup(e){return '^'+e;}
+function genomeDiagram(M,el){
+  var mut=P.spec;var eg=COL.eg,ch=COL.ch,mu=COL.text;
+  function node(x,y,w,lab,sub,col,on){return '<rect x="'+(x-w/2)+'" y="'+(y-16)+'" width="'+w+'" height="32" fill="#fff" stroke="'+col+'" stroke-width="'+(on?3:1.5)+'"/><text x="'+x+'" y="'+(y-2)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9.5" font-weight="600" fill="'+col+'">'+lab+'</text><text x="'+x+'" y="'+(y+10)+'" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8.5" fill="#5B6470">'+sub+'</text>';}
+  function arrow(x1,y1,x2,y2){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#5B6470" stroke-width="1.2" marker-end="url(#ah)"/>';}
+  var s='<svg viewBox="0 0 520 150" role="img" aria-label="Where the first chicken genotype first exists"><defs><marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#5B6470"/></marker></defs>';
+  s+=node(60,40,100,'PROTO-HEN','not a chicken',mu,false)+node(60,110,100,'PROTO-ROOSTER','not a chicken',mu,false);
+  s+=node(190,40,90,'OVUM','egg cell',mut==='gam'?eg:mu,mut==='gam')+node(190,110,90,'SPERM','',mu,false);
+  s+=node(320,75,110,'ZYGOTE IN EGG','genotype fixed',mut==='zyg'?eg:(mut==='gam'?eg:mu),mut!=='grad');
+  s+=node(455,75,100,'FIRST CHICKEN','hatches +21 d',ch,mut!=='grad');
+  s+=arrow(110,40,145,40)+arrow(110,110,145,110)+arrow(235,45,262,68)+arrow(235,105,262,82)+arrow(375,75,403,75);
+  var star=(mut==='zyg')?'320,50':(mut==='gam'?'190,15':null);
+  if(star){var xy=star.split(',');s+='<text x="'+xy[0]+'" y="'+xy[1]+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="'+eg+'">* defining mutation here</text>';}
+  else s+='<text x="260" y="15" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#5B6470">gradual model: no single defining change, no first individual</text>';
+  s+='</svg>';
+  el.innerHTML='<div style="border:1px solid var(--line);background:#fff;padding:6px">'+s+'</div><div class="cap">Fertilization happens in the oviduct; shell deposition follows over 20 - 26 h; incubation 21 d. Highlighted = where the first chicken genotype exists under the current speciation model.</div>';
+}
+function lifeChart(el,M){
+  var segs=[{lab:'egg',d:INC,col:COL.eg},{lab:'chick to hen',d:P.mat-INC,col:COL.pale},{lab:'lays',d:6,col:COL.ch}];
+  var c=mkCanvas(el,120,false),ctx=c.ctx;var pad={l:14,r:14,t:26,b:34};var pw=c.W-pad.l-pad.r;var tot=0;segs.forEach(function(s){tot+=s.d;});var x=pad.l,y=pad.t,h=36;
+  segs.forEach(function(s){var w_=pw*s.d/tot;ctx.fillStyle=s.col;ctx.fillRect(x,y,Math.max(0,w_-2),h);ctx.fillStyle=(s.col===COL.pale)?COL.ink:'#fff';ctx.textAlign='center';if(w_>46)ctx.fillText(s.lab+' '+s.d+' d',x+w_/2,y+h/2+4);x+=w_;});
+  ctx.fillStyle=COL.text;ctx.textAlign='left';ctx.fillText('day 0: an egg exists',pad.l,pad.t-8);ctx.textAlign='right';ctx.fillText('day '+P.mat+': its first egg',pad.l+pw,pad.t-8);
+  ctx.textAlign='center';ctx.fillText(c.W>=600?'one individual, entry to exit: the cycle can only be entered at the egg':'the cycle can only be entered at the egg',pad.l+pw/2,c.H-6);
+}
+function readingsChart(el,M){
+  var rows=Object.keys(EGG).map(function(k){return {k:k,lab:EGG[k].n,a:withP(Object.assign({},P,{egg:k}),function(){return model().a_lang;})};});
+  var c=mkCanvas(el,rows.length*28+36,false),ctx=c.ctx;var pad={l:c.W>=600?190:150,r:44,t:8,b:24};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;var mid=pad.l+pw/2;
+  ctx.strokeStyle=COL.grid;[-1,-0.5,0.5,1].forEach(function(v){var x=mid+v*pw/2;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();});
+  ctx.strokeStyle=COL.ink;ctx.beginPath();ctx.moveTo(mid,pad.t);ctx.lineTo(mid,pad.t+ph);ctx.stroke();
+  rows.forEach(function(r,i){var y=pad.t+i*rh+5,h=rh-10;var on=r.k===P.egg;ctx.fillStyle=on?COL.ink:COL.text;ctx.font=(on?'600 ':'')+'10.5px "IBM Plex Mono",monospace';ctx.textAlign='right';ctx.fillText(r.lab,pad.l-8,y+h/2+3);ctx.font='10.5px "IBM Plex Mono",monospace';var w_=r.a*pw/2;ctx.fillStyle=r.a>=0?COL.eg:COL.ch;if(r.a>=0)ctx.fillRect(mid+1,y,Math.max(0,w_-1),h);else ctx.fillRect(mid+w_,y,Math.max(0,-w_-1),h);ctx.fillStyle=COL.ink;ctx.textAlign=r.a>=0?'left':'right';ctx.fillText(sgn(r.a),r.a>=0?mid+w_+4:mid+w_-4,y+h/2+3);});
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText('reading score (left = chicken first, right = egg first); bold = current',pad.l+pw/2,c.H-5);
+}
+function advChart(el,M){
+  var rows=OBJ.filter(function(o){return o.id!=='comp';}).map(function(o){return {lab:o.short,a:o.score(M)[2],w:W[o.id]};});
+  var c=mkCanvas(el,rows.length*28+36,false),ctx=c.ctx;var pad={l:150,r:44,t:8,b:24};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;var mid=pad.l+pw/2;
+  ctx.strokeStyle=COL.grid;[-1,-0.5,0.5,1].forEach(function(v){var x=mid+v*pw/2;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+ph);ctx.stroke();});
+  ctx.strokeStyle=COL.ink;ctx.beginPath();ctx.moveTo(mid,pad.t);ctx.lineTo(mid,pad.t+ph);ctx.stroke();
+  rows.forEach(function(r,i){var y=pad.t+i*rh+5,h=rh-10;ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab+' (w'+r.w+')',pad.l-8,y+h/2+3);var w_=r.a*pw/2;ctx.fillStyle=r.a>=0?COL.eg:COL.ch;if(r.a>=0)ctx.fillRect(mid+1,y,Math.max(0,w_-1),h);else ctx.fillRect(mid+w_,y,Math.max(0,-w_-1),h);ctx.fillStyle=COL.ink;ctx.textAlign=r.a>=0?'left':'right';ctx.fillText(sgn(r.a),r.a>=0?mid+w_+4:mid+w_-4,y+h/2+3);});
+  ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText('normalized advantage a (left = chicken first, right = egg first)',pad.l+pw/2,c.H-5);
+}
+// tornado
+function tornadoChart(el,rows,J0){
+  var c=mkCanvas(el,rows.length*30+36,false),ctx=c.ctx;var pad={l:c.W>=600?130:104,r:14,t:8,b:24};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var rh=ph/rows.length;
+  var xmn=0,xmx=0;rows.forEach(function(r){xmn=Math.min(xmn,r.lo,r.hi,J0);xmx=Math.max(xmx,r.lo,r.hi,J0);});var span=Math.max(0.2,xmx-xmn);xmn-=span*0.28;xmx+=span*0.28;xmn=Math.max(-1.1,xmn);xmx=Math.min(1.1,xmx);
+  function X(v){return pad.l+(v-xmn)/(xmx-xmn)*pw;}
+  var step=(xmx-xmn)>1?0.5:0.25;ctx.strokeStyle=COL.grid;for(var gv=Math.ceil(xmn/step)*step;gv<=xmx+1e-9;gv+=step){ctx.beginPath();ctx.moveTo(X(gv),pad.t);ctx.lineTo(X(gv),pad.t+ph);ctx.stroke();ctx.fillStyle=COL.text;ctx.textAlign='center';ctx.fillText(sgn(gv),X(gv),c.H-5);}
+  ctx.strokeStyle=COL.axis;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(X(0),pad.t);ctx.lineTo(X(0),pad.t+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(J0),pad.t);ctx.lineTo(X(J0),pad.t+ph);ctx.stroke();ctx.lineWidth=1;
+  ctx.fillStyle=COL.ink;ctx.textAlign='center';ctx.fillText('J now '+sgn(J0),X(J0),pad.t-1);
+  var boxes=[];
+  rows.forEach(function(r,i){var y=pad.t+i*rh+6,h=rh-12;var a=Math.min(r.lo,r.hi),b=Math.max(r.lo,r.hi);
+    ctx.fillStyle=COL.pale;ctx.fillRect(X(a),y,Math.max(1,X(b)-X(a)),h);
+    if(a<0){ctx.fillStyle=COL.ch;ctx.fillRect(X(a),y,X(Math.min(b,0))-X(a),h);} if(b>0){ctx.fillStyle=COL.eg;ctx.fillRect(X(Math.max(a,0)),y,X(b)-X(Math.max(a,0)),h);}
+    ctx.fillStyle=COL.text;ctx.textAlign='right';ctx.fillText(r.lab,pad.l-8,y+h/2+3);
+    if(c.W>=600){ctx.fillStyle=COL.ink;ctx.textAlign='left';ctx.font='9.5px "IBM Plex Mono",monospace';var lw=ctx.measureText(r.loLab).width;if(X(a)-lw-3>=pad.l+2){ctx.fillText(r.loLab,X(a)-lw-3,y+h/2+3);}else if(X(b)-X(a)>lw+8){ctx.fillStyle='#fff';ctx.fillText(r.loLab,X(a)+4,y+h/2+3);ctx.fillStyle=COL.ink;}ctx.fillText(r.hiLab,X(b)+3,y+h/2+3);ctx.font='10.5px "IBM Plex Mono",monospace';}
+    boxes.push({y0:y,y1:y+h,r:r});});
+  hover(c.cv,function(mx,my){for(var i=0;i<boxes.length;i++){var b=boxes[i];if(my>=b.y0&&my<=b.y1){var r=b.r;return '<b>'+r.lab+'</b><br><span class="k">'+r.desc+'</span><hr>J at '+r.loLab+': <b>'+sgn(r.lo)+'</b> ('+wname(r.lo)+')<br>J at '+r.hiLab+': <b>'+sgn(r.hi)+'</b> ('+wname(r.hi)+')<br>Swing: <b>'+f2(Math.abs(r.hi-r.lo))+'</b>'+(r.flip?' &middot; can flip the verdict':' &middot; cannot flip the verdict alone');}}return null;});
+}
+// heatmap
+function heatChart(el,H){
+  var c=mkCanvas(el,H.ny*34+60,false),ctx=c.ctx;var pad={l:c.W>=600?150:120,r:14,t:8,b:52};var pw=c.W-pad.l-pad.r,ph=c.H-pad.t-pad.b;var cw=pw/H.nx,ch=ph/H.ny;
+  function col(J){var t=Math.max(-1,Math.min(1,J));if(t>=0){return mix('#FFFFFF',COL.eg,Math.pow(t,0.7));}return mix('#FFFFFF',COL.ch,Math.pow(-t,0.7));}
+  for(var i=0;i<H.nx;i++)for(var j=0;j<H.ny;j++){var J=H.J[i][j];ctx.fillStyle=col(J);ctx.fillRect(pad.l+i*cw+1,pad.t+(H.ny-1-j)*ch+1,cw-2,ch-2);
+    ctx.fillStyle=Math.abs(J)>0.55?'#fff':COL.ink;ctx.textAlign='center';ctx.font='10px "IBM Plex Mono",monospace';ctx.fillText(sgn(J).replace('+0.','+.').replace('-0.','-.'),pad.l+i*cw+cw/2,pad.t+(H.ny-1-j)*ch+ch/2+3);}
+  ctx.font='10px "IBM Plex Mono",monospace';ctx.fillStyle=COL.text;
+  for(i=0;i<H.nx;i++){ctx.textAlign='center';var parts=H.xs[i].split('|');ctx.fillText(parts[0],pad.l+i*cw+cw/2,pad.t+ph+13);if(parts[1])ctx.fillText(parts[1],pad.l+i*cw+cw/2,pad.t+ph+25);}
+  for(j=0;j<H.ny;j++){ctx.textAlign='right';ctx.fillText(H.ys[j],pad.l-6,pad.t+(H.ny-1-j)*ch+ch/2+3);}
+  ctx.textAlign='center';ctx.fillText(H.xlab,pad.l+pw/2,c.H-5);
+  var ci=H.ci,cj=H.cj;if(ci>=0&&cj>=0){ctx.strokeStyle=COL.ink;ctx.lineWidth=2.5;ctx.strokeRect(pad.l+ci*cw+1.5,pad.t+(H.ny-1-cj)*ch+1.5,cw-3,ch-3);ctx.lineWidth=1;}
+  hover(c.cv,function(mx,my){var i=Math.floor((mx-pad.l)/cw),jj=H.ny-1-Math.floor((my-pad.t)/ch);if(i<0||i>=H.nx||jj<0||jj>=H.ny)return null;var d=H.detail(i,jj);return '<b>'+H.xn[i]+' &times; '+H.yn[jj]+'</b><br>Composite J = <b>'+sgn(d.J)+'</b> &rarr; '+wname(d.J)+'<hr><span class="k">'+d.split+'</span>';});
+}
+function mix(a,b,t){function h(x){return [parseInt(x.substr(1,2),16),parseInt(x.substr(3,2),16),parseInt(x.substr(5,2),16)];}var A=h(a),B=h(b);var r=A.map(function(v,i){return Math.round(v+(B[i]-v)*t);});return 'rgb('+r.join(',')+')';}
+
+// ---------- analytics: sensitivity + heat ----------
+function sensitivity(J0){
+  var rows=[];
+  VARS.forEach(function(v){
+    var lo,hi,loLab,hiLab;
+    if(v.sel){var best=null,worst=null;Object.keys(v.sel).forEach(function(k){var p=Object.assign({},P);p[v.id]=k;var J=Jof(p);if(best===null||J>best.J)best={J:J,k:k};if(worst===null||J<worst.J)worst={J:J,k:k};});lo=worst.J;hi=best.J;loLab=v.sel[worst.k].t||v.sel[worst.k].n;hiLab=v.sel[best.k].t||v.sel[best.k].n;}
+    else{var p1=Object.assign({},P);p1[v.id]=v.min;var p2=Object.assign({},P);p2[v.id]=v.max;lo=Jof(p1);hi=Jof(p2);loLab=v.min+(v.unit?' '+v.unit.split(' ')[0]:'');hiLab=v.max+(v.unit?' '+v.unit.split(' ')[0]:'');}
+    rows.push({id:v.id,lab:v.lab,lo:lo,hi:hi,loLab:loLab,hiLab:hiLab,desc:v.tip,swing:Math.abs(hi-lo),flip:(Math.min(lo,hi)<-0.05&&Math.max(lo,hi)>0.05)||(Math.sign(lo)!==Math.sign(J0)&&Math.abs(lo)>0.05)||(Math.sign(hi)!==Math.sign(J0)&&Math.abs(hi)>0.05)});
+  });
+  rows.sort(function(a,b){return b.swing-a.swing;});
+  return rows;
+}
+function heat(){
+  var xs=Object.keys(CHK),ys=Object.keys(EGG);
+  var J=[],det=[];
+  xs.forEach(function(x,i){J[i]=[];det[i]=[];ys.forEach(function(y,j){var p=Object.assign({},P);p.chk=x;p.egg=y;var r=withP(p,function(){var M=model();var c=composite(M);var parts=OBJ.filter(function(o){return o.id!=='comp';}).map(function(o){var a=o.score(M)[2];return o.short+' '+sgn(a);});return {J:c.J,split:parts.join(' &middot; ')};});J[i][j]=r.J;det[i][j]=r;});});
+  var xl={sp:'species|G. gallus',dom:'domestic|only',breed:'modern|breeds'};
+  return {nx:xs.length,ny:ys.length,xs:xs.map(function(k){return xl[k];}),ys:ys.map(function(k){return EGG[k].t;}),xn:xs.map(function(k){return CHK[k].n;}),yn:ys.map(function(k){return EGG[k].n;}),J:J,xlab:'chicken definition (rows: egg definition)',ci:xs.indexOf(P.chk),cj:ys.indexOf(P.egg),detail:function(i,j){return det[i][j];}};
+}
+
+// ---------- render ----------
+var cur=0, M, SENS=[], curPreset='Default';
+function renderVerdict(){
+  var J=composite(M);var w=winner(J.J);
+  var el=document.getElementById('vwin');el.className='vwin '+w;el.textContent=w==='eg'?'The egg':w==='ch'?'The chicken':'Ill-posed';
+  document.getElementById('vj').textContent='J = '+sgn(J.J)+'  |  '+J.egWins+' egg-first, '+J.chWins+' chicken-first, '+J.ties+' zero';
+  fillMeter('vfill',J.J);
+  var egList=[],chList=[],tieList=[];OBJ.forEach(function(o){if(o.id==='comp')return;var a=o.score(M)[2];var t=o.short.toLowerCase();if(a>0.05)egList.push(t);else if(a<-0.05)chList.push(t);else tieList.push(t);});
+  var top=SENS[0];
+  var txt='<b class="eg">Egg first</b> on '+(egList.length?egList.join(', '):'nothing')+'. <b class="ch">Chicken first</b> on '+(chList.length?chList.join(', '):'nothing')+'.'+(tieList.length?' Zero: '+tieList.join(', ')+'.':'')+' Reading: <i>'+EGG[P.egg].s+'</i>, chicken = <i>'+CHK[P.chk].s+'</i>.'+(top?' The verdict is most sensitive to <b>'+top.lab.toLowerCase()+'</b> (swing '+f2(top.swing)+' in J across its options'+(top.flip?', enough to flip it':', not enough to flip it')+').':'');
+  document.getElementById('vtext').innerHTML=txt;
+  document.getElementById('vph').textContent='composite of 7 lines of evidence at the '+curPreset.toLowerCase()+' scenario';
+  document.getElementById('scen').textContent=curPreset;
+}
+function fillMeter(id,a){var f=document.getElementById(id);a=Math.max(-1,Math.min(1,a));if(a>=0){f.style.left='50%';f.style.width=(a*50)+'%';f.style.background=COL.eg;}else{f.style.left=(50+a*50)+'%';f.style.width=(-a*50)+'%';f.style.background=COL.ch;}}
+function renderKpis(){
+  var el=document.getElementById('kpis');el.innerHTML='';
+  OBJ.forEach(function(o,i){if(o.id==='comp')return;var s=o.score(M);var a=s[2];var w=winner(a);
+    var d=document.createElement('div');d.className='kpi'+(i===cur?' on':'');
+    d.setAttribute('data-tip','<b>'+o.title+'</b><br><span class="k">'+o.what+'</span><hr><span class="ch">Chicken first</span>: <b>'+s[0]+'</b><br><span class="eg">Egg first</span>: <b>'+s[1]+'</b><br>Advantage a = <b>'+sgn(a)+'</b> &middot; weight '+W[o.id]+' &middot; confidence '+o.conf+'<hr><span class="k">Click to open the analysis.</span>');
+    d.innerHTML='<div class="t"><span>'+o.short+'</span><span class="ch-tag">'+o.conf+'</span></div><div class="w '+w+'">'+(w==='tie'?'Zero':wname(a))+'</div><div class="v">'+s[0]+' / '+s[1]+'</div><div class="bar"><span class="m"></span></div>';
+    var bar=d.querySelector('.bar');var i_=document.createElement('i');var aa=Math.max(-1,Math.min(1,a));if(aa>=0){i_.style.left='50%';i_.style.width=(aa*50)+'%';i_.style.background=COL.eg;}else{i_.style.left=(50+aa*50)+'%';i_.style.width=(-aa*50)+'%';i_.style.background=COL.ch;}bar.appendChild(i_);
+    d.onclick=function(){cur=i;renderObjective();renderKpis();document.getElementById('otitle').scrollIntoView({behavior:'smooth',block:'start'});};
+    el.appendChild(d);});
+}
+function renderDrivers(){
+  var J0=composite(M).J;SENS=sensitivity(J0);
+  tornadoChart(document.getElementById('tornado'),SENS,J0);
+  heatChart(document.getElementById('heat'),heat());
+}
+function renderVars(){
+  var el=document.getElementById('vars');el.innerHTML='';var maxSw=SENS.length?SENS[0].swing:1;
+  VARS.forEach(function(v){var s=SENS.filter(function(r){return r.id===v.id;})[0];var rank=SENS.indexOf(s)+1;
+    var d=document.createElement('div');d.className='var';
+    var val=v.sel?(v.sel[P[v.id]].s||v.sel[P[v.id]].n):P[v.id];
+    d.innerHTML='<div class="t"><span>'+v.lab+'</span><span class="i" data-tip="<b>'+v.lab+'</b><br><span class=k>'+v.tip.replace(/"/g,'&quot;')+'</span>'+(v.sel?'<hr><span class=k>'+Object.keys(v.sel).map(function(k){return '<b>'+v.sel[k].n+'</b>: '+(v.sel[k].tip||'').replace(/"/g,'&quot;');}).join('<br>')+'</span>':'')+'<hr>Sensitivity rank <b>#'+rank+' of 8</b>, swing '+f2(s?s.swing:0)+' in J'+(s&&s.flip?' (can flip the verdict)':'')+'">i</span></div>'
+      +'<div class="v" style="'+(v.sel?'font-size:12px;white-space:normal;line-height:1.25;min-height:30px':'')+'">'+val+(v.unit&&!v.sel?' <span class="u">'+v.unit+'</span>':'')+'</div>'
+      +(v.sel?'<select>'+Object.keys(v.sel).map(function(k){return '<option value="'+k+'"'+(P[v.id]===k?' selected':'')+'>'+v.sel[k].n+'</option>';}).join('')+'</select>':'<input type="range" min="'+v.min+'" max="'+v.max+'" step="'+v.step+'" value="'+P[v.id]+'">')
+      +'<div class="imp"><i style="width:'+Math.round((s?s.swing:0)/maxSw*100)+'%"></i></div><div class="rank">#'+rank+' driver &middot; swing '+f2(s?s.swing:0)+'</div>';
+    var inp=d.querySelector('input,select');
+    inp.oninput=function(){P[v.id]=v.sel?inp.value:+inp.value;d.querySelector('.v').innerHTML=(v.sel?(v.sel[P[v.id]].s||v.sel[P[v.id]].n):P[v.id])+(v.unit&&!v.sel?' <span class="u">'+v.unit+'</span>':'');curPreset='Custom';renderLight();scheduleHeavy();};
+    el.appendChild(d);});
+}
+function renderPresets(){var el=document.getElementById('presets');el.innerHTML='';PRESETS.forEach(function(pr){var b=document.createElement('button');b.textContent=pr.n;b.className=pr.n===curPreset?'on':'';b.setAttribute('data-tip','<b>'+pr.n+'</b><br><span class="k">'+Object.keys(pr.p).map(function(k){var v=VARS.filter(function(x){return x.id===k;})[0];return v.lab+': '+(v.sel?v.sel[pr.p[k]].n:pr.p[k]+(v.unit?' '+v.unit:''));}).join(' &middot; ')+'</span>');b.onclick=function(){Object.keys(pr.p).forEach(function(k){P[k]=pr.p[k];});curPreset=pr.n;renderAll();};el.appendChild(b);});}
+function renderChips(){var el=document.getElementById('chips');el.innerHTML='';OBJ.forEach(function(o,i){var b=document.createElement('button');b.textContent=o.chip;b.className=i===cur?'on':'';b.onclick=function(){cur=i;renderObjective();renderKpis();};el.appendChild(b);});}
+function renderObjective(){
+  renderChips();
+  var o=OBJ[cur];document.getElementById('otitle').innerHTML=o.title;document.getElementById('owhat').innerHTML=o.what;
+  document.getElementById('omech').innerHTML=o.mech(M);document.getElementById('ofx').innerHTML=o.fx(M);
+  if(o.id==='comp')renderWeights();
+  o.chart(M,document.getElementById('ochart'));
+  var cd=o.cards(M);
+  document.getElementById('ch_big').innerHTML=cd.ch[0];document.getElementById('ch_u').innerHTML=cd.ch[1];document.getElementById('ch_kv').innerHTML=cd.ch[2].map(function(r){return '<span>'+r[0]+'</span><span>'+r[1]+'</span>';}).join('');
+  document.getElementById('eg_big').innerHTML=cd.eg[0];document.getElementById('eg_u').innerHTML=cd.eg[1];document.getElementById('eg_kv').innerHTML=cd.eg[2].map(function(r){return '<span>'+r[0]+'</span><span>'+r[1]+'</span>';}).join('');
+  var v=o.verdict(M);fillMeter('ofill',v.a);
+  document.getElementById('otext').innerHTML='<b class="'+winner(v.a)+'">'+(winner(v.a)==='tie'?'ZERO':wname(v.a).toUpperCase())+'</b> <span class="tag">confidence '+o.conf+'</span><br>'+v.text;
+}
+function renderWeights(){var el=document.getElementById('weights');if(!el)return;el.innerHTML='';OBJ.forEach(function(o){if(o.id==='comp')return;var d=document.createElement('div');d.className='c';d.innerHTML='<label><span>'+o.short+'</span><output>'+W[o.id]+'</output></label><input type="range" min="0" max="5" step="1" value="'+W[o.id]+'">';var inp=d.querySelector('input');inp.oninput=function(){W[o.id]=+inp.value;d.querySelector('output').textContent=inp.value;renderLight();scheduleHeavy();};el.appendChild(d);});}
+function renderProv(){var rows=[
+ ['T<sub>ovum</sub>','first multicellular animal eggs / embryos','600 Ma','lit','phosphatized embryos of the Ediacaran Doushantuo formation'],
+ ['T<sub>amn</sub>','first amniote (shelled land) egg','312 Ma','lit','Benton &amp; Donoghue 2007 calibration for the amniote crown'],
+ ['&Delta;T<sub>EER</sub>','possible delay of the shelled egg if early amniotes retained embryos','up to 50 Myr','asm','Jiang et al. 2023 argue for extended embryo retention as ancestral; the size of any delay is not given, 50 Myr is a placeholder'],
+ ['T<sub>bird</sub>','first birds','150 Ma','lit','Archaeopteryx, Late Jurassic'],
+ ['T<sub>bird egg</sub>','oldest fossil bird egg','110 Ma','lit','Bao et al. 2019: enantiornithine with an unlaid egg (Early Cretaceous)'],
+ ['','first dinosaur eggs were soft; hard shells evolved &ge; 3 times','Mesozoic','lit','Norell et al. 2020, Nature; used qualitatively'],
+ ['T<sub>Gallus</sub>','crown genus Gallus','4 - 5 Ma','lit','Tiley et al. 2020 citing Hosner 2017 / Wang 2017; Gallus - Bambusicola split 15 - 16 Ma'],
+ ['T<sub>G. gallus</sub>','red junglefowl lineage','3 Ma','est','younger than crown Gallus; exact node age depends on the unresolved species topology'],
+ ['T<sub>dom</sub>','chicken domestication','3,500 - 9,500 yr','lit','Peters et al. 2022 PNAS: Ban Non Wat 1650 - 1250 BCE, 600+ sites; Wang et al. 2020 Cell Research: 863 genomes, ancestor G. g. spadiceus, older genomic estimate'],
+ ['T<sub>breed</sub>','modern commercial broiler / layer lines','~70 yr','lit','post-1950 breeding programs'],
+ ['t<sub>inc</sub>, t<sub>mat</sub>','incubation, age at first lay','21 d, 100 - 200 d','lit','standard poultry values; 18 - 22 weeks typical for first lay'],
+ ['OC-17','ovocleidin-17 and homologs','goose, ostrich, emu, rhea','lit','Freeman et al. 2010 (Sheffield / Warwick) for the mechanism; ansocalcin, struthiocalcin, dromaiocalcin, rheacalcin in the literature; divergence 70 / 100 Ma are round numbers'],
+ ['S','speciation sharpness','1.0 / 0.9 / 0','asm','zygote / gamete / gradual; scales every line that needs a first individual'],
+ ['h','lineage-local horizon discount on deep-time lines','0.35','asm','a choice; the deep lines still dominate at any value above 0.15'],
+ ['a<sub>i</sub> rules','the fixed advantages per line (0.5, 0.6, 0.7, 0.8, 0.9)','see each Scoring rule','asm','hand-set to express strength of the argument; the sign is the claim, the magnitude is judgment'],
+ ['tanh scales','2.0 (log ratio of dates), 3.0 (log days)','','asm','compress a 10<sup>5</sup> ratio and a 21-day margin onto the same [-1, 1] axis']];
+ document.querySelector('#prov tbody').innerHTML=rows.map(function(r){return '<tr><td class="mono">'+r[0]+'</td><td>'+r[1]+'</td><td class="r">'+r[2]+'</td><td><span class="tag '+r[3]+'">'+r[3].toUpperCase()+'</span></td><td class="mini">'+r[4]+'</td></tr>';}).join('');}
+// light = instant parts; heavy = sensitivity + heat (debounced)
+function renderLight(){M=model();renderVerdict();renderKpis();renderObjective();renderPresets();}
+var ht;function scheduleHeavy(){clearTimeout(ht);ht=setTimeout(function(){renderDrivers();renderVars();renderVerdict();},120);}
+function renderAll(){M=model();renderDrivers();renderVars();renderVerdict();renderKpis();renderObjective();renderPresets();}
+document.getElementById('prev').onclick=function(){cur=(cur+OBJ.length-1)%OBJ.length;renderObjective();renderKpis();};
+document.getElementById('next').onclick=function(){cur=(cur+1)%OBJ.length;renderObjective();renderKpis();};
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;if(e.key==='ArrowRight'){cur=(cur+1)%OBJ.length;renderObjective();renderKpis();}else if(e.key==='ArrowLeft'){cur=(cur+OBJ.length-1)%OBJ.length;renderObjective();renderKpis();}});
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(renderAll,150);});
+renderProv();renderAll();
+window.QE={model:model,P:P,OBJ:OBJ,W:W,composite:composite,sensitivity:sensitivity,heat:heat,VARS:VARS,PRESETS:PRESETS,withP:withP};
+})();
+</script>
+</body>
+</html>

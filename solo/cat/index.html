@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only dark">
+<title>Hiss &amp; Ship -- Ron Clawson, DFC Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:#141618 !important}
+  body{
+    margin:0;padding:0;background:#141618 !important;color:#EDEEEA;
+    font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:15px;line-height:1.45;min-height:100vh;min-height:100dvh;overscroll-behavior-y:none;
+  }
+  .wrap{max-width:520px;margin:0 auto;background:#141618;padding:calc(16px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+  button{user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  a{color:#F96302}
+
+  /* ---------- header ---------- */
+  .hdr{border:2px solid #363B40;background:#1A1D20;margin-bottom:14px}
+  .hdr-top{display:flex;justify-content:space-between;align-items:center;background:#F96302;color:#1A0D02;padding:5px 6px 5px 10px;font-weight:600;font-size:11px;letter-spacing:.14em}
+  .hdr-top a{color:#1A0D02;text-decoration:none}
+  .hdr-top .btns{display:flex;gap:4px}
+  .mini{width:auto;white-space:nowrap;padding:5px 10px;font-size:10px;letter-spacing:.14em;background:#1A0D02;color:#F96302;border:none;cursor:pointer;font-family:inherit;font-weight:600}
+  .hdr-body{padding:12px 12px 14px}
+  .slim .hdr-body{display:none}
+  .slim .hdr{margin-bottom:10px}
+  h1{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:clamp(34px,11.5vw,52px);line-height:.95;letter-spacing:.01em;margin:0 0 6px;text-transform:uppercase;color:#F96302}
+  .sub{color:#A6ADB5;font-size:12px;letter-spacing:.06em}
+  .barcode{height:26px;margin-top:12px;opacity:.85;background-image:repeating-linear-gradient(90deg,#EDEEEA 0 2px,transparent 2px 4px,#EDEEEA 4px 5px,transparent 5px 9px,#EDEEEA 9px 12px,transparent 12px 13px,#EDEEEA 13px 14px,transparent 14px 18px)}
+
+  /* ---------- shared ---------- */
+  .panel{border:2px solid #363B40;background:#1A1D20;padding:14px;margin-bottom:14px;color:#EDEEEA}
+  .eyebrow{font-size:10px;letter-spacing:.2em;color:#F96302;font-weight:600;margin:0 0 8px;text-transform:uppercase}
+  ol.rules{margin:0;padding-left:20px;font-size:13.5px}
+  ol.rules li{margin-bottom:7px}
+  ol.rules li::marker{color:#F96302;font-weight:600}
+  label{display:block;font-size:10px;letter-spacing:.18em;color:#A6ADB5;margin-bottom:6px;text-transform:uppercase}
+  input[type=text]{width:100%;padding:13px 12px;background:#141618;color:#EDEEEA;border:2px solid #363B40;border-radius:0;font-family:inherit;font-size:16px}
+  input[type=text]:focus{outline:none;border-color:#F96302}
+  button.cta,button.ghost{font-family:inherit;font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;padding:15px 16px;width:100%;cursor:pointer;border-radius:0;transition:transform .06s ease}
+  button.cta{border:2px solid #F96302;background:#F96302;color:#1A0D02}
+  button.ghost{border:2px solid #363B40;background:#1A1D20;color:#EDEEEA}
+  button.cta:active,button.ghost:active{transform:scale(.97)}
+  button:focus-visible{outline:3px solid #D6F04B;outline-offset:2px}
+  .warn{color:#FF7A7E;font-size:11.5px;margin-top:8px;min-height:16px}
+  .hide{display:none !important}
+  .center{text-align:center}
+  .screen{animation:slidein .28s ease both}
+  @keyframes slidein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .prize{border:3px solid #D6F04B;background:#1F2226;padding:12px;margin-bottom:14px;text-align:center;font-weight:600;letter-spacing:.06em;font-size:14px}
+  .prize b{color:#D6F04B}
+  .prize .who{color:#F96302}
+
+  /* ---------- Ron ---------- */
+  .ronbar{display:flex;gap:10px;align-items:stretch;margin-bottom:10px}
+  .ronbox{width:112px;flex:none;border:2px solid #363B40;background:#1F2226;padding:6px 4px 4px;text-align:center}
+  .ronbox svg{width:96px;height:88px;display:block;margin:0 auto}
+  .ronbox .tag{font-size:8.5px;letter-spacing:.12em;color:#A6ADB5;margin-top:2px;text-transform:uppercase}
+  .ronbox .tag b{color:#F96302;display:block;font-size:9.5px}
+  .ronside{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .bubble{flex:1;border:2px solid #363B40;background:#1A1D20;padding:8px 10px;font-size:12.5px;line-height:1.35;position:relative;min-height:44px;display:flex;align-items:center}
+  .bubble:before{content:"";position:absolute;left:-9px;top:16px;border:7px solid transparent;border-right-color:#363B40;border-left:0}
+  .bubble.content{border-color:#D6F04B}
+  .bubble.content:before{border-right-color:#D6F04B}
+  .bubble.furious{border-color:#E5484D}
+  .bubble.furious:before{border-right-color:#E5484D}
+  .pfp{border:2px solid #363B40;background:#1F2226;padding:6px 8px;display:flex;align-items:center;gap:8px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#A6ADB5;overflow:hidden}
+  .pfp .bump{overflow:hidden;text-overflow:ellipsis}
+  .pfp .pips{display:flex;gap:3px}
+  .pfp .pip{width:14px;height:10px;border:2px solid #454B52;background:#141618}
+  .pfp .pip.on{background:#F96302;border-color:#F96302}
+  .pfp .bump{color:#D6F04B;font-weight:600;margin-left:auto;white-space:nowrap}
+  .pfp.active{border-color:#D6F04B}
+  .ron.shake{animation:shake .32s ease}
+  .ron.bounce{animation:bounce .5s ease}
+  @keyframes bounce{30%{transform:translateY(-6px) rotate(-3deg)}60%{transform:translateY(0) rotate(2deg)}}
+
+  /* ---------- LMS board ---------- */
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+  .stat{border:2px solid #363B40;background:#1F2226;padding:8px 4px;text-align:center}
+  .stat .v{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:22px;line-height:1;color:#F96302}
+  .stat .k{font-size:8.5px;letter-spacing:.12em;color:#A6ADB5;margin-top:5px;text-transform:uppercase}
+  .stat.good .v{color:#D6F04B}
+  .stat.bad .v{color:#FF7A7E}
+  .boardbtn{width:100%;border:2px solid #363B40;background:#1A1D20;color:#A6ADB5;font-family:inherit;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:7px;cursor:pointer;margin-bottom:10px;display:flex;justify-content:space-between}
+  .boardbtn b{color:#F96302}
+  .board{margin-bottom:10px}
+  .brow{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:5px 8px;border:2px solid #2A2E33;background:#1F2226;margin-bottom:3px;transition:transform .3s}
+  .brow.me{border-color:#D6F04B}
+  .brow .r{color:#A6ADB5;width:20px}
+  .brow .n{flex:1;letter-spacing:.06em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .brow .n small{color:#A6ADB5;font-size:9px;letter-spacing:.1em;margin-left:6px}
+  .brow .p{font-weight:600;color:#EDEEEA}
+  .brow.me .p{color:#D6F04B}
+  .brow .p.up{color:#D6F04B}.brow .p.dn{color:#FF7A7E}
+
+  /* ---------- task card ---------- */
+  .qcard{border:2px solid #363B40;background:#1A1D20;padding:10px;color:#EDEEEA}
+  .qcard.glitch{animation:glitch .18s steps(2) infinite}
+  @keyframes glitch{50%{transform:translateX(1px) skewX(-1deg);filter:hue-rotate(40deg)}}
+  .qcard.huddle{border-color:#D6F04B}
+  #scrGame{padding-bottom:86px}
+  .qmeta{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.1em;color:#A6ADB5;margin-bottom:8px;text-transform:uppercase}
+  .qmeta b{color:#F96302;font-weight:600}
+  .clock{height:10px;border:2px solid #363B40;background:#141618;margin-bottom:6px;position:relative;overflow:hidden}
+  .clock .fill{position:absolute;inset:0;background:#D6F04B;transform-origin:left}
+  .clock.mid .fill{background:#F96302}
+  .clock.hot .fill{background:#E5484D}
+  .clock.hot{animation:hotpulse .5s ease-in-out infinite}
+  .clock.over{border-color:#E5484D}
+  @keyframes hotpulse{50%{box-shadow:0 0 0 3px rgba(229,72,77,.35)}}
+  .rf{background:#0E1A12;border:2px solid #2E5A3A;color:#8EE29A;font-size:11.5px;letter-spacing:.06em;padding:8px 10px;margin-bottom:10px;line-height:1.5;box-shadow:inset 0 0 18px rgba(0,0,0,.6)}
+  .rf b{color:#D6F04B;font-weight:600}
+  .rf .hd{color:#5FAE6C;font-size:9.5px;letter-spacing:.16em;border-bottom:1px dashed #2E5A3A;padding-bottom:3px;margin-bottom:4px}
+  .lbl{background:#EDEEEA;color:#141618;padding:8px 10px;margin-bottom:10px;font-size:12px;letter-spacing:.05em;border:2px solid #A6ADB5;line-height:1.5}
+  .lbl b{font-size:15px;display:block;font-weight:600}
+  .lbl .bc{height:14px;margin-top:6px;background-image:repeating-linear-gradient(90deg,#141618 0 2px,transparent 2px 4px,#141618 4px 5px,transparent 5px 8px,#141618 8px 11px,transparent 11px 12px)}
+  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:10px;background:#101214;padding:8px;border:2px solid #2A2E33}
+  .cell{aspect-ratio:1/1}
+  .box{background:#B8742E;border:2px solid #7A4A1A;position:relative;box-shadow:inset -3px -3px 0 rgba(0,0,0,.25)}
+  .box:after{content:"";position:absolute;left:45%;top:0;bottom:0;width:10%;background:#D9B27A;opacity:.9}
+  .qtext{font-size:16px;line-height:1.35;font-weight:500;margin:6px 0 12px;color:#FFFFFF}
+  .opts{display:flex;flex-direction:column;gap:6px}
+  .opts.nums{flex-direction:row;flex-wrap:wrap}
+  .opts.nums .opt{flex:1 1 28%;justify-content:center;font-size:20px;font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;padding:12px 4px}
+  .opts.chutes{display:grid;grid-template-columns:1fr 1fr}
+  .opts.chutes .opt{justify-content:center;text-align:center;font-size:12.5px;letter-spacing:.08em;padding:16px 6px;font-weight:600}
+  .opt{font-family:inherit;text-align:left;text-transform:none;letter-spacing:.02em;font-weight:500;font-size:14px;line-height:1.35;background:#25292E;border:2px solid #454B52;color:#FFFFFF;padding:11px 12px;width:100%;cursor:pointer;border-radius:0;display:flex;gap:10px;align-items:baseline;transition:transform .06s ease}
+  .opt:active{transform:scale(.98)}
+  .opt .tag{font-size:10px;letter-spacing:.12em;color:#A6ADB5;font-weight:600}
+  .opt small{display:block;color:#A6ADB5;font-size:10.5px;letter-spacing:.08em;margin-top:2px}
+  .opt.hit{background:#D6F04B;border-color:#D6F04B;color:#141608;animation:punch .34s ease}
+  .opt.hit .tag,.opt.hit small{color:#141608}
+  .opt.miss{background:#E5484D;border-color:#E5484D;color:#FFFFFF;animation:shake .32s ease}
+  .opt.miss .tag,.opt.miss small{color:#FFFFFF}
+  .opt.dim{opacity:.45}
+  @keyframes punch{30%{transform:scale(.96)}65%{transform:scale(1.03)}}
+  @keyframes shake{20%{transform:translateX(-6px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
+  .verdict{margin-top:10px;font-size:12.5px;letter-spacing:.05em;min-height:20px;font-weight:600}
+  .verdict b{color:#D6F04B}
+  .verdict.bad b{color:#FF7A7E}
+  .fact{color:#A6ADB5;font-size:11.5px;margin-top:6px;min-height:16px;letter-spacing:.03em}
+
+  /* ---------- timing track ---------- */
+  .track{position:relative;height:54px;border:2px solid #454B52;background:#101214;margin:4px 0 10px;overflow:hidden;cursor:pointer}
+  .track .zone{position:absolute;top:0;bottom:0;background:rgba(214,240,75,.28);border-left:2px solid #D6F04B;border-right:2px solid #D6F04B}
+  .track .zone:after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#D6F04B;opacity:.6}
+  .track .mk{position:absolute;top:0;bottom:0;width:6px;margin-left:-3px;background:#F96302;box-shadow:0 0 10px #F96302}
+  .track.hit .mk{background:#D6F04B;box-shadow:0 0 12px #D6F04B}
+  .track.miss .mk{background:#E5484D;box-shadow:0 0 12px #E5484D}
+  .track .lab{position:absolute;left:8px;bottom:3px;font-size:9px;letter-spacing:.16em;color:#A6ADB5;text-transform:uppercase}
+  .tapbtn{font-size:18px;padding:18px}
+
+  /* ---------- results ---------- */
+  .bignum{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:clamp(60px,24vw,104px);line-height:.85;color:#F96302;margin:6px 0 2px}
+  .bignum small{font-size:.4em}
+  .stamp{animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes stamp{from{transform:scale(2.2) rotate(-12deg);opacity:0}65%{transform:scale(.94) rotate(2deg);opacity:1}to{transform:scale(1) rotate(-2deg)}}
+  .rank{border:2px solid #F96302;background:#1F2226;padding:10px 12px;margin-bottom:10px;text-align:center}
+  .rank .t{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:20px;color:#F96302}
+  .rank .k{font-size:9px;letter-spacing:.14em;color:#A6ADB5;text-transform:uppercase}
+  .lb-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:7px 8px;border:2px solid #363B40;background:#1F2226;margin-bottom:5px}
+  .lb-row.me{border-color:#D6F04B}
+  .lb-row .r{color:#A6ADB5;width:22px}
+  .lb-row .n{flex:1;letter-spacing:.06em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .lb-row .n small{color:#F96302;font-size:9.5px;letter-spacing:.1em;margin-left:6px}
+  .lb-row .p{color:#D6F04B;font-weight:600}
+  .lb-beat{font-size:13px;font-weight:600;letter-spacing:.06em;color:#F96302;margin-bottom:10px}
+  .lb-off{color:#A6ADB5;font-size:12px}
+  .payout{border:2px solid #D6F04B;background:#1F2226;padding:10px 12px;margin-bottom:10px;font-size:12.5px;letter-spacing:.05em}
+  .payout b{color:#D6F04B}
+  .fish{font-size:20px;letter-spacing:.1em}
+
+  /* ---------- overlays ---------- */
+  .nextbar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;justify-content:center;padding:14px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#141618 42%)}
+  .nextbar button{max-width:492px}
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  #fx span{position:absolute;width:9px;height:9px;will-change:transform,opacity}
+  #pause{position:fixed;inset:0;z-index:80;background:rgba(20,22,24,.94);display:flex;align-items:center;justify-content:center;padding:20px}
+  #pause .panel{max-width:420px;width:100%;border-color:#F96302;text-align:center}
+  #pause h2{font-family:"Saira Stencil One","Arial Black",sans-serif;font-weight:400;font-size:34px;color:#F96302;margin:0 0 6px;line-height:1}
+  #toast{position:fixed;left:0;right:0;top:28%;z-index:70;pointer-events:none}
+  .ch-banner{background:#F96302;color:#1A0D02;font-weight:600;letter-spacing:.1em;font-size:13px;padding:14px 12px;text-align:center;border-top:3px solid #1A0D02;border-bottom:3px solid #1A0D02;animation:chslide 2.6s ease both}
+  .ch-banner.nip{background:#D6F04B;color:#141608}
+  @keyframes chslide{0%{transform:translateX(112%)}14%{transform:none}84%{transform:none}100%{transform:translateX(-112%)}}
+  .quake{animation:quake .5s}
+  @keyframes quake{20%{transform:translate(-7px,3px) rotate(-.5deg)}40%{transform:translate(6px,-4px) rotate(.4deg)}60%{transform:translate(-5px,2px) rotate(-.3deg)}80%{transform:translate(4px,-2px)}}
+
+  @media (prefers-reduced-motion:reduce){
+    .screen,.opt.hit,.opt.miss,.stamp,.clock.hot,.quake,.ch-banner,.ron.shake,.ron.bounce,.qcard.glitch{animation:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="hdr">
+    <div class="hdr-top">
+      <span style="white-space:nowrap"><a href="/">&larr; HUB</a> &nbsp;|&nbsp; LMS</span>
+      <div class="btns">
+        <button class="mini hide" id="pauseBtn">PAUSE</button>
+        <button class="mini" id="sndBtn" aria-pressed="true">SOUND ON</button>
+      </div>
+    </div>
+    <div class="hdr-body">
+      <h1>Hiss &amp;<br>Ship.</h1>
+      <div class="sub">ONE SHIFT. TEN TASKS. ONE GRUMPY ORANGE TABBY.</div>
+      <div class="barcode" aria-hidden="true"></div>
+    </div>
+  </header>
+
+  <!-- CLOCK IN -->
+  <section id="scrStart" class="screen">
+    <div class="prize">TOP CAT AT END OF LUNCH<br><b>EATS FREE.</b> <span class="who">PAVEL PAYS.</span></div>
+    <div class="ronbar" id="ronIntro"></div>
+    <div class="panel">
+      <p class="eyebrow">Shift briefing</p>
+      <ol class="rules">
+        <li>You are Ron Clawson, Associate #0913, orange tabby, grumpy. One shift: receive, putaway, replen, pick, cycle count, pack, SLAM, ship sort, trailer load. Every task has an engineered standard.</li>
+        <li>The LMS tracks % to standard, accuracy and UPH live. The floor board re-ranks after every task. Everyone can see it. That is the point.</li>
+        <li>Three tasks at or above standard triggers Pay-for-Performance: a fish treat (speed bump) or catnip (accuracy bump). Ron stops being grumpy while it lasts.</li>
+        <li>Things will break. Robotics go-lives, RF outages, labor cuts. Huddle with the right cats and make the SOP-correct call. Wrong calls cost you.</li>
+        <li>Pause any time. The shift saves on this phone. Close the browser, come back, clock back in.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <label for="me">Associate name</label>
+      <input id="me" type="text" autocomplete="given-name" placeholder="First name" maxlength="24">
+      <div class="warn" id="startWarn"></div>
+      <div style="height:12px"></div>
+      <button class="cta" id="clockIn">Clock in</button>
+      <div id="resumeBox" class="hide">
+        <div style="height:8px"></div>
+        <button class="cta" id="resumeBtn">Resume shift</button>
+        <div style="height:8px"></div>
+        <button class="ghost" id="restartBtn">Start a fresh shift</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="scrGame" class="screen hide">
+    <div class="ronbar" id="ronGame"></div>
+    <div class="stats">
+      <div class="stat" id="stPerfBox"><div class="v" id="stPerf">--</div><div class="k">% to std</div></div>
+      <div class="stat"><div class="v" id="stAcc">--</div><div class="k">accuracy</div></div>
+      <div class="stat"><div class="v" id="stUph">--</div><div class="k">UPH</div></div>
+      <div class="stat"><div class="v" id="stRank">--</div><div class="k">floor rank</div></div>
+    </div>
+    <button class="boardbtn" id="boardBtn"><span>PRODUCTIVITY BOARD</span><b id="boardHint">SHOW</b></button>
+    <div class="board hide" id="board"></div>
+
+    <div class="qcard" id="qcard">
+      <div class="qmeta">
+        <span id="qNum">TASK <b>1</b>/10</span>
+        <span id="qFunc">--</span>
+        <span>STD <b id="qStd">--</b></span>
+      </div>
+      <div class="clock" id="clock"><div class="fill" id="clockFill"></div></div>
+      <div id="stim"></div>
+      <p class="qtext" id="qText"></p>
+      <div id="mech"></div>
+      <div class="verdict" id="verdict"></div>
+      <div class="fact" id="fact"></div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="scrEnd" class="screen hide">
+    <div class="ronbar" id="ronEnd"></div>
+    <div class="panel center">
+      <p class="eyebrow">Shift closed</p>
+      <div class="bignum stamp" id="endPerf">0<small>%</small></div>
+      <div class="sub" style="margin-bottom:10px">TO STANDARD</div>
+      <div class="rank"><div class="k">Final rating</div><div class="t" id="endRank">--</div></div>
+      <div class="stats" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="stat"><div class="v" id="endAcc">--</div><div class="k">accuracy</div></div>
+        <div class="stat"><div class="v" id="endUph">--</div><div class="k">UPH</div></div>
+        <div class="stat"><div class="v" id="endSop">--</div><div class="k">SOP calls</div></div>
+      </div>
+      <div class="payout" id="payout"></div>
+      <div class="sub" id="endName">--</div>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Floor leaderboard</p>
+      <div class="lb-beat" id="lbBeat"></div>
+      <div id="lbRows"><div class="lb-off">Loading the board...</div></div>
+      <div style="height:8px"></div>
+      <button class="ghost" id="lbRefresh" style="padding:10px">Refresh board</button>
+    </div>
+    <button class="cta" id="again">Work a double -- new shift</button>
+    <div style="height:10px"></div>
+    <a class="ghost" href="/" style="display:block;text-align:center;text-decoration:none;padding:13px;border:2px solid #363B40;font-size:12px;letter-spacing:.1em">BACK TO THE HUB</a>
+  </section>
+</div>
+
+<div class="nextbar hide" id="qNextWrap"><button class="cta" id="qNext">Next task</button></div>
+<div id="fx" aria-hidden="true"></div>
+<div id="toast" aria-hidden="true"></div>
+<div id="pause" class="hide">
+  <div class="panel">
+    <h2>Paused.</h2>
+    <div class="sub" style="margin-bottom:14px" id="pauseSub">Ron is asleep on a pallet. The clock is stopped.</div>
+    <button class="cta" id="resumeGame">Resume shift</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LB_KEY="hissship7k2ronclawsona1863100";
+  var SAVE_KEY="hissship.v1";
+  var CAP=140;               // max % to standard on any one task
+  var PERIOD=2400;           // timing-marker sweep period (ms)
+
+  /* ---------- Ron ---------- */
+  var RON_SVG='<svg class="ron" viewBox="0 0 120 104" aria-label="Ron Clawson">'+
+    '<polygon points="14,44 24,6 50,32" fill="#E8892B"/><polygon points="106,44 96,6 70,32" fill="#E8892B"/>'+
+    '<polygon points="22,40 27,18 42,32" fill="#F4B183"/><polygon points="98,40 93,18 78,32" fill="#F4B183"/>'+
+    '<ellipse cx="60" cy="60" rx="46" ry="38" fill="#E8892B"/>'+
+    '<path d="M60 22 l0 18 M49 24 l4 16 M71 24 l-4 16 M38 30 l6 12 M82 30 l-6 12" stroke="#B55A14" stroke-width="4" stroke-linecap="round" fill="none"/>'+
+    '<path d="M18 58 l10 2 M18 70 l10 -1 M102 58 l-10 2 M102 70 l-10 -1" stroke="#B55A14" stroke-width="3.5" stroke-linecap="round"/>'+
+    '<ellipse cx="42" cy="58" rx="9" ry="8" fill="#F2D35B"/><ellipse cx="78" cy="58" rx="9" ry="8" fill="#F2D35B"/>'+
+    '<ellipse cx="42" cy="58" rx="2.6" ry="6.5" fill="#141618"/><ellipse cx="78" cy="58" rx="2.6" ry="6.5" fill="#141618"/>'+
+    '<path id="lidL" d="M32 50 L52 50 L52 56 L32 60 Z" fill="#E8892B"/><path id="lidR" d="M68 50 L88 50 L88 60 L68 56 Z" fill="#E8892B"/>'+
+    '<path id="browL" d="M31 46 L52 52" stroke="#B55A14" stroke-width="4" stroke-linecap="round"/>'+
+    '<path id="browR" d="M89 46 L68 52" stroke="#B55A14" stroke-width="4" stroke-linecap="round"/>'+
+    '<polygon points="55,70 65,70 60,76" fill="#E07A8A"/>'+
+    '<path id="mouth" d="M50 86 Q60 78 70 86" stroke="#7A3A0E" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    '<path d="M4 66 L34 72 M4 78 L34 76 M116 66 L86 72 M116 78 L86 76" stroke="#EDEEEA" stroke-width="1.6" opacity=".8"/>'+
+    '</svg>';
+  var MOODS={
+    grumpy:{lidL:"M32 50 L52 50 L52 56 L32 60 Z",lidR:"M68 50 L88 50 L88 60 L68 56 Z",browL:"M31 46 L52 52",browR:"M89 46 L68 52",mouth:"M50 86 Q60 78 70 86"},
+    content:{lidL:"M32 46 L52 46 L52 47 L32 47 Z",lidR:"M68 46 L88 46 L88 47 L68 47 Z",browL:"M31 44 L52 42",browR:"M89 44 L68 42",mouth:"M48 82 Q60 92 72 82"},
+    furious:{lidL:"M32 48 L52 48 L52 58 L32 62 Z",lidR:"M68 48 L88 48 L88 62 L68 58 Z",browL:"M30 44 L53 54",browR:"M90 44 L67 54",mouth:"M48 90 Q60 78 72 90 L70 86 L66 90 L60 86 L54 90 L50 86 Z"}
+  };
+  var RON_LINES={
+    grumpy:["Mrrp.","I was told there would be a window.","The conveyor is louder than my opinions.","Standard is a social construct.","Here since 06:00. Emotionally, since 1987.","Nobody ever scans me.","I have read the SOP. I have opinions.","Tote 4471 looked at me funny."],
+    content:["Purrrrr. Fish acquired.","I am, briefly, a team player.","Catnip: the original engagement survey.","Productivity is easy when you are vibrating.","Tell Labor Planning I feel seen."],
+    furious:["HISS.","Who approved that.","I am filing this under NO.","Engineering cats. Every. Time.","Put it in the ticket. Put it ALL in the ticket."]
+  };
+
+  /* ---------- floor roster (fictional cats) ---------- */
+  var NPC=[["WHISKERS","PICK",108],["BARTHOLOMEW","PACK",96],["SIR POUNCE","SLAM",118],["MEOWRICE","RECEIVING",84],["TUNA","SHIP SORT",102],["GRAVY","REPLEN",91],["PICKLES","CYCLE COUNT",124]];
+
+  /* ---------- task content ---------- */
+  var PUT=[
+    {sku:"SKU 1002-447 | 50 FT FLEX HOSE, GRN",vel:"VELOCITY A | 40 PICKS/DAY",opts:["Golden zone pick face, aisle 03, waist height","Top rack reserve, aisle 22","Bulk floor, dock side","Returns cage"],ok:"A-MOVER IN THE GOLDEN ZONE. SLOTTING CAT NODS ONCE.",bad:"A-MOVER OUT OF THE GOLDEN ZONE. EVERY PICKER NOW WALKS FOR YOU."},
+    {sku:"SKU 4410-019 | 9 FT ARTIFICIAL FICUS",vel:"VELOCITY C | 2 PICKS/WEEK",opts:["Reserve rack, upper level, aisle 22","Golden zone pick face, aisle 03","In front of the SLAM line","The break room"],ok:"C-MOVER UP TOP. GOLDEN ZONE STAYS FOR VELOCITY.",bad:"A FICUS IN THE GOLDEN ZONE. THE A-MOVERS ARE FURIOUS."},
+    {sku:"SKU 7781-203 | 1 GAL PAINT THINNER",vel:"VELOCITY B | HAZMAT CLASS 3",opts:["Flammables cage, hazmat storage","Any open pick face","Under the conveyor","Next to the PIT charger bank"],ok:"HAZMAT CAGED. FIRE MARSHAL CAT APPROVES.",bad:"FLAMMABLES IN THE WRONG SPOT. SAFETY CAT IS WALKING OVER."}
+  ];
+  var PICKS=[
+    {loc:"07-22-C",upc:"4471",items:[["50 FT FLEX HOSE, GRN","4471"],["25 FT FLEX HOSE, GRN","4417"],["50 FT FLEX HOSE, BLK","4741"],["50 FT SOAKER HOSE","4174"]]},
+    {loc:"12-04-A",upc:"8823",items:[["INT EGGSHELL, SWISS COFFEE, 1 GAL","8823"],["INT SATIN, SWISS COFFEE, 1 GAL","8832"],["INT EGGSHELL, SWISS COFFEE, 1 QT","8283"],["EXT EGGSHELL, SWISS COFFEE, 1 GAL","8328"],["INT EGGSHELL, ALABASTER, 1 GAL","8238"],["INT FLAT, SWISS COFFEE, 1 GAL","8382"]]},
+    {loc:"19-31-D",upc:"5506",items:[["3/8 IN HEX BOLT, ZINC, 50 PK","5506"],["3/8 IN HEX BOLT, ZINC, 25 PK","5560"],["3/8 IN LAG BOLT, ZINC, 50 PK","5056"],["5/16 IN HEX BOLT, ZINC, 50 PK","5065"],["3/8 IN HEX NUT, ZINC, 50 PK","5605"]]},
+    {loc:"04-08-B",upc:"2290",items:[["LED BULB, 60W EQ, SOFT WHITE, 4 PK","2290"],["LED BULB, 60W EQ, DAYLIGHT, 4 PK","2209"],["LED BULB, 40W EQ, SOFT WHITE, 4 PK","2920"],["LED BULB, 60W EQ, SOFT WHITE, 2 PK","2029"]]},
+    {loc:"15-11-A",upc:"6634",items:[["1/2 IN PEX, RED, 100 FT","6634"],["1/2 IN PEX, BLUE, 100 FT","6643"],["3/4 IN PEX, RED, 100 FT","6364"],["1/2 IN PEX, RED, 25 FT","6346"],["1/2 IN COPPER, 10 FT","6436"]]}
+  ];
+  var CARTONS=[[8,6,4],[12,10,8],[16,12,10],[20,16,14]];
+  var ITEMS=[[7,5,3,"CORDLESS DRILL, BARE TOOL"],[11,9,7,"SMART THERMOSTAT, 2 PK"],[15,11,9,"CEILING FAN, 44 IN"],[19,15,12,"SHOP VAC, 6 GAL"]];
+  var CHUTES=["UPS GROUND","FEDEX 2DAY","USPS PRIORITY","LTL DOCK"];
+  var SHIPS=[["14.2 LB","FEDEX 2DAY","ZONE 5"],["3.1 LB","USPS PRIORITY","ZONE 2"],["212 LB","LTL","PALLET"],["28.6 LB","UPS GROUND","ZONE 7"],["0.8 LB","USPS PRIORITY","ZONE 3"],["41.0 LB","UPS GROUND","ZONE 4"],["9.4 LB","FEDEX 2DAY","ZONE 8"]];
+
+  var HUDDLES=[
+    {who:"ENGINEERING CATS",title:"AMR go-live",text:"The new AMR fleet went live at 06:00. WMS is now sending pick paths to locations that do not exist (aisle 99). Engineering cats are in the huddle. Your call:",
+     opts:["Stop the line, roll back to manual pick paths, open a P1 ticket with examples","Keep picking. Aisle 99 is probably around here somewhere","Restart every AMR by kicking it gently","Blame IT and take lunch early"],
+     ok:"ROLLED BACK. DATA CLEAN. ENGINEERING OWES YOU A FISH.",bad:"PICKING INTO THE VOID. LOCATION DATA IS NOW FICTION.",eff:{mult:.8,n:2,glitch:true}},
+    {who:"IT CATS",title:"RF outage",text:"RF guns dropped off the network mid-wave. IT cats say the access point on aisle 12 is \"thinking about it\". Your call:",
+     opts:["Switch to the downtime SOP: paper pick lists, hold scans, backflush when RF returns","Reboot your gun fourteen times","Memorize the pick list and wing it","Throw the gun in the baler"],
+     ok:"DOWNTIME SOP ACTIVATED. PAPER NEVER LOSES SIGNAL.",bad:"NO SCANS, NO TRACEABILITY. QA CAT IS WRITING THIS DOWN.",eff:{mult:.8,n:2}},
+    {who:"LABOR PLANNING CATS",title:"Headcount cut",text:"Labor Planning cut outbound headcount 15% at the 10:00 huddle. The forecast used last week's volume. Today's order drop is up 30%. Your call:",
+     opts:["Escalate with actual order drops vs forecast, request flex from inbound to outbound","Accept it. The customers can wait","Quietly hide in the returns cage","Unionize the cats"],
+     ok:"FLEX APPROVED. INBOUND CATS ARE WALKING OVER. SLOWLY.",bad:"SHORT-STAFFED INTO THE CPT. EVERY STANDARD JUST GOT TIGHTER.",eff:{mult:.85,n:2}},
+    {who:"INVENTORY CONTROL CATS",title:"Count variance",text:"Cycle count on 12-08-A shows -3 versus system on-hand. Inventory Control cats are staring at you. Your call:",
+     opts:["Research first: adjacent bins, open picks, recent receipts. Then adjust","Adjust system to match. Problem gone","Adjust system to +3 so it averages out","Eat the evidence"],
+     ok:"FOUND IT IN 12-08-B. NO ADJUSTMENT NEEDED. INVENTORY CAT BLINKS SLOWLY AT YOU.",bad:"BLIND ADJUSTMENT. THE VARIANCE WILL BE BACK. IT ALWAYS COMES BACK.",eff:{mult:.85,n:1}},
+    {who:"TRANSPORTATION CATS",title:"CPT moved up",text:"The carrier pulled the critical pull time forward 30 minutes. Transportation cats want to know what ships. Your call:",
+     opts:["Prioritize by service level, wave the expedites first, tell pack the new cutoff","Load whatever is closest to the door","Climb into the trailer, become a stowaway","Tell the driver to come back tomorrow"],
+     ok:"EXPEDITES WAVED. THE DRIVER STOPPED HONKING.",bad:"GROUND SHIPPED, 2DAY STUCK ON THE DOCK. OTIF IS A MEMORY.",eff:{mult:.8,n:2}},
+    {who:"SAFETY CATS",title:"Near miss",text:"A PIT came around the end cap without honking and nearly clipped a picker. Safety cats called a stand-down. Your call:",
+     opts:["Report the near miss, re-walk the intersection with the operator, review the pedestrian zone SOP","Nobody got hit, so nothing happened","Hiss at the forklift","Remove the end cap"],
+     ok:"NEAR MISS LOGGED. MIRROR INSTALLED BY LUNCH. SAFETY CAT PURRS.",bad:"UNREPORTED. NEXT TIME IT IS NOT A NEAR MISS.",eff:{mult:.85,n:1}},
+    {who:"ENGINEERING CATS",title:"New pack SOP",text:"Engineering rolled out pack SOP v4.2 overnight. Nobody read it. Where does the new cartonization step go?",
+     opts:["At pick release, so the right carton is at the pack station before the tote arrives","After the ship label is applied","Let the customer choose the box","Biggest box every time. Air ships free"],
+     ok:"CARTONIZE AT RELEASE. PACK CATS STOP RE-BOXING.",bad:"RE-BOXING AT PACK. DIM WEIGHT SURCHARGES FOR EVERYONE.",eff:{mult:.8,n:1}}
+  ];
+
+  var OK_LINES=["SCANNED. MOVING ON.","STANDARD BEATEN. STILL GRUMPY.","CLEAN TRANSACTION.","RATE BUSTER PACE.","THE LMS NOTICED. BRIEFLY."];
+  var SLOW_LINES=["RIGHT. EVENTUALLY.","CORRECT, BUT THE WAVE CLOSED.","GOOD. SLOW. THE BOARD SAW IT."];
+  var BAD_LINES=["MIS-PICK. QA CAT IS WRITING THIS DOWN.","THAT IS A REWORK TICKET.","WRONG. THE WMS WEEPS.","NOT PER SOP. NOT EVEN CLOSE."];
+
+  /* ---------- utils ---------- */
+  function $(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/[<>&\"]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c];});}
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function shuf(a,r){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function newSeed(){return (Math.floor(Math.random()*2147483646)+1);}
+  function clamp(v,lo,hi){return v<lo?lo:(v>hi?hi:v);}
+  var REDUCED=false;try{REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+
+  /* ---------- shift plan (deterministic from seed) ---------- */
+  function buildShift(seed){
+    var r=rng(seed),T=[];
+    // 1 RECEIVE
+    var asn=8+Math.floor(r()*6),dv=r(),actual=asn+(dv<.5?0:(dv<.75?-1:1));
+    T.push({kind:"task",func:"RECEIVING",name:"RECEIVE",mech:"count",std:9000,units:actual,n:actual,
+      rf:'<div class="hd">RF | INBOUND | DOOR 14</div>PO 7731-2201 | LPN <b>0048812</b><br>ASN: <b>'+asn+' CTN</b> | VENDOR: RIDGEWAY TOOL',
+      q:"Count the cartons that actually came off the trailer.",ans:actual,
+      ok:(actual===asn?"MATCHES ASN. RECEIVED TO LPN.":"VARIANCE VS ASN. OS&D TICKET LOGGED. GOOD CATCH."),bad:"MISCOUNT. THE ASN IS NOW FICTION.",
+      fact:"OS&D = Over, Short and Damaged. Receiving's whole personality."});
+    // 2 PUTAWAY
+    var P=PUT[Math.floor(r()*PUT.length)],po=shuf([0,1,2,3],r);
+    T.push({kind:"task",func:"PUTAWAY",name:"PUTAWAY",mech:"choice",std:7000,units:1,
+      rf:'<div class="hd">RF | PUTAWAY | DIRECTED PUTAWAY FAILED</div>'+P.sku+'<br>'+P.vel,
+      q:"WMS could not direct the putaway. Pick the slot.",opts:po.map(function(i){return P.opts[i];}),ans:po.indexOf(0),ok:P.ok,bad:P.bad,
+      fact:"Slotting by velocity: A-movers in the golden zone (waist to shoulder), C-movers up top."});
+    // 3 REPLEN
+    T.push({kind:"task",func:"REPLENISHMENT",name:"REPLEN",mech:"timing",std:4000,units:1,z:.22+r()*.5,zw:.16,
+      rf:'<div class="hd">RF | REPLEN | MIN/MAX TRIGGER</div>PICK FACE <b>03-14-B</b> AT MIN | CASE FROM RESERVE 22-40-D',
+      q:"Drop the replen case when the marker is in the window: at min, before the pick face hits zero.",
+      ok:"REPLEN LANDED. PICK FACE NEVER HIT ZERO.",bad:"MISSED THE WINDOW. PICKERS SHORT-PICKED 03-14-B.",fact:"A zero-on-hand pick face is a short pick, and a short pick is a customer email."});
+    // H1
+    var hs=shuf([0,1,2,3,4,5,6],r);
+    T.push(huddle(hs[0],r));
+    // 4,5 PICK
+    var pk=shuf([0,1,2,3,4],r);
+    T.push(pickTask(PICKS[pk[0]],r,"07"));T.push(pickTask(PICKS[pk[1]],r,"09"));
+    // 6 CYCLE COUNT
+    var sys=6+Math.floor(r()*9),dv2=r(),cnt=sys+(dv2<.55?0:(dv2<.8?-1:1));
+    T.push({kind:"task",func:"INVENTORY CONTROL",name:"CYCLE COUNT",mech:"count",std:9000,units:cnt,n:cnt,
+      rf:'<div class="hd">RF | CYCLE COUNT | ABC CLASS A</div>BIN <b>12-08-A</b> | SYSTEM ON-HAND: <b>'+sys+' EA</b>',
+      q:"Blind count the bin. Post what is actually there.",ans:cnt,
+      ok:(cnt===sys?"COUNT MATCHES SYSTEM. BIN CERTIFIED.":"VARIANCE "+(cnt-sys>0?"+":"")+(cnt-sys)+" POSTED. INVENTORY CONTROL CAT NOTIFIED."),bad:"WRONG COUNT. YOU JUST CREATED A VARIANCE.",
+      fact:"A-class SKUs get counted most often. Accuracy beats speed here, but the LMS still has a standard."});
+    // H2
+    T.push(huddle(hs[1],r));
+    // 7 PACK
+    var ii=Math.floor(r()*ITEMS.length),it=ITEMS[ii],co=shuf([0,1,2,3],r);
+    T.push({kind:"task",func:"PACK",name:"PACK",mech:"choice",std:8000,units:1,
+      rf:'<div class="hd">PACK STATION 06 | ORDER 77-2201</div>'+it[3]+'<br>ITEM CUBE: <b>'+it[0]+' x '+it[1]+' x '+it[2]+' IN</b>',
+      q:"Cartonize. Smallest carton that fits. DIM weight is not free.",opts:co.map(function(i){var c=CARTONS[i];return "CARTON "+String.fromCharCode(65+i)+" -- "+c[0]+" x "+c[1]+" x "+c[2]+" in";}),ans:co.indexOf(ii),
+      ok:"CUBED RIGHT. NO DIM WEIGHT SURCHARGE.",badFn:function(j){var c=CARTONS[co[j]];return (c[0]<it[0])?"DOES NOT FIT. PACK CAT IS SITTING IN THE BOX INSTEAD.":"IT FITS. SO DOES NINE POUNDS OF AIR. DIM WEIGHT SURCHARGE.";},
+      fact:"DIM weight = L x W x H / 139. Carriers bill the greater of actual and dimensional weight."});
+    // 8 SLAM
+    T.push({kind:"task",func:"SLAM",name:"SLAM",mech:"timing",std:4000,units:1,z:.3+r()*.4,zw:.12,
+      rf:'<div class="hd">SLAM LINE 2 | SCAN. LABEL. APPLY. MANIFEST.</div>CARTON <b>1Z 884 11A</b> INBOUND ON CONVEYOR | 412 CPM',
+      q:"Apply the ship label while the carton is in the window, or it kicks out to the jackpot lane.",
+      ok:"LABEL APPLIED. MANIFESTED. GONE.",bad:"LABEL MISSED. CARTON KICKED TO THE JACKPOT LANE. RE-INDUCT.",fact:"Jackpot lane: where cartons go when the scanner cannot read them. Not a prize."});
+    // H3
+    T.push(huddle(hs[2],r));
+    // 9 SHIP SORT
+    var sh=shuf([0,1,2,3,4,5,6],r).slice(0,3);
+    T.push({kind:"task",func:"OUTBOUND",name:"SHIP SORT",mech:"sort",std:10500,units:3,rf:"",
+      rounds:sh.map(function(i,k){var s=SHIPS[i];var svc=s[1]==="LTL"?"LTL DOCK":s[1];
+        return {lbl:'<b>ORD 88-11'+(40+i)+'</b>'+s[0]+' | '+s[1]+' | '+s[2]+'<div class="bc"></div>',ans:CHUTES.indexOf(svc)};}),
+      q:"Three cartons off the sorter. Tap the right chute for each label.",
+      ok:"THREE FOR THREE. SORT CATS APPROVE.",bad:"MIS-SORT. A 2DAY CARTON IS RIDING GROUND.",fact:"A mis-sort is a mis-ship waiting to happen. Carriers bill those too."});
+    // 10 TRAILER LOAD
+    T.push({kind:"task",func:"SHIPPING",name:"TRAILER LOAD",mech:"timing",std:4000,units:1,z:.25+r()*.5,zw:.14,
+      rf:'<div class="hd">DOOR 31 | UPS | CPT 14:30</div>TRAILER 88% CUBED | DRIVER: <b>HONKING</b>',
+      q:"Close and seal the door in the window. Too early leaves cartons on the dock. Too late misses CPT.",
+      ok:"SEALED. BOL SIGNED. DRIVER GONE. ON-TIME SHIP.",bad:"MISSED CPT. TRANSPORTATION CAT WANTS A WORD.",fact:"CPT = critical pull time. The minute the trailer has to leave to hit the carrier's network."});
+    return T;
+  }
+  function huddle(i,r){
+    var H=HUDDLES[i],o=shuf([0,1,2,3],r);
+    return {kind:"huddle",func:H.who,name:"HUDDLE: "+H.title.toUpperCase(),mech:"choice",std:15000,units:0,
+      who:H.who,text:H.text,opts:o.map(function(k){return H.opts[k];}),ans:o.indexOf(0),ok:H.ok,bad:H.bad,eff:H.eff,
+      fact:"Correct call: "+H.opts[0]+"."};
+  }
+  function pickTask(P,r,suffix){
+    var o=shuf(P.items.map(function(_,i){return i;}),r);
+    return {kind:"task",func:"EACH PICK",name:"PICK",mech:"choice",std:(P.items.length>4?7000:5500),units:1,
+      rf:'<div class="hd">RF | PICK | WAVE 1124 | TOTE T-'+suffix+'31</div>GO TO <b>'+P.loc+'</b> | PICK <b>1 EA</b><br>SCAN UPC ENDING <b>'+P.upc+'</b>',
+      q:"Scan the right item into the tote.",opts:o.map(function(i){return P.items[i][0]+'<small>UPC ...'+P.items[i][1]+'</small>';}),ans:o.indexOf(0),html:true,
+      ok:"SCANNED. TOTE CONFIRMED.",bad:"WRONG UPC. MIS-PICK LOGGED AGAINST YOUR BADGE.",fact:"Lookalike SKUs are why the scan exists. The last four digits are the whole game."};
+  }
+
+  /* ---------- state ---------- */
+  var S=null,PLAN=[],LIVE=null;   // LIVE = current task runtime (not saved)
+  function fresh(me,att){
+    return {v:1,me:me,pid:Math.random().toString(36).slice(2,9),att:att||1,seed:newSeed(),step:0,res:[],pfp:0,bump:null,fish:0,nip:0,eff:null,mood:"grumpy",npc:NPC.map(function(n){return n[2];}),done:false};
+  }
+  function save(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+  function load(){try{var o=JSON.parse(localStorage.getItem(SAVE_KEY));return (o&&o.v===1)?o:null;}catch(e){return null;}}
+
+  /* ---------- derived stats ---------- */
+  function taskRes(){return S.res.filter(function(x){return x.kind==="task";});}
+  function perf(){var t=taskRes();if(!t.length)return null;var s=0;for(var i=0;i<t.length;i++)s+=t[i].pct;return Math.round(s/t.length);}
+  function acc(){var a=0,c=0;S.res.forEach(function(x){if(x.kind==="task"){a+=x.att;c+=x.hit;}});return a?Math.round(100*c/a):null;}
+  // UPH: one real second = 30 seconds of floor time, so the number lands in a believable range
+  function uph(){var u=0,ms=0;taskRes().forEach(function(x){if(x.ok)u+=x.units;ms+=x.t;});return ms?Math.round(u/(ms*30/3600000)):null;}
+  function sop(){var o=0,n=0;S.res.forEach(function(x){if(x.kind==="huddle"){n++;if(x.ok)o++;}});return o+"/"+n;}
+  function rank(p){if(p===null)return "UNRATED";if(p>=120)return "TOP CAT";if(p>=100)return "EXCEEDS STANDARD";if(p>=80)return "MEETS STANDARD";return "NEEDS COACHING";}
+  function taskNo(step){var n=0;for(var i=0;i<=step&&i<PLAN.length;i++)if(PLAN[i].kind==="task")n++;return n;}
+  function floorRank(){var p=perf();if(p===null)return null;var above=0;for(var i=0;i<S.npc.length;i++)if(S.npc[i]>p)above++;return above+1;}
+
+  /* ---------- sound ---------- */
+  var AU={ctx:null,on:true};
+  function aInit(){if(AU.ctx)return;try{var C=window.AudioContext||window.webkitAudioContext;if(C)AU.ctx=new C();}catch(e){}}
+  function tone(f,t0,dur,type,vol){
+    if(!AU.on||!AU.ctx)return;
+    try{var c=AU.ctx,o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(t0||0);
+      o.type=type||"triangle";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(vol||.12,t+.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.02);}catch(e){}
+  }
+  function sndOk(fast){tone(660,0,.09);tone(880,.09,.11);if(fast)tone(1175,.18,.13);}
+  function sndBad(){tone(150,0,.16,"square",.08);tone(110,.13,.2,"square",.08);}
+  function sndScan(){tone(1320,0,.06,"square",.05);}
+  function sndHiss(){for(var i=0;i<8;i++)tone(1800+Math.random()*2200,i*.03,.06,"sawtooth",.025);}
+  function sndPurr(){for(var i=0;i<10;i++)tone(82+(i%2)*6,i*.07,.09,"sawtooth",.07);}
+  function sndBell(){tone(1046,0,.25);tone(1318,.12,.3);tone(1568,.24,.4);}
+  function sndHonk(){tone(392,0,.13,"square",.09);tone(392,.2,.16,"square",.09);}
+  function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+  $("sndBtn").addEventListener("click",function(){AU.on=!AU.on;this.textContent=AU.on?"SOUND ON":"SOUND OFF";this.setAttribute("aria-pressed",AU.on);aInit();});
+
+  /* ---------- fx ---------- */
+  function burstAt(cx,cy,n,palette){
+    if(REDUCED)return;
+    var fx=$("fx"),cols=palette||["#F96302","#D6F04B","#EDEEEA"];
+    for(var i=0;i<n;i++){
+      var s=document.createElement("span"),a=Math.random()*Math.PI*2,d=60+Math.random()*120;
+      s.style.left=cx+"px";s.style.top=cy+"px";s.style.background=cols[i%cols.length];
+      if(Math.random()<.4)s.style.borderRadius="50%";
+      fx.appendChild(s);
+      s.animate([{transform:"translate(0,0) rotate(0)",opacity:1},{transform:"translate("+Math.cos(a)*d+"px,"+(Math.sin(a)*d+60)+"px) rotate("+(Math.random()*540-270)+"deg)",opacity:0}],{duration:650+Math.random()*350,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=function(){this.effect.target.remove();};
+    }
+  }
+  function burst(el,n,palette){var b=el.getBoundingClientRect();burstAt(b.left+b.width/2,b.top+b.height/2,n,palette);}
+  function toast(html,cls,life){var t=$("toast"),d=document.createElement("div");d.className="ch-banner"+(cls?" "+cls:"");d.innerHTML=html;t.appendChild(d);setTimeout(function(){d.remove();},life||2600);}
+  function quake(){if(REDUCED)return;var w=$("wrap");w.classList.remove("quake");void w.offsetWidth;w.classList.add("quake");}
+
+  /* ---------- Ron rendering ---------- */
+  function ronBar(host,line){
+    host.innerHTML='<div class="ronbox">'+RON_SVG+'<div class="tag"><b>RON CLAWSON</b>ASSOC #0913</div></div>'+
+      '<div class="ronside"><div class="bubble"><span></span></div>'+
+      '<div class="pfp"><span>PFP</span><div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i></div><span class="bump"></span></div></div>';
+    setMoodIn(host,S?S.mood:"grumpy",line);
+    paintPfp(host);
+  }
+  function setMoodIn(host,m,line){
+    var M=MOODS[m]||MOODS.grumpy;
+    ["lidL","lidR","browL","browR","mouth"].forEach(function(id){var el=host.querySelector("#"+id);if(el)el.setAttribute("d",M[id]);});
+    var b=host.querySelector(".bubble");if(b){b.className="bubble "+m;b.firstChild.textContent=line||pick(RON_LINES[m]||RON_LINES.grumpy);}
+  }
+  function paintPfp(host){
+    if(!S)return;
+    var p=host.querySelector(".pfp");if(!p)return;
+    var pips=p.querySelectorAll(".pip");for(var i=0;i<3;i++)pips[i].className="pip"+(i<S.pfp?" on":"");
+    var b=p.querySelector(".bump");
+    if(S.done){p.classList.toggle("active",S.fish>0);b.textContent="PAYOUT: "+S.fish+" BUMP"+(S.fish===1?"":"S");}
+    else if(S.bump){p.classList.add("active");b.textContent=(S.bump.kind==="fish"?"FISH +25% TIME":"CATNIP x1 MISS")+" ("+S.bump.left+")";}
+    else{p.classList.remove("active");b.textContent=S.pfp?(3-S.pfp)+" TO BUMP":"3 AT STD = BUMP";}
+  }
+  function ronSay(mood,line,anim){
+    S.mood=mood;var host=$("ronGame");setMoodIn(host,mood,line);paintPfp(host);
+    if(anim&&!REDUCED){var svg=host.querySelector(".ron");svg.classList.remove("shake","bounce");void svg.getBoundingClientRect();svg.classList.add(anim);}
+  }
+
+  /* ---------- board ---------- */
+  function driftNpc(){for(var i=0;i<S.npc.length;i++){S.npc[i]=clamp(Math.round(S.npc[i]+(Math.random()*14-7)),62,138);}}
+  function paintBoard(){
+    var p=perf(),rows=NPC.map(function(n,i){return {n:n[0],d:n[1],p:S.npc[i],me:false};});
+    if(p!==null)rows.push({n:S.me.toUpperCase(),d:"YOU",p:p,me:true});
+    rows.sort(function(a,b){return b.p-a.p;});
+    var html="";
+    rows.forEach(function(r,i){html+='<div class="brow'+(r.me?" me":"")+'"><span class="r">'+(i+1)+'</span><span class="n">'+esc(r.n)+'<small>'+esc(r.d)+'</small></span><span class="p">'+r.p+'%</span></div>';});
+    $("board").innerHTML=html;
+    var fr=floorRank();$("boardHint").textContent=$("board").classList.contains("hide")?(fr?"#"+fr+" OF "+rows.length+" -- SHOW":"SHOW"):"HIDE";
+  }
+  $("boardBtn").addEventListener("click",function(){$("board").classList.toggle("hide");paintBoard();});
+  function paintStats(){
+    var p=perf(),a=acc(),u=uph(),fr=floorRank();
+    $("stPerf").textContent=p===null?"--":p+"%";
+    $("stPerfBox").className="stat"+(p===null?"":(p>=100?" good":(p<80?" bad":"")));
+    $("stAcc").textContent=a===null?"--":a+"%";
+    $("stUph").textContent=u===null?"--":u;
+    $("stRank").textContent=fr?"#"+fr:"--";
+    paintBoard();
+  }
+
+  /* ---------- screens ---------- */
+  function show(id){["scrStart","scrGame","scrEnd"].forEach(function(s){$(s).classList.toggle("hide",s!==id);});
+    $("wrap").classList.toggle("slim",id!=="scrStart");$("pauseBtn").classList.toggle("hide",id!=="scrGame");window.scrollTo(0,0);}
+
+  /* ---------- clock ---------- */
+  function effStd(T){var m=1;if(S.bump&&S.bump.kind==="fish"&&T.kind==="task")m*=1.25;if(S.eff&&S.eff.n>0&&T.kind==="task")m*=S.eff.mult;return Math.round(T.std*m);}
+  function clockStart(){LIVE.tLast=performance.now();LIVE.ticker=setInterval(tick,LIVE.mech==="timing"?16:50);tick();}
+  function clockStop(){if(LIVE&&LIVE.ticker){clearInterval(LIVE.ticker);LIVE.ticker=null;}}
+  function tick(){
+    if(!LIVE||LIVE.paused||LIVE.done)return;
+    var now=performance.now();LIVE.tAcc+=now-LIVE.tLast;LIVE.tLast=now;
+    var f=clamp(1-LIVE.tAcc/LIVE.std,0,1),c=$("clock");
+    $("clockFill").style.transform="scaleX("+f+")";
+    c.className="clock"+(f<.2?" hot":(f<.5?" mid":""))+(f<=0?" over":"");
+    if(LIVE.mech==="timing")paintMarker();
+    if(LIVE.tAcc>LIVE.std*3)timeout();
+  }
+  function pauseGame(auto){
+    if(!LIVE||LIVE.done||LIVE.paused)return;
+    LIVE.paused=true;$("pause").classList.remove("hide");
+    $("pauseSub").textContent=auto?"Screen went away. Ron sat down. The clock is stopped.":"Ron is asleep on a pallet. The clock is stopped.";
+  }
+  function resumeGame(){if(!LIVE||!LIVE.paused)return;LIVE.paused=false;LIVE.tLast=performance.now();$("pause").classList.add("hide");}
+  $("pauseBtn").addEventListener("click",function(){pauseGame(false);});
+  $("resumeGame").addEventListener("click",resumeGame);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)pauseGame(true);});
+
+  /* ---------- task rendering ---------- */
+  function runStep(){
+    if(S.step>=PLAN.length){end();return;}
+    var T=PLAN[S.step],std=effStd(T);
+    LIVE={T:T,std:std,mech:T.mech,tAcc:0,tLast:0,ticker:null,paused:false,done:false,round:0,att:0,hit:0};
+    $("qNextWrap").classList.add("hide");
+    $("verdict").className="verdict";$("verdict").textContent="";$("fact").textContent="";
+    var card=$("qcard");card.className="qcard"+(T.kind==="huddle"?" huddle":"")+((S.eff&&S.eff.glitch&&S.eff.n>0&&T.kind==="task")?" glitch":"");
+    $("qNum").innerHTML=(T.kind==="huddle"?"HUDDLE":"TASK <b>"+taskNo(S.step)+"</b>/10");
+    $("qFunc").textContent=T.func;
+    $("qStd").textContent=(std/1000).toFixed(1)+"s"+(std!==T.std?(std>T.std?" (FISH)":" (TIGHT)"):"");
+    if(T.kind==="huddle"){
+      $("stim").innerHTML='<div class="rf" style="background:#1A1D20;border-color:#D6F04B;color:#EDEEEA;box-shadow:none"><div class="hd" style="color:#D6F04B;border-color:#D6F04B">HUDDLE | '+esc(T.who)+' | INDIRECT TIME</div>'+esc(T.text)+'</div>';
+      $("qText").textContent="";
+      ronSay(S.bump?"content":"grumpy",pick(["Not the cats. Anyone but the cats.","A huddle. My favorite kind of standing.","Fifteen seconds. Make it a good one."]));
+    }else{
+      $("stim").innerHTML='<div class="rf">'+T.rf+'</div>'+(T.mech==="count"?gridHtml(T.n):"");
+      $("qText").textContent=T.q;
+      if(!S.bump&&S.mood!=="furious")ronSay("grumpy");
+    }
+    var m=$("mech");m.innerHTML="";
+    if(T.mech==="choice")renderChoice(T.opts,T.html,T.kind==="huddle"?"":"");
+    else if(T.mech==="count")renderNums(T.ans);
+    else if(T.mech==="sort")renderSortRound();
+    else renderTiming(T);
+    clockStart();
+  }
+  function gridHtml(n){
+    var cells=24,idx=[];for(var i=0;i<cells;i++)idx.push(i);
+    idx.sort(function(){return Math.random()-.5;});var on={};for(var k=0;k<n;k++)on[idx[k]]=1;
+    var h='<div class="grid">';for(var c=0;c<cells;c++)h+='<div class="cell'+(on[c]?" box":"")+'"></div>';return h+'</div>';
+  }
+  function renderChoice(opts,isHtml){
+    var m=$("mech"),w=document.createElement("div");w.className="opts";
+    opts.forEach(function(o,j){var b=document.createElement("button");b.className="opt";b.innerHTML='<span class="tag">'+"ABCDEF"[j]+'</span><span>'+(isHtml?o:esc(o))+'</span>';b.addEventListener("click",function(){answerChoice(j,b);});w.appendChild(b);});
+    m.appendChild(w);
+  }
+  function renderNums(ans){
+    var set={},arr=[ans];set[ans]=1;
+    while(arr.length<6){var v=ans+Math.floor(Math.random()*7)-3;if(v>0&&!set[v]){set[v]=1;arr.push(v);}}
+    arr.sort(function(a,b){return a-b;});
+    var m=$("mech"),w=document.createElement("div");w.className="opts nums";
+    arr.forEach(function(v){var b=document.createElement("button");b.className="opt";b.textContent=v;b.addEventListener("click",function(){answerValue(v===ans,b);});w.appendChild(b);});
+    m.appendChild(w);
+  }
+  function renderSortRound(){
+    var T=LIVE.T,R=T.rounds[LIVE.round];
+    $("stim").innerHTML='<div class="rf">'+sortHdr()+'</div><div class="lbl">'+R.lbl+'</div>';
+    var m=$("mech");m.innerHTML="";var w=document.createElement("div");w.className="opts chutes";
+    CHUTES.forEach(function(c,j){var b=document.createElement("button");b.className="opt";b.textContent=c;b.addEventListener("click",function(){answerSort(j,b);});w.appendChild(b);});
+    m.appendChild(w);
+  }
+  function renderTiming(T){
+    var m=$("mech");
+    m.innerHTML='<div class="track" id="track"><div class="zone" style="left:'+(T.z*100)+'%;width:'+(T.zw*100)+'%"></div><div class="mk" id="mk"></div><div class="lab">TAP IN THE WINDOW</div></div>'+
+      '<button class="cta tapbtn" id="tap">TAP</button>';
+    var h=function(e){e.preventDefault();answerTiming();};
+    $("track").addEventListener("pointerdown",h);$("tap").addEventListener("pointerdown",h);
+  }
+  function markerPos(){var ph=(LIVE.tAcc%PERIOD)/PERIOD;return ph<.5?ph*2:2-ph*2;}
+  function paintMarker(){var mk=$("mk");if(mk)mk.style.left=(markerPos()*100)+"%";}
+
+  /* ---------- answering ---------- */
+  function lockOpts(correctIdx,chosenIdx){
+    var kids=$("mech").querySelectorAll(".opt");
+    for(var k=0;k<kids.length;k++){kids[k].disabled=true;
+      if(correctIdx!==undefined&&k===correctIdx)kids[k].classList.add("hit");
+      else if(k===chosenIdx)kids[k].classList.add("miss");else kids[k].classList.add("dim");}
+  }
+  function answerChoice(j,btn){
+    if(!LIVE||LIVE.done||LIVE.paused)return;
+    var T=LIVE.T,ok=(j===T.ans);LIVE.att=1;LIVE.hit=ok?1:0;
+    lockOpts(T.ans,j);
+    finish(ok,btn,ok?null:(T.badFn?T.badFn(j):null));
+  }
+  function answerValue(ok,btn){
+    if(!LIVE||LIVE.done||LIVE.paused)return;
+    LIVE.att=1;LIVE.hit=ok?1:0;
+    var kids=$("mech").querySelectorAll(".opt");
+    for(var k=0;k<kids.length;k++){kids[k].disabled=true;if(parseInt(kids[k].textContent,10)===LIVE.T.ans)kids[k].classList.add("hit");else if(kids[k]===btn)kids[k].classList.add("miss");else kids[k].classList.add("dim");}
+    finish(ok,btn);
+  }
+  function answerSort(j,btn){
+    if(!LIVE||LIVE.done||LIVE.paused)return;
+    var T=LIVE.T,R=T.rounds[LIVE.round],ok=(j===R.ans);LIVE.att++;if(ok)LIVE.hit++;
+    if(ok&&LIVE.round<T.rounds.length-1){sndScan();burst(btn,8);LIVE.round++;renderSortRound();return;}
+    lockOpts(R.ans,j);finish(ok,btn);
+  }
+  function answerTiming(){
+    if(!LIVE||LIVE.done||LIVE.paused)return;
+    var T=LIVE.T,pos=markerPos(),c=T.z+T.zw/2,inZone=(pos>=T.z&&pos<=T.z+T.zw);
+    LIVE.att=1;LIVE.hit=inZone?1:0;
+    var tr=$("track");tr.classList.add(inZone?"hit":"miss");$("tap").disabled=true;
+    paintMarker();
+    var pct=0;
+    if(inZone){var d=Math.abs(pos-c)/(T.zw/2),sweeps=Math.floor(LIVE.tAcc/(PERIOD/2));pct=clamp(Math.round(150-50*d)-10*sweeps,60,CAP);}
+    finish(inZone,$("tap"),null,pct);
+  }
+  function timeout(){
+    if(!LIVE||LIVE.done)return;
+    LIVE.att=Math.max(LIVE.att,1);
+    var T=LIVE.T;if(T.mech==="choice")lockOpts(T.ans,-1);else if(T.mech==="timing"){$("track").classList.add("miss");$("tap").disabled=true;}
+    else{var kids=$("mech").querySelectorAll(".opt");for(var k=0;k<kids.length;k++)kids[k].disabled=true;}
+    finish(false,null,"TIMED OUT. SUPERVISOR CAT REASSIGNED THE TASK.");
+  }
+
+  function finish(ok,btn,badLine,fixedPct){
+    LIVE.done=true;clockStop();
+    var T=LIVE.T,t=LIVE.tAcc,std=LIVE.std,v=$("verdict"),secs=(t/1000).toFixed(1),forgiven=false;
+    // catnip forgiveness
+    if(!ok&&T.kind==="task"&&S.bump&&S.bump.kind==="nip"){ok=true;forgiven=true;LIVE.hit=LIVE.att;S.bump=null;}
+    var res={kind:T.kind,name:T.name,ok:ok,t:t,units:T.units,att:LIVE.att,hit:LIVE.hit,pct:0};
+    if(T.kind==="task"){
+      if(!ok)res.pct=0;
+      else if(forgiven)res.pct=90;
+      else if(fixedPct!==undefined)res.pct=fixedPct;
+      else res.pct=clamp(Math.round(100*std/Math.max(t,1)),50,CAP);
+    }
+    S.res.push(res);
+    // effects bookkeeping
+    if(T.kind==="task"){
+      if(S.eff&&S.eff.n>0){S.eff.n--;}
+      if(S.bump&&S.bump.kind==="fish"){S.bump.left--;if(S.bump.left<=0)S.bump=null;}
+      else if(S.bump&&S.bump.kind==="nip"&&!forgiven){S.bump.left--;if(S.bump.left<=0)S.bump=null;}
+      driftNpc();
+    }
+    var over=t>std,mood="grumpy",line=null,anim=null,reward=null;
+    if(T.kind==="huddle"){
+      if(ok){v.innerHTML=esc(T.ok)+" <b>SOP CALL: CORRECT</b> / "+secs+"s";sndOk(true);buzz([15]);burst(btn||v,18,["#D6F04B","#EDEEEA"]);line=pick(["Fine. That was the right call.","Huddle over. Back to being ignored.","Correct. Do not tell the cats I said so."]);}
+      else{v.className="verdict bad";v.innerHTML=esc(badLine||T.bad)+" <b>SOP CALL: WRONG</b>";sndHiss();buzz([60,40,60]);quake();
+        S.eff={mult:T.eff.mult,n:T.eff.n,glitch:!!T.eff.glitch};mood="furious";anim="shake";
+        toast("NEXT "+T.eff.n+" TASK"+(T.eff.n>1?"S":"")+": STANDARD x"+T.eff.mult,"",2600);}
+    }else if(ok){
+      if(forgiven){v.innerHTML="CATNIP KICKED IN. MISS FORGIVEN. <b>+90%</b> / "+secs+"s";sndPurr();}
+      else if(res.pct>=100){v.innerHTML=pick(OK_LINES)+" <b>"+res.pct+"%</b> / "+secs+"s vs "+(std/1000).toFixed(1)+"s std";burst(btn||v,res.pct>=CAP?26:14);sndOk(res.pct>=120);buzz(res.pct>=120?[12,40,12,40,18]:[15]);}
+      else{v.innerHTML=pick(SLOW_LINES)+" <b>"+res.pct+"%</b> / "+secs+"s vs "+(std/1000).toFixed(1)+"s std";sndOk(false);buzz([15]);}
+      // PFP meter
+      if(res.pct>=100){S.pfp++;if(S.pfp>=3){S.pfp=0;reward=(S.fish%2===0)?"fish":"nip";S.fish++;S.bump={kind:reward,left:3};}}
+      else if(!forgiven)S.pfp=0;
+    }else{
+      v.className="verdict bad";v.innerHTML=esc(badLine||T.bad)+" <b>0%</b>";sndBad();buzz([60]);S.pfp=0;
+      line=pick(["Hsss. That one is on the board now.","Rework. My favorite word. Not.","Tell QA cat I said nothing."]);anim="shake";
+    }
+    if(T.fact)$("fact").textContent=T.fact;
+    if(reward){
+      toast(reward==="fish"?"PAY FOR PERFORMANCE: FISH TREAT. +25% TIME ON THE NEXT 3 TASKS.":"PAY FOR PERFORMANCE: CATNIP. ONE MISS FORGIVEN IN THE NEXT 3 TASKS.",reward==="nip"?"nip":"",3000);
+      sndPurr();sndBell();buzz([20,50,20,50,40]);burstAt(window.innerWidth/2,120,40,["#D6F04B","#F96302","#EDEEEA"]);
+      mood="content";anim="bounce";line=pick(RON_LINES.content);
+    }else if(S.bump&&ok){mood="content";}
+    else if(mood==="grumpy"&&T.kind==="task"&&!ok){mood="grumpy";}
+    S.step++;save();
+    ronSay(mood,line,anim);paintStats();
+    $("qNext").textContent=(S.step>=PLAN.length)?"Clock out":(PLAN[S.step].kind==="huddle"?"Go to the huddle":"Next task");
+    $("qNextWrap").classList.remove("hide");
+    try{v.scrollIntoView({block:"center",behavior:REDUCED?"auto":"smooth"});}catch(e){}
+  }
+  $("qNext").addEventListener("click",function(){aInit();runStep();});
+
+  /* ---------- sort header helper ---------- */
+  function sortHdr(){return '<div class="hd">SORTER | OUTBOUND | 3 CARTONS QUEUED</div>SCAN LABEL, TAP CHUTE. CARTON <b>'+(LIVE.round+1)+'</b> OF 3';}
+
+  /* ---------- start / resume / end ---------- */
+  function begin(state){
+    S=state;PLAN=buildShift(S.seed);
+    ronBar($("ronGame"));show("scrGame");paintStats();
+    if(S.step>=PLAN.length){end();return;}
+    runStep();
+  }
+  $("clockIn").addEventListener("click",function(){
+    aInit();var me=$("me").value.trim();
+    if(me.length<2){$("startWarn").textContent="Badge needs a name. Two letters minimum.";return;}
+    begin(fresh(me,1));
+  });
+  $("me").addEventListener("keydown",function(e){if(e.key==="Enter")$("clockIn").click();});
+  $("resumeBtn").addEventListener("click",function(){aInit();var o=load();if(o&&!o.done){begin(o);}else{$("resumeBox").classList.add("hide");}});
+  $("restartBtn").addEventListener("click",function(){var o=load();try{localStorage.removeItem(SAVE_KEY);}catch(e){}$("resumeBox").classList.add("hide");if(o)$("me").value=o.me;});
+  $("again").addEventListener("click",function(){aInit();begin(fresh(S.me,(S.att||1)+1));});
+
+  function end(){
+    clockStop();S.done=true;
+    var p=perf()||0,a=acc(),u=uph();
+    $("endPerf").innerHTML=p+"<small>%</small>";$("endRank").textContent=rank(p);
+    $("endAcc").textContent=(a===null?"--":a+"%");$("endUph").textContent=(u===null?"--":u);$("endSop").textContent=sop();
+    var fishStr="";for(var i=0;i<S.fish;i++)fishStr+="&#128031; ";
+    $("payout").innerHTML='<b>PFP PAYOUT:</b> '+(S.fish?S.fish+" BUMP"+(S.fish>1?"S":"")+' <span class="fish">'+fishStr+'</span>':"NOTHING. THREE IN A ROW AT STANDARD WAS TOO MUCH TO ASK.")+
+      '<br>RON AT CLOCK-OUT: <b>'+(p>=120?"ALMOST PLEASANT":(p>=100?"TOLERATING YOU":(p>=80?"GRUMPY, AS ISSUED":"FILING A GRIEVANCE")))+'</b>';
+    $("endName").textContent=S.me.toUpperCase()+" | SHIFT "+S.att+" | "+taskRes().length+" TASKS";
+    var mood=p>=100?"content":(p<80?"furious":"grumpy");
+    S.mood=mood;save();ronBar($("ronEnd"),p>=120?"Top cat. Do not make it weird.":(p>=100?"Above standard. I am not smiling. This is my face.":(p>=80?"Meets standard. Like everyone else.":"Needs coaching. Me too, apparently.")));
+    show("scrEnd");$("qNextWrap").classList.add("hide");
+    if(p>=100){burstAt(window.innerWidth/2,160,50);sndBell();}else sndHonk();
+    lbSubmit();
+  }
+
+  /* ---------- shared leaderboard (textdb.online, best-effort) ---------- */
+  function lbGet(cb){
+    var done=false,once=function(v){if(!done){done=true;cb(v);}};
+    setTimeout(function(){once(null);},8000);
+    try{fetch("https://textdb.online/"+LB_KEY+"?_="+Date.now()).then(function(r){return r.text();})
+      .then(function(t){var o=null;try{o=JSON.parse(t);}catch(e){}once((o&&Array.isArray(o.list))?o:{v:1,list:[]});})["catch"](function(){once(null);});}catch(e){once(null);}
+  }
+  function lbPut(o,done){
+    try{fetch("https://textdb.online/update",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
+      body:"key="+LB_KEY+"&value="+encodeURIComponent(JSON.stringify(o))}).then(function(){done(true);})["catch"](function(){done(false);});}catch(e){done(false);}
+  }
+  function lbSort(L){L.sort(function(a,b){return (b.p-a.p)||(b.a-a.a)||(b.f-a.f);});}
+  function lbRender(o){
+    var rows=$("lbRows"),beat=$("lbBeat");
+    if(!o){rows.innerHTML='<div class="lb-off">Board offline. Compare out loud.</div>';beat.textContent="";return;}
+    var L=o.list.slice();lbSort(L);
+    if(!L.length){rows.innerHTML='<div class="lb-off">Nobody on the board yet. Set the bar.</div>';beat.textContent="";return;}
+    beat.textContent="TOP CAT: "+L[0].p+"% -- "+L[0].n.toUpperCase()+" (SHIFT "+(L[0].att||1)+")";
+    var html="";
+    for(var i=0;i<Math.min(L.length,10);i++){var e=L[i];
+      html+='<div class="lb-row'+(e.id===S.pid?" me":"")+'"><span class="r">'+(i+1)+'</span><span class="n">'+esc(e.n.toUpperCase())+'<small>S'+(e.att||1)+'</small></span><span>'+(e.a||0)+'% acc</span><span class="p">'+e.p+'%</span></div>';}
+    rows.innerHTML=html;
+  }
+  function lbSubmit(){
+    var mine={id:S.pid,n:S.me.slice(0,14),p:perf()||0,a:acc()||0,f:S.fish||0,att:S.att};
+    lbGet(function(o){
+      if(!o){lbRender(null);return;}
+      var found=false;
+      for(var i=0;i<o.list.length;i++){if(o.list[i].id===S.pid){found=true;if(mine.p>o.list[i].p||(mine.p===o.list[i].p&&mine.a>o.list[i].a))o.list[i]=mine;}}
+      if(!found)o.list.push(mine);
+      lbSort(o.list);o.list=o.list.slice(0,40);
+      lbPut(o,function(){lbRender(o);});
+    });
+  }
+  $("lbRefresh").addEventListener("click",function(){$("lbRows").innerHTML='<div class="lb-off">Checking the floor...</div>';lbGet(lbRender);});
+
+  /* ---------- boot ---------- */
+  (function boot(){
+    S=null;
+    var host=$("ronIntro");host.innerHTML="";
+    // intro Ron (no state yet)
+    host.innerHTML='<div class="ronbox">'+RON_SVG+'<div class="tag"><b>RON CLAWSON</b>ASSOC #0913</div></div><div class="ronside"><div class="bubble grumpy"><span>Orange tabby. Eleven years in outbound. Zero smiles on file. Clock in and try to keep up.</span></div><div class="pfp"><span>PFP</span><div class="pips"><i class="pip"></i><i class="pip"></i><i class="pip"></i></div><span class="bump">3 AT STD = BUMP</span></div></div>';
+    setMoodIn(host,"grumpy","Orange tabby. Eleven years in outbound. Zero smiles on file. Clock in and try to keep up.");
+    var o=load();
+    if(o&&!o.done&&o.step>0){
+      var plan=buildShift(o.seed),tn=0;for(var i=0;i<=o.step&&i<plan.length;i++)if(plan[i].kind==="task")tn++;
+      $("resumeBox").classList.remove("hide");$("me").value=o.me;
+      $("resumeBtn").textContent="Resume shift -- "+(plan[o.step]&&plan[o.step].kind==="huddle"?"huddle after task "+(tn):"task "+tn+" of 10");
+    }
+    else if(o&&o.me)$("me").value=o.me;
+  })();
+})();
+</script>
+</body>
+</html>

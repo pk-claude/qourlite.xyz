@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only dark">
+<title>Threat Level Lunchtime -- Office Trivia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:#141618 !important}
+  body{margin:0;background:#141618 !important;color:#EDEEEA;font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;line-height:1.45;min-height:100vh;min-height:100dvh}
+  .wrap{max-width:520px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+  .hdr{border:2px solid #363B40;background:#1A1D20;margin-bottom:12px}
+  .hdr-top{display:flex;justify-content:space-between;background:#F96302;color:#1A0D02;padding:5px 10px;font-weight:600;font-size:11px;letter-spacing:.14em}
+  .hdr-top a{color:#1A0D02;text-decoration:none}
+  .hdr-body{padding:10px 12px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .hdr h1{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:26px;line-height:.95;margin:0;text-transform:uppercase;color:#F96302}
+  .sync{font-size:10px;letter-spacing:.14em;color:#A6ADB5;text-transform:uppercase;white-space:nowrap}
+  .sync b{color:#D6F04B;font-weight:600}
+  .sync.bad b{color:#F96302}
+  .card{border:2px solid #363B40;background:#1A1D20;padding:14px 12px 16px}
+  .tag{font-size:10px;letter-spacing:.18em;color:#A6ADB5;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .tag b{color:#F96302;font-weight:600}
+  .lvl{color:#D6F04B}
+  .q{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:clamp(22px,7vw,32px);line-height:1;text-transform:uppercase;color:#EDEEEA;margin:0 0 14px}
+  .opts{display:grid;gap:8px}
+  button.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#101214;color:#EDEEEA;border:2px solid #363B40;padding:13px 12px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .12s,background .12s}
+  button.opt .k{flex:0 0 auto;width:24px;height:24px;border:2px solid #363B40;display:flex;align-items:center;justify-content:center;font-size:11px;color:#A6ADB5}
+  button.opt.sel{border-color:#F96302;background:#2A1A0E}
+  button.opt.sel .k{border-color:#F96302;background:#F96302;color:#1A0D02;font-weight:600}
+  button.opt.lock{border-color:#F96302;background:#2A1A0E;opacity:1}
+  button.opt.right{border-color:#D6F04B;background:#20260E}
+  button.opt.right .k{border-color:#D6F04B;background:#D6F04B;color:#1A0D02;font-weight:600}
+  button.opt.dim{opacity:.45}
+  button.opt:disabled{cursor:default}
+  .big{font-family:"Saira Stencil One","Arial Black",Impact,sans-serif;font-weight:400;font-size:clamp(34px,12vw,58px);line-height:.95;text-transform:uppercase;color:#F96302;margin:4px 0 10px}
+  .big.lime{color:#D6F04B}
+  .sub{color:#A6ADB5;font-size:12px;letter-spacing:.06em}
+  .status{margin-top:12px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#A6ADB5;min-height:14px}
+  .status.ok{color:#D6F04B}.status.bad{color:#F96302}
+  .inrow{display:flex;gap:8px;margin-top:6px}
+  input.txt{flex:1;min-width:0;background:#101214;color:#EDEEEA;border:2px solid #363B40;padding:12px;font:inherit;font-size:16px;outline:none}
+  input.txt:focus{border-color:#F96302}
+  button.go{flex:0 0 auto;background:#F96302;color:#1A0D02;border:2px solid #F96302;padding:12px 16px;font:inherit;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .rules{margin-top:12px;color:#A6ADB5;font-size:11.5px;line-height:1.5}
+  .rules b{color:#EDEEEA}
+  .foot{margin-top:16px;text-align:center;color:#A6ADB5;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .pulse{display:inline-block;width:8px;height:8px;background:#D6F04B;border-radius:50%;margin-right:6px;animation:p 1.4s infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr">
+    <div class="hdr-top"><span>QOURLITE / OFFICE TRIVIA</span><a href="/">&lt;- HUB</a></div>
+    <div class="hdr-body"><h1>Threat level: lunchtime.</h1><div class="sync" id="sync">SYNC <b>...</b></div></div>
+  </header>
+  <div class="card" id="card"></div>
+  <div class="foot">Identity theft is not a joke. One entry per phone.</div>
+</div>
+<script src="/live/office/office.js"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var card=$("card"), syncEl=$("sync");
+  var S={dev:null,name:"",session:null,idx:-1,stage:0,ans:{},seen:{},joined:false,stateFails:0};
+  var lastRenderKey="", saveTimer=null, saveAttempt=0, saving=false, dirty=false, statusText="", statusCls="", pendingSel=-1;
+
+  try{ S.dev=localStorage.getItem("qo.dev"); S.name=localStorage.getItem("qo.name")||""; }catch(e){}
+  if(!S.dev||S.dev.length!==6){ S.dev=QT.rid(6); try{ localStorage.setItem("qo.dev",S.dev); }catch(e){} }
+
+  function loadSession(s){
+    S.session=s; S.ans={}; S.seen={}; S.joined=false; pendingSel=-1;
+    try{
+      var a=localStorage.getItem("qo.ans."+s); if(a) S.ans=JSON.parse(a)||{};
+      var v=localStorage.getItem("qo.seen."+s); if(v) S.seen=JSON.parse(v)||{};
+      S.joined=localStorage.getItem("qo.join."+s)==="1";
+    }catch(e){}
+  }
+  function persist(){ try{ localStorage.setItem("qo.ans."+S.session,JSON.stringify(S.ans)); localStorage.setItem("qo.seen."+S.session,JSON.stringify(S.seen)); }catch(e){} }
+
+  function pollState(){
+    QT.get(QT.stateKey()).then(function(st){
+      S.stateFails=0; setSync(true);
+      if(!st||!st.s){ S.idx=-1; render(); return; }
+      if(st.s!==S.session){ loadSession(st.s); if(S.name&&!S.joined) join(0); }
+      S.idx=typeof st.i==="number"?st.i:0;
+      S.stage=st.g?1:0;
+      render();
+    })["catch"](function(){ S.stateFails++; if(S.stateFails>=2) setSync(false); })
+    .then(function(){ setTimeout(pollState,2200+Math.random()*600); });
+  }
+  function setSync(ok){ syncEl.className="sync"+(ok?"":" bad"); syncEl.innerHTML="SYNC <b>"+(ok?"OK":"LOST")+"</b>"; }
+
+  function join(attempt){
+    var ses=S.session;
+    QT.get(QT.regKey(ses)).then(function(reg){
+      if(ses!==S.session) return;
+      var d=(reg&&reg.d)||[];
+      if(d.indexOf(S.dev)>=0){ S.joined=true; try{ localStorage.setItem("qo.join."+ses,"1"); }catch(e){} return; }
+      if(attempt>=6) return;
+      d.push(S.dev); if(d.length>400) d=d.slice(-400);
+      return QT.put(QT.regKey(ses),{d:d}).then(function(){ setTimeout(function(){ join(attempt+1); },1500+Math.random()*2500); });
+    })["catch"](function(){ if(attempt<6) setTimeout(function(){ join(attempt+1); },3000); });
+  }
+  setInterval(function(){ if(S.session&&S.joined) join(0); },45000);
+
+  function scheduleSave(){ dirty=true; setStatus("saving",""); clearTimeout(saveTimer); saveTimer=setTimeout(doSave,600); }
+  function doSave(){
+    if(saving) return; saving=true; dirty=false; var ses=S.session;
+    QT.put(QT.devKey(ses,S.dev),{n:S.name,a:S.ans,t:Date.now()}).then(function(ok){
+      saving=false;
+      if(ses!==S.session) return;
+      if(ok){ saveAttempt=0; setStatus(dirty?"saving":"locked and saved",dirty?"":"ok"); if(dirty) doSave(); if(!S.joined) join(0); }
+      else{
+        saveAttempt++;
+        if(saveAttempt<=4){ setStatus("not saved. retrying...","bad"); setTimeout(doSave,[2000,5000,10000,20000][saveAttempt-1]); }
+        else{ setStatus("not saved. yell your answer.","bad"); saveAttempt=0; }
+      }
+    });
+  }
+  function setStatus(t,c){ statusText=t; statusCls=c; var el=$("status"); if(el){ el.textContent=t; el.className="status "+c; } }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function qNum(){ var n=0,total=0; for(var i=0;i<QT_SLIDES.length;i++){ if(QT_SLIDES[i].id){ total++; if(i<=S.idx) n++; } } return [n,total]; }
+
+  function render(){
+    if(!S.name){ renderNameGate(); return; }
+    var sl=S.idx>=0?QT_SLIDES[S.idx]:null;
+    var key=S.session+"|"+S.idx+"|"+S.stage+"|"+pendingSel+"|"+(sl&&sl.id?JSON.stringify(S.ans[sl.id]||0):"");
+    if(key===lastRenderKey) return; lastRenderKey=key;
+    if(!sl){ card.innerHTML='<div class="tag"><span><span class="pulse"></span>STANDING BY</span></div><div class="big">Eyes up, '+esc(S.name)+'.</div><div class="sub">The screen has not started yet. Keep this page open; it follows the screen by itself.</div>'; return; }
+    if(sl.t==="title"){
+      card.innerHTML='<div class="tag"><span><span class="pulse"></span>CLOCKED IN</span></div><div class="big">'+esc(S.name)+'.</div><div class="sub">You are in. 10 questions, hardest last.</div>'
+        +'<div class="rules"><b>House rules:</b> tap an answer, then tap it again to LOCK. No changes after locking. Correct answers score a point; total speed on correct answers breaks ties. Winner eats free.</div>';
+      return;
+    }
+    if(sl.t==="board"){ card.innerHTML='<div class="tag"><span>FINAL BOARD</span></div><div class="big">Check the screen.</div><div class="sub">If your name is on top, lunch is on Pavel. If not, there is always the cat game.</div>'; return; }
+
+    /* question slide */
+    var qn=qNum(), a=S.ans[sl.id], locked=a&&typeof a.i==="number", c=QT.correct(sl);
+    if(S.stage===0&&!locked&&S.seen[sl.id]===undefined){ S.seen[sl.id]=Date.now(); persist(); }
+    var head='<div class="tag"><span>Q<b>'+qn[0]+'</b> / '+qn[1]+'</span><span class="lvl">'+esc(sl.lvl)+'</span><span>SPEED BREAKS TIES</span></div><div class="q">'+esc(sl.q)+'</div>';
+    var h=head+'<div class="opts">';
+    for(var i=0;i<sl.o.length;i++){
+      var cls="opt", dis=(S.stage===1||locked);
+      if(S.stage===1){ if(i===c) cls+=" right"; else if(locked&&a.i===i) cls+=" lock"; else cls+=" dim"; }
+      else if(locked){ cls+=(a.i===i?" lock":" dim"); }
+      else if(pendingSel===i){ cls+=" sel"; }
+      h+='<button class="'+cls+'" data-i="'+i+'"'+(dis?" disabled":"")+'><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+esc(sl.o[i])+'</span></button>';
+    }
+    h+='</div>';
+    if(S.stage===1){
+      if(locked&&a.i===c) h+='<div class="big lime" style="margin-top:12px">Correct.</div><div class="sub">+1. Took you '+(a.e/1000).toFixed(1)+'s.</div>';
+      else if(locked) h+='<div class="big" style="margin-top:12px">Wrong.</div><div class="sub">It was '+String.fromCharCode(65+c)+': '+esc(sl.o[c])+'.</div>';
+      else h+='<div class="big" style="margin-top:12px">Too slow.</div><div class="sub">No lock, no points. It was '+String.fromCharCode(65+c)+': '+esc(sl.o[c])+'.</div>';
+    } else if(locked){
+      h+='<div class="status ok" id="status">locked: '+String.fromCharCode(65+a.i)+' in '+(a.e/1000).toFixed(1)+'s</div>';
+    } else if(pendingSel>=0){
+      h+='<div class="status" id="status">tap '+String.fromCharCode(65+pendingSel)+' again to lock it in</div>';
+    } else {
+      h+='<div class="status" id="status">'+esc(statusText)+'</div>';
+    }
+    card.innerHTML=h;
+    if(S.stage===0&&!locked){
+      var bs=card.querySelectorAll("button.opt");
+      for(var j=0;j<bs.length;j++){
+        bs[j].onclick=function(){
+          var i=+this.getAttribute("data-i");
+          if(pendingSel===i){
+            var e=Date.now()-(S.seen[sl.id]||Date.now());
+            S.ans[sl.id]={i:i,e:e}; pendingSel=-1; persist(); lastRenderKey=""; render(); scheduleSave();
+          } else { pendingSel=i; lastRenderKey=""; render(); }
+        };
+      }
+    }
+  }
+
+  function renderNameGate(){
+    if(lastRenderKey==="gate") return; lastRenderKey="gate";
+    card.innerHTML='<div class="tag"><span>CLOCK IN</span></div><div class="big">First name.</div>'
+      +'<div class="sub">Goes on the board. Winner eats free, so no aliases. Beesly.</div>'
+      +'<div class="inrow"><input class="txt" id="nm" maxlength="14" placeholder="first name" autocomplete="given-name"><button class="go" id="goBtn">Clock in</button></div>'
+      +'<div class="status bad" id="nmErr"></div>';
+    function submit(){
+      var v=QT.cleanName($("nm").value);
+      if(v.length<2){ $("nmErr").textContent="need at least 2 letters"; return; }
+      S.name=v; try{ localStorage.setItem("qo.name",v); }catch(e){}
+      lastRenderKey=""; if(S.session&&!S.joined) join(0); if(S.session) scheduleSave(); render();
+    }
+    $("goBtn").onclick=submit;
+    $("nm").onkeydown=function(e){ if(e.key==="Enter"){ e.preventDefault(); submit(); } };
+    setTimeout(function(){ var n=$("nm"); if(n) n.focus(); },50);
+  }
+
+  pollState();
+})();
+</script>
+</body>
+</html>
