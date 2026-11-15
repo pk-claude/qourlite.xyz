@@ -361,7 +361,8 @@ const A = {
   control(i) { snap(); S.control = i; S.buzz = null; up(); },
   // Click an answer to reveal it. Click it again to hide it (a misclick costs nothing).
   reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
-    if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i]) { S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
+    if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i] && !S.awarded) {   // after the award the budget is banked: hiding a tile changes neither pot nor score
+      S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
     S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (i === 0) SFX.top(); else SFX.reveal(i); up();
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
