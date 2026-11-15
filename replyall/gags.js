@@ -26,6 +26,9 @@
     '#gags{position:fixed;inset:0;z-index:2147483000;pointer-events:none;overflow:hidden;display:none;font-family:var(--body,"Archivo","Segoe UI",Arial,sans-serif);color:#fff8ea;--gd:var(--disp,"Archivo Black","Arial Black",Impact,sans-serif);--gm:var(--mono,"JetBrains Mono",Consolas,monospace)}',
     '#gags.on{display:block;animation:ggin .28s ease-out}',
     '#gags.out{animation:ggout .4s ease-in forwards}',
+    // reduced motion: every gag keeps its timing (delays, fill) but each animation becomes one plain fade -- no shakes, spins, blinks or flying objects
+    '@media (prefers-reduced-motion:reduce){.gg,.gg *,.gg *::before,.gg *::after{animation-name:ggcalm!important;animation-duration:.4s!important;animation-iteration-count:1!important;animation-timing-function:ease!important;transition:none!important}}',
+    '@keyframes ggcalm{from{opacity:0}to{opacity:1}}',
     '#gags *{box-sizing:border-box}',
     '@keyframes ggin{from{opacity:0;transform:scale(1.04)}}',
     '@keyframes ggout{to{opacity:0;transform:scale(.97)}}',
