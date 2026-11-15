@@ -320,6 +320,16 @@ body.covered #bg,body.covered #stage{visibility:hidden}
 .tko.won{background:linear-gradient(120deg,#0d3a33,#13a37f 55%,var(--cyan))}
 .card .tko.won .tks .ibar,.tko.won .tks .ibar{background:#13a37f}
 .tko.won .tks .ilab,.tko.won .tbud b{color:#0f8a6b}
+/* clean sweep notification */
+.izt{position:absolute;top:22cqh;left:50%;translate:-50% 0;display:flex;align-items:center;gap:2cqw;padding:2.4cqh 3cqw 2.4cqh 2.4cqw;background:var(--paper);color:var(--ink);border:.35cqw solid var(--ink);border-radius:1.6cqw;box-shadow:0 1.4cqh 0 rgba(10,10,31,.45),0 0 5cqw rgba(255,225,77,.55);white-space:nowrap;animation:izt 3.4s cubic-bezier(.2,1.3,.3,1) forwards}
+@keyframes izt{0%{transform:translateY(-40cqh)}14%{transform:none}86%{transform:none;opacity:1}100%{transform:translateY(-6cqh);opacity:0}}
+.izb{position:relative;flex:none;width:8cqw;height:6cqw}
+.izb .e2{width:100%;height:100%}
+.izb b{position:absolute;right:-1.4cqw;top:-1.6cqw;min-width:3.6cqw;height:3.6cqw;padding:0 .6cqw;border-radius:99px;background:var(--red);color:#fff;border:.3cqw solid var(--ink);font:400 2.2cqw/1 var(--disp);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.izb.zero b{background:#13a37f;animation:pop .45s cubic-bezier(.3,1.7,.5,1)}
+.izx small{display:block;font-size:1.2cqw;color:var(--violet);font-weight:800}
+.izx strong{display:block;font-family:var(--disp);font-weight:400;font-size:4.6cqw;line-height:1}
+.izx span{display:block;font-size:1.7cqw;font-weight:700;color:#4a31c9;margin-top:.4cqh}
 /* meeting invite: the round transition. A calendar window flies in, a cursor clicks Accept, the screen irises open onto the board */
 @property --r{syntax:"<length>";inherits:false;initial-value:-40px}
 .inv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;--d:2900ms;--cx:50cqw;--cy:70cqh}
@@ -653,6 +663,7 @@ body[data-phase=lightning] .bubble .mono{font-size:.95cqw;margin-bottom:0}
   #chip *{animation:none!important}.chp .x-w.tr{display:none!important}.chh,.chl{transition:none}
   .ks,.kb i,.kn,.kst,.kch,.trow,.trow u,.trow b{animation:none!important}.trow.out b{background-size:100% .35cqw}
   .lw *,.ldots i,.lrec i{animation:none!important}.lw,.lw.out,.lside,.tl>*,.tl.away>*:not(.storm){transition-duration:1s,0s,0s}.lw.pre,.lw.out,.lside,.tl.away>*:not(.storm),.lhq.sw,.lnp div,.ljr{transform:none}.llb i{transition:none}
+  .izt{animation:rfade 3.4s forwards}
   .cal8,.org,.fly{display:none}.cer .cert,.cer .meets,.cer .mst,.mr,.unr b,.lip,.stack .e2,.sort i,.sq.dr:after,.sv .ibar em:before{animation:none!important}
 }
 @keyframes rfade{0%{opacity:0}8%{opacity:1}86%{opacity:1}100%{opacity:0}}
@@ -865,8 +876,16 @@ function reveal(t, i, k, last) {
   at(() => t.classList.remove('flash'), d0 + A + 1100);
   if (last) at(boardDone, d0 + A + 800);
 }
+// a clean sweep: a desktop notification drops in, its unread badge counts down to zero, achievement unlocked
+function inboxZero(n) {
+  over.innerHTML = `<div class="izt"><div class="izb">${ENV2}<b>${CALM ? 0 : n}</b></div><div class="izx"><small class="mono">Achievement unlocked</small><strong>Inbox zero</strong><span>Every reply opened. Nobody believes you.</span></div></div>`;
+  const b = over.querySelector('.izb b'); let k = CALM ? 0 : n;
+  const t = setInterval(() => { if (!b.isConnected || k <= 0) return clearInterval(t); b.textContent = --k; if (!k) b.parentNode.classList.add('zero'); }, 140);
+  clearOver(3400);
+}
 function boardDone() {
-  const ts = $$('.tile'); if (!S || S.phase !== 'round' || ts.some(t => !t.classList.contains('open'))) return;
+  const ts = $$('.tile'); if (!S || S.phase !== 'round' || S.awarded || ts.some(t => !t.classList.contains('open'))) return;   // "reveal the rest" after the budget went out is not a sweep
+  inboxZero(ts.length);
   ts.forEach((t, k) => { setTimeout(() => t.classList.add('wv'), k * 70); setTimeout(() => t.classList.remove('wv'), k * 70 + 420); });
   confetti(70); const m = $('.agenda .mono'); if (!m || m.dataset.t) return;
   m.dataset.t = m.textContent; m.textContent = 'Inbox zero / every reply opened'; m.classList.add('iz');
