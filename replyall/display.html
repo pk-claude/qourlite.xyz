@@ -312,6 +312,14 @@ body.covered #bg,body.covered #stage{visibility:hidden}
 .trow.out u{background:var(--red);color:#fff}.trow.in u{background:var(--yellow);color:var(--ink);rotate:3deg}
 .tbud{margin-top:1.8cqh;padding-top:1.6cqh;border-top:.3cqw solid var(--ink);display:flex;justify-content:space-between;align-items:baseline;font:800 1.4cqw var(--mono);letter-spacing:.12em;text-transform:uppercase}
 .tbud b{font:400 4.4cqw/1 var(--disp);letter-spacing:0;color:var(--red)}
+/* budget awarded: slips of budget fly from the pot into the team's score, which pulses when the money lands */
+.bill{width:4.4cqw;height:2.6cqw;border-radius:.4cqw;background:linear-gradient(90deg,var(--yellow) 0 70%,#f5c400 70%);border:.25cqw solid var(--ink);box-shadow:0 .4cqh 0 rgba(10,10,31,.4)}
+.team.paid{animation:paid .7s cubic-bezier(.2,1.5,.4,1)}
+@keyframes paid{30%{transform:scale(1.07);box-shadow:0 0 4cqw rgba(255,225,77,.9)}}
+.trow.ok u{background:var(--yellow);color:var(--ink)}
+.tko.won{background:linear-gradient(120deg,#0d3a33,#13a37f 55%,var(--cyan))}
+.card .tko.won .tks .ibar,.tko.won .tks .ibar{background:#13a37f}
+.tko.won .tks .ilab,.tko.won .tbud b{color:#0f8a6b}
 /* meeting invite: the round transition. A calendar window flies in, a cursor clicks Accept, the screen irises open onto the board */
 @property --r{syntax:"<length>";inherits:false;initial-value:-40px}
 .inv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;--d:2900ms;--cx:50cqw;--cy:70cqh}
@@ -1013,6 +1021,7 @@ function effects(fx) {
   // Chip reacts to whatever the host just did: a strike stamp, a takeover, money changing hands
   const heads = (fx.cards || []).map(c => String(c[1])).join(' / ');
   if (fx.stamp) chipMood('wince'); else if (/TAKEOVER (COMPLETE|DENIED)/.test(heads) || fx.banner) chipMood('money'); else if (/HOSTILE TAKEOVER|WINNER IS/.test(heads)) chipMood('shock'); else if (fx.confetti || /ROOM HAS SPOKEN/.test(heads)) chipMood('happy');
+  if (fx.payout !== undefined) payout(fx.payout);
   if (fx.banner) { over.innerHTML = `<div class="banner">${esc(fx.banner)}</div>`; confetti(140); clearOver(2800); }
   if (fx.confetti) confetti(fx.confetti);
   if (fx.chip) { lobChip = false; chipSay(fx.chip); }
@@ -1032,6 +1041,7 @@ function playCards() {
   // stay covered when the next card wipes in at least as fast as this one wipes out: nothing underneath can show between them
   setTimeout(() => { if (gen !== cardGen) return; const n = cardQ[0]; if (!n || CALM || (n[3] || (/^Agenda item \d/i.test(String(n[0])) ? 2900 : 2400)) * .14 > ms * .16) document.body.classList.remove('covered'); }, ms * .79);
   if (inv) el = invite(inv[1], c, ms);
+  else if (/^TAKEOVER (COMPLETE|DENIED)$/.test(String(c[1])) && c[4] && S && S.teams) el = tkoOut(c, ms, c[4]);
   else if (String(c[1]) === 'HOSTILE TAKEOVER' && S && (S.control === 0 || S.control === 1)) el = takeover(c, ms);
   else if (/ vs /.test(String(c[0])) && /^\d+ : \d+$/.test(String(c[1]))) el = results(c, ms);
   else { el = document.createElement('div'); el.className = 'card'; el.style.animationDuration = ms + 'ms';
@@ -1041,13 +1051,38 @@ function playCards() {
   const prev = cardEl; cardEl = el; if (prev) setTimeout(() => prev.remove(), ms * .15);
   setTimeout(() => { if (gen !== cardGen) return; cardBusy = false; playCards(); }, ms * .84); setTimeout(() => { el.remove(); if (cardEl === el) cardEl = null; }, ms);
 }
+// How the steal ended, in the same access-alert window. kind 'stolen': the stealing team (i) is granted access and the budget.
+// kind 'kept': the team in control (i) keeps it and the request is denied.
+function tkoOut(c, ms, x) {
+  const el = document.createElement('div'), i = x.i, o = 1 - i, at = f => Math.round(ms * f) + 'ms', won = x.kind === 'stolen';
+  el.className = 'card tko' + (won ? ' won' : ''); el.style.animationDuration = ms + 'ms';
+  const row = (t, cls, em, u, f) => `<div class="trow ${cls} t${t}" style="animation-delay:${at(f)}"><span class="tav"></span><span class="tn"><b style="animation-delay:${at(f + .14)};font-size:${Math.min(2.6, 40 / (S.teams[t].name.length || 1))}cqw">${esc(S.teams[t].name)}</b><em>${em}</em></span><u style="animation-delay:${at(f + .16)}">${u}</u></div>`;
+  const rows = won ? row(i, 'ok', 'New budget owner', 'Access granted', .14) + row(o, 'out', 'Previous owner', 'Reassigned', .3)
+    : row(i, 'ok', 'Budget owner', 'Access retained', .14) + row(o, 'out', 'Access request', 'Request denied', .3);
+  el.innerHTML = `<div class="ks tks"><div class="ibar mono"><i></i><i></i><i></i><span>IT security / ${won ? 'access granted' : 'request closed'}</span><em>Ticket resolved</em></div>
+    <div class="kbd"><div class="ilab">${esc(c[0])} / outcome</div><h1 style="font-size:${Math.min(5.8, 92 / String(c[1]).length)}cqw">${esc(c[1])}</h1>${rows}
+      <div class="tbud"><span>${won ? 'Budget transferred' : 'Budget stays put'}</span><b>+${esc(x.pot)}</b></div></div></div>`;
+  document.getElementById('cards').appendChild(el);
+  return el;
+}
+// a normal award: slips of budget fly from the pot into the winning team's score
+function payout(i) {
+  const p = $('.pot'), t = document.getElementById('t' + i); if (!p || !t || CALM) return;
+  const src = rect(p), dst = rect(t.querySelector('.ts') || t), w = BW() * .044;
+  for (let k = 0; k < 7; k++) setTimeout(() => {
+    const e = document.createElement('i'); e.className = 'bill fly';
+    e.style.setProperty('--sx', src.left + src.width * (.2 + Math.random() * .6) - w / 2 + 'px'); e.style.setProperty('--sy', src.top + src.height * .4 + 'px');
+    e.style.setProperty('--ex', dst.left + dst.width * (.2 + Math.random() * .6) - w / 2 + 'px'); e.style.setProperty('--ey', dst.top + dst.height * .3 + 'px');
+    stage.appendChild(e); setTimeout(() => { e.remove(); const tt = document.getElementById('t' + i); if (k === 6 && tt) { tt.classList.remove('paid'); void tt.offsetWidth; tt.classList.add('paid'); } }, 830);
+  }, k * 110);
+}
 // Three strikes with a team in control: an IT access alert. The playing team loses access, the other team requests it.
 function takeover(c, ms) {
   const el = document.createElement('div'), p = S.control, o = 1 - p, at = f => Math.round(ms * f) + 'ms';
   el.className = 'card tko'; el.style.animationDuration = ms + 'ms';
   const row = (i, cls, em, u, f) => `<div class="trow ${cls} t${i}" style="animation-delay:${at(f)}"><span class="tav"></span><span class="tn"><b style="animation-delay:${at(f + .14)};font-size:${Math.min(2.6, 40 / (S.teams[i].name.length || 1))}cqw">${esc(S.teams[i].name)}</b><em>${em}</em></span><u style="animation-delay:${at(f + .16)}">${u}</u></div>`;
   el.innerHTML = `<div class="ks tks"><div class="ibar mono"><i></i><i></i><i></i><span>IT security / access alert</span><em>Priority: urgent (actually)</em></div>
-    <div class="kbd"><div class="ilab">${esc(c[0])} / suspicious activity</div><h1>${esc(c[1])}</h1>
+    <div class="kbd"><div class="ilab">${esc(c[0])} / suspicious activity</div><h1 style="font-size:${Math.min(5.8, 92 / String(c[1]).length)}cqw">${esc(c[1])}</h1>
       ${row(p, 'out', 'Budget owner', 'Access revoked', .14)}${row(o, 'in', 'Requesting access<span class="ldots"><i></i><i></i><i></i></span>', 'One answer to steal', .36)}
       <div class="tbud"><span>Budget on the table</span><b>${esc(S.pot)}</b></div></div></div>`;
   document.getElementById('cards').appendChild(el);
