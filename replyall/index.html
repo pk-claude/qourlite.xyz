@@ -42,6 +42,13 @@ nav button.util{border-color:#3b3870;justify-content:center}
 nav button.util.live{background:#1f9d55;border-color:#1f9d55;color:#fff;font-weight:600}
 nav button.util.need{background:var(--violet);border-color:var(--violet);color:#fff;font-weight:600}
 nav button.util.on{background:var(--yellow);color:var(--ink)}
+#gagMenu{position:fixed;z-index:50;width:292px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 12px 34px rgba(10,10,31,.28);display:none}
+#gagMenu.on{display:block}
+#gagMenu .cap{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute);padding:4px 8px 5px}
+#gagMenu button{display:block;width:100%;text-align:left;border-color:transparent;padding:5px 8px;line-height:1.25}
+#gagMenu button b{display:block;font-weight:600}
+#gagMenu button span{display:block;font-size:12px;color:var(--mute)}
+#gagMenu button.fun{margin-top:4px;text-align:center}
 main{display:flex;flex-direction:column;min-width:0;height:100vh}
 .score{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line)}
 .tm{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:12px;padding:6px 10px}
@@ -108,6 +115,8 @@ table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
 </style>
 <script src="questions.js"></script>
 <script src="sound.js"></script>
+<script>window.GAGS_NO_LISTEN = true;</script>
+<script src="gags.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -400,6 +409,35 @@ const A = {
     snap(); A.tstop(); clearLater(); S.buzzOpen = false; SFX.drum(); push({cards: [['The results are in', 'AND THE WINNER IS', 'Drumroll, please']]});
     later(() => { S.phase = 'winner'; SFX.win(); up(); later(() => chipLine('win', true), 1500); if (S.items) later(() => chip(itemsLine()), 9000); }, 1900); }
 };
+
+// ---------- office interruptions (gags.js draws them on the big screen) ----------
+// One sidebar button opens a small menu. The menu lives outside #app so a re-render does not close it.
+const GAG_LIST = (window.GAGS && GAGS.list) || [];
+let gseq = Date.now(), lastGag = '';
+function fireGag(id) {
+  if (id === '?') { const pool = GAG_LIST.filter(g => g.id !== lastGag); if (!pool.length) return; id = pool[Math.floor(Math.random() * pool.length)].id; }
+  lastGag = id; const m = {gag: id, gseq: ++gseq};
+  try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
+  SFX.gag(id); gagClose();
+}
+function gagClose() { const el = document.getElementById('gagMenu'); if (el) el.classList.remove('on'); }
+function gagMenu(ev) {
+  if (ev) ev.stopPropagation();
+  let el = document.getElementById('gagMenu');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'gagMenu'; el.setAttribute('role', 'menu');
+    el.innerHTML = '<div class="cap">Office interruptions / plays on the big screen</div>' + GAG_LIST.map(g => `<button role="menuitem" data-gag="${esc(g.id)}"><b>${esc(g.label)}</b><span>${esc(g.hint)}</span></button>`).join('') + '<button role="menuitem" class="fun" data-gag="?">Random interruption</button>';
+    el.addEventListener('click', e => { const b = e.target.closest('button[data-gag]'); if (b) fireGag(b.dataset.gag); e.stopPropagation(); });
+    document.body.appendChild(el);
+    document.addEventListener('click', gagClose);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') gagClose(); });
+    window.addEventListener('resize', gagClose);
+  }
+  if (el.classList.contains('on')) return gagClose();
+  el.classList.add('on');
+  const b = document.getElementById('gagBtn').getBoundingClientRect(), h = el.offsetHeight;
+  el.style.left = (b.right + 8) + 'px'; el.style.top = Math.max(8, Math.min(b.top, innerHeight - h - 8)) + 'px';
+}
 function audLight() { const el = document.getElementById('aud'); if (!el) return; el.className = 'util ' + (alive() ? 'live' : 'need'); el.textContent = alive() ? 'Big screen connected' : 'Open big screen'; }
 function phonesHtml(full) {
   if (!ONLINE) return '<span class="muted">Phones need the game opened from the website. Keyboard buzzers work anywhere.</span>';
@@ -427,6 +465,7 @@ function render() {
     <button id="aud" class="util ${alive() ? 'live' : 'need'}" onclick="A.open()">${alive() ? 'Big screen connected' : 'Open big screen'}</button>
     <button class="util ${SFX.thinking() ? 'on' : ''}" onclick="SFX.think(!SFX.thinking());render()">${SFX.thinking() ? 'Thinking music: on' : 'Thinking music'}</button>
     <button class="util ${S.join ? 'on' : ''}" onclick="A.join()" ${ONLINE ? '' : 'disabled'}>${S.join ? 'Join code: showing' : 'Show join code'}</button>
+    <button id="gagBtn" class="util" onclick="gagMenu(event)" aria-haspopup="true" title="Fire a full-screen office gag on the big screen">Interruption</button>
     <button class="util" onclick="A.rx()">${S.rx ? 'Reactions: on' : 'Reactions: off'}</button>
     <button class="util" onclick="A.undo()" ${hist.length ? '' : 'disabled'}>Undo <kbd>Ctrl</kbd>+<kbd>Z</kbd></button>
     <button class="util" onclick="A.newGame()">New game</button></nav>
