@@ -115,6 +115,9 @@ table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
 .dock input{flex:1;min-width:120px;padding:6px;border-radius:8px;border:0}
 .dock .muted{color:#b9b5dc;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #chipLast{font-style:italic}
+.reh{display:flex;gap:10px;align-items:center;padding:5px 14px;background:var(--yellow);color:var(--ink);font-size:13px}
+.reh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reh button{padding:2px 14px;font-weight:600;border-color:var(--ink)}
 </style>
 <script src="questions.js"></script>
 <script src="sound.js"></script>
@@ -166,12 +169,14 @@ const room = () => 'ra-' + S.sid.toLowerCase();
 const cur = () => S.useCustom && S.custom ? S.custom : G.rounds[S.ri];
 let dupHost = false, win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0, lastKid = '';
 let phones = [], answers = [], phoneErr = '';
+// REH is set while the demo show (rehearsal) plays. It holds the real game, which comes back untouched when the demo ends.
+let REH = null;
 
 // ---------- link to the audience screen ----------
 // Every update goes out twice: on a broadcast channel (survives a refresh of either window) and straight to the window this page opened.
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
 function push(fx) {
-  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  try { localStorage.setItem(KEY, REH ? REH.keep : JSON.stringify(S)); } catch (e) {}   // a refresh in the middle of a demo brings back the real game
   seq = Math.max(seq + 1, Date.now()); const m = {S, fx: fx || {}, seq};
   try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
   postState();
@@ -219,7 +224,7 @@ const chipLine = (k, big) => chip(draw(k), big);
 // A live AI line is never sent to the big screen directly. It waits here for the scorekeeper to read and send.
 const roundKey = () => S.phase + (S.useCustom ? 'you' : S.ri);
 async function roast(answer, question) {
-  if (!ONLINE || !answer.trim()) return; const k = roundKey();
+  if (!ONLINE || REH || !answer.trim()) return; const k = roundKey();
   try {
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
     const r = await fetch('/api/quip', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({question, answer}), signal: ctl.signal}); clearTimeout(t);
@@ -253,7 +258,7 @@ function handleKey(code) {
 // Phones: each phone posts to this site's relay; this page reads the relay and posts back what phones should show.
 const seen = new Set(), EMOJI = {clap: '\u{1F44F}', laugh: '\u{1F602}', groan: '\u{1F62C}', fire: '\u{1F525}'}; let polling = false, first = true, armed = false;
 async function pollPhones(countBuzzes) {
-  if (!ONLINE || polling) return; polling = true;
+  if (!ONLINE || polling || REH) return; polling = true;   // a demo show never touches the phones
   try {
     const r = await fetch('/api/relay?room=' + room() + '&k=up&sid=' + S.sid, {cache: 'no-store'}); if (!r.ok) throw 0;
     const msgs = (await r.json()).msgs.map(m => { try { return JSON.parse(m); } catch (e) { return {}; } }).filter(m => m && m.id && /^[a-z0-9-]{1,32}$/i.test(m.p || ''));
@@ -262,17 +267,22 @@ async function pollPhones(countBuzzes) {
     phones = msgs.filter(m => m.k === 'join' && now - m.t < 8 * 3600e3).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
     const reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
     if (reacts.length && !first && S.rx) push({react: reacts.slice(0, 6)});
-    if (S.survey && S.survey.st === 'open') { answers = msgs.filter(m => m.k === 'ans' && m.q === S.survey.n && typeof m.a === 'string' && m.a.trim()).map(m => m.a.trim().slice(0, 30));
-      if (answers.length !== S.survey.count) { S.survey.count = answers.length; push(); const el = document.getElementById('scount'); if (el) el.textContent = answers.length; } }
+    takeAnswers(msgs);
     // Only phones the scorekeeper approved can buzz.
     if (countBuzzes) { const b = fresh.filter(m => m.k === 'buzz' && S.allowed[m.p] && (m.team === 0 || m.team === 1)).sort((a, b) => (a.rt || a.t) - (b.rt || b.t))[0]; if (b) buzzIn(b.team, b.p); }
     first = false; phoneErr = '';
   } catch (e) { phoneErr = ' Phones are not reachable right now. Keyboard buzzers still work.'; }
   polling = false; setPhones();
 }
+// Survey answers arrive as relay messages. The demo show feeds its made-up answers through this same function.
+function takeAnswers(msgs) {
+  if (!S.survey || S.survey.st !== 'open') return;
+  answers = msgs.filter(m => m.k === 'ans' && m.q === S.survey.n && typeof m.a === 'string' && m.a.trim()).map(m => m.a.trim().slice(0, 30));
+  if (answers.length !== S.survey.count) { S.survey.count = answers.length; push(); const el = document.getElementById('scount'); if (el) el.textContent = answers.length; }
+}
 let lastState = '';
 function postState() {
-  if (!ONLINE) return;
+  if (!ONLINE || REH) return;
   const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null,
     q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score)};
   const j = JSON.stringify(st); if (j === lastState) return; lastState = j;
@@ -290,7 +300,7 @@ function localGroups(list) {
   return [...m.values()].sort((a, b) => b.count - a.count).slice(0, 10);
 }
 async function cluster(question, list) {
-  if (ONLINE && list.length >= 4) try {
+  if (ONLINE && !REH && list.length >= 4) try {
     const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
     const r = await fetch('/api/quip', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({mode: 'cluster', question, answers: list}), signal: ctl.signal}); clearTimeout(t);
     const j = await r.json(); if (r.ok && Array.isArray(j.groups) && j.groups.length) return j.groups.map(g => ({label: String(g.label), count: Number(g.count) || 0}));
@@ -300,7 +310,7 @@ async function cluster(question, list) {
 
 // ---------- actions ----------
 function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; clearLater(); stopVoice(); }
-const leaveOk = () => S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
+const leaveOk = () => !!REH || S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
 // Between rounds the audience sees the standings before the next round card.
 function standings(nextMult) {
   if (S.phase !== 'round' || !S.awarded) return [];
@@ -414,7 +424,7 @@ const A = {
   treset() { A.tstop(); S.timer = S.lp ? 25 : 20; up(); },
   lclear() { if (!confirm('Clear all final round answers?')) return; A.lset(S.li); },
   winner() { if (!gate() || !leaveOk()) return; const [a, b] = S.teams;
-    if (a.score === b.score && !confirm('The scores are tied.\n\nOK = show a shared certificate.\nCancel = go back and play a spare round as a tie-breaker (first team with an answer on the board wins).')) return;
+    if (a.score === b.score && !REH && !confirm('The scores are tied.\n\nOK = show a shared certificate.\nCancel = go back and play a spare round as a tie-breaker (first team with an answer on the board wins).')) return;
     snap(); A.tstop(); clearLater(); S.buzzOpen = false; SFX.drum(); push({cards: [['The results are in', 'AND THE WINNER IS', 'Drumroll, please']]});
     later(() => { S.phase = 'winner'; SFX.win(); up(); later(() => chipLine('win', true), 1500); if (S.items) later(() => chip(itemsLine()), 9000); }, 1900); }
 };
@@ -447,6 +457,67 @@ function gagMenu(ev) {
   const b = document.getElementById('gagBtn').getBoundingClientRect(), h = el.offsetHeight;
   el.style.left = (b.right + 8) + 'px'; el.style.top = Math.max(8, Math.min(b.top, innerHeight - h - 8)) + 'px';
 }
+// ---------- rehearsal: a scripted demo show ----------
+// Plays a whole made-up game on the big screen through the same actions the buttons use, so the owner can watch
+// every animation without players. The real game is parked in REH.keep and comes back when the demo ends or is stopped.
+// While it runs nothing is sent to or read from the phones.
+const REH_ANS = ['Read it', 'read it', 'Can you read', 'You fool', 'Scroll up', 'Read it!', 'can you read?', 'As I said', 'you fool', 'Read It', 'scroll up', 'You Fool', 'as i said', 'Can you read', 'I said this', 'Whatever'];
+function rehScript() {
+  const st = [], add = (fn, ms) => st.push([fn, ms]), seg = t => add(() => { REH.label = t; const el = document.getElementById('rehLbl'); if (el) el.textContent = t; }, 0);
+  const sc = fn => () => { lastScene = 0; fn(); };   // the demo is not a double-click: skip the scene gate
+  const buzz = key => { add(() => A.buzzOpen(), 2400); add(() => handleKey(key), 2400); };
+  const strike = (txt, ms) => { if (txt) add(() => { A.said(txt); render(); }, 1300); add(() => A.strike(), ms || 3400); };
+  const rest = () => add(() => A.rest(), () => 2200 + cur().a.filter((_, i) => !S.revealed[i]).length * 1300);
+  seg('Lobby'); add(() => chipLine('hello', true), 6000);
+  seg('Round 1: buzz, answers, a strike'); add(sc(() => A.round(0)), 8600); buzz('KeyL');
+  add(() => A.reveal(2), 3000); add(() => A.reveal(0), 4400); strike('Warm regards'); add(() => A.reveal(1), 3000); add(() => A.reveal(4), 3000);
+  add(() => A.award(1), 4000); rest();
+  seg('Round 2: three strikes and a steal'); add(sc(() => A.round(1)), 7600); buzz('KeyF');
+  add(() => A.reveal(1), 3000); strike('Working'); add(() => fireGag('mute'), 6200); add(() => A.reveal(3), 3000); strike('', 3200); strike('', 6800);
+  add(() => A.reveal(0), 4200); add(() => A.steal(true), 5600); rest();
+  seg('Round 3: a clean sweep, double budget'); add(sc(() => A.round(2)), 7600); buzz('KeyD');
+  add(() => A.reveal(0), 4000); for (let i = 1; i < G.rounds[2].a.length; i++) add(() => A.reveal(i), 2300);
+  add(() => {}, 2400); add(() => A.award(0), 4200);
+  seg('You said: the room answers on phones'); add(sc(() => A.sprep()), 8400); add(() => A.sopen(), 1500); add(() => SFX.think(true), 700);
+  REH_ANS.forEach((a, i) => add(() => { REH.msgs.push({id: 'reh' + i, p: 'reh-' + i, k: 'ans', q: S.survey.n, a}); takeAnswers(REH.msgs); }, 500 + (i % 3) * 150));
+  add(() => SFX.think(false), 900); add(() => A.sclose(), 3000); add(sc(() => A.splay()), 5600); buzz('KeyK');
+  add(() => A.reveal(0), 4200); strike('Noted'); add(() => A.reveal(1), 3000); add(() => A.award(1), 4000); rest();
+  seg('Final round: the 4:59 Friday rush'); add(sc(() => A.lstart()), 5200);
+  const step = () => { if (S.lend && !REH.lend) { REH.lend = 1; return 6800; } return 1100; };
+  [[0, 0, 0, -1, 0], [1, 1, 2, 0, 2]].forEach((ks, p) => {
+    add(() => A.lplayer(p), 1600); add(() => A.tstart(), 1400);
+    ks.forEach((k, i) => add(() => { const q = G.lightning[S.li].qs[i]; A.lq(i); if (k < 0 || !q.a[k]) { A.ltext(p, i, 'Pass'); A.lpts(p, i, 0); up(); } else A.lfill(i, k); }, 1900));
+    add(() => A.tstop(), 1200); for (let n = 0; n < 10; n++) add(() => A.lnext(), step);
+  });
+  add(() => {}, 1500);
+  seg('The winner'); add(sc(() => A.winner()), 15000);
+  return st;
+}
+function rehRun() {
+  if (!REH) return; const s = REH.steps[REH.i++]; if (!s) return R.stop();
+  let ms; try { s[0](); ms = typeof s[1] === 'function' ? s[1]() : s[1]; } catch (e) { console.error(e); return R.stop(); }
+  if (REH) REH.t = setTimeout(rehRun, ms);
+}
+const R = {
+  on: () => !!REH,
+  start() {
+    if (REH) return;
+    if (!alive()) win = window.open('display.html', 'replyall_display', 'width=1280,height=720');
+    if (!confirm('Plays a demo show of about 4 and a half minutes on the big screen, with sound.\n\nIt is only a rehearsal: your scores, team names, join code and phones come back exactly as they are now when it ends. You can stop it at any time.')) return;
+    const old = S; clearLater(); A.tstop(); stopVoice(); SFX.stop(); gagClose();
+    REH = {keep: JSON.stringify(S), hist: hist.splice(0), said, pending, note, chipLast, answers, resumed, t: null, i: 0, label: 'Lobby', msgs: [], lend: 0, steps: []};
+    S = fresh(); S.teams.forEach((t, i) => t.name = old.teams[i].name); S.allowed = Object.assign({}, old.allowed); S.rx = old.rx; S.sid = old.sid; S.joinUrl = old.joinUrl;
+    said = ''; pending = null; note = ''; answers = []; resumed = false; busy = false;
+    REH.steps = rehScript(); SFX.theme(); up({clear: 1}); REH.t = setTimeout(rehRun, 1500);
+  },
+  // Also runs when the demo reaches its end. Everything the demo started is cut off and the real game is put back.
+  stop() {
+    if (!REH) return; const k = REH; REH = null; clearTimeout(k.t); clearLater(); A.tstop(); stopVoice(); SFX.stop();
+    S = JSON.parse(k.keep); hist.length = 0; hist.push(...k.hist); said = k.said; pending = k.pending; note = k.note; chipLast = k.chipLast; answers = k.answers; resumed = k.resumed; busy = false; armed = false;
+    const m = {gag: 'stop', gseq: ++gseq}; try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
+    lastState = ''; up({clear: 1});
+  }
+};
 // Effects like the time-up horn switch the thinking music off by themselves; the button has to follow.
 function thinkLight() { const el = document.getElementById('thinkBtn'), on = !!SFX.thinking(); if (!el) return; el.classList.toggle('on', on); el.textContent = on ? 'Thinking music: on' : 'Thinking music'; }
 SFX.onThink = thinkLight;
@@ -488,7 +559,7 @@ function render() {
     <button class="util" onclick="A.rx()">${S.rx ? 'Reactions: on' : 'Reactions: off'}</button>
     <button class="util" onclick="A.undo()" ${hist.length ? '' : 'disabled'}>Undo <kbd>Ctrl</kbd>+<kbd>Z</kbd></button>
     <button class="util" onclick="A.newGame()">New game</button></nav>
-  <main><div class="score">${[0, 1].map(i => { const t = S.teams[i]; return `<div class="tm ${i ? 'r' : ''} ${ph === 'round' && S.control === i ? 'floor' : ''}"><input class="nm" value="${esc(t.name)}" maxlength="20" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name" title="Click to rename">
+  <main>${REH ? `<div class="reh"><b>Rehearsal running</b><span id="rehLbl">${esc(REH.label)}</span><button onclick="R.stop()">Stop</button></div>` : ''}<div class="score">${[0, 1].map(i => { const t = S.teams[i]; return `<div class="tm ${i ? 'r' : ''} ${ph === 'round' && S.control === i ? 'floor' : ''}"><input class="nm" value="${esc(t.name)}" maxlength="20" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name" title="Click to rename">
       <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage">${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
     ${resumed ? '<span class="status warn" style="margin:0 0 10px">Picked up the saved game from last time. <button onclick="resumed=false;render()">Keep going</button> <button onclick="resumed=false;A.newGame()">Start a new game</button></span>' : ''}`;
 
@@ -496,6 +567,7 @@ function render() {
     h += `<div class="three even"><div class="card"><h2><b>1</b>Big screen</h2>
         <p>Press <kbd>Win</kbd>+<kbd>P</kbd> and choose <b>Extend</b>. Open the big screen, drag it onto the projector and click it once for full screen.</p>
         <button class="${alive() ? '' : 'go'} wide" onclick="A.open()">${alive() ? 'Open it again' : 'Open big screen'}</button>
+        <button class="wide" onclick="R.start()" ${REH ? 'disabled' : ''} title="Plays a whole made-up game on the big screen so you can see the show. Your real game is not changed.">${REH ? 'Demo show is playing' : 'Watch a demo show'}</button>
         <p class="muted">The button at the bottom left turns green when both windows are linked. They relink by themselves after a refresh.</p></div>
       <div class="card"><h2><b>2</b>Sound and Chip</h2>
         <div class="row"><button onclick="SFX.theme()">Test sound</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
@@ -570,7 +642,7 @@ function render() {
 }
 render(); push();
 try { if (bc) bc.postMessage({host: '?'}); } catch (e) {}
-window.addEventListener('beforeunload', () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} });
+window.addEventListener('beforeunload', () => { try { localStorage.setItem(KEY, REH ? REH.keep : JSON.stringify(S)); } catch (e) {} });
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
