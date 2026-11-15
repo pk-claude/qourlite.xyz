@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>REPLY ALL - Phone</title>
 <style>
@@ -17,6 +17,7 @@ button{font:inherit;font-weight:700;font-size:19px;border:0;border-radius:14px;p
 button.aud{background:#fff8ea}
 #buzz{margin-bottom:18px;width:min(66vw,40vh);height:min(66vw,40vh);max-width:none;border-radius:50%;background:#55527a;color:#cfcbe8;font:900 30px "Arial Black","Segoe UI",sans-serif;box-shadow:0 12px 0 #2c2a48;transition:background .15s}
 #buzz.open{background:#ff3d8b;color:#fff;box-shadow:0 12px 0 #a31450;animation:pulse .6s infinite}
+#buzz.sent{background:#ffe14d;color:#0a0a1f;box-shadow:0 12px 0 #9c8718}
 #buzz.first{background:#1fbf6b;color:#fff;box-shadow:0 12px 0 #0f6b3a}
 #buzz.slow{background:#e5263a;color:#fff;box-shadow:0 12px 0 #8a1220}
 #buzz:active{transform:translateY(8px);box-shadow:0 4px 0 #2c2a48}
@@ -28,6 +29,7 @@ button.aud{background:#fff8ea}
 #survey b{display:block;font-size:20px;margin-bottom:10px}
 #survey button{margin-top:8px;background:#ffe14d}
 #msg{min-height:22px;color:#ffe14d}
+#live{font-weight:700;color:#ffe14d;max-width:360px}
 .hide{display:none!important}
 a{color:#2de2e6}
 </style>
@@ -44,6 +46,7 @@ a{color:#2de2e6}
 </div>
 <div id="play" class="hide">
   <p id="who"></p>
+  <p id="live"></p>
   <button id="buzz">WAIT</button>
   <p id="hint"></p>
   <div id="survey" class="hide"><b id="sq"></b><input id="sa" maxlength="30" autocomplete="off" placeholder="One or two words" aria-label="Your answer"><button onclick="answer()">Send my answer</button><p id="sdone"></p></div>
@@ -58,8 +61,9 @@ a{color:#2de2e6}
 const $ = id => document.getElementById(id), msg = $('msg'), b = $('buzz'), LS = 'replyall_phone';
 // This phone keeps one id, so a refresh keeps its team and its approval.
 let pid = localStorage.getItem('replyall_pid'); if (!/^[a-z0-9]{8}$/.test(pid || '')) { pid = Math.random().toString(36).slice(2, 10).padEnd(8, '0'); localStorage.setItem('replyall_pid', pid); }
-let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, joined = false, pressed = 0, answered = '';
-const api = k => '/api/relay?room=replyall&k=' + k;
+let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {};
+try { answered = JSON.parse(sessionStorage.getItem('replyall_ans')) || {}; } catch (e) {}
+const code = () => (sid || $('code').value.trim().toUpperCase()), api = k => '/api/relay?room=ra-' + code().toLowerCase() + '&k=' + k;
 function send(k, extra) {
   return fetch(api('up'), {method: 'POST', headers: {'content-type': 'application/json'},
     body: JSON.stringify(Object.assign({id: pid + '-' + k + '-' + Date.now().toString(36) + (n++), sid, p: pid, k, team, name, t: Date.now()}, extra || {}))}).then(r => { if (!r.ok) throw 0; });
@@ -67,29 +71,32 @@ function send(k, extra) {
 // What the host says right now: team names, whether buzzers are open, who was first, which phones may buzz, and the survey question.
 async function poll() {
   if (document.hidden) return;
-  try { const r = await fetch(api('state'), {cache: 'no-store'}), m = (await r.json()).msgs[0], s = m ? JSON.parse(m) : null; st = s && s.sid === (sid || $('code').value.trim().toUpperCase()) ? s : null; } catch (e) {}
+  if (!/^[A-Z0-9]{4}$/.test(code())) return show();
+  try { const r = await fetch(api('state'), {cache: 'no-store'}), m = (await r.json()).msgs[0], s = m ? JSON.parse(m) : null; st = s && s.sid === code() ? s : null; known = !!st; } catch (e) { known = null; }   // known: true = game found, false = no such game, null = could not check
   show();
 }
 function show() {
   const names = st && st.names || ['team 1', 'team 2'];
   $('j0').textContent = 'I play for ' + names[0]; $('j1').textContent = 'I play for ' + names[1];
   if (!joined) return;
+  $('live').textContent = st && st.scores ? (st.q ? st.q + '  ' : '') + st.names[0] + ' ' + st.scores[0] + ' / ' + st.names[1] + ' ' + st.scores[1] : '';
   $('who').textContent = (name ? name + ' / ' : '') + (team === 2 ? 'Audience' : names[team]) + ' / game ' + sid;
   b.classList.toggle('hide', team === 2); $('hint').classList.toggle('hide', team === 2);
   if (team !== 2) {
     const ok = st && st.ok.includes(pid), mine = st && st.first === pid, done = st && !st.open && st.buzz !== null && Date.now() - pressed < 15000;
-    const mode = !st ? 'wait' : !ok ? 'wait' : st.open ? 'open' : mine ? 'first' : done && pressed ? 'slow' : 'wait';
+    const sent = st && st.open && Date.now() - pressed < 2500, mode = !st ? 'wait' : !ok ? 'wait' : sent ? 'sent' : st.open ? 'open' : mine ? 'first' : done && pressed ? 'slow' : 'wait';
     b.className = mode === 'wait' ? '' : mode;
-    b.textContent = mode === 'open' ? 'BUZZ' : mode === 'first' ? 'FIRST!' : mode === 'slow' ? 'TOO SLOW' : 'WAIT';
+    b.textContent = mode === 'sent' ? 'SENT' : mode === 'open' ? 'BUZZ' : mode === 'first' ? 'FIRST!' : mode === 'slow' ? 'TOO SLOW' : 'WAIT';
     $('hint').textContent = !st ? 'Connecting to the game...' : !ok ? 'Waiting for the scorekeeper to approve this phone.' : mode === 'open' ? 'Buzzers are open. Go!' : mode === 'first' ? 'You buzzed first. Answer out loud.' : mode === 'slow' ? 'Someone else got there first.' : 'Buzzers are closed. Wait for the host.';
   }
   const v = st && st.survey; $('survey').classList.toggle('hide', !v);
-  if (v) { $('sq').textContent = v.q; if (answered.q !== v.n) { answered = {q: v.n, a: ''}; $('sa').value = ''; } $('sdone').textContent = answered.a ? 'Sent: ' + answered.a + '. You can change it until the survey closes.' : ''; }
+  if (v) { $('sq').textContent = v.q; if (answered.q !== v.n) { answered = {q: v.n, a: ''}; $('sa').value = ''; } else if (answered.a && !$('sa').value) $('sa').value = answered.a; $('sdone').textContent = answered.a ? 'Sent: ' + answered.a + '. You can change it until the survey closes.' : ''; }
 }
 function join(t) {
   sid = $('code').value.trim().toUpperCase(); team = t; name = $('name').value.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 12);
   if (!/^[A-Z0-9]{4}$/.test(sid)) { sid = ''; msg.textContent = 'Type the 4-character code first.'; return; }
   if (t !== 2 && !name) { sid = ''; msg.textContent = 'Type your first name so the scorekeeper can approve your buzzer.'; return; }
+  if (known === false) { sid = ''; msg.textContent = 'No game is using that code. Check the big screen.'; return; }
   send('join').then(() => {
     joined = true; localStorage.setItem(LS, JSON.stringify({sid, team, name}));
     $('join').className = 'hide'; $('play').className = ''; msg.textContent = ''; timer(); poll();
@@ -97,14 +104,15 @@ function join(t) {
 }
 function leave() { joined = false; sid = ''; localStorage.removeItem(LS); $('play').className = 'hide'; $('join').className = ''; timer(); }
 function react(e) { const now = Date.now(); if (now - lastReact < 700) return; lastReact = now; send('react', {e}).catch(() => {}); }
-function answer() { const a = $('sa').value.trim().slice(0, 30), v = st && st.survey; if (!a || !v) return; send('ans', {q: v.n, a}).then(() => { answered = {q: v.n, a}; show(); }).catch(() => { $('sdone').textContent = 'Not sent. Check your signal and try again.'; }); }
+function answer() { const a = $('sa').value.trim().slice(0, 30), v = st && st.survey; if (!a || !v) return; send('ans', {q: v.n, a}).then(() => { answered = {q: v.n, a}; try { sessionStorage.setItem('replyall_ans', JSON.stringify(answered)); } catch (e) {} show(); }).catch(() => { $('sdone').textContent = 'Not sent. Check your signal and try again.'; }); }
 $('sa').addEventListener('keydown', e => { if (e.key === 'Enter') answer(); });
-b.addEventListener('pointerdown', () => { pressed = Date.now(); send('buzz').catch(() => { msg.textContent = 'Not sent. Check your signal.'; setTimeout(() => msg.textContent = '', 2000); }); });
+b.addEventListener('click', () => { if (st && !st.open) return; pressed = Date.now(); show(); send('buzz').catch(() => { msg.textContent = 'Not sent. Check your signal.'; setTimeout(() => msg.textContent = '', 2000); }); });
 // Team phones check once a second (buzzer feedback); audience phones every four seconds (survey only).
 let pt; function timer() { clearInterval(pt); pt = setInterval(poll, joined && team !== 2 ? 1000 : 4000); }
 // A scanned QR code carries the game code. A phone that joined before goes straight back in.
 const c = (new URLSearchParams(location.search).get('c') || '').toUpperCase(); let saved = null; try { saved = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
 $('code').value = /^[A-Z0-9]{4}$/.test(c) ? c : saved && saved.sid || '';
+$('code').addEventListener('input', () => { known = null; if ($('code').value.trim().length === 4) poll(); });
 if (saved && saved.sid === $('code').value) { $('name').value = saved.name || ''; join(saved.team); } else { timer(); poll(); }
 </script>
 </body>

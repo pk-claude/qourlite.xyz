@@ -31,15 +31,15 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 
 /* title */
 .re{font-size:1.8vw;color:var(--cyan)}
-.logo{font-family:var(--disp);font-size:14vw;line-height:.86;letter-spacing:-.04em;background:linear-gradient(100deg,var(--paper) 20%,var(--yellow) 50%,var(--pink) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(.5vw .6vw 0 rgba(108,76,255,.9));animation:bob 4s ease-in-out infinite}
+.logo{font-family:var(--disp);font-size:12vw;line-height:.86;letter-spacing:-.04em;background:linear-gradient(100deg,var(--paper) 20%,var(--yellow) 50%,var(--pink) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(.5vw .6vw 0 rgba(108,76,255,.9));animation:bob 4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-1.2vh) rotate(-1deg)}}
 .sub{font-size:2.6vw;font-weight:700}
 .tag{font-size:1.6vw;color:var(--yellow);border:2px solid var(--yellow);border-radius:99px;padding:.6vh 1.6vw}
 .vs{display:flex;align-items:center;gap:2vw;font-family:var(--disp);font-size:3.4vw}
 .vs em{font-style:normal;font-size:2vw;background:var(--pink);border-radius:50%;width:5vw;height:5vw;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg)}
-.join{display:flex;align-items:center;gap:1.6vw;text-align:left;font-size:2vw;font-weight:700;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:1.2vw;padding:1.2vh 1.8vw 1.2vh 1.2vh}
+.join{display:flex;align-items:center;gap:1.8vw;text-align:left;font-size:2.3vw;line-height:1.35;font-weight:700;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:1.2vw;padding:1.2vh 1.8vw 1.2vh 1.2vh}
 .join b{color:var(--yellow);font-family:var(--mono);letter-spacing:.1em}
-.qr{background:#fff;border-radius:.8vw;padding:.5vw;width:11vw;height:11vw;flex:none}
+.qr{background:#fff;border-radius:.8vw;padding:.6vw;width:15vw;height:15vw;flex:none}
 .qr svg{display:block;width:100%;height:100%}
 .qr.big{width:19vw;height:19vw}
 
@@ -86,8 +86,8 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 
 /* overlays */
 #over,#cards{position:fixed;inset:0;z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:center}
-.stamp{font-family:var(--disp);color:var(--red);border:1.2vw solid var(--red);border-radius:2vw;padding:1.4vh 3vw;transform:rotate(-9deg);background:rgba(10,10,31,.86);text-align:center;line-height:1;white-space:nowrap;animation:stamp 1.7s forwards;box-shadow:0 0 0 .5vw rgba(229,38,58,.25)}
-.stamp small{display:block;font-family:var(--mono);font-size:1.7vw;letter-spacing:.16em;margin-top:1.2vh}
+.stamp{font-family:var(--disp);color:var(--red);border:1.2vw solid var(--red);border-radius:2vw;padding:1.4vh 3vw;transform:rotate(-9deg);background:var(--ink);text-align:center;line-height:1;white-space:nowrap;animation:stamp 1.7s forwards;box-shadow:0 0 0 .5vw rgba(229,38,58,.25)}
+.stamp small{display:block;font-family:var(--mono);font-weight:800;text-transform:uppercase;font-size:2.6vw;letter-spacing:.12em;margin-top:1.4vh;color:var(--paper)}
 @keyframes stamp{0%{transform:rotate(-9deg) scale(4);opacity:0}12%{transform:rotate(-9deg) scale(.95);opacity:1}18%{transform:rotate(-9deg) scale(1)}82%{opacity:1}100%{opacity:0}}
 .card{position:absolute;inset:0;background:linear-gradient(120deg,var(--violet),var(--pink));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5vh;animation:card 2.4s forwards;text-align:center;padding:0 4vw}
 .card .mono{font-size:2vw}.card h1{font-family:var(--disp);margin:0;line-height:.95}.card p{font-size:2.8vw;font-weight:700;margin:0;color:var(--yellow)}
@@ -117,9 +117,10 @@ body{background:var(--ink);color:var(--paper);font-family:var(--body);overflow:h
 .rush .mono{font-size:1.4vw;color:var(--yellow)}
 .clock{font-family:var(--mono);font-weight:800;font-size:3.4vw;background:var(--ink);border:.25vw solid var(--cyan);color:var(--cyan);border-radius:1vw;padding:.4vh 1.4vw}
 .clock.hot{color:var(--red);border-color:var(--red);animation:pulse .5s infinite}
-.lq{height:8.5vh;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.6vw;font-weight:900;line-height:1.05;color:var(--yellow)}
+.lq{height:7vh;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.6vw;font-weight:900;line-height:1.05;color:var(--yellow)}
 table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-spacing:.9vw 1vh;font-size:2.5vw}
 .lt td{background:rgba(255,255,255,.07);border:.15vw solid rgba(255,255,255,.12);border-radius:1vw;padding:0 1.4vw;transition:.3s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lt tr.lh td{background:none;border:0;font-size:2vw;font-weight:900;height:5vh}.lt tr.lh td>*{vertical-align:middle}.lt tr.lh b{font-family:var(--disp);color:var(--yellow);font-size:2.8vw;margin-left:1vw}
 .lt td.ln{width:5vw;background:none;border:0;color:var(--cyan);font-family:var(--disp);text-align:center}
 .lt tr.cur td.ln{color:var(--ink);background:var(--cyan)}
 .lt td.lp{width:9vw;text-align:center;font-family:var(--disp);color:var(--yellow)}
@@ -138,6 +139,7 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
 .cert .sig{display:flex;justify-content:space-between;margin-top:2.5vh;font-size:1.4vw;font-family:var(--mono)}
 .cert .sig span{border-top:.2vw solid var(--ink);padding-top:.5vh;width:24vw}
 .meets{font-size:2.2vw;font-weight:700;background:rgba(255,255,255,.1);border-radius:99px;padding:1vh 2.4vw}
+#joinbox{position:fixed;inset:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(10,10,31,.93)}#joinbox.on{display:flex}
 .hint{position:fixed;bottom:1vh;right:1vw;font-size:1.2vw;opacity:.5;z-index:8;transition:opacity 1s}
 </style>
 <script src="questions.js"></script>
@@ -146,7 +148,7 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
 <body>
 <div id="bg"><i></i><i></i><i></i><b></b></div>
 <div id="stage"><div class="center"><div class="sub">Open this screen from the host page</div></div></div>
-<div id="over"></div><div id="cards"></div>
+<div id="over"></div><div id="cards"></div><div id="joinbox"></div>
 <div id="chip"><div class="bot"><i></i><i></i><u></u></div><div class="bubble"><span class="mono">Chip - AI intern</span><span id="chipText"></span></div></div>
 <canvas id="fx"></canvas>
 <div class="hint" id="hint">Click anywhere for full screen</div>
@@ -185,7 +187,7 @@ function build() {
     h = `<div class="bar">${teamHtml(0)}<div class="mid"><div><div class="mono">The budget</div><div class="pot" data-v="${S.pot}">${S.pot}</div></div><div class="slots"><i>X</i><i>X</i><i>X</i></div></div>${teamHtml(1)}</div>
       <div class="agenda"><div class="mono">${S.useCustom ? 'You said / ' + r.n + ' of you answered / triple budget' : 'Agenda item ' + (S.ri + 1) + ' / ' + MODE(r.mult)}</div><div class="q">${esc(r.q)}</div></div>
       <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr)">${r.a.map((a, i) =>
-        `<div class="tile ${S.revealed[i] ? 'open' : ''}"><div class="in"><div class="f"><span>${i + 1}</span></div><div class="b"><span>${esc(a[0])}</span><em>${a[1]}</em></div></div></div>`).join('')}</div>
+        `<div class="tile ${S.revealed[i] ? 'open' : ''}"><div class="in"><div class="f"><span>${i + 1}</span></div><div class="b"><span style="font-size:${Math.min(2.7, 46 / a[0].length)}vw;overflow-wrap:anywhere">${esc(a[0])}</span><em>${a[1]}</em></div></div></div>`).join('')}</div>
       <div class="strip"></div>`;
   } else if (S.phase === 'survey') {
     const v = S.survey;
@@ -197,7 +199,7 @@ function build() {
   } else if (S.phase === 'lightning') {
     h = `<div class="rush"><div><h1>The 4:59 Friday Rush</h1><div class="mono">${esc(G.finalStakes || 'Hit ' + G.lightningTarget + ' to win')}</div></div><div class="clock"></div></div>
       <div class="lq"></div>
-      <table class="lt">${[0,1,2,3,4].map(i => `<tr><td class="ln">${i + 1}</td><td></td><td class="lp"></td><td></td><td class="lp"></td></tr>`).join('')}</table>
+      <table class="lt"><tr class="lh"><td class="ln"></td><td colspan="2"><span id="fn0"></span><b id="fs0" data-v="${S.teams[0].score}">${S.teams[0].score}</b></td><td colspan="2"><span id="fn1"></span><b id="fs1" data-v="${S.teams[1].score}">${S.teams[1].score}</b></td></tr>${[0,1,2,3,4].map(i => `<tr class="la"><td class="ln">${i + 1}</td><td></td><td class="lp"></td><td></td><td class="lp"></td></tr>`).join('')}</table>
       <div class="lfoot"><div id="target"></div><div>Total <span class="big" data-v="0">0</span></div></div>`;
   } else if (S.phase === 'winner') {
     h = `<div class="center"><div class="cert"></div><div class="meets"></div></div>`;
@@ -207,7 +209,7 @@ function build() {
 }
 
 function sync() {
-  if (S.phase === 'title') { [0, 1].forEach(i => { const el = $('#n' + i); if (el) el.textContent = S.teams[i].name; }); }
+  if (S.phase === 'title') { const len = Math.max(S.teams[0].name.length, S.teams[1].name.length); $('.vs').style.fontSize = Math.min(3.4, 48 / len) + 'vw'; [0, 1].forEach(i => { const el = $('#n' + i); if (el) el.textContent = S.teams[i].name; }); }
   if (S.phase === 'round') {
     [0, 1].forEach(i => { const t = $('#t' + i); t.querySelector('.tn').textContent = S.teams[i].name; tween(t.querySelector('.ts'), S.teams[i].score);
       t.classList.toggle('ctl', S.control === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); });
@@ -218,19 +220,20 @@ function sync() {
   if (S.phase === 'survey') { const c = $('.cnt span'); if (c) tween(c, S.survey.count); }
   if (S.phase === 'lightning') {
     let total = 0; const qs = G.lightning[S.li].qs;
-    $$('.lt tr').forEach((tr, i) => { tr.classList.toggle('cur', S.lq === i); [0, 1].forEach(p => { const a = S.la[p][i], hide = p === 0 && S.hideP1, c = tr.children;
+    $$('.lt tr.la').forEach((tr, i) => { tr.classList.toggle('cur', S.lq === i); [0, 1].forEach(p => { const a = S.la[p][i], hide = p === 0 && S.hideP1, c = tr.children;
       const ta = c[1 + p * 2], tp = c[2 + p * 2]; ta.textContent = a.st && !hide ? a.t || '(no answer)' : ''; ta.classList.toggle('on', a.st && !hide);
       tp.textContent = a.sp && !hide ? a.p : ''; tp.classList.toggle('on', a.sp && !hide); if (a.sp) total += Number(a.p) || 0; }); });
     $('.lq').textContent = S.lq === null || !qs[S.lq] ? '' : (S.lq + 1) + '. ' + qs[S.lq].q;
-    const left = Math.max(0, S.timer), sec = (60 - left) % 60, c = $('.clock');
-    c.textContent = (left ? '4:59:' + String(sec).padStart(2, '0') : '5:00:00') + ' PM'; c.classList.toggle('hot', left <= 5);
+    const left = Math.max(0, S.timer), c = $('.clock');
+    c.textContent = left ? ':' + String(left).padStart(2, '0') : 'TIME'; c.classList.toggle('hot', left <= 5);
+    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; tween($('#fs' + i), S.teams[i].score); });
     tween($('.lfoot .big'), total); const tg = $('#target'), hit = total >= G.lightningTarget;
     tg.textContent = hit ? 'Target hit!' : 'Target ' + G.lightningTarget; tg.className = hit ? 'won' : '';
   }
   if (S.phase === 'winner') {
     const [a, b] = S.teams, tie = a.score === b.score, w = a.score >= b.score ? a : b, l = w === a ? b : a;
     const h = `<div class="mono">Office of mandatory fun / form 4-59</div><h1>${tie ? 'Certificate of Perfect Alignment' : 'Employees of the Month'}</h1>
-      <p>${tie ? 'awarded jointly, to avoid a meeting, to' : 'is hereby awarded to'}</p><h2>${tie ? esc(a.name) + ' &amp; ' + esc(b.name) : esc(w.name)}</h2>
+      <p>${tie ? 'awarded jointly, to avoid a meeting, to' : 'is hereby awarded to'}</p><h2 style="font-size:${Math.min(6.4, 90 / (tie ? a.name.length + b.name.length + 3 : w.name.length))}vw">${tie ? esc(a.name) + ' &amp; ' + esc(b.name) : esc(w.name)}</h2>
       <p>for ${tie ? 'scoring exactly ' + a.score + ' each' : 'outscoring the competition ' + w.score + ' to ' + l.score} and exceeding expectations, briefly.</p>
       <div class="sig"><span>Chip, AI intern</span><span>Valid for bragging rights</span></div>`;
     const c = $('.cert'); if (c.dataset.h !== h) { c.dataset.h = h; c.innerHTML = h; }   // score edits update the text without replaying the scene
@@ -246,7 +249,7 @@ function effects(fx) {
   if (fx.banner) { over.innerHTML = `<div class="banner">${esc(fx.banner)}</div>`; confetti(140); clearOver(2800); }
   if (fx.confetti) confetti(fx.confetti);
   if (fx.chip) chipSay(fx.chip);
-  (fx.react || []).forEach((e, i) => setTimeout(() => { const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (8 + Math.random() * 84) + 'vw'; d.style.fontSize = (3.5 + Math.random() * 3) + 'vw'; document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 120));
+  (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 6) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (Math.random() < .5 ? Math.random() * 2 : 95 + Math.random() * 2) + 'vw'; d.style.fontSize = '3vw'; document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 120));
 }
 function clearOver(ms) { clearTimeout(overT); overT = setTimeout(() => over.innerHTML = '', ms); }
 // Full-screen title cards: [small line, headline, line below, optional milliseconds]. Several in a row wipe into each other.
@@ -287,6 +290,7 @@ function recv(d) {
   S = d.S; const fx = d.fx || {}, k = sceneKey();
   if (k !== key) { key = k; clearTimeout(buildT); if (fx.cards && fx.cards.length) buildT = setTimeout(() => { build(); sync(); }, 380); else build(); }   // under a title card, swap the scene once the card covers it
   if (built === key) sync();
+  const jb = document.getElementById('joinbox'), on = !!(S.join && S.phones); if (on !== jb.classList.contains('on')) { jb.classList.toggle('on', on); jb.innerHTML = on ? `<div class="how">${qr(S.joinUrl, 1)}<div>Join on your phone.<br>Scan, or open <b>${esc(shortUrl())}</b><br>code <b>${esc(S.sid)}</b></div></div>` : ''; }
   effects(fx);
 }
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;

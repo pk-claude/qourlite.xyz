@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     const c = await getClient();
     if (req.method === 'POST') {
       const msg = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+      if (k === 'up') msg.rt = Date.now(); // arrival time on one clock, so buzzes can be ordered fairly
       const body = JSON.stringify(msg);
       if (body.length > 6000 || !msg.id) return res.status(400).json({ error: 'bad message' });
       if (k === 'state') {
