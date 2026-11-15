@@ -781,7 +781,7 @@ function build() {
       <div class="cal8"><div class="mono">Annual review cycle / form 4-59</div><h1>Calibrating performance reviews...</h1><div class="upb"><i></i></div><div class="cpc">0%</div><div class="cst mono"></div></div>
       <div class="org"><div class="otl mono">Org chart / effective immediately</div><svg viewBox="0 0 840 660" preserveAspectRatio="none"><path d="M420 160V225M210 290V225H630V290M210 440V490M125 540V490H295V540M630 440V540"/></svg>
         <div class="oslot mono">Top of the org chart<br>(position vacant)</div>${ob(0)}${ob(1)}
-        <div class="ob s" style="left:12.5cqw"><small>AI intern</small>Chip</div><div class="ob s" style="left:29.5cqw"><small>Reports to no one</small>The printer</div><div class="ob s" style="left:63cqw"><small>Still replying all</small>Greg</div></div>
+        <div class="ob s" style="left:12.5cqw"><small>AI intern</small>Chip</div><div class="ob s" style="left:29.5cqw"><small>Reports to no one</small>The printer</div><div class="ob s" style="left:63cqw"><small>Still replying all</small>Serial replier</div></div>
       <div class="cert"></div><div class="meets"><span></span><b class="mst">Meets expectations</b></div></div>`;
     if (CALM) cerT.push(setTimeout(() => confetti(260), 300));
     else {
@@ -894,7 +894,7 @@ function boardDone() {
 
 // ---------- "You said" inbox: envelopes fly from the join card into the tray, the unread badge bumps as each one lands ----------
 const ENV2 = '<svg class="e2" viewBox="0 0 54 40"><path d="M3 5h48v30H3z"/><path d="M3 6l24 18L51 6"/><circle cx="27" cy="25" r="5"/></svg>';
-const WHO = ['Someone in row 3', 'A phone on 4% battery', 'Definitely not Greg', 'The back table', 'Anonymous (we know)', 'Sent from a phone', 'The quiet one', 'Somebody near the snacks', 'A suspiciously fast typer', 'A team player, allegedly', 'Typed with one thumb', 'The loud table'];
+const WHO = ['Someone in row 3', 'A phone on 4% battery', 'Definitely not your manager', 'The back table', 'Anonymous (we know)', 'Sent from a phone', 'The quiet one', 'Somebody near the snacks', 'A suspiciously fast typer', 'A team player, allegedly', 'Typed with one thumb', 'The loud table'];
 const svT = [], cerT = [];
 function survRow(n, anim) {
   const rows = $('.rows'); if (!rows) return; const el = document.createElement('div'); el.className = 'mr' + (anim ? ' new' : ''); el.style.color = ['var(--cyan)', 'var(--pink)', 'var(--yellow)', 'var(--violet)'][n % 4];
@@ -931,9 +931,9 @@ function survSync() {
 
 // ---------- title cold open: the reply-all storm ----------
 const NL = 8;   // banks of ceiling lights in the final round
-const MAILS = [['Dave (Sales)', 'RE: RE: RE: Mandatory fun'], ['Priya', 'Please remove me from this list'], ['Unknown sender', 'Who is this?'], ['Greg', 'STOP REPLYING ALL'], ['Linda (Finance)', '+1'], ['Tom', 'Sent from my phone'], ['Everyone', 'Unsubscribe'], ['Legal', 'Per my last email'], ['Sam', 'Thanks!'], ['The host', 'Can everyone see my screen?'],
-  ['IT desk', 'You are on mute'], ['Greg', 'Replying all to say stop'], ['HR', 'Friendly reminder (it is not)'], ['Chip', 'Circling back on this'], ['Facilities', 'Whose lunch is this?'], ['Dana', 'Wrong thread, sorry'], ['Calendar', 'Meeting moved to: now'], ['Out of office', 'Back never. Regards'], ['The intern', 'Is this the right list?'], ['Bob', 'RE: Unsubscribe'],
-  ['Mailer daemon', 'Recall failed'], ['Linda (Finance)', '+1 to the +1'], ['Tom', 'Let us take this offline'], ['Priya', 'Quick question (not quick)'], ['Sam', 'Thanks for the thanks!'], ['Greg', 'RE: STOP REPLYING ALL']];
+const MAILS = [['Sales (all of it)', 'RE: RE: RE: Mandatory fun'], ['Marketing', 'Please remove me from this list'], ['Unknown sender', 'Who is this?'], ['Serial replier', 'STOP REPLYING ALL'], ['Finance', '+1'], ['Your skip-level', 'Sent from my phone'], ['Everyone', 'Unsubscribe'], ['Legal', 'Per my last email'], ['Someone in Ops', 'Thanks!'], ['The host', 'Can everyone see my screen?'],
+  ['IT desk', 'You are on mute'], ['Serial replier', 'Replying all to say stop'], ['HR', 'Friendly reminder (it is not)'], ['Chip', 'Circling back on this'], ['Facilities', 'Whose lunch is this?'], ['Project manager', 'Wrong thread, sorry'], ['Calendar', 'Meeting moved to: now'], ['Out of office', 'Back never. Regards'], ['The intern', 'Is this the right list?'], ['A former employee', 'RE: Unsubscribe'],
+  ['Mailer daemon', 'Recall failed'], ['Finance', '+1 to the +1'], ['Your skip-level', 'Let us take this offline'], ['Marketing', 'Quick question (not quick)'], ['Someone in Ops', 'Thanks for the thanks!'], ['Serial replier', 'RE: STOP REPLYING ALL']];
 const SLOTS = [[-2, 9], [-4, 31], [-5, 53], [-4, 74], [80, 7], [82, 29], [83, 51], [82, 73], [4, 90], [77, 91]];
 let stormT = [], stormRaf = 0, mailN = 0;
 function stormStop() { stormT.forEach(t => { clearTimeout(t); clearInterval(t); }); stormT = []; cancelAnimationFrame(stormRaf); stage.classList.remove('rumble'); }
