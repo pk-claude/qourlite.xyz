@@ -94,6 +94,7 @@
   }
   function think(on) {
     on = !!on; if (on === thinkOn) return; thinkOn = on;
+    try { if (SFX.onThink) SFX.onThink(on); } catch (e) {}   // lets the host page keep its button in step
     clearInterval(timer); timer = null;
     if (!on) { var b = musBus; musBus = null; dropBus(b); return; }
     play(function (t) { if (!thinkOn || timer) return; musBus = bus(MUS); step = 0; nextT = t + .05; pump(); timer = setInterval(pump, 100); }, true);

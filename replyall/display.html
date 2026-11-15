@@ -428,7 +428,7 @@ body.covered #bg,body.covered #stage{visibility:hidden}
 .wall.hot .face .rim{stroke:var(--red);fill:#ffe1e1}.wall.hot .face .arc{stroke:var(--red)}
 table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-spacing:.9vw 1vh;font-size:2.5vw}
 .lt td{background:rgba(255,255,255,.07);border:.15vw solid rgba(255,255,255,.12);border-radius:1vw;padding:0 1.4vw;transition:background .3s,color .3s,border-color .3s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.lt tr.lh td{background:none;border:0;border-bottom:.35vh solid transparent;border-radius:0;font-size:2vw;font-weight:900;height:5.4vh}.lt tr.lh td>*{vertical-align:middle}.lt tr.lh b{font-family:var(--disp);color:var(--yellow);font-size:2.8vw;margin-left:1vw}
+.lt tr.lh td{background:none;border:0;border-bottom:.35vh solid transparent;border-radius:0;font-size:2vw;font-weight:900;height:5.4vh}.lt tr.lh td>*{vertical-align:middle}.lt tr.lh span{display:inline-block;max-width:calc(100% - 10vw);overflow:hidden;text-overflow:ellipsis}.lt tr.lh td.act span{max-width:calc(100% - 23vw)}.lt tr.lh b{font-family:var(--disp);color:var(--yellow);font-size:2.8vw;margin-left:1vw}
 .lt tr.lh td.act{border-bottom-color:var(--cyan)}
 .lt tr.lh td.act:after{content:"on the clock";font:800 1.05vw var(--mono);letter-spacing:.12em;text-transform:uppercase;background:var(--cyan);color:var(--ink);border-radius:99px;padding:.3vh .9vw;margin-left:1.2vw;vertical-align:middle}
 .lt td.ln{width:5vw;background:none;border:0;color:var(--cyan);font-family:var(--disp);text-align:center}
@@ -464,7 +464,7 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
 .cert p{font-size:2vw;margin:.8vh 0;font-weight:700}
 .cert .sig{display:flex;justify-content:space-between;margin-top:2.5vh;font-size:1.4vw;font-family:var(--mono)}
 .cert .sig span{border-top:.2vw solid var(--ink);padding-top:.5vh;width:24vw}
-.meets{position:relative;font-size:2.2vw;font-weight:700;background:rgba(20,18,58,.85);border:.12vw solid rgba(255,255,255,.2);border-radius:99px;padding:1vh 2.4vw;margin-right:13vw}
+.meets{position:relative;font-size:2.2vw;font-weight:700;background:rgba(20,18,58,.85);border:.12vw solid rgba(255,255,255,.2);border-radius:99px;padding:1vh 2.4vw;margin-right:13vw;max-width:57vw}
 .mst{position:absolute;left:100%;top:50%;margin:-2.6vh 0 0 -1.6vw;font:400 1.9vw/1 var(--disp);text-transform:uppercase;white-space:nowrap;color:var(--yellow);background:var(--ink);border:.35vw solid var(--yellow);border-radius:.8vw;padding:1vh 1vw;transform:rotate(-7deg);box-shadow:0 0 0 .25vw rgba(255,225,77,.25)}
 /* promotion ceremony: calibrating -> org chart, the winner is hoisted to the top -> the certificate slams in -> the runner-up gets stamped */
 .cer{position:relative}
@@ -489,7 +489,7 @@ table.lt{flex:1;width:100%;table-layout:fixed;border-collapse:separate;border-sp
 .otl{position:absolute;left:0;top:-5.5vh;font-size:1.5vw;color:var(--cyan)}
 .oslot{position:absolute;top:0;left:50%;width:32vw;margin-left:-16vw;height:16vh;border:.35vw dashed var(--yellow);border-radius:1.2vw;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.5vw;line-height:1.5;color:var(--yellow);background:rgba(255,225,77,.07)}
 .tie .oslot{width:64vw;margin-left:-32vw}
-.ob{position:absolute;top:29vh;width:29vw;height:15vh;margin-left:-14.5vw;border-radius:1.2vw;background:#211d5c;border:.3vw solid rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 1vw;font-weight:900;line-height:1.02;box-shadow:0 1vh 2vw rgba(0,0,0,.5);animation:cin .4s 3s backwards cubic-bezier(.3,1.6,.5,1)}
+.ob{overflow-wrap:anywhere;position:absolute;top:29vh;width:29vw;height:15vh;margin-left:-14.5vw;border-radius:1.2vw;background:#211d5c;border:.3vw solid rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 1vw;font-weight:900;line-height:1.02;box-shadow:0 1vh 2vw rgba(0,0,0,.5);animation:cin .4s 3s backwards cubic-bezier(.3,1.6,.5,1)}
 .ob small{font:800 1.2vw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:.5vh}
 .ob.t0{left:21vw}.ob.t1{left:63vw;animation-delay:3.1s}
 .ob.s{top:54vh;width:17vw;height:11vh;margin-left:-8.5vw;font-size:2vw;opacity:.75;animation-delay:3.2s}
@@ -645,7 +645,7 @@ function build() {
 function sync() {
   if (S.phase === 'title') { const len = Math.max(S.teams[0].name.length, S.teams[1].name.length); $('.vs').style.fontSize = Math.min(3.4, 48 / len) + 'vw'; [0, 1].forEach(i => { const el = $('#n' + i); if (el) el.textContent = S.teams[i].name; }); }
   if (S.phase === 'round') {
-    [0, 1].forEach(i => { const t = $('#t' + i); t.querySelector('.tn').textContent = S.teams[i].name; tween(t.querySelector('.ts'), S.teams[i].score);
+    [0, 1].forEach(i => { const t = $('#t' + i), tn = t.querySelector('.tn'); tn.textContent = S.teams[i].name; tn.style.fontSize = Math.max(1.15, Math.min(2.2, 31 / (S.teams[i].name.length || 1))) + 'vw'; tween(t.querySelector('.ts'), S.teams[i].score);
       t.classList.toggle('ctl', S.control === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); });
     tween($('.pot'), S.pot); $('.q').classList.toggle('on', !!S.showQ);
     const tiles = $$('.tile'), done = tiles.length > 1 && S.revealed.filter(Boolean).length >= cur().a.length, fresh = [];
@@ -670,7 +670,7 @@ function sync() {
     const arc = $('.face .arc'); arc.style.strokeDasharray = len + ' ' + C; arc.style.strokeDashoffset = -(C - len);
     const lit = Math.ceil(Math.min(1, left / max) * NL); $$('.lights i').forEach((el, i) => el.classList.toggle('off', i >= lit));
     $('.dim').style.opacity = (1 - lit / NL) * .5;
-    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; tween($('#fs' + i), S.teams[i].score); $('#fn' + i).parentNode.classList.toggle('act', S.lp === i); });
+    [0, 1].forEach(i => { $('#fn' + i).textContent = S.teams[i].name; $('#fn' + i).style.fontSize = Math.max(1.1, Math.min(2, 30 / (S.teams[i].name.length || 1))) + 'vw'; tween($('#fs' + i), S.teams[i].score); $('#fn' + i).parentNode.classList.toggle('act', S.lp === i); });
     tween($('.lfoot .big'), total); const tg = $('#target'), hit = total >= G.lightningTarget, pct = Math.max(0, Math.min(100, Math.round(total / (G.lightningTarget || 1) * 100)));
     tg.textContent = hit ? 'Target hit!' : 'Target ' + G.lightningTarget; tg.className = hit ? 'won' : '';
     $('#upt').textContent = hit ? 'Weekend uploaded. Out of office: ON' : 'Uploading weekend.zip...'; $('#upp').textContent = pct + '%';
@@ -683,7 +683,7 @@ function sync() {
       <p>for ${tie ? 'scoring exactly ' + a.score + ' each' : 'outscoring the competition ' + w.score + ' to ' + l.score} and exceeding expectations, briefly.</p>
       <div class="sig"><span>Chip, AI intern</span><span>Valid for bragging rights</span></div>`;
     const c = $('.cert'); if (c.dataset.h !== h) { c.dataset.h = h; c.innerHTML = h; }   // score edits update the text without replaying the scene
-    const m = $('.meets'); m.style.display = tie ? 'none' : ''; m.firstChild.textContent = l.name + ': Runner-up, Most Valuable Reply';
+    const m = $('.meets'); m.style.display = tie ? 'none' : ''; m.firstChild.textContent = l.name + ': Runner-up, Most Valuable Reply'; m.style.fontSize = Math.min(2.2, 96 / (l.name.length + 31)) + 'vw';
   }
 }
 
@@ -805,10 +805,11 @@ function storm() {
   }, 2600));
 }
 
-let overT, cardQ = [], cardBusy = false, cardEl = null, busyT = 0, busyEnd = 0;
+let overT, cardQ = [], cardBusy = false, cardEl = null, cardGen = 0, busyT = 0, busyEnd = 0;
 // ambient motion rests while something big is on screen (see body.busy in the styles)
 function busy(ms) { const end = performance.now() + ms; if (end < busyEnd) return; busyEnd = end; document.body.classList.add('busy'); clearTimeout(busyT); busyT = setTimeout(() => document.body.classList.remove('busy'), ms); }
 function effects(fx) {
+  if (fx.clear) wipe();
   if (fx.stamp) { const size = Math.min(9, 105 / fx.stamp.length);   // long stamps shrink so they always fit the screen
     over.innerHTML = `<div class="stamp" style="font-size:${size}vw">${esc(fx.stamp)}<small>${esc(fx.sub || 'strike')}</small></div>`; stage.classList.remove('in'); stage.classList.add('shake'); setTimeout(() => stage.classList.remove('shake'), 500); clearOver(1700); }
   if (fx.cards) { cardQ.push(...fx.cards); playCards(); }
@@ -820,14 +821,19 @@ function effects(fx) {
   if (fx.chip) chipSay(fx.chip);
   (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 6) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e; d.style.left = (Math.random() < .5 ? Math.random() * 2 : 95 + Math.random() * 2) + 'vw'; d.style.fontSize = '3vw'; document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 120));
 }
+// Undo on the host: whatever was still playing for the undone step (title cards, a stamp, a banner) goes away at once.
+function wipe() {
+  cardGen++; cardQ = []; cardBusy = false; cardEl = null; document.getElementById('cards').innerHTML = ''; document.body.classList.remove('covered');
+  clearTimeout(overT); over.innerHTML = ''; bits = []; stage.classList.remove('shake');
+}
 function clearOver(ms) { clearTimeout(overT); overT = setTimeout(() => over.innerHTML = '', ms); }
 // Full-screen title cards: [small line, headline, line below, optional milliseconds]. Several in a row wipe into each other.
 // A card that opens an agenda item ("Agenda item N ...") plays as an animated meeting invite instead of plain text.
 function playCards() {
-  if (cardBusy || !cardQ.length) return; cardBusy = true; const c = cardQ.shift(), inv = /^Agenda item (\d+)/i.exec(String(c[0])), ms = c[3] || (inv ? 2900 : 2400);
-  let el; busy(ms); setTimeout(() => document.body.classList.add('covered'), ms * .16); 
+  if (cardBusy || !cardQ.length) return; cardBusy = true; const gen = cardGen, c = cardQ.shift(), inv = /^Agenda item (\d+)/i.exec(String(c[0])), ms = c[3] || (inv ? 2900 : 2400);
+  let el; busy(ms); setTimeout(() => { if (gen === cardGen) document.body.classList.add('covered'); }, ms * .16);
   // stay covered when the next card wipes in at least as fast as this one wipes out: nothing underneath can show between them
-  setTimeout(() => { const n = cardQ[0]; if (!n || CALM || (n[3] || (/^Agenda item \d/i.test(String(n[0])) ? 2900 : 2400)) * .14 > ms * .16) document.body.classList.remove('covered'); }, ms * .79);
+  setTimeout(() => { if (gen !== cardGen) return; const n = cardQ[0]; if (!n || CALM || (n[3] || (/^Agenda item \d/i.test(String(n[0])) ? 2900 : 2400)) * .14 > ms * .16) document.body.classList.remove('covered'); }, ms * .79);
   if (inv) el = invite(inv[1], c, ms);
   else if (/ vs /.test(String(c[0])) && /^\d+ : \d+$/.test(String(c[1]))) el = results(c, ms);
   else { el = document.createElement('div'); el.className = 'card'; el.style.animationDuration = ms + 'ms';
@@ -835,7 +841,7 @@ function playCards() {
     document.getElementById('cards').appendChild(el); }
   // once this card fully covers the previous one, the previous one stops wiping out behind it
   const prev = cardEl; cardEl = el; if (prev) setTimeout(() => prev.remove(), ms * .15);
-  setTimeout(() => { cardBusy = false; playCards(); }, ms * .84); setTimeout(() => { el.remove(); if (cardEl === el) cardEl = null; }, ms);
+  setTimeout(() => { if (gen !== cardGen) return; cardBusy = false; playCards(); }, ms * .84); setTimeout(() => { el.remove(); if (cardEl === el) cardEl = null; }, ms);
 }
 // The standings card ("A vs B", "12 : 7", caption) plays as a quarterly-results slide.
 function results(c, ms) {
@@ -955,7 +961,9 @@ window.addEventListener('message', e => recv(e.data));
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.teams) recv({S: s}); } catch (e) {}
 toHost({hello: 1}); setInterval(() => toHost({alive: 1}), 2000);
 // Buzzer keys pressed while this window has focus are passed to the host window.
-document.addEventListener('keydown', e => { toHost({key: e.code}); if (/^Page|^Arrow|^Space/.test(e.code)) e.preventDefault(); });
+// Each press carries an id: it travels on two links and the host must act on it once. A held key counts once.
+let kn = 0; const kbase = Date.now().toString(36);
+document.addEventListener('keydown', e => { if (!e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) toHost({key: e.code, kid: kbase + '-' + (++kn)}); if (/^Page|^Arrow|^Space/.test(e.code)) e.preventDefault(); });
 const hint = document.getElementById('hint'); setTimeout(() => hint.style.opacity = 0, 10000);
 document.addEventListener('click', () => { hint.style.display = 'none'; if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); });
 </script>
