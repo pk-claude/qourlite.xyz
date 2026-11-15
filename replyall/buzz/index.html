@@ -75,6 +75,8 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 .bar .ch{font:400 16px/1.1 var(--disp);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #who{font:500 11px/1.3 var(--mono);color:#e4dcff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec{flex:none;display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:99px;background:var(--ink);font:800 10px/1 var(--mono);letter-spacing:.08em;color:#fff}
+#snd{flex:none;width:34px;height:34px;padding:0;border-radius:11px;background:var(--ink);color:#fff;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
+#snd.off{background:transparent;box-shadow:0 0 0 2px rgba(10,10,31,.55) inset;opacity:.75}
 .rec:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--red);animation:dot 1.4s infinite}
 @keyframes dot{50%{opacity:.25}}
 .main{flex:1;display:flex;flex-direction:column;gap:12px;padding:12px 14px 14px}
@@ -213,6 +215,7 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
   <div class="bar">
     <div id="av">?</div>
     <div class="id"><div class="ch"># all-hands</div><div id="who"></div></div>
+    <button id="snd" onclick="sndToggle()" aria-label="Phone sounds" aria-pressed="true" title="Phone sounds">&#x1F509;</button>
     <div class="rec" title="It is not">REC</div>
   </div>
   <div class="main">
@@ -245,6 +248,35 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 const $ = id => document.getElementById(id), msg = $('msg'), b = $('buzz'), LS = 'replyall_phone', DEF = ['Team Synergy', 'Team Bandwidth'];
 const set = (el, t) => { if (el.textContent !== t) el.textContent = t; }, cls = (el, c) => { if (el.className !== c) el.className = c; };
 const buzzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} };
+// Phone sounds: tiny synthesized blips (WebAudio, no files). Quiet on purpose, because a room full of phones adds up.
+// The audio context is only created or resumed from a tap (iOS Safari insists), and every call is safe if audio is missing.
+const SND = (() => {
+  const AC = window.AudioContext || window.webkitAudioContext; let ac = null, out = null, on = true, nb = null, woke = 0;
+  try { on = localStorage.getItem('replyall_psnd') !== '0'; } catch (e) {}
+  function wake() { try { if (!on || !AC) return; woke = Date.now(); if (!ac) { ac = new AC(); out = ac.createGain(); out.gain.value = .16; out.connect(ac.destination); } if (ac.state !== 'running') { const p = ac.resume(); if (p && p.catch) p.catch(() => {}); } } catch (e) {} }
+  // one enveloped oscillator: frequency f gliding to f2, peak level v, length d, starting at offset w
+  function tone(type, f, f2, v, d, w) { const t = ac.currentTime + (w || 0), o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(out); o.start(t); o.stop(t + d + .03); }
+  // filtered noise sweeping from f to f2
+  function hiss(f, f2, v, d) { const t = ac.currentTime; if (!nb) { nb = ac.createBuffer(1, Math.floor(ac.sampleRate * .5), ac.sampleRate); const ch = nb.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; }
+    const s = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = nb; bp.type = 'bandpass'; bp.Q.value = 1.2; bp.frequency.setValueAtTime(f, t); bp.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + d * .45); g.gain.exponentialRampToValueAtTime(.0001, t + d); s.connect(bp); bp.connect(g); g.connect(out); s.start(t); s.stop(t + d + .03); }
+  const FX = {
+    click() { tone('sine', 520, 300, .5, .05); },                                                                   // soft tap
+    chime() { [[784, 0], [988, .09], [1319, .18]].forEach(n => { tone('sine', n[0], 0, .7, .5, n[1]); tone('triangle', n[0] * 2, 0, .18, .25, n[1]); }); },   // bright rising three notes
+    bonk() { tone('sine', 196, 82, .9, .3); tone('triangle', 147, 62, .4, .32, .02); },                           // low and a bit sorry
+    whoosh() { hiss(500, 3800, .55, .28); tone('sine', 660, 1320, .18, .16, .1); },                                // message leaving
+    pop() { tone('sine', 380, 900, .6, .09); }                                                                     // bubble
+  };
+  // A context that is still waking up from this very tap is fine: the sound plays the moment it is running.
+  const play = k => { try { if (!on || !ac || !FX[k] || (ac.state !== 'running' && Date.now() - woke > 500)) return false; FX[k](); return true; } catch (e) { return false; } };
+  const paint = () => { try { const el = document.getElementById('snd'); if (!el) return; el.className = on ? '' : 'off'; el.textContent = on ? '\u{1F509}' : '\u{1F507}'; el.setAttribute('aria-pressed', on ? 'true' : 'false'); el.title = on ? 'Phone sounds: on' : 'Phone sounds: off'; } catch (e) {} };
+  const toggle = () => { on = !on; try { localStorage.setItem('replyall_psnd', on ? '1' : '0'); } catch (e) {} paint(); if (on) { wake(); setTimeout(() => play('pop'), 60); } else { try { if (ac) ac.suspend(); } catch (e) {} } };
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(k => { try { document.addEventListener(k, wake, {capture: true, passive: true}); } catch (e) {} });
+  return {play, wake, toggle, paint, on: () => on};
+})();
+function sndToggle() { SND.toggle(); }
+SND.paint();
 // This phone keeps one id, so a refresh keeps its team and its approval.
 let pid = localStorage.getItem('replyall_pid'); if (!/^[a-z0-9]{8}$/.test(pid || '')) { pid = Math.random().toString(36).slice(2, 10).padEnd(8, '0'); localStorage.setItem('replyall_pid', pid); }
 let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {}, sentAt = 0, lastMode = '', ctx = '', qi = 0;
@@ -316,7 +348,7 @@ function show() {
     cls($('pad'), 'pad' + (mode === 'open' || mode === 'first' ? ' ' + mode : ''));
     set($('bi'), t[0]); set($('bl'), t[1]); set($('bs'), t[2]); set($('hint'), t[3]);
     b.setAttribute('aria-disabled', mode === 'open' || mode === 'hold' ? 'false' : 'true');
-    if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); } else if (mode === 'slow') buzzz(220); }
+    if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); SND.play('chime'); } else if (mode === 'slow') { buzzz(220); SND.play('bonk'); } }
   }
   lastMode = mode;
   $('survey').classList.toggle('hide', !v);
@@ -344,7 +376,7 @@ function join(t) {
 }
 function leave() { joined = false; sid = ''; st = null; known = null; localStorage.removeItem(LS); $('play').className = 'hide'; $('join').className = ''; timer(); show(); poll(); }
 function react(e, el) {
-  const now = Date.now(); if (now - lastReact < 700) return; lastReact = now; send('react', {e}).catch(() => {}); buzzz(15);
+  const now = Date.now(); if (now - lastReact < 700) return; lastReact = now; send('react', {e}).catch(() => {}); buzzz(15); SND.play('pop');
   if (!el) return;
   const f = document.createElement('span'), r = $('rx'); f.className = 'fly'; f.textContent = el.firstChild.textContent; f.style.setProperty('--x', (Math.random() * 60 - 30) + 'px'); f.style.setProperty('--r', (Math.random() * 50 - 25) + 'deg'); el.appendChild(f); setTimeout(() => f.remove(), 950);
   let c = el.querySelector('em'); if (!c) { c = document.createElement('em'); el.appendChild(c); } c.textContent = '+' + (el.dataset.n = (+el.dataset.n || 0) + 1);
@@ -352,7 +384,7 @@ function react(e, el) {
 }
 function answer() {
   const a = $('sa').value.trim().slice(0, 30), v = st && st.survey, d = $('sdone'); if (!a || !v) return;
-  const ss = $('ss'); ss.className = ''; void ss.offsetWidth; ss.className = 'go'; d.className = '';
+  const ss = $('ss'); ss.className = ''; void ss.offsetWidth; ss.className = 'go'; d.className = ''; SND.play('whoosh');
   send('ans', {q: v.n, a}).then(() => {
     answered = {q: v.n, a}; sentAt = Date.now(); try { sessionStorage.setItem('replyall_ans', JSON.stringify(answered)); } catch (e) {}
     $('sa').value = ''; const m = $('sm'); m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); buzzz(25); show(); setTimeout(show, 1500);
@@ -362,7 +394,7 @@ $('sa').addEventListener('keydown', e => { if (e.key === 'Enter') answer(); });
 // The press: ripple and a short buzz straight away, so the button feels instant even on a slow network.
 b.addEventListener('pointerdown', e => {
   b.classList.add('down'); if (st && !st.open) return;
-  const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px'; b.appendChild(s); setTimeout(() => s.remove(), 600); buzzz(30);
+  const r = b.getBoundingClientRect(), s = document.createElement('span'); s.className = 'rip'; s.style.left = (e.clientX - r.left) + 'px'; s.style.top = (e.clientY - r.top) + 'px'; b.appendChild(s); setTimeout(() => s.remove(), 600); buzzz(30); SND.wake(); SND.play('click');
 });
 ['pointerup', 'pointerleave', 'pointercancel'].forEach(k => b.addEventListener(k, () => b.classList.remove('down')));
 b.addEventListener('click', () => { if (st && !st.open) return; pressed = Date.now(); show(); send('buzz').catch(() => { msg.textContent = 'Not sent. Check your signal.'; setTimeout(() => msg.textContent = '', 2000); }); });
