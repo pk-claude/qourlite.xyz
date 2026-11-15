@@ -14,82 +14,82 @@ window.GAME = {
   tagline: "This meeting could not have been an email",
   teams: ["Team Synergy", "Team Bandwidth"],
   lightningTarget: 200,
-  finalStakes: "200 points and the whole room wins",
+  finalStakes: "200 points and the whole room wins. No action items.",
 
   // THE SHOW: rounds 1 to 3, then the live "You said" round (triple), then the final.
   // Round 4 is the backup triple round if phones are not working.
   // Rounds 5 to 10 are spares for swaps and tie-breakers.
   rounds: [
-    { id: "r01", mult: 1, q: "Name something a coworker does that instantly makes your day better.",
-      a: [["Brings food", 34, "snacks, donuts, treats, lunch, candy, cake", "The fastest way to a promotion in my book."], ["Says thank you", 21, "appreciation, compliment, praise, kind words"], ["Makes you laugh", 17, "jokes, funny, memes"],
-          ["Cancels the meeting", 12, "ends the meeting early", "The greatest gift one coworker can give another."], ["Helps with your work", 10, "covers for you, fixes it, answers a question"], ["Makes the coffee", 6, "coffee run, brings coffee"]] },
-    { id: "r02", mult: 1, q: "Name something at work that takes 'two minutes' but never does.",
-      a: [["A computer update", 28, "restart, reboot, install", "Do not turn off your computer. Or your hopes."], ["Joining the video call", 22, "logging in, audio, camera, password"], ["The printer", 18, "printing, scanning, copying"],
-          ["A quick question", 14, "quick chat, got a minute, quick call"], ["Finding a meeting room", 10, "booking a room, conference room"], ["An expense report", 8, "expenses, timesheet, forms"]] },
-    { id: "r03", mult: 2, q: "Besides your real job, name a job you somehow ended up doing at work.",
-      a: [["Tech support", 30, "IT, fixing computers, help desk, printer fixer", "Have you tried turning the team off and on again?"], ["Therapist", 22, "listener, counselor, shoulder to cry on"], ["Party planner", 16, "events, birthdays, potluck, celebrations"],
-          ["Snack supplier", 13, "candy bowl, baker, feeds everyone"], ["Human calendar", 11, "reminders, scheduler, knows the deadlines"], ["Plant waterer", 8, "plants, office gardener"]] },
-    { id: "r04", mult: 3, q: "Name a sound that means it is going to be a good day at work.",
-      a: [["Coffee brewing", 32, "coffee machine, espresso, kettle"], ["People laughing", 22, "laughter, laughing down the hall"], ["A 'canceled' ping", 16, "meeting canceled notification, calendar ping", "Music. Pure music."],
-          ["A pizza box opening", 13, "food arriving, lunch delivery, donut box"], ["Your favorite song", 10, "music, playlist, headphones, radio"], ["Laptops closing at five", 7, "laptop shutting, end of day, packing up"]] },
+    { id: "r01", mult: 1, q: "Name something people write in a work email that really means 'I am furious.'",
+      a: [["Per my last email", 36, "as I said, as stated, as mentioned, as previously noted, see below", "Translation: I have receipts. They are attached."], ["Just following up", 20, "follow up, bumping this, gentle reminder, friendly reminder, checking in"], ["As discussed", 14, "per our conversation, as agreed, as we talked about"],
+          ["Thanks in advance", 12, "thanks, thank you, regards, best, kindly", "The thanks is a deadline wearing a nice hat."], ["Going forward", 9, "in future, next time, moving forward, for future reference"], ["CC'ing your manager", 9, "cc, copying, looping in, adding your boss", "That is not a CC. That is a witness."]] },
+    { id: "r02", mult: 1, q: "Name something people are really doing when their camera is off.",
+      a: [["Eating", 26, "lunch, breakfast, snacking, cooking, making food", "Camera off, crunch on. We can all hear the chips."], ["Still in bed", 21, "sleeping, napping, lying down, pajamas, not dressed"], ["Laundry", 17, "chores, dishes, cleaning, vacuuming, folding"],
+          ["Scrolling their phone", 15, "phone, texting, social media, shopping, videos"], ["Their actual job", 12, "working, emails, other work, another meeting, multitasking", "Working during a meeting. A bold productivity hack."], ["Walking the dog", 9, "outside, driving, errands, walking, gym"]] },
+    { id: "r03", mult: 2, q: "Name a meeting that should have been an email.",
+      a: [["The weekly status update", 30, "status, weekly, check-in, team meeting, update", "Status: unchanged. See you next week."], ["The all-hands", 20, "town hall, company meeting, all hands", "I feel attacked. This all-hands is load-bearing."], ["The meeting about the meeting", 17, "pre-meeting, prep, planning meeting, alignment, debrief"],
+          ["The daily stand-up", 14, "standup, daily, scrum, huddle", "Everyone is standing. Nobody is up."], ["The brainstorm", 10, "ideation, workshop, blue sky, kickoff"], ["All of them", 9, "every meeting, this one, any"]] },
+    { id: "r04", mult: 3, q: "Name something a boss says that means your weekend is in danger.",
+      a: [["Got a minute?", 30, "quick chat, do you have a sec, can we talk, quick call, quick question", "It is never a minute. I have run the numbers."], ["One small favor", 21, "quick favor, tiny ask, small thing, can you help"], ["The client called", 16, "client, customer, urgent request, something came up"],
+          ["By Monday", 15, "deadline, end of day, EOD, ASAP, first thing Monday", "By Monday is just Sunday with better branding."], ["Are you around Saturday?", 10, "weekend plans, are you free, around this weekend"], ["No pressure, but", 8, "no rush, when you get a chance, only if you have time", "There was pressure. I measured it."]] },
 
     // SPARE ROUNDS
     { id: "r05", mult: 1, q: "If the office printer could talk, what would it say?",
-      a: [["Paper jam", 36, "jammed, stuck"], ["No", 22, "nope, not today, I refuse"], ["Feed me", 16, "toner, paper, ink, low on"], ["Try again", 12, "error, retry, please wait"], ["Help me", 8, "I am tired, I need a break"], ["Turn me off and on", 6, "restart me, unplug me"]] },
-    { id: "r06", mult: 1, q: "Name something you would put in the office time capsule.",
-      a: [["The good stapler", 26, "stapler"], ["A sticky note", 21, "post-it, notepad"], ["A coffee mug", 18, "mug, cup"], ["A badge or lanyard", 14, "ID, lanyard, badge"], ["The mystery cable", 12, "charger, cord, cable"], ["That fridge yogurt", 9, "old lunch, leftovers", "It was already a time capsule."]] },
+      a: [["Paper jam", 34, "jammed, stuck", "It has been jammed since the last reorg."], ["No", 22, "nope, not today, I refuse, error"], ["Feed me toner", 15, "toner, paper, ink, low on, cyan"], ["Try the other printer", 12, "use another one, not my job, go upstairs"], ["I only work for IT", 9, "works when IT comes, fine when tech arrives", "Classic. Performs only when observed."], ["I quit", 8, "help me, I am tired, I need a break, unplug me"]] },
+    { id: "r06", mult: 1, q: "Name something people do to look busy at work.",
+      a: [["Walk fast with a laptop", 27, "walk around, carry papers, carry a laptop, rush, pace", "Destination unknown. Urgency: maximum."], ["Type loudly", 22, "typing, keyboard, clicking"], ["Sigh at the screen", 15, "sigh, frown, stare at screen, look stressed"], ["Book a meeting with themselves", 14, "block calendar, fake meeting, focus time, full calendar", "Attendance was perfect. No decisions were made."], ["Keep the status dot green", 13, "wiggle the mouse, stay active, online status, jiggle"], ["Send an email at 11 p.m.", 9, "late email, scheduled send, weekend email"]] },
     { id: "r07", mult: 1, q: "Name something people say in a meeting that really means 'I was not listening.'",
-      a: [["Can you repeat that?", 38, "say that again, repeat the question"], ["I agree", 22, "what they said, same, sounds good"], ["Sorry, I was on mute", 16, "mute"], ["Great point", 12, "good point, interesting"], ["Let's take it offline", 8, "circle back, follow up later"], ["No questions", 4, "nothing from me, all good"]] },
-    { id: "r08", mult: 1, q: "Name the real hero of the break room.",
-      a: [["The coffee machine", 39, "coffee, coffee maker"], ["The microwave", 21, "microwave"], ["Whoever brings donuts", 17, "donut person, snack bringer, baker"], ["The fridge", 11, "refrigerator"], ["Whoever cleans up", 7, "refills, wipes, takes out trash"], ["The vending machine", 5, "vending, snack machine"]] },
-    { id: "r09", mult: 1, q: "Name a way to celebrate hitting a big deadline.",
-      a: [["Go home early", 27, "leave early, day off"], ["Team lunch", 24, "food, pizza, eat, dinner"], ["Take a nap", 17, "sleep, rest"], ["Happy dance", 13, "dance, cheer, high five"], ["Tell everyone", 10, "brag, announce, email the team"], ["Start the next one", 9, "more work, next project", "Somebody check on this person."]] },
-    { id: "r10", mult: 1, q: "Name something the office microwave has been through.",
-      a: [["Fish", 36, "seafood, salmon, tuna", "HR has entered the chat."], ["Burnt popcorn", 27, "popcorn"], ["A soup explosion", 15, "splatter, spill, exploded"], ["A fork", 10, "metal, foil, sparks"], ["A very long line", 7, "queue, waiting"], ["Leftover curry", 5, "curry, leftovers, strong smells"]] }
+      a: [["Can you repeat that?", 36, "say that again, repeat the question, sorry what, come again"], ["I agree", 22, "what they said, same, sounds good, plus one", "With what? Nobody knows. Not even them."], ["Sorry, I was on mute", 16, "mute, bad connection, you cut out, froze"], ["Great point", 12, "good point, interesting, love that"], ["Let's take it offline", 9, "circle back, follow up later, park that", "Offline is where questions go to retire."], ["Nothing from me", 5, "no questions, all good, I am fine"]] },
+    { id: "r08", mult: 1, q: "Name something in the shared fridge that has been there since the last reorg.",
+      a: [["A mystery container", 32, "tupperware, leftovers, unlabeled box, old lunch", "It has outlasted three managers."], ["Yogurt", 20, "expired yogurt, dairy"], ["Condiments", 16, "ketchup, mustard, mayo, salad dressing, hot sauce, sauce"], ["Milk", 13, "creamer, oat milk, cream", "It is cheese now. It has earned a new title."], ["A lunch with a name on it", 10, "labeled lunch, sandwich, someone's lunch, do not touch"], ["Birthday cake", 9, "cake, half a cake, leftover cake, cupcakes"]] },
+    { id: "r09", mult: 1, q: "Name something people say at the end of a meeting that keeps everyone 15 more minutes.",
+      a: [["One more thing", 34, "one last thing, just one thing, real quick", "It was not one thing. It was a whole agenda."], ["Quick question", 24, "question, can I ask, just curious"], ["Can you go back a slide?", 14, "previous slide, go back, scroll up"], ["Before we wrap up", 12, "before we go, before we end, while I have you"], ["Anything else from anyone?", 9, "any other business, any questions, anyone else"], ["Sorry, I joined late", 7, "what did I miss, can you recap, catch me up", "Great. A rerun. I love reruns."]] },
+    { id: "r10", mult: 1, q: "Name something in an open-plan office you can hear from across the floor.",
+      a: [["A call on speakerphone", 30, "speaker, loud call, video call, no headphones, meeting", "Thank you for sharing. With the entire building."], ["Angry typing", 20, "typing, keyboard, loud keyboard, clicking"], ["Someone's lunch", 16, "chewing, crunching, eating, chips, apple, slurping"], ["A personal phone call", 14, "dentist, doctor, family call, private call, arguing", "We all know about the dentist now. Good luck."], ["Dramatic sighing", 11, "sigh, groaning, muttering, complaining"], ["The microwave beeping", 9, "microwave, popcorn, beeping, coffee machine"]] }
   ],
 
   // "YOU SAID" ROUND. The audience answers one of these on their phones, live,
   // and the board is built from what this room actually said. Keep them answerable in one or two words.
   room: [
-    "In one or two words: what should our team mascot be?",
-    "In one or two words: your go-to lunch order?",
-    "One word that describes this team.",
-    "In one or two words: what would you rename the Monday meeting?"
+    "In one or two words: translate 'per my last email'.",
+    "In one or two words: what does 'let's circle back' really mean?",
+    "In one or two words: rename the Monday morning meeting.",
+    "One word that should be banned from every meeting."
   ],
 
   // FINAL ROUND ("The 4:59 Friday Rush"). Two sets. Each set must have exactly 5 questions.
   lightning: [
     { name: "Set A", qs: [
-      { id: "a1", q: "Name a snack that vanishes from the break room in under a minute.", a: [["Donuts", 41], ["Pizza", 24], ["Cookies", 14], ["Bagels", 10], ["Candy", 7], ["Free anything", 4]] },
-      { id: "a2", q: "Name a word that should be banned from work emails.", a: [["Synergy", 26], ["ASAP", 21], ["Circle back", 18], ["Kindly", 13], ["Bandwidth", 12], ["Leverage", 10]] },
-      { id: "a3", q: "Name an animal that would be the most fun coworker.", a: [["Dog", 38], ["Monkey", 19], ["Parrot", 15], ["Otter", 11], ["Penguin", 10], ["Cat", 7]] },
-      { id: "a4", q: "Name the best day of the work week.", a: [["Friday", 58], ["Thursday", 17], ["Payday", 12], ["Wednesday", 8], ["Monday", 5]] },
-      { id: "a5", q: "Name something people pretend to understand at work.", a: [["Spreadsheet formulas", 29], ["The org chart", 22], ["Acronyms", 20], ["The strategy", 14], ["The new software", 10], ["The budget", 5]] }
+      { id: "a1", q: "Name a piece of office jargon that should be banned.", a: [["Synergy", 27], ["Circle back", 22], ["Bandwidth", 15], ["Low-hanging fruit", 13], ["Touch base", 12], ["Move the needle", 11]] },
+      { id: "a2", q: "Name something that gets said on every video call.", a: [["You're on mute", 42], ["Can you hear me?", 22], ["Can you see my screen?", 16], ["Sorry, go ahead", 10], ["I have a hard stop", 6], ["Bye, bye, bye", 4]] },
+      { id: "a3", q: "Name something free that gets people to show up to any meeting.", a: [["Pizza", 38], ["Donuts", 22], ["Coffee", 16], ["Cake", 10], ["A T-shirt", 9], ["Leaving early", 5]] },
+      { id: "a4", q: "Name the worst possible time for a meeting.", a: [["Friday afternoon", 36], ["Monday morning", 26], ["Lunchtime", 18], ["8 a.m.", 10], ["5 p.m.", 6], ["Any time", 4]] },
+      { id: "a5", q: "Name something that gets blamed when work is late.", a: [["The other team", 26], ["The system", 22], ["A lost email", 17], ["Too many meetings", 14], ["The client", 12], ["The Wi-Fi", 9]] }
     ] },
     { name: "Set B", qs: [
-      { id: "b1", q: "Name the true fuel of this office.", a: [["Coffee", 58], ["Snacks", 15], ["Teamwork", 11], ["Deadlines", 8], ["Energy drinks", 5], ["Gossip", 3]] },
-      { id: "b2", q: "Name the best thing to hear at 4:55 on a Friday.", a: [["Go home early", 36], ["See you Monday", 22], ["It can wait", 18], ["Great job this week", 14], ["Meeting canceled", 10]] },
-      { id: "b3", q: "Name the strangest place you have taken a work call.", a: [["Car", 29], ["Bathroom", 22], ["Closet", 16], ["Grocery store", 14], ["Bed", 11], ["A kid's soccer game", 8]] },
-      { id: "b4", q: "Name something that breaks only when you are presenting.", a: [["Projector", 28], ["Screen share", 25], ["Wi-Fi", 21], ["Clicker", 11], ["Microphone", 9], ["Laptop battery", 6]] },
-      { id: "b5", q: "Name a superpower that would help in meetings.", a: [["Mind reading", 30], ["Invisibility", 24], ["Fast forward", 19], ["Teleportation", 12], ["Muting everyone", 10], ["Staying awake", 5]] }
+      { id: "b1", q: "Name something everyone at work pretends to have read.", a: [["The pre-read", 27], ["The policy", 21], ["The long email", 20], ["The handbook", 14], ["The meeting notes", 11], ["The strategy deck", 7]] },
+      { id: "b2", q: "Name a chat status that really means 'leave me alone.'", a: [["In a meeting", 30], ["Do not disturb", 24], ["Focus time", 18], ["Away", 12], ["Out sick", 9], ["Presenting", 7]] },
+      { id: "b3", q: "Name something that breaks only when you are presenting.", a: [["Screen share", 30], ["Wi-Fi", 24], ["Projector", 18], ["Clicker", 11], ["Microphone", 10], ["The demo", 7]] },
+      { id: "b4", q: "Name something in every out-of-office reply.", a: [["Limited email access", 34], ["A return date", 26], ["Ask someone else", 18], ["On vacation", 12], ["Sorry for the delay", 6], ["A palm tree", 4]] },
+      { id: "b5", q: "Name something a reorg always changes.", a: [["Your boss", 34], ["The org chart", 22], ["The team name", 16], ["Your desk", 12], ["Job titles", 10], ["Nothing", 6]] }
     ] }
   ],
 
   // CHIP, THE AI INTERN. Chip picks a line from the matching list and never repeats one until the list runs out.
   // Add, remove or rewrite lines freely. Keep them short and kind.
   chip: {
-    hello: ["Hi. I am Chip, the AI intern. I was told there would be snacks.", "Welcome, everyone. Attendance is mandatory. Fun is strongly encouraged.", "I have reviewed the agenda. It is one item. The item is winning.", "Hello. I will be taking notes. I will also be losing them."],
-    round: ["New agenda item. Please hold your questions until never.", "Moving on. I have a hard stop at fun o'clock.", "Next item. Somebody take notes. Not me, I am an intern.", "Round incoming. Hydrate accordingly.", "New item. This one counts. They all count. This one counts more.", "Next up. I have a good feeling. I am not qualified to have feelings."],
-    top: ["Number one answer. Somebody promote this person.", "Top of the board. That is what we call a quick win.", "Nailed it. I am adding that to your performance review.", "The number one answer. Synergy achieved.", "Number one. I would high five you, but I have no hands.", "Top answer. Frame it. Put it in the lobby.", "First place answer. This team has range.", "That is the big one. Somebody ring a bell.", "Number one. I am telling everyone I know. It is three people.", "Top answer. You have peaked. Enjoy it."],
-    good: ["It is on the board. Low-hanging fruit, successfully picked.", "Approved. No further sign-off required.", "Correct. I will loop in the team.", "That tracks. Great alignment, everyone.", "On the board. Let's not overthink it.", "Yes. Filing that under wins.", "Good answer. Adding it to the slide deck.", "Confirmed. The data agrees with you.", "On the board. Somebody is paying attention.", "Solid. That is a deliverable.", "Correct. Morale is up two percent.", "That works. Ship it."],
-    strike: ["Bold. Wrong, but bold.", "Let's put a pin in that. Forever.", "I checked with the team. The team said no.", "Thank you for your input. It was input.", "Not on the board. Great energy, though.", "That one is going in the parking lot.", "I love the confidence. The board does not.", "Close. In the sense that it was also words.", "I will add that to my list of action items.", "The survey has spoken. It said no thank you.", "Nice try. I am rooting for you quietly.", "Not this time. We learn. We grow.", "I asked the board twice. Still no.", "That answer is ahead of its time."],
-    takeover: ["Hostile takeover time. Legal has been notified.", "The other team smells opportunity. And budget.", "Three strikes. The other side would like a word.", "Takeover attempt. Everyone act natural."],
-    stolen: ["Takeover complete. The budget has a new owner.", "Stolen. That is just business.", "And just like that, the budget changes desks."],
-    kept: ["Takeover denied. Please return to your seats.", "The budget stays put. Nice try.", "Defense holds. Somebody get them a trophy. A small one."],
-    award: ["Budget approved.", "Funds transferred. Spend it on snacks.", "Approved. Finance has left the chat.", "Budget released. No receipts required."],
-    sweep: ["A clean sweep. I did not know that was allowed.", "Every answer. Show-offs. I mean that warmly.", "The whole board. Give this team a conference room named after them."],
-    rest: ["Here is what the board was hiding.", "Let's see what got away."],
-    survey: ["Phones out. This round, the answers come from you.", "Your turn, audience. No pressure. Some pressure."],
-    win: ["Congratulations. Your reward is this certificate and my respect.", "Winners, see me about your certificate. Everyone else, see me about cake.", "What a game. I laughed. I cried. I am a rectangle."]
+    hello: ["Hi. I am Chip, the AI intern. I was told there would be snacks.", "Welcome. This meeting is mandatory. So is the fun. I checked.", "I have reviewed the agenda. It is one item. The item is winning.", "Hello. I will be taking notes. I will also be losing them.", "Hope this game finds you well. If not, please reply all.", "Thanks for joining. You are all on mute. I prefer it."],
+    round: ["New agenda item. Please hold your questions until never.", "Moving on. I have a hard stop at fun o'clock.", "Next item. Somebody take notes. Not me, I am an intern.", "Let's double-click on the next one. I do not have a mouse.", "Next slide, please. I have always wanted to say that.", "New item. Per my last round, points still matter."],
+    top: ["Number one answer. Somebody promote this person.", "Top of the board. That moved the needle. I watched it move.", "Nailed it. I am adding that to your performance review.", "Number one. Synergy achieved. I do not know what that means.", "Number one. I would high five you, but I have no hands.", "Top answer. Exceeds expectations. Raise not included.", "Top answer. Please update your profile to thought leader.", "Number one. Put it in the all-hands deck. Slide one.", "Number one. I am telling everyone I know. It is three people.", "Top answer. You have peaked. Enjoy it.", "Best in class. I have notified the class.", "Number one. That is a key result. Possibly the only one."],
+    good: ["On the board. Low-hanging fruit, picked. Where is the fruit?", "Approved. No further sign-off required.", "Correct. Looping in the team. I cannot find the loop.", "That tracks. Great alignment, everyone.", "Nice. Adding it to the slide deck. Slide 94.", "Confirmed. The data agrees with you.", "Solid. That is a deliverable.", "Correct. Morale is up two percent.", "That works. Ship it.", "On the board. Meets expectations. That is the highest praise.", "Yes. I will circle back to congratulate you. Circling now.", "Valid. You clearly have the bandwidth.", "Logged as a quick win. It was quick. It was a win."],
+    strike: ["Bold. Wrong, but bold.", "Let's put a pin in that. Forever.", "I checked with the team. The team said no.", "Thank you for your input. It was input.", "That goes in the parking lot. It is a very full parking lot.", "I love the confidence. The board does not.", "Close. In the sense that it was also words.", "Let's take that answer offline. And leave it there.", "Per my last board, no.", "Noted as an action item. Nobody will action it.", "Not on the board. Have you tried turning it off and on?", "That answer is out of office with limited access to points.", "We do not have the bandwidth for that answer.", "Great energy. Wrong deliverable."],
+    takeover: ["Hostile takeover time. Legal has been notified.", "The other team smells opportunity. And budget.", "Three strikes. The other side would like a quick sync.", "Takeover attempt. Everyone act natural.", "This item has been reassigned. Effective immediately."],
+    stolen: ["Takeover complete. The budget has a new owner.", "Stolen. They are calling it a strategic realignment.", "And just like that, the budget changes desks.", "Reorg complete. Your points report to them now."],
+    kept: ["Takeover denied. Please return to your seats.", "The budget stays put. Nice try.", "Defense holds. Somebody get them a trophy. A small one.", "Request declined. Please resubmit never."],
+    award: ["Budget approved.", "Funds transferred. Spend it on snacks.", "Approved. Finance has left the chat.", "Budget released. No receipts required.", "Points allocated. Expense report waived. Just this once."],
+    sweep: ["A clean sweep. I did not know that was allowed.", "Every answer. Show-offs. I mean that warmly.", "The whole board. Name a conference room after this team.", "All of them. One hundred percent of OKRs. That never happens."],
+    rest: ["Here is what the board was hiding.", "Let's see what got away.", "Now the answers nobody had the bandwidth for.", "Full transparency. This is what you missed."],
+    survey: ["Phones out. This round, the answers come from you.", "Your turn, audience. No pressure. Some pressure.", "Phones out. Yes, in a meeting. I am as shocked as you are.", "This is your one approved reply all. Use it wisely."],
+    win: ["Congratulations. Your reward is this certificate and my respect.", "Winners, see me about your certificate. Everyone else, cake.", "What a game. I laughed. I cried. I am a rectangle.", "Meeting adjourned. This one could not have been an email."]
   }
 };
