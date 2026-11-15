@@ -28,7 +28,7 @@ body{position:relative;width:min(100vw,177.78vh);height:100vh;margin:0 auto;cont
 .toast i{flex:none;width:2.4cqw;height:2.4cqw;border-radius:.6cqw;background:currentColor;opacity:.8}
 .toast b{display:block;font:800 .8cqw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:currentColor}
 .toast span{color:var(--paper)}
-@keyframes toast{0%{transform:translateY(0);opacity:0}6%{opacity:.2}88%{opacity:.2}100%{transform:translateY(-130cqh);opacity:0}}
+@keyframes toast{0%{transform:translateY(0);opacity:0}6%{opacity:.2}50%{opacity:.2}62%,100%{opacity:0}100%{transform:translateY(-130cqh)}}
 #bg .type{position:absolute;right:3cqw;bottom:4.2cqh;font:800 1.25cqw var(--mono);letter-spacing:.08em;color:var(--cyan);opacity:.34}
 #bg .type i{display:inline-block;width:.7cqw;height:1.5cqw;margin-left:.2cqw;background:var(--cyan);vertical-align:-.25cqw;animation:caret 1s steps(1) infinite}
 @keyframes caret{50%{opacity:0}}
@@ -137,6 +137,7 @@ body.covered #bg,body.covered #stage{visibility:hidden}
 .tile .b{transform:rotateX(180deg);background:var(--paper);color:var(--ink);justify-content:space-between;padding:0 .7cqw 0 1.9cqw;gap:1cqw;font-size:2.7cqw;font-weight:900;line-height:1.05;box-shadow:0 0 2.4cqw rgba(255,225,77,.55)}
 .tile .b:before{content:"";position:absolute;left:0;top:0;bottom:0;width:.6cqw;background:var(--yellow)}
 .tile .b:after{content:"";position:absolute;top:-30%;bottom:-30%;left:-35%;width:26%;background:linear-gradient(90deg,transparent,rgba(255,225,77,.85),#fff,rgba(255,225,77,.85),transparent);transform:skewX(-22deg);opacity:0}
+.tile .b>span{font-size:var(--afs,2.7cqw);overflow-wrap:anywhere;text-wrap:balance;max-height:2.2em;overflow:hidden}
 .tile .b em{flex:none;font-style:normal;font-family:var(--disp);background:var(--ink);color:var(--yellow);border-radius:.8cqw;padding:1cqh 0;min-width:6cqw;text-align:center;font-size:3cqw}
 .tile.flash{scale:1.045;z-index:2}
 .tile.flash .b{animation:flash .9s}
@@ -708,8 +709,8 @@ function build() {
     const r = cur();
     h = `<div class="bar">${teamHtml(0)}<div class="mid"><div><div class="mono">The budget</div><div class="pot" data-v="${S.pot}">${S.pot}</div></div><div class="rc"><div class="mono rcl">Strikes</div><div class="slots"><i>X</i><i>X</i><i>X</i></div></div></div>${teamHtml(1)}</div>
       <div class="agenda"><div class="mono">${S.useCustom ? 'You said / ' + r.n + ' of you answered / triple budget' : 'Agenda item ' + (S.ri + 1) + ' / ' + MODE(r.mult)}</div><div class="q">${esc(r.q)}</div></div>
-      <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr)">${r.a.map((a, i) =>
-        `<div class="tile ${S.revealed[i] ? 'open' : ''}" style="--i:${i}"><div class="in"><div class="f"><span>${i + 1}</span><div class="sk"><i style="width:${24 + i * 13 % 22}%"></i><i style="width:${52 + i * 17 % 40}%"></i></div><u class="op">Opening...</u>${ENV}</div><div class="b"><span style="font-size:${Math.min(2.7, 46 / a[0].length)}cqw;overflow-wrap:anywhere">${esc(a[0])}</span><em data-to="${esc(a[1])}">${esc(a[1])}</em></div></div>${i ? '' : '<b class="tr">Top reply</b>'}</div>`).join('')}</div>
+      <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr);--afs:${Math.min(2.7, 108 / Math.max(1, ...r.a.map(a => a[0].length)))}cqw">${r.a.map((a, i) =>
+        `<div class="tile ${S.revealed[i] ? 'open' : ''}" style="--i:${i}"><div class="in"><div class="f"><span>${i + 1}</span><div class="sk"><i style="width:${24 + i * 13 % 22}%"></i><i style="width:${52 + i * 17 % 40}%"></i></div><u class="op">Opening...</u>${ENV}</div><div class="b"><span>${esc(a[0])}</span><em data-to="${esc(a[1])}">${esc(a[1])}</em></div></div>${i ? '' : '<b class="tr">Top reply</b>'}</div>`).join('')}</div>
       <div class="strip"></div>`;
   } else if (S.phase === 'survey') {
     const v = S.survey, st = v.st, n = Math.max(0, v.count | 0), q = String(v.q || ''), u = shortUrl();
@@ -1061,7 +1062,7 @@ function deal() { if (CALM || !S || S.phase !== 'round') return; stage.classList
 (function ambient() {
   const bg = document.getElementById('bg'), cols = ['var(--cyan)', 'var(--pink)', 'var(--yellow)', 'var(--violet)'];
   let h = '<div class="cal"></div>' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((d, i) => `<span class="day mono" style="left:${i * 20 + .7}cqw">${d}</span>`).join('');
-  [[0, 16.7, 16.6, 'Sync'], [1, 41.7, 25, 'Sync about the sync'], [2, 8.4, 16.6, 'Stand-up (seated)'], [3, 58.4, 25, 'Mandatory fun'], [4, 25, 16.6, 'Quick call'], [0, 66.7, 16.6, 'Follow-up'], [2, 75, 16.6, 'Pre-meeting'], [4, 58.4, 25, 'All-hands']].forEach((e, i) =>
+  [[0, 16.7, 16.6, 'Sync'], [1, 41.7, 25, 'Sync about the sync'], [2, 33.4, 16.6, 'Stand-up (seated)'], [3, 58.4, 25, 'Mandatory fun'], [4, 25, 16.6, 'Quick call'], [0, 66.7, 16.6, 'Follow-up'], [2, 75, 16.6, 'Pre-meeting'], [4, 58.4, 25, 'All-hands']].forEach((e, i) =>
     h += `<div class="ev" style="left:${e[0] * 20 + .4}cqw;top:${e[1]}cqh;width:19.2cqw;height:${e[2] - .8}cqh;color:${cols[i % 4]};animation-delay:${-i * 2.3}s"><b>${e[3]}</b></div>`);
   h += '<div class="now"></div>';
   [['Reply all', '47 people are typing...'], ['Calendar', 'Meeting moved to: now'], ['Chip', 'Circling back on this'], ['Reminder', 'Sync about the sync'], ['Out of office', 'Everyone. Until further notice.']].forEach((t, i) =>
