@@ -15,7 +15,8 @@
     {id: 'wifi', label: 'Wifi down', hint: 'Buffering wheel over everything.', ms: 5600},
     {id: 'printer', label: 'Printer jam', hint: 'Paper jam in a tray that does not exist.', ms: 6000},
     {id: 'share', label: 'Wrong screen shared', hint: 'Everyone sees your tabs. All of them.', ms: 6200},
-    {id: 'mic', label: 'Not on mute', hint: 'Live captions of what nobody meant to say.', ms: 6400}
+    {id: 'mic', label: 'Not on mute', hint: 'Live captions of what nobody meant to say.', ms: 6400},
+    {id: 'drill', label: 'Fire drill', hint: 'Everyone out. One person finishing an email.', ms: 6400}
   ];
   var BY = {}; LIST.forEach(function (g) { BY[g.id] = g; });
   var api = {list: LIST.map(function (g) { return {id: g.id, label: g.label, hint: g.hint}; }), play: function () { return false; }, playing: function () { return null; }};
@@ -239,7 +240,18 @@
     '.g-mic .cc p{margin:0;font:700 2.5cqw/1.35 var(--gm);color:#fff8ea;animation:ggcc .3s backwards}',
     '@keyframes ggcc{from{transform:translateY(1.6cqh);opacity:0}}',
     '.g-mic .muted{position:absolute;left:50%;top:44%;margin-left:-28cqw;width:56cqw;white-space:nowrap;padding:1.6cqh 0;border:.6cqw solid #e5263a;border-radius:1cqw;color:#e5263a;background:rgba(255,248,234,.94);font:400 4.8cqw/1 var(--gd);opacity:0}',
-    '.g-mic .muted.on{opacity:1;animation:ggstamp .5s cubic-bezier(.3,1.4,.5,1) forwards}'
+    '.g-mic .muted.on{opacity:1;animation:ggstamp .5s cubic-bezier(.3,1.4,.5,1) forwards}',
+    '.g-drill{background:#1a0710;justify-content:flex-start;padding-top:8cqh}',
+    '.g-drill .strobe{position:absolute;inset:0;background:radial-gradient(60cqw 60cqh at 50% 40%,rgba(229,38,58,.55),transparent 70%);animation:ggdrillflash .5s steps(2) infinite}',
+    '@keyframes ggdrillflash{50%{opacity:.15}}',
+    '.g-drill .sign{position:relative;display:inline-flex;align-items:center;gap:1.6cqw;padding:1.4cqh 2.6cqw;border-radius:1cqw;background:#13a37f;color:#fff;border:.4cqw solid #0a0a1f;font:400 3.2cqw/1 var(--gd);letter-spacing:.04em;animation:ggpop .4s cubic-bezier(.3,1.5,.5,1)}',
+    '.g-drill .sign svg{width:3.6cqw;height:3.6cqw}',
+    '.g-drill h1{position:relative;font-family:var(--gd);font-weight:400;font-size:7.6cqw;line-height:1;margin:3.4cqh 0 0}',
+    '.g-drill p{position:relative;font-size:2.3cqw;font-weight:800;color:#ffe14d;margin:1.6cqh 0 0;min-height:3.2cqw}',
+    '.g-drill .roll{position:relative;display:flex;gap:2cqw;justify-content:center;margin-top:3.4cqh}',
+    '.g-drill .roll div{width:20cqw;padding:1.6cqh 1cqw;border-radius:1cqw;background:#fff8ea;color:#0a0a1f;border:.35cqw solid #0a0a1f;text-align:center;animation:ggup .35s backwards}',
+    '.g-drill .roll small{display:block;font:800 1.2cqw var(--gm);letter-spacing:.12em;text-transform:uppercase;color:#6c4cff}',
+    '.g-drill .roll b{display:block;font:400 2.6cqw/1.1 var(--gd);margin-top:.6cqh}'
   ].join('\n');
 
   var root = null, timers = [], current = null, endT = null, teams = null;
@@ -340,6 +352,16 @@
       at(1600, function () { lcd.innerHTML = 'Tray 7<br>does not exist'; });
       at(2700, function () { lcd.innerHTML = 'Printing copy<br>3 of 412'; p.textContent = 'Q3 deck FINAL v9 (actual final), double-sided.'; });
       at(4300, function () { lcd.innerHTML = 'Toner low<br>since 2017'; });
+    },
+    drill: function () {
+      root.innerHTML = '<div class="gg g-drill"><div class="strobe"></div><div class="sign"><svg viewBox="0 0 40 40"><circle cx="24" cy="7" r="4" fill="#fff"/><path d="M21 13l-7 9 5 2-3 12M21 13l7 8 6-2M19 24l8 4 2 9" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>EXIT</div>' +
+        '<h1>FIRE DRILL</h1><p>Please proceed calmly to the nearest exit.</p>' +
+        '<div class="roll"><div style="animation-delay:1500ms"><small>Headcount</small><b class="hc">0 of 40</b></div><div style="animation-delay:1900ms"><small>Still inside</small><b>Finishing an email</b></div><div style="animation-delay:2300ms"><small>Brought</small><b>Laptop. Coffee.</b></div></div>' +
+        chip('I have been designated fire warden. I have a vest. I have no plan.', 4000) + '</div>';
+      var p = q('p'), hc = q('.hc');
+      at(1500, function () { var n = 0, t = setInterval(function () { if (!hc.isConnected || n >= 41) return clearInterval(t); hc.textContent = (++n) + ' of 40'; }, 45); });
+      at(2700, function () { p.textContent = 'Please do not stop to reply all.'; });
+      at(4300, function () { p.textContent = 'Headcount: 41 of 40. Nobody knows who the extra one is.'; });
     },
     mic: function () {
       root.innerHTML = '<div class="gg g-mic"><div class="live"><i></i>Your microphone is on</div>' +
