@@ -636,6 +636,14 @@ body[data-phase=lightning] .bubble .mono{font-size:.95cqw;margin-bottom:0}
 .ljr.on{opacity:1;transform:none}
 .ljr u{flex:none;width:1.3cqw;height:1.3cqw;border-radius:50%;background:#1fbf6b}
 .ljr b{font-size:1.95cqw;font-weight:900;color:var(--ink)}.ljr span{font-size:1.7cqw;font-weight:700;color:rgba(10,10,31,.62)}
+.lsb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-auto-rows:1fr;gap:1.4cqh 1.4cqw;margin-top:.4cqh}
+.lsc{position:relative;display:flex;align-items:center;gap:1.2cqw;min-height:9.4cqh;padding:1cqh 1.3cqw;border-radius:.9cqw;background:#fff;border:.15cqw solid rgba(10,10,31,.12);opacity:0;transform:scale(.9);transition:opacity .35s,transform .4s cubic-bezier(.3,1.5,.5,1)}
+.lsc.on{opacity:1;transform:none}
+.lsc u{flex:none;width:1.6cqw;height:1.6cqw;border-radius:50%;background:var(--d);box-shadow:0 0 0 .3cqw #fff,0 0 0 .45cqw rgba(10,10,31,.15);transition:background .3s}
+.lsc div{min-width:0;line-height:1.1}.lsc b{display:block;font-size:1.85cqw;font-weight:900;white-space:nowrap}
+.lsc span{display:block;font-size:1.55cqw;font-weight:700;color:rgba(10,10,31,.62)}
+.lsc.flip u{background:#e5263a}.lsc.flip{animation:pop .4s cubic-bezier(.3,1.7,.5,1)}
+.lsf{margin-top:1.8cqh;font:400 2.1cqw/1.1 var(--disp);text-align:center;opacity:0;transition:opacity .4s}.lsf.on{opacity:1}
 .lw.rec{background:#0c0b24;color:var(--paper)}
 .lrc{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2cqh;text-align:center;padding:0 4cqw}
 .lrc>u{position:absolute;width:4cqw;height:4cqw;border:solid rgba(255,255,255,.75);border-width:.4cqw 0 0 .4cqw}
@@ -662,7 +670,7 @@ body[data-phase=lightning] .bubble .mono{font-size:.95cqw;margin-bottom:0}
   .face .hs,.face .arc,.upb i,.dim{transition:none}
   #chip *{animation:none!important}.chp .x-w.tr{display:none!important}.chh,.chl{transition:none}
   .ks,.kb i,.kn,.kst,.kch,.trow,.trow u,.trow b{animation:none!important}.trow.out b{background-size:100% .35cqw}
-  .lw *,.ldots i,.lrec i{animation:none!important}.lw,.lw.out,.lside,.tl>*,.tl.away>*:not(.storm){transition-duration:1s,0s,0s}.lw.pre,.lw.out,.lside,.tl.away>*:not(.storm),.lhq.sw,.lnp div,.ljr{transform:none}.llb i{transition:none}
+  .lw *,.ldots i,.lrec i{animation:none!important}.lw,.lw.out,.lside,.tl>*,.tl.away>*:not(.storm){transition-duration:1s,0s,0s}.lw.pre,.lw.out,.lside,.tl.away>*:not(.storm),.lhq.sw,.lnp div,.ljr,.lsc{transform:none}.llb i{transition:none}
   .izt{animation:rfade 3.4s forwards}
   .cal8,.org,.fly{display:none}.cer .cert,.cer .meets,.cer .mst,.mr,.unr b,.lip,.stack .e2,.sort i,.sq.dr:after,.sv .ibar em:before{animation:none!important}
 }
@@ -1001,6 +1009,10 @@ const LSEGS = [
   { bar: 'HR portal / did you know', em: 'Not verified by Legal', ms: 13000,
     html: () => `<div class="ilab">Fun fact from HR</div><div class="lhr"><i>i</i><div class="lhq">${esc(LFACTS[lobF++ % LFACTS.length])}</div></div><div class="lfo">Source: trust us</div>`,
     run: (el, at) => { const q = el.querySelector('.lhq'); at(6500, () => q.classList.add('sw')); at(6950, () => { q.textContent = LFACTS[lobF++ % LFACTS.length]; q.classList.remove('sw'); }); } },
+  { bar: 'Team chat / who is around', em: 'Presence: busy', ms: 13000,
+    html: () => `<div class="ilab">Before we start</div><h2>Team status</h2><div class="lsb">${[['Your manager', 'In a meeting about meetings', '#e5263a'], ['Finance', 'Away (physically at desk)', '#f5b400'], ['IT', 'Do not disturb (restarting)', '#e5263a'], ['Marketing', 'Available (aspirationally)', '#1fbf6b'], ['The intern', 'Commuting (from bed)', '#f5b400'], ['Sales', 'Out of office until Q3', '#9a98ad']].map(r => `<div class="lsc" style="--d:${r[2]}"><u></u><div><b>${r[0]}</b><span>${r[1]}</span></div></div>`).join('')}</div><div class="lsf">6 people. 0 available. 1 calendar invite pending.</div>`,
+    run: (el, at) => { const c = el.querySelectorAll('.lsc'); c.forEach((r, i) => at(600 + i * 700, () => r.classList.add('on')));
+      at(7600, () => { c[3].classList.add('flip'); c[3].querySelector('span').textContent = 'In a meeting (it was a trap)'; }); at(9400, () => el.querySelector('.lsf').classList.add('on')); } },
   { bar: 'Lobby / attendees', em: 'Doors open', ms: 13000,
     html: () => { const n = S && S.allowed ? Object.keys(S.allowed).filter(k => S.allowed[k]).length : 0;
       return `<div class="ilab">People are joining</div><div class="ljn"><b>${n || 47}</b><span>${n ? (n === 1 ? 'buzzer has' : 'buzzers have') + ' checked in<small>Room for more. ' + (S.phones ? 'Scan the code on the right.' : 'Grab a seat.') + '</small>' : 'people are typing<span class="ldots"><i></i><i></i><i></i></span><small>Nobody has hit send. ' + (S.phones ? 'Phones out, scan the code.' : 'Grab a seat.') + '</small>'}</span></div><div class="ljl">${[0, 1, 2, 3].map(i => { const k = lobJ++; return `<div class="ljr" style="color:${['var(--cyan)', 'var(--pink)', 'var(--yellow)', 'var(--violet)'][k % 4]}"><u></u><b>${WHO[(k * 5 + 2) % WHO.length]}</b><span>${LJOIN[k % LJOIN.length]}</span></div>`; }).join('')}</div>`; },
