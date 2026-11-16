@@ -167,6 +167,13 @@ window.GAME = {
       { id: "d3", q: "Name a word people add to an email to sound polite but annoyed.", a: [["Kindly", 34], ["Just", 22], ["Gentle", 16], ["Again", 12], ["Per", 10], ["Thoughts?", 6]] },
       { id: "d4", q: "Name something people do the moment a meeting gets cancelled.", a: [["Celebrate", 30], ["Get a snack", 22], ["Answer emails", 17], ["Take a nap", 13], ["Leave early", 11], ["Book another meeting", 7]] },
       { id: "d5", q: "Name something on every expense report.", a: [["Coffee", 28], ["Taxi", 24], ["Hotel", 18], ["Lunch", 14], ["Parking", 10], ["A missing receipt", 6]] }
+    ] },
+    { name: "Set E", qs: [
+      { id: "e1", q: "Name something people pretend to understand in a meeting.", a: [["The acronym", 34], ["The spreadsheet", 22], ["The strategy", 16], ["The org chart", 12], ["The budget", 10], ["The joke", 6]] },
+      { id: "e2", q: "Name something people do right before turning their camera on.", a: [["Fix their hair", 34], ["Clean the background", 22], ["Put on a real shirt", 18], ["Check their teeth", 12], ["Turn on a lamp", 8], ["Sit up straight", 6]] },
+      { id: "e3", q: "Name something that always runs out in the office kitchen.", a: [["Coffee", 36], ["Milk", 24], ["Clean mugs", 16], ["Snacks", 12], ["Paper towels", 7], ["Patience", 5]] },
+      { id: "e4", q: "Name a phrase people say when they did not do the reading.", a: [["Remind me again?", 30], ["Big picture...", 24], ["Building on that", 18], ["Good question", 13], ["Let's take a step back", 9], ["I skimmed it", 6]] },
+      { id: "e5", q: "Name something people say on the way out the door on a Friday.", a: [["Have a good weekend", 38], ["See you Monday", 24], ["Don't work too hard", 14], ["Any fun plans?", 12], ["Finally", 7], ["Logging off", 5]] }
     ] }
   ],
 
