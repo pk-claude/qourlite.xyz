@@ -173,8 +173,8 @@ body.nogl #stagebg{display:none}
 .tile .pp .an{flex:1;font:800 var(--afs,2.6cqw)/1.04 var(--head);letter-spacing:-.01em}
 .tile .pp .pt{flex:none;min-width:7cqw;height:72%;display:grid;place-items:center;border-radius:.7cqw;background:#0b0b10;font:900 7.2cqh/1 var(--disp);color:var(--gold);font-variant-numeric:tabular-nums;box-shadow:inset 0 0 0 .14cqw rgba(255,201,60,.35)}
 .tile .pp .kpi{position:absolute;left:0;bottom:0;height:.8cqh;width:calc(var(--k)*100%);background:linear-gradient(90deg,var(--ta),var(--gold));transform-origin:left}
-.tile .pp .cal{position:absolute;right:9.4cqw;top:.9cqh;font:800 .78cqw var(--mono);letter-spacing:.12em;color:#8a6d33;opacity:0}
-.tile .pp .cal.on{opacity:1;animation:fin .4s .7s backwards}
+.tile .pp .called{display:none;margin-top:.7cqh;font:800 .82cqw/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#0f8a7f}
+.tile .pp .called.on{display:block;animation:fin .4s .7s backwards}
 .tile .tr{position:absolute;left:-.6cqw;top:-1.6cqh;z-index:2;font:800 .9cqw var(--mono);letter-spacing:.2em;padding:.6cqh 1cqw;border-radius:.4cqw;background:var(--goldtx);color:#2b1800;box-shadow:0 .6cqh 1.4cqw rgba(0,0,0,.5);transform:rotate(-4deg) scale(0);transition:transform .4s cubic-bezier(.3,1.7,.5,1)}
 .tile.open .pp{clip-path:inset(0)}
 .tile.open .rd,.tile.open .rk{opacity:0}
@@ -582,7 +582,7 @@ function build() {
       <div class="guesses" id="gs"></div>
       <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr);--afs:${Math.min(2.7, 96 / Math.max(1, ...r.a.map(a => String(a[0]).length)))}cqw">${r.a.map((a, i) =>
         `<div class="tile t-${i}${S.revealed[i] ? ' open' : ''}" style="--i:${i}"><div class="sh"></div><div class="rk">${i + 1}</div><div class="rd">CLASSIFIED</div>
-          <div class="pp" style="--k:${((Number(a[1]) || 0) / max).toFixed(3)}"><div class="an">${esc(a[0])}</div><div class="pt" data-to="${esc(a[1])}">${esc(a[1])}</div><div class="kpi"></div><div class="cal"></div></div>${i ? '' : '<div class="tr">Top reply</div>'}</div>`).join('')}</div>
+          <div class="pp" style="--k:${((Number(a[1]) || 0) / max).toFixed(3)}"><div class="an">${esc(a[0])}<div class="called"></div></div><div class="pt" data-to="${esc(a[1])}">${esc(a[1])}</div><div class="kpi"></div></div>${i ? '' : '<div class="tr">Top reply</div>'}</div>`).join('')}</div>
       <div class="dock"><div class="streak" id="stk"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z"/></svg><span>Synergy streak x<b>2</b></span></div>
         <div class="mode m${r.mult}"><b>x${r.mult}</b>${esc(S.useCustom ? 'The room has spoken / triple budget' : MODE(r.mult))}</div></div>`;
   } else if (S.phase === 'survey') {
@@ -639,7 +639,7 @@ function syncRound() {
   tiles.forEach((t, i) => {
     const was = t._rev === undefined ? t.classList.contains('open') : t._rev, now = !!S.revealed[i]; t._rev = now;
     if (now && !was) { fresh.push([t, i]); chipMood(i === 0 || done ? 'star' : 'happy'); } else if (!now && was) { tileStop(t); t.classList.remove('open', 'go'); }
-    const c = t.querySelector('.cal'), hits = au.hits && au.hits[i] || 0, txt = hits ? hits + (hits === 1 ? ' person' : ' people') + ' called it' : ''; if (c.textContent !== txt) { c.textContent = txt; c.classList.toggle('on', !!hits); }
+    const c = t.querySelector('.called'), hits = au.hits && au.hits[i] || 0, txt = hits ? hits + (hits === 1 ? ' person' : ' people') + ' called it' : ''; if (c.textContent !== txt) { c.textContent = txt; c.classList.toggle('on', !!hits); }
   });
   fresh.forEach((f, k) => { if (!S.awarded) streak++; reveal(f[0], f[1], k, done && k === fresh.length - 1); });
   if (fresh.length) setStreak();
