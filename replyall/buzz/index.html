@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0a0a1f">
+<meta name="theme-color" content="#07060f">
 <title>REPLY ALL - Phone</title>
 <link rel="stylesheet" href="../vendor/fonts.css">
 <style>
@@ -169,6 +169,23 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 #sdone{min-height:16px;margin-top:7px;font-size:12px;color:var(--mute);text-align:center}
 #sdone.err{color:#a3101f;font-weight:700}
 
+/* call it: everyone guesses one answer per board */
+#call{background:var(--paper);color:var(--ink);border-radius:18px;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--cyan);padding:12px 12px 11px;text-align:left;animation:rise .4s both;position:relative;overflow:hidden}
+#call .th em{background:var(--violet)}
+#cs{font-size:13.5px;color:var(--mute);line-height:1.35}
+#cl{display:none;margin-top:9px;padding:9px 12px;border-radius:12px;background:#ebe3cf;font-weight:700;font-size:17px;overflow-wrap:anywhere}
+#cl small{display:block;font:800 9.5px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
+#call.got #cl{display:block}
+#call.win{box-shadow:6px 6px 0 var(--green)}#call.win #cl{background:var(--green);color:#fff}#call.win #cl small{color:#dfffe9}
+#call.miss #cl{background:#3a3857;color:#d8d4f0;text-decoration:line-through;text-decoration-thickness:2px}#call.miss #cl small{color:#aaa5c8}
+#cv{display:none;margin-top:8px;font:400 34px/1 var(--disp);color:#0c6b3a;letter-spacing:-.02em;animation:win .5s cubic-bezier(.2,1.6,.4,1) both}
+#call.win #cv{display:block}
+#call .comp{margin-top:10px}#call.shut .comp{display:none}
+#ca{flex:1;min-width:0;height:42px;border:0;outline:0;background:transparent;color:var(--ink);font-size:18px}
+#cgo{flex:none;height:44px;padding:0 16px;border-radius:99px;background:var(--violet);color:#fff;border:2.5px solid var(--ink);font:400 16px/1 var(--disp);letter-spacing:.02em}
+#cgo:active{transform:scale(.93)}
+#me{flex:none;display:none;padding:5px 9px;border-radius:99px;background:var(--yellow);color:var(--ink);border:2px solid var(--ink);font:800 11px/1 var(--mono);letter-spacing:.03em}
+#me.on{display:block}#me.up{animation:hit .5s}
 #lv{align-self:center;font-size:12.5px;color:#b9b3d6;padding:6px 10px}
 /* reactions */
 .rxw{position:sticky;bottom:0;z-index:5;padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));background:#15142e;border-top:3px solid var(--ink);box-shadow:0 -1px 0 rgba(255,255,255,.14) inset}
@@ -187,6 +204,58 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 
 #msg{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9;max-width:406px;margin:0 auto;padding:11px 14px;border-radius:13px;background:var(--yellow);color:var(--ink);border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:700;font-size:14.5px;text-align:center}
 #msg:empty{display:none}
+/* ---------- prime-time skin: matches the big screen (night stage, gold, paper memos) ---------- */
+:root{--ink:#07060f;--paper:#f6f1e6;--violet:#8b6cff;--pink:#ff4f8b;--cyan:#2ee6d6;--yellow:#ffc93c;--green:#2fd97a;--red:#ff3b30;--line:#ddd3bd;--mute:#686579;--gold:#ffc93c;
+  --goldtx:linear-gradient(180deg,#fff3c4 0%,#ffd45a 38%,#e9a514 62%,#ffcf4a 100%);
+  --disp:"Big Shoulders","Arial Narrow","Segoe UI",sans-serif;--body:"Bricolage","Segoe UI",system-ui,Arial,sans-serif}
+body{background:#07060f;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.6px),radial-gradient(ellipse 60% 40% at 18% -4%,rgba(46,230,214,.22),transparent 70%),radial-gradient(ellipse 60% 40% at 86% -6%,rgba(255,79,139,.22),transparent 70%),radial-gradient(ellipse 80% 50% at 50% 108%,rgba(255,201,60,.16),transparent 70%);background-size:13px 13px,auto,auto,auto}
+.sso,.card,#mail,#survey,#call{border:0;border-radius:16px;box-shadow:0 0 0 1px rgba(255,201,60,.38),0 0 0 4px rgba(255,201,60,.07),0 22px 50px rgba(0,0,0,.55)}
+.brand h1{font:900 34px/.9 var(--disp);letter-spacing:.01em;text-transform:uppercase;background:var(--goldtx);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #7a4c00)}
+.brand h1 span{color:transparent}
+.sso h2{font:900 30px/1 var(--disp);text-transform:uppercase;letter-spacing:.01em}
+.sso h2 em{background:var(--ink);color:var(--gold);box-shadow:none;padding:0 7px}
+.sso input{border:2px solid #cfc5ad;border-radius:10px}.sso input:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(255,201,60,.45)}
+.jb{border:0;border-radius:12px;box-shadow:0 4px 0 rgba(0,0,0,.35),0 10px 24px rgba(0,0,0,.25)}
+.jb:active{box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.jb b{font:900 23px/1 var(--disp);text-transform:uppercase;letter-spacing:.01em}
+.jb i{font:900 20px/34px var(--disp)}
+.jb.aud{background:#ece4d2;box-shadow:0 4px 0 #cfc5ad}
+.bar{background:rgba(9,7,22,.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,201,60,.45)}
+.bar .ch{font:900 19px/1 var(--disp);text-transform:uppercase;letter-spacing:.04em;color:var(--gold)}
+#who{color:#a9a4c6}
+#av{background:var(--goldtx);border:0;font:900 21px/38px var(--disp);color:#2b1800}#av:after{border-color:#0a0818}
+#snd{background:rgba(255,255,255,.08)}#snd.off{box-shadow:0 0 0 1px rgba(255,255,255,.25) inset}
+.rec{background:rgba(255,59,48,.14);color:#ffb3ad}
+#me{background:var(--goldtx);border:0;color:#2b1800;font:900 15px/1 var(--disp);letter-spacing:.03em;padding:6px 10px}
+#sc div{background:linear-gradient(180deg,rgba(34,28,70,.9),rgba(12,9,28,.92));border:1px solid rgba(255,255,255,.14);border-radius:10px}
+#sc div:first-child{box-shadow:inset 3px 0 0 var(--cyan)}#sc div:last-child{box-shadow:inset -3px 0 0 var(--pink)}
+#sc div.me{border-color:var(--gold);background:linear-gradient(180deg,rgba(80,60,10,.55),rgba(20,14,4,.8))}
+#sc b{font:900 27px/1 var(--disp);color:#fff}
+#live{font-weight:800}
+.card h3{font:900 27px/1 var(--disp);text-transform:uppercase;letter-spacing:.01em}
+.th{font:900 18px/1 var(--disp);text-transform:uppercase;letter-spacing:.04em}
+.th em{background:var(--ink);color:var(--gold)}
+#call .th em{background:var(--ink);color:var(--cyan)}
+#cgo{background:var(--ink);color:var(--gold);border:0;font:900 19px/1 var(--disp);letter-spacing:.04em}
+#cv{font:900 46px/1 var(--disp);color:#0c7a40}
+#call.win{box-shadow:0 0 0 2px var(--green),0 0 40px rgba(47,217,122,.45),0 22px 50px rgba(0,0,0,.55)}
+#ss{background:var(--ink);border:0}#ss svg{fill:var(--gold)}
+#sm .bub{background:var(--ink);color:var(--gold)}
+#buzz{border:0;background:radial-gradient(circle at 50% 30%,#3b3560,#1b1833 70%);color:#a9a4c6;box-shadow:0 0 0 3px rgba(255,255,255,.08),0 12px 0 #0d0b1c,0 30px 40px rgba(0,0,0,.55)}
+#bl{font:900 clamp(30px,10vw,42px)/.9 var(--disp);letter-spacing:.02em}
+#buzz:active,#buzz.down{box-shadow:0 0 0 3px rgba(255,255,255,.08),0 3px 0 #0d0b1c}
+#buzz.open{background:radial-gradient(circle at 50% 28%,#fff1b8,#ffc93c 45%,#c98800 100%);color:#2b1800;box-shadow:0 0 0 4px rgba(255,201,60,.35),0 12px 0 #7a4c00,0 0 60px rgba(255,201,60,.55)}
+#buzz.open:active,#buzz.open.down{box-shadow:0 0 0 4px rgba(255,201,60,.35),0 3px 0 #7a4c00}
+#buzz.sent{background:radial-gradient(circle at 50% 30%,#fff,#e9e2d0);color:var(--ink);box-shadow:0 12px 0 #8e866f}
+#buzz.first{background:radial-gradient(circle at 50% 30%,#8dffc0,#2fd97a 50%,#108a48);color:#04210f;box-shadow:0 12px 0 #0b5a2f,0 0 60px rgba(47,217,122,.6)}
+#buzz.slow{background:radial-gradient(circle at 50% 30%,#ff8a80,#ff3b30 55%,#a3120a);box-shadow:0 12px 0 #6e0c06}
+.pad:before,.pad:after{border-color:var(--gold)}
+.rxw{background:rgba(9,7,22,.92);border-top:1px solid rgba(255,201,60,.3);box-shadow:none}
+.rx button{background:linear-gradient(180deg,rgba(34,28,70,.95),rgba(14,11,32,.95));border:1px solid rgba(255,255,255,.14);border-radius:12px}
+.rx button.hit{background:rgba(255,201,60,.25);border-color:var(--gold)}
+.rx em{background:var(--gold);border:0}
+#msg{background:var(--gold);border:0;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.foot{color:#8a85a8}
 @media (max-height:640px){.card{padding:14px}.card .chip{width:44px;height:44px}.pad{margin-bottom:12px}}
 @media (max-width:345px){.sso h2{font-size:20px}.jb u{display:none}.jb b{font-size:16.5px}.jb{gap:10px;padding:8px 10px}#sc div{padding:7px 8px}#sc span{font-size:11.5px}#sc b{font-size:18px}.main{padding:10px 10px 12px}.rx button span{font-size:9.5px}#code{font-size:24px}.brand h1{font-size:24px}.sso{padding:16px 14px}}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.rip,.burst,.fly{display:none}}
@@ -216,11 +285,19 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
     <div id="av">?</div>
     <div class="id"><div class="ch"># all-hands</div><div id="who"></div></div>
     <button id="snd" onclick="sndToggle()" aria-label="Phone sounds" aria-pressed="true" title="Phone sounds">&#x1F509;</button>
+    <div id="me" title="Your points and rank"></div>
     <div class="rec" title="It is not">REC</div>
   </div>
   <div class="main">
     <div id="sc" class="hide"><div id="sc0"><span></span><b></b></div><div id="sc1"><span></span><b></b></div></div>
     <div id="mail" class="hide"><div class="chip"><b></b><i></i></div><div><small>Agenda item / from Chip</small><div id="live"></div></div></div>
+    <div id="call" class="hide">
+      <div class="th"># call-it <em>EVERYONE PLAYS</em></div>
+      <p id="cs"></p>
+      <div id="cl"><small id="ck"></small><span id="ct"></span></div>
+      <div id="cv"></div>
+      <div class="comp"><input id="ca" maxlength="30" autocomplete="off" enterkeyhint="send" placeholder="Your answer..." aria-label="Your guess"><button id="cgo" onclick="guess()">LOCK IT</button></div>
+    </div>
     <div class="stage" id="stage">
       <div class="card hide" id="lobby"><div class="chip"><b></b><i></i></div><h3 id="lt">Waiting for the host to let you in</h3><p id="ls">The scorekeeper has to approve this phone.</p><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div><div id="lq"></div></div>
       <div class="pad" id="pad"><button id="buzz"><u id="bi">&#x1F507;</u><span id="bl">MUTED</span><span id="bs">Host has the floor</span></button></div>
@@ -279,8 +356,8 @@ function sndToggle() { SND.toggle(); }
 SND.paint();
 // This phone keeps one id, so a refresh keeps its team and its approval.
 let pid = localStorage.getItem('replyall_pid'); if (!/^[a-z0-9]{8}$/.test(pid || '')) { pid = Math.random().toString(36).slice(2, 10).padEnd(8, '0'); localStorage.setItem('replyall_pid', pid); }
-let sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {}, sentAt = 0, lastMode = '', ctx = '', qi = 0;
-try { answered = JSON.parse(sessionStorage.getItem('replyall_ans')) || {}; } catch (e) {}
+let guessed = {}, lastPm = null, sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {}, sentAt = 0, lastMode = '', ctx = '', qi = 0;
+try { answered = JSON.parse(sessionStorage.getItem('replyall_ans')) || {}; guessed = JSON.parse(sessionStorage.getItem('replyall_guess')) || {}; } catch (e) {}
 const code = () => (sid || $('code').value.trim().toUpperCase()), api = k => '/api/relay?room=ra-' + code().toLowerCase() + '&k=' + k;
 function send(k, extra) {
   return fetch(api('up'), {method: 'POST', headers: {'content-type': 'application/json'},
@@ -351,6 +428,7 @@ function show() {
     if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); SND.play('chime'); } else if (mode === 'slow') { buzzz(220); SND.play('bonk'); } }
   }
   lastMode = mode;
+  showCall();
   $('survey').classList.toggle('hide', !v);
   $('stage').classList.toggle('hide', !!v && !/^(open|sent|first|slow)$/.test(mode));   // the survey gets the whole screen unless a buzz is in play
   if (v) {
@@ -363,6 +441,34 @@ function show() {
   }
   const c = gone ? 'ended' : !st ? 'conn' : lobby ? 'lobby' : v ? 'survey' : team === 2 ? 'aud' : mode === 'wait' ? 'wait' : '';
   if (c !== ctx) { ctx = c; quip(true); }
+}
+// Call it: one guess per board, open until the first answer is revealed. Any answer on the board pays its points.
+function showCall() {
+  const g = st && st.gb, c = $('call'), me = st && st.pm && st.pm[pid];
+  const pts = me ? me[0] : 0, rk = me ? me[3] : 0, mp = $('me'); set(mp, pts + ' pts' + (rk && pts ? ' / #' + rk : '')); mp.className = me && pts ? 'on' : '';
+  if (lastPm && me && me[0] > lastPm[0]) { mp.className = 'on up'; }
+  c.classList.toggle('hide', !(g && st.q));
+  if (team === 2 && g && st.q) $('lobby').classList.add('hide');   // the audience's mute card steps aside for the guess
+  if (!g || !st.q) { lastPm = me; return; }
+  if (guessed.g !== g.id) guessed = {g: g.id, a: ''};
+  const s = me && guessed.a ? me[2] : guessed.a ? 1 : 0, open = g.open, k = !guessed.a ? (open ? 'open' : 'late') : s === 2 ? 'win' : s === 3 ? 'miss' : open ? 'sent' : 'wait';
+  const T = {open: 'Call an answer before the first reveal. If it is on the board, the points are yours. Team or audience, everyone plays.',
+    sent: 'Locked in. You can change it until the first answer is revealed. Like any good deck.',
+    wait: 'Pending approval from the board...',
+    win: 'Approved. Put it on your self-review.',
+    miss: 'Not on the board. Noted for your development plan.',
+    late: 'Too late for this one. The window closes at the first reveal. Next round, be quicker than legal.'};
+  cls(c, k === 'win' ? 'win got shut' : k === 'miss' ? 'miss got shut' : k === 'sent' ? 'got' : k === 'wait' ? 'got shut' : k === 'late' ? 'shut' : '');
+  set($('cs'), T[k]); set($('ck'), k === 'win' ? 'On the board' : k === 'miss' ? 'Your call' : 'Your call / locked in'); set($('ct'), guessed.a || '');
+  set($('cv'), me && me[1] ? '+' + me[1] + ' POINTS' : ''); set($('cgo'), guessed.a ? 'CHANGE' : 'LOCK IT');
+  if (k !== c.dataset.k) { if (k === 'win') { buzzz([60, 50, 160]); SND.play('chime'); cburst(); } else if (k === 'miss' && c.dataset.k) SND.play('bonk'); c.dataset.k = k; }
+  lastPm = me;
+}
+function cburst() { const d = document.createElement('div'); d.className = 'burst'; d.style.top = '60%'; for (let i = 0; i < 14; i++) { const p = document.createElement('i'); p.style.setProperty('--a', (i * 26) + 'deg'); p.style.setProperty('--d', (110 + (i % 4) * 20) + 'px'); d.appendChild(p); } $('call').appendChild(d); setTimeout(() => d.remove(), 1100); }
+function guess() {
+  const a = $('ca').value.trim().slice(0, 30), g = st && st.gb; if (!a || !g || !g.open) return; SND.play('whoosh');
+  send('guess', {g: g.id, a}).then(() => { guessed = {g: g.id, a}; try { sessionStorage.setItem('replyall_guess', JSON.stringify(guessed)); } catch (e) {} $('ca').value = ''; $('ca').blur(); buzzz(25); show(); })
+    .catch(() => { msg.textContent = 'Not sent. Check your signal and try again.'; setTimeout(() => msg.textContent = '', 2500); });
 }
 function join(t) {
   sid = $('code').value.trim().toUpperCase(); team = t; name = $('name').value.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 12);
@@ -391,6 +497,7 @@ function answer() {
   }).catch(() => { d.className = 'err'; d.textContent = 'Not sent. Check your signal and try again.'; });
 }
 $('sa').addEventListener('keydown', e => { if (e.key === 'Enter') answer(); });
+$('ca').addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
 // The press: ripple and a short buzz straight away, so the button feels instant even on a slow network.
 b.addEventListener('pointerdown', e => {
   b.classList.add('down'); if (st && !st.open) return;
@@ -398,8 +505,8 @@ b.addEventListener('pointerdown', e => {
 });
 ['pointerup', 'pointerleave', 'pointercancel'].forEach(k => b.addEventListener(k, () => b.classList.remove('down')));
 b.addEventListener('click', () => { if (st && !st.open) return; pressed = Date.now(); show(); send('buzz').catch(() => { msg.textContent = 'Not sent. Check your signal.'; setTimeout(() => msg.textContent = '', 2000); }); });
-// Team phones check once a second (buzzer feedback); audience phones every four seconds (survey only).
-let pt; function timer() { clearInterval(pt); pt = setInterval(poll, joined && team !== 2 ? 1000 : 4000); }
+// Team phones check once a second (buzzer feedback); audience phones every 2.5 seconds (their guesses and points).
+let pt; function timer() { clearInterval(pt); pt = setInterval(poll, joined && team !== 2 ? 1000 : joined ? 2500 : 4000); }
 // A scanned QR code carries the game code. A phone that joined before goes straight back in.
 const c = (new URLSearchParams(location.search).get('c') || '').toUpperCase(); let saved = null; try { saved = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
 $('code').value = /^[A-Z0-9]{4}$/.test(c) ? c : saved && saved.sid || '';

@@ -17,6 +17,10 @@
     var comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 8; comp.attack.value = .003; comp.release.value = .2;
     master = ctx.createGain(); master.gain.value = vol; master.connect(comp); comp.connect(ctx.destination);
+    // A generated hall: two seconds of decaying stereo noise. It puts every sound on a big stage instead of in a laptop.
+    try { var rl = ctx.sampleRate * 2.2, ir = ctx.createBuffer(2, rl, ctx.sampleRate); for (var c = 0; c < 2; c++) { var ch = ir.getChannelData(c); for (var j = 0; j < rl; j++) ch[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / rl, 3.2); }
+      var rev = ctx.createConvolver(), send = ctx.createGain(), hp = ctx.createBiquadFilter(); rev.buffer = ir; send.gain.value = .2; hp.type = 'highpass'; hp.frequency.value = 280;
+      master.connect(hp); hp.connect(send); send.connect(rev); rev.connect(comp); } catch (e) {}
     sfxBus = bus(1);
     nbuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     var d = nbuf.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -43,7 +47,8 @@
     n.type = type; n.frequency.setValueAtTime(f, t); if (o.to) n.frequency.exponentialRampToValueAtTime(o.to, t + (o.glide || d));
     if (o.det) n.detune.value = o.det;
     env(g, t, a, d, v); n.connect(g);
-    if (o.lp) { last = ctx.createBiquadFilter(); last.type = 'lowpass'; last.frequency.value = o.lp; g.connect(last); }
+    if (o.pan && ctx.createStereoPanner) { var pn = ctx.createStereoPanner(); pn.pan.value = o.pan; g.connect(pn); g = pn; }
+    last = g; if (o.lp) { last = ctx.createBiquadFilter(); last.type = 'lowpass'; last.frequency.value = o.lp; g.connect(last); }
     last.connect(out); n.start(t); n.stop(t + a + d + .05);
   }
   // o: {a: attack, type: filter type, f: filter Hz, to: sweep target Hz, q}
@@ -57,9 +62,9 @@
   function snare(out, t, v) { nz(out, t, .15, v, {f: 1600}); osc(out, 'triangle', 200, t, .09, v * .7, {to: 140, a: .002}); }
   function hat(out, t, v, open) { nz(out, t, open ? .16 : .035, v, {f: 8500}); }
   function crash(out, t, v) { nz(out, t, 1.5, v, {f: 4500}); nz(out, t, .5, v * .6, {type: 'bandpass', f: 9000}); }
-  function brass(out, t, d, m, v) { var f = hz(m); osc(out, 'sawtooth', f, t, d, v, {a: .02, det: -9, lp: 2600}); osc(out, 'sawtooth', f, t, d, v, {a: .02, det: 9, lp: 2600}); }
+  function brass(out, t, d, m, v) { var f = hz(m); osc(out, 'sawtooth', f, t, d, v, {a: .02, det: -9, lp: 2600, pan: -.4}); osc(out, 'sawtooth', f, t, d, v, {a: .02, det: 9, lp: 2600, pan: .4}); }
   function stab(out, t, d, ms, v) { ms.forEach(function (m) { brass(out, t, d, m, v); }); }
-  function lead(out, t, d, m, v) { var f = hz(m); osc(out, 'square', f, t, d, v * .6, {lp: 3600}); osc(out, 'sawtooth', f, t, d, v, {det: 7, lp: 4200}); osc(out, 'sine', f * 2, t, d * .6, v * .4); }
+  function lead(out, t, d, m, v) { var f = hz(m); osc(out, 'square', f, t, d, v * .6, {lp: 3600, pan: -.2}); osc(out, 'sawtooth', f, t, d, v, {det: 7, lp: 4200, pan: .2}); osc(out, 'sine', f * 2, t, d * .6, v * .4); }
   function bell(out, t, m, v, d) { var f = hz(m); d = d || .8; osc(out, 'sine', f, t, d, v, {a: .003}); osc(out, 'sine', f * 2, t, d * .6, v * .4, {a: .003}); osc(out, 'sine', f * 3.01, t, d * .3, v * .18, {a: .003}); }
   function bass(out, t, d, m, v) { var f = hz(m); osc(out, 'triangle', f, t, d, v, {lp: 700}); osc(out, 'sine', f, t, d, v * .8); }
   function keys(out, t, d, ms, v) { ms.forEach(function (m) { var f = hz(m); osc(out, 'sine', f, t, d, v, {a: .008}); osc(out, 'triangle', f, t, d * .5, v * .35, {a: .008, det: 6}); }); }
@@ -97,11 +102,51 @@
     try { if (SFX.onThink) SFX.onThink(on); } catch (e) {}   // lets the host page keep its button in step
     clearInterval(timer); timer = null;
     if (!on) { var b = musBus; musBus = null; dropBus(b); return; }
+    stopLoop('hold');
     play(function (t) { if (!thinkOn || timer) return; musBus = bus(MUS); step = 0; nextT = t + .05; pump(); timer = setInterval(pump, 100); }, true);
   }
   function duck(t, d) { if (!musBus) return; var g = musBus.gain; g.cancelScheduledValues(t); g.setTargetAtTime(MUS * .22, t, .03); g.setTargetAtTime(MUS, t + d, .3); }
   // An effect: duck the loop for d seconds (or stop it when d is 0) and play on the effects bus.
-  function fx(d, fn) { if (!d) think(false); play(function (t) { if (d) duck(t, d); fn(t, sfxBus); }); }
+  function fx(d, fn) { if (!d) { think(false); stopLoop('hold'); } play(function (t) { if (d) duck(t, d); fn(t, sfxBus); }); }
+
+  // ---------- more loops: hold music for the lobby, and a tension bed that builds with the strikes ----------
+  // loop(name, stepFn, seconds per step, steps, level): one scheduler per loop, each on its own bus. stopLoop fades it out.
+  var LOOPS = {};
+  function loop(name, fn, sec, len, level) {
+    if (LOOPS[name]) return; var L = LOOPS[name] = {n: 0, t: 0, bus: null, iv: null};
+    play(function (t) { if (LOOPS[name] !== L) return; L.bus = bus(level); L.t = t + .05;
+      var go = function () { try { if (LOOPS[name] !== L) return; if (L.t < ctx.currentTime) L.t = ctx.currentTime + .05; while (L.t < ctx.currentTime + 1.2) { fn(L.n, L.t, L.bus); L.t += sec; L.n = (L.n + 1) % len; } } catch (e) {} };
+      go(); L.iv = setInterval(go, 100); }, true);
+  }
+  function stopLoop(name) { var L = LOOPS[name]; if (!L) return; delete LOOPS[name]; clearInterval(L.iv); dropBus(L.bus); }
+  // Hold music: smooth, harmless, endless. Electric piano with tremolo, soft bass, brushes, a flute-ish tune. 16 bars at 88 bpm.
+  var H16 = 60 / 88 / 4;
+  var HOLD = [   // bass root, chord, tune
+    [50, [61, 64, 66, 69], {0: 78, 6: 76, 8: 73, 12: 71}], [47, [62, 64, 66, 69], {0: 74, 4: 73, 6: 71, 10: 69}],
+    [52, [62, 66, 67, 71], {0: 71, 2: 73, 4: 74, 8: 78, 12: 76}], [45, [61, 64, 67, 69], {0: 76, 8: 73}],
+    [50, [61, 64, 66, 69], {0: 78, 6: 81, 8: 78, 12: 76}], [54, [61, 64, 66, 69], {0: 76, 4: 73, 6: 76, 10: 78}],
+    [55, [62, 66, 69, 71], {0: 81, 4: 79, 8: 78, 12: 74}], [45, [61, 64, 67, 69], {0: 76, 6: 73, 8: 69, 14: 73}]
+  ];
+  function holdStep(n, t, o) {
+    var s = n % 16, bi = (n >> 4) % 8, b = HOLD[bi];
+    if (s % 4 === 0) nz(o, t, .18, .05, {type: 'bandpass', f: 3000, q: .7, a: .06});           // brush swish
+    if (s % 8 === 4) nz(o, t, .09, .07, {type: 'bandpass', f: 2200, q: 1.2});                   // brush tap
+    if (s % 2 === 0) nz(o, t, .02, .025, {f: 9000});
+    var bn = {0: b[0], 6: b[0] + 7, 8: b[0] + 12, 12: b[0] + 7}[s]; if (bn !== undefined) bass(o, t, .5, bn - 12, .34);
+    if (s === 0 || s === 7) b[1].forEach(function (m, i) { var f = hz(m); osc(o, 'sine', f, t + i * .012, s ? .5 : 1.1, .05, {a: .01, pan: i % 2 ? .3 : -.3}); osc(o, 'triangle', f * 2, t + i * .012, .3, .012, {a: .005}); });
+    var m = b[2][s]; if (m) { osc(o, 'sine', hz(m), t, .5, .11, {a: .06}); osc(o, 'triangle', hz(m), t, .4, .03, {a: .06, det: 8}); }
+  }
+  // Tension: a heartbeat under everything. Level 1 after the second strike, level 2 for the takeover.
+  var heat = 0, B16 = 60 / 104 / 4;
+  function tenseStep(n, t, o) {
+    var s = n % 16;
+    if (s === 0 || s === 3) osc(o, 'sine', s ? 52 : 60, t, .28, s ? .5 : .7, {to: 34, glide: .2, a: .004});     // lub-dub
+    if (heat > 1 && s % 2 === 0) osc(o, 'sawtooth', hz(38), t, .12, .07, {lp: 380});                               // pulsing low string
+    if (heat > 1 && s % 4 === 2) nz(o, t, .05, .05, {f: 7000});
+    if (s === 8) osc(o, 'sine', hz(heat > 1 ? 86 : 81) + n % 32 * (heat > 1 ? 3 : 1.5), t, .9, .028, {a: .3});      // a high note that will not resolve
+  }
+  function tension(level) { level = level | 0; if (level === heat) return; heat = level; stopLoop('tense'); if (level) loop('tense', tenseStep, B16, 64, level > 1 ? .55 : .48); }
+  function hold(on) { if (on === undefined) on = !LOOPS.hold; if (on) { think(false); loop('hold', holdStep, H16, 128, .52); } else stopLoop('hold'); return !!on; }
 
   // ---------- theme: two bars and a big finish; the short version is the second bar ----------
   var Q = 60 / 132 / 4;
@@ -131,13 +176,19 @@
   // ---------- effects ----------
   var RANK = [88, 86, 84, 81, 79, 76, 74, 72], tock = false;
   var SFX = {
-    theme: theme,
+    theme: function (short) { tension(0); theme(short); },
+    hold: hold,
+    holding: function () { return !!LOOPS.hold; },
+    tension: tension,
     think: think,
     thinking: function () { return thinkOn; },
-    stop: function () { think(false); try { if (ctx) { var b = sfxBus; sfxBus = bus(1); dropBus(b); } } catch (e) {} },
+    stop: function () { think(false); tension(0); stopLoop('hold'); try { if (ctx) { var b = sfxBus; sfxBus = bus(1); dropBus(b); } } catch (e) {} },
     volume: function (v) { if (v === undefined) return vol; vol = Math.max(0, Math.min(1, Number(v) || 0)); try { localStorage.setItem('replyall_vol', vol); } catch (e) {} try { if (master) master.gain.setTargetAtTime(vol, ctx.currentTime, .02); } catch (e) {} return vol; },
     // Answer tile: a two-note ding, higher for better answers (rank 0 is the top answer).
-    reveal: function (rank) { fx(.8, function (t, o) { var m = RANK[Math.max(0, Math.min(7, rank === undefined ? 3 : rank))]; bell(o, t, m - 7, .2, .25); bell(o, t + .07, m, .32, 1); nz(o, t + .07, .25, .05, {f: 9000}); }); },
+    // streak: answers revealed in a row this round. Each one lands a whole step higher, and from the third on a run of bells climbs with it.
+    reveal: function (rank, streak) { fx(.8, function (t, o) { var k = Math.max(0, Math.min(6, (streak || 1) - 1)), m = RANK[Math.max(0, Math.min(7, rank === undefined ? 3 : rank))] + k * 2;
+      bell(o, t, m - 7, .2, .25); bell(o, t + .07, m, .32, 1); nz(o, t + .07, .25, .05, {f: 9000});
+      if (k >= 2) { for (var i = 0; i <= k; i++) bell(o, t + .16 + i * .05, m + [0, 4, 7, 12, 16, 19, 24][i], .07 + i * .012, .5); kick(o, t + .07, .3 + k * .05); } }); },
     top: function () { fx(1.8, function (t, o) {
       [72, 76, 79, 84].forEach(function (m, i) { brass(o, t + i * .07, .14, m, .1); bell(o, t + i * .07, m + 12, .14, .5); });
       var e = t + .3; kick(o, e, .7); crash(o, e, .18); stab(o, e, .9, [72, 76, 79, 84], .07);
@@ -151,13 +202,13 @@
       osc(o, 'sawtooth', 98, t, .3, .12, {to: 392, glide: 1.5, a: 1.3, lp: 2200}); osc(o, 'sawtooth', 147, t, .3, .1, {to: 554, glide: 1.5, a: 1.3, lp: 2200});
       [0, .42, .78, 1.06, 1.26, 1.4, 1.5].forEach(function (d, i) { kick(o, t + d, .35 + i * .06); });
       var e = t + 1.62; kick(o, e, .9); osc(o, 'sine', 70, e, 1.2, .6, {to: 38}); crash(o, e, .14); stab(o, e, 1, [50, 53, 57, 60], .08); }); },
-    stolen: function () { fx(0, function (t, o) {
+    stolen: function () { tension(0); fx(0, function (t, o) {
       [57, 60, 64, 67, 69].forEach(function (m, i) { brass(o, t + i * .08, .12, m, .11); });
       var e = t + .45; kick(o, e, .7); crash(o, e, .18); stab(o, e, .9, [69, 73, 76, 81], .075); coins(o, e + .25); }); },
-    kept: function () { fx(0, function (t, o) {
+    kept: function () { tension(0); fx(0, function (t, o) {
       [0, .22].forEach(function (d) { kick(o, t + d, .7); snare(o, t + d, .25); stab(o, t + d, .16, [67, 71, 74], .09); });
       var e = t + .44; kick(o, e, .8); crash(o, e, .15); stab(o, e, .9, [67, 72, 76, 79], .075); bell(o, e, 91, .2, 1.2); }); },
-    award: function () { fx(0, function (t, o) {
+    award: function () { tension(0); fx(0, function (t, o) {
       nz(o, t, .04, .3, {type: 'bandpass', f: 2200, q: 2}); nz(o, t + .07, .05, .35, {type: 'bandpass', f: 1400, q: 2}); osc(o, 'sine', 120, t + .07, .12, .4, {to: 70});
       coins(o, t + .16); }); },
     sweep: function () { fx(2.2, function (t, o) {
@@ -169,7 +220,7 @@
     timeUp: function () { fx(0, function (t, o) {
       [155, 196, 233].forEach(function (f) { osc(o, 'sawtooth', f, t, 1, .14, {to: f * .94, a: .03, lp: 1800}); osc(o, 'sawtooth', f, t, 1, .1, {to: f * .94, a: .03, det: 14, lp: 1800}); });
       kick(o, t, .7); }); },
-    win: function () { fx(0, function (t, o) {
+    win: function () { tension(0); fx(0, function (t, o) {
       var b = .16;
       [[0, 72], [1, 72], [2, 72], [3, 76], [5, 79], [7, 84]].forEach(function (x) { brass(o, t + x[0] * b, x[0] === 7 ? .5 : .14, x[1], .12); lead(o, t + x[0] * b, .12, x[1] + 12, .07); });
       [0, 1, 2].forEach(function (i) { snare(o, t + i * b, .3); }); kick(o, t + 3 * b, .7); kick(o, t + 5 * b, .7);

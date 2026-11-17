@@ -162,18 +162,18 @@ const joinUrl = s => location.origin + location.pathname.replace(/[^/]*$/, '') +
 const blankLa = () => [0, 1].map(() => Array.from({length: 5}, () => ({t: '', p: 0, st: false, sp: false})));
 const fresh = () => ({teams: G.teams.map(n => ({name: n, score: 0})), phase: 'title', ri: 0, useCustom: false, custom: null, revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null,
   buzzOpen: false, buzz: null, buzzPid: null, showQ: false, li: 0, lp: 0, la: blankLa(), lq: null, hideP1: false, timer: 20, lreset: 0, lend: null,
-  items: 0, allowed: {}, survey: null, rx: true, join: false, back: null, phones: ONLINE, sid: sid(), joinUrl: joinUrl(sid())});
+  items: 0, allowed: {}, pl: {}, gb: null, survey: null, rx: true, join: false, back: null, phones: ONLINE, sid: sid(), joinUrl: joinUrl(sid())});
 let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
 let resumed = !!(S && S.teams && (S.phase !== 'title' || S.teams.some(t => t.score)));
 if (!S || !S.teams || !G.rounds[S.ri] || !G.lightning[S.li]) { S = fresh(); resumed = false; }
-S.buzzOpen = false; if (S.rx === undefined) S.rx = true;
+S.buzzOpen = false; if (S.rx === undefined) S.rx = true; if (!S.pl) S.pl = {};
 // The page was refreshed while the survey answers were being counted: reopen it, so Close and count can run again.
 if (S.phase === 'survey' && S.survey && S.survey.st === 'closed' && !S.survey.groups) S.survey.st = 'open';
 // Each game code has its own relay room, so two hosts never overwrite each other.
 const room = () => 'ra-' + S.sid.toLowerCase();
 const cur = () => S.useCustom && S.custom ? S.custom : G.rounds[S.ri];
 let dupHost = false, win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0, lastKid = '';
-let phones = [], answers = [], phoneErr = '';
+let phones = [], answers = [], phoneErr = '', streak = 0;   // streak: answers revealed in a row this round (the reveal sound climbs with it)
 // REH is set while the demo show (rehearsal) plays. It holds the real game, which comes back untouched when the demo ends.
 let REH = null;
 
@@ -182,7 +182,7 @@ let REH = null;
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
 function push(fx) {
   try { localStorage.setItem(KEY, REH ? REH.keep : JSON.stringify(S)); } catch (e) {}   // a refresh in the middle of a demo brings back the real game
-  seq = Math.max(seq + 1, Date.now()); const m = {S, fx: fx || {}, seq};
+  S.aud = aud(); seq = Math.max(seq + 1, Date.now()); const m = {S, fx: fx || {}, seq};
   try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
   postState();
 }
@@ -272,7 +272,8 @@ async function pollPhones(countBuzzes) {
     phones = msgs.filter(m => m.k === 'join' && now - m.t < 8 * 3600e3).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
     const reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
     if (reacts.length && !first && S.rx) push({react: reacts.slice(0, 6)});
-    takeAnswers(msgs);
+    let nw = false; phones.forEach(p => { nw = plAdd(p.p, p.name, p.team) || nw; }); if (nw && !first) push();
+    takeAnswers(msgs); takeGuesses(msgs);
     // Only phones the scorekeeper approved can buzz.
     if (countBuzzes) { const b = fresh.filter(m => m.k === 'buzz' && S.allowed[m.p] && (m.team === 0 || m.team === 1)).sort((a, b) => (a.rt || a.t) - (b.rt || b.t))[0]; if (b) buzzIn(b.team, b.p); }
     first = false; phoneErr = '';
@@ -289,13 +290,52 @@ let lastState = '';
 function postState() {
   if (!ONLINE || REH) return;
   const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null,
-    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score)};
-  const j = JSON.stringify(st); if (j === lastState) return; lastState = j;
+    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open} : null, pm: pmap()};
+  let j = JSON.stringify(st); while (j.length > 5600 && Object.keys(st.pm).length) { const k = Object.keys(st.pm); k.slice(Math.floor(k.length * .8)).forEach(p => delete st.pm[p]); j = JSON.stringify(st); }   // the relay takes 6000 bytes: the lowest ranks lose their line first
+  if (j === lastState) return; lastState = j;
   fetch('/api/relay?room=' + room() + '&k=state', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(Object.assign({id: 's' + Date.now()}, st))}).catch(() => { lastState = ''; });
 }
 setInterval(() => { if (S.buzzOpen && armed) pollPhones(true); }, 300);
 setInterval(() => { if (!S.buzzOpen) pollPhones(false); }, 1000);
 setInterval(() => { lastState = ''; postState(); }, 30000);
+
+// ---------- everyone plays: each phone calls one answer per board ----------
+// Any phone, team or audience, may lock in one guess per board until the first answer is revealed (or a strike).
+// A guess that matches any answer on the board pays that answer's points (times the round multiplier) to that person.
+// S.pl: pid -> {n: name, t: team, s: banked points}. S.gb: this board's guesses, pid -> [text, answer index or -1].
+const guest = p => 'Guest ' + p.slice(0, 3).toUpperCase();
+function plAdd(p, n, t) { n = String(n || '').slice(0, 14); const o = S.pl[p]; if (o) { if (n && o.n !== n) o.n = n; if (t === 0 || t === 1 || t === 2) o.t = t; return false; } S.pl[p] = {n, t: t === 0 || t === 1 ? t : 2, s: 0}; return true; }
+function gmatch(txt, r) {
+  const t = norm(txt); if (t.length < 2) return -1; const w = x => ' ' + x + ' ';
+  return r.a.findIndex(a => [a[0]].concat(String(a[2] || '').split(',')).map(norm).filter(Boolean).some(c => c === t || (t.length >= 3 && c.length >= 3 && (w(c).includes(w(t)) || w(t).includes(w(c))))));
+}
+const gain = p => { const b = S.gb, x = b && !b.banked && b.g[p]; return x && x[1] >= 0 && S.revealed[x[1]] ? cur().a[x[1]][1] * cur().mult : 0; };
+const total = p => S.pl[p].s + gain(p);
+function gbNew() { S.gb = {id: Date.now().toString(36), open: true, lockAt: 0, g: {}}; }
+function gbLock() { if (S.gb && S.gb.open) { S.gb.open = false; S.gb.lockAt = Date.now(); } }
+// At the end of a board every guess that is on the board pays, revealed or not.
+function bankGb() { const b = S.gb; if (!b || b.banked || !cur()) return; const r = cur(); Object.keys(b.g).forEach(p => { const x = b.g[p]; if (x[1] >= 0 && r.a[x[1]] && S.pl[p]) S.pl[p].s += r.a[x[1]][1] * r.mult; }); b.banked = true; b.open = false; }
+function takeGuesses(msgs) {
+  const b = S.gb; if (!b || b.banked || S.phase !== 'round') return; let ch = false;
+  msgs.forEach(m => { if (m.k !== 'guess' || m.g !== b.id || typeof m.a !== 'string' || !m.a.trim() || RUDE.test(m.a)) return;
+    if (!b.open && (m.rt || m.t) > b.lockAt + 1000) return;   // sent after the lock (a second of grace for clock drift)
+    const a = m.a.trim().slice(0, 30), o = b.g[m.p]; if (o && o[0] === a) return; plAdd(m.p, m.name, m.team); b.g[m.p] = [a, gmatch(a, cur())]; ch = true; });
+  if (ch) { push(); setPhones(); }
+}
+const ranked = () => Object.keys(S.pl).sort((a, b) => total(b) - total(a));
+function aud() {
+  const b = S.gb, live = S.phase === 'round' && b && !b.banked, g = live ? Object.values(b.g) : [], hits = [];
+  g.forEach(x => { if (x[1] >= 0) hits[x[1]] = (hits[x[1]] || 0) + 1; });
+  const ids = Object.keys(S.pl), top = ranked().filter(p => total(p) > 0).slice(0, 5).map(p => [S.pl[p].n || guest(p), total(p), S.pl[p].t]);
+  return {n: ids.length, g: g.length, hits, top, names: ids.slice(-6).map(p => S.pl[p].n || guest(p))};
+}
+// What each phone shows about itself: [points, points from this board so far, 0 no guess / 1 waiting / 2 on the board / 3 not on the board, rank]. Capped to fit the relay.
+function pmap() {
+  const b = S.gb, live = S.phase === 'round' && b && !b.banked, done = live && cur().a.every((_, k) => S.revealed[k]), out = {};
+  ranked().slice(0, 140).forEach((p, i) => { const x = live && b.g[p]; out[p] = [total(p), gain(p), !x ? 0 : x[1] >= 0 && S.revealed[x[1]] ? 2 : done ? 3 : 1, i + 1]; });
+  return out;
+}
+function leadersCard() { const t = aud().top; return t.length ? [['Between rounds', 'TOP INDIVIDUAL CONTRIBUTORS', 'Call an answer on your phone every round. On the board means points.', 4200, t]] : []; }
 
 // ---------- the "You said" round: turn the room's answers into a board ----------
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/^(the|a|an|some|my|our) /, '').replace(/s$/, '').trim();
@@ -314,13 +354,14 @@ async function cluster(question, list) {
 }
 
 // ---------- actions ----------
-function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; clearLater(); stopVoice(); }
+function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; streak = 0; clearLater(); stopVoice(); SFX.tension(0); }
 const leaveOk = () => !!REH || S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
 // Between rounds the audience sees the standings before the next round card.
 function standings(nextMult) {
-  if (S.phase !== 'round' || !S.awarded) return [];
+  if (S.phase === 'round') bankGb();
+  if (S.phase !== 'round' || !S.awarded) return leadersCard();
   const [a, b] = S.teams, d = Math.abs(a.score - b.score), t = a.score < b.score ? a : b;
-  return [[a.name + ' vs ' + b.name, a.score + ' : ' + b.score, !d ? 'All square. Perfect alignment.' : t.name + ' trails by ' + d + '. ' + (nextMult > 1 ? 'The next one pays ' + (nextMult === 2 ? 'double.' : 'triple.') : 'Plenty of budget left.'), 3400]];
+  return [[a.name + ' vs ' + b.name, a.score + ' : ' + b.score, !d ? 'All square. Perfect alignment.' : t.name + ' trails by ' + d + '. ' + (nextMult > 1 ? 'The next one pays ' + (nextMult === 2 ? 'double.' : 'triple.') : 'Plenty of budget left.'), 3400]].concat(leadersCard());
 }
 function nextStep() {
   const p = S.phase;
@@ -342,7 +383,7 @@ let lastScene = 0, closeN = 0, openedAt = 0, struckAt = 0;
 const gate = () => { const n = Date.now(); if (n - lastScene < 600) return false; lastScene = n; return true; };
 const A = {
   open() { if (alive() && !confirm('The audience screen is already open and connected. Open a second one?')) return; win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
-  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; struckAt = 0; up({clear: 1}); },
+  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); SFX.tension(0); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; struckAt = 0; up({clear: 1}); },
   next() { resumed = false; const n = nextStep(); if (n) n[1](); },
   phase(p) { if (S.phase === p || !gate() || !leaveOk()) return; snap(); clearLater(); S.back = p === 'title' && S.phase !== 'winner' ? S.phase : null; S.phase = p; S.buzzOpen = false; up(); },   // follow-ups still queued for the old scene (takeover card, winner reveal) must not land on this one
   back() { if (!gate()) return; snap(); clearLater(); S.phase = S.back; S.back = null; up(); },
@@ -351,7 +392,7 @@ const A = {
   hello() { chipLine('hello', true); },
   round(i) { i = Number(i); if (!G.rounds[i] || !gate() || !leaveOk()) return; snap(); const cards = standings(G.rounds[i].mult), intro = S.phase === 'title' && i === 0;
     if (intro) cards.push(['How it works', 'TOP ANSWERS SCORE', 'Guess what the survey said. Three strikes and the other team can steal.', 4600]);
-    S.ri = i; S.useCustom = false; resetRound(); S.phase = 'round'; SFX.theme(!intro);
+    S.ri = i; S.useCustom = false; resetRound(); gbNew(); S.phase = 'round'; SFX.theme(!intro);
     cards.push(['Agenda item ' + (i + 1), 'ROUND ' + (i + 1), MODE(G.rounds[i].mult)]); up({cards}); later(() => chipLine('round'), cards.length * 2400 + 300); },
   showQ() { S.showQ = !S.showQ; up(); },
   read() { const r = cur(); S.showQ = true; up(); speak(r.id, r.q); },
@@ -360,20 +401,20 @@ const A = {
     S.buzz = null; S.buzzPid = null; S.buzzOpen = false; up(); },
   control(i) { snap(); S.control = i; S.buzz = null; up(); },
   // Click an answer to reveal it. Click it again to hide it (a misclick costs nothing).
-  reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
+  reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); gbLock(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
     if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i] && !S.awarded) {   // after the award the budget is banked: hiding a tile changes neither pot nor score
       S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
-    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (i === 0) SFX.top(); else SFX.reveal(i); up();
+    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (!S.awarded) streak++; if (i === 0) SFX.top(); else SFX.reveal(i, streak); up();
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
   strike() { if (S.strikes >= 3 || S.phase !== 'round' || Date.now() - struckAt < 450) return; struckAt = Date.now(); snap();   // a double-click is one strike, not two
-    S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; SFX.strike(); const a = said; said = '';
+    gbLock(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; streak = 0; SFX.strike(); if (S.strikes === 2) later(() => SFX.tension(1), 1200); const a = said; said = '';
     const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },
-  wrong() { snap(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: WRONG[S.items % WRONG.length], sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
-  clearStrikes() { snap(); S.strikes = 0; up(); },
-  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
+  wrong() { snap(); gbLock(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: WRONG[S.items % WRONG.length], sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
+  clearStrikes() { snap(); S.strikes = 0; SFX.tension(0); up(); },
+  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); later(() => SFX.tension(2), 1800); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
   award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award']();
     const x = {kind, i, pot};
@@ -408,11 +449,11 @@ const A = {
     if (g.length < 3) { note = 'A board needs at least 3 different answers. Reopen the survey, add rows by hand, or play round 4 instead.'; return render(); }
     snap(); const total = g.reduce((n, x) => n + x.count, 0);
     S.custom = {id: 'you', q: S.survey.q, mult: 3, n: S.survey.count, a: g.map(x => [x.label.trim().slice(0, 24), Math.max(1, Math.round(100 * x.count / total)), '', ''])};
-    S.useCustom = true; resetRound(); S.phase = 'round'; SFX.theme(true); up({cards: [['You said', 'THE ROOM HAS SPOKEN', S.survey.count + ' answers / triple budget']]}); later(() => chipLine('round'), 2700); },
+    S.useCustom = true; resetRound(); gbNew(); S.phase = 'round'; SFX.theme(true); up({cards: [['You said', 'THE ROOM HAS SPOKEN', S.survey.count + ' answers / triple budget']]}); later(() => chipLine('round'), 2700); },
   // final round
   lset(i) { snap(); S.la.forEach((row, p) => row.forEach(c => { if (c.sp) S.teams[p].score -= Number(c.p) || 0; }));   // points already revealed leave the team scores with their answers
     S.li = Number(i); S.la = blankLa(); S.lp = 0; S.lq = null; S.lend = null; S.hideP1 = false; S.lreset++; A.tstop(); S.timer = 20; up(); },
-  lstart() { if (!gate() || !leaveOk()) return; snap(); S.phase = 'lightning'; S.buzzOpen = false; clearLater(); SFX.theme(true); up({cards: [['Final round', 'THE 4:59 FRIDAY RUSH', 'One player per team. Every point counts for your team.', 3400]]}); },
+  lstart() { if (!gate() || !leaveOk()) return; snap(); if (S.phase === 'round') bankGb(); S.phase = 'lightning'; S.buzzOpen = false; clearLater(); SFX.theme(true); up({cards: [['Final round', 'THE 4:59 FRIDAY RUSH', 'One player per team. Every point counts for your team.', 3400]]}); },
   lplayer(p) { snap(); S.lp = p; A.tstop(); S.timer = p ? 25 : 20; S.hideP1 = p === 1; S.lq = null; up(); },
   lhide() { S.hideP1 = !S.hideP1; up(); },
   lq(i) { if (S.lq !== i) { S.lq = i; push(); } },
@@ -438,7 +479,7 @@ const A = {
   lclear() { if (!confirm('Clear all final round answers?')) return; A.lset(S.li); },
   winner() { if (!gate() || !leaveOk()) return; const [a, b] = S.teams;
     if (a.score === b.score && !REH && !confirm('The scores are tied.\n\nOK = show a shared certificate.\nCancel = go back and play a spare round as a tie-breaker (first team with an answer on the board wins).')) return;
-    snap(); A.tstop(); clearLater(); S.buzzOpen = false; SFX.drum(); push({cards: [['The results are in', 'AND THE WINNER IS', 'Drumroll, please']]});
+    snap(); if (S.phase === 'round') bankGb(); A.tstop(); clearLater(); S.buzzOpen = false; SFX.drum(); push({cards: [['The results are in', 'AND THE WINNER IS', 'Drumroll, please']]});
     later(() => { S.phase = 'winner'; SFX.win(); up(); later(() => chipLine('win', true), 1500); if (S.items) later(() => chip(itemsLine()), 9000); }, 1900); }
 };
 
@@ -539,7 +580,8 @@ function phonesHtml(full) {
   if (!ONLINE) return '<span class="muted">Phones need the game opened from the website. Keyboard buzzers work anywhere.</span>';
   const team = phones.filter(p => p.team < 2), ok = team.filter(p => S.allowed[p.p]).length, wait = team.length - ok;
   const head = `<b>${ok}</b> buzzer${ok === 1 ? '' : 's'} approved, <b>${phones.length - team.length}</b> audience${wait ? `<button class="go wide" onclick="A.allowAll()">Approve ${wait} waiting</button>` : ''}<span class="muted">${esc(phoneErr)}</span>`;
-  return full ? head + `<div class="plist">${team.map(p => `<label class="${S.allowed[p.p] ? 'ok' : ''}"><input type="checkbox" ${S.allowed[p.p] ? 'checked' : ''} onchange="A.allow('${p.p}',this.checked)"> ${esc(p.name || 'Phone ' + p.p.slice(0, 3))} (${esc(S.teams[p.team].name)})</label>`).join('')}</div>` : head;
+  const b = S.gb, gl = S.phase === 'round' && b && !b.banked ? `<br><b>${Object.keys(b.g).length}</b> room guess${Object.keys(b.g).length === 1 ? '' : 'es'} in, <b>${Object.values(b.g).filter(x => x[1] >= 0).length}</b> on the board. ${b.open ? 'Open until the first reveal or strike.' : 'Locked.'}` : '';
+  return full ? head + gl + `<div class="plist">${team.map(p => `<label class="${S.allowed[p.p] ? 'ok' : ''}"><input type="checkbox" ${S.allowed[p.p] ? 'checked' : ''} onchange="A.allow('${p.p}',this.checked)"> ${esc(p.name || 'Phone ' + p.p.slice(0, 3))} (${esc(S.teams[p.team].name)})</label>`).join('')}</div>` : head + gl;
 }
 function setPhones() { const el = document.getElementById('phonesBox'); if (!el) return; const h = phonesHtml(el.dataset.full === '1'); if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } }
 let more = false;
@@ -583,7 +625,7 @@ function render() {
         <button class="wide" onclick="R.start()" ${REH ? 'disabled' : ''} title="Plays a whole made-up game on the big screen so you can see the show. Your real game is not changed.">${REH ? 'Demo show is playing' : 'Watch a demo show'}</button>
         <p class="muted">The button at the bottom left turns green when both windows are linked. They relink by themselves after a refresh.</p></div>
       <div class="card"><h2><b>2</b>Sound and Chip</h2>
-        <div class="row"><button onclick="SFX.theme()">Test sound</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
+        <div class="row"><button onclick="SFX.theme()">Test sound</button><button id="holdBtn" class="${SFX.holding() ? 'on' : ''}" onclick="SFX.hold();this.classList.toggle('on',SFX.holding())" title="Lobby music while people walk in and join. Stops when round 1 starts.">Hold music</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
         <label class="vol" title="Volume of the music and sound effects"><span aria-hidden="true">&#x1F50A;</span> Volume <input type="range" min="0" max="100" step="5" value="${Math.round(SFX.volume() * 100)}" oninput="setVol(this.value)" aria-label="Volume"><b id="volPct">${Math.round(SFX.volume() * 100)}%</b></label>
         <p><label>Voice <select onchange="setPref('voice',this.value)" style="max-width:100%"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></p>
         <p><label>Chip speaks out loud <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Big moments</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label></p>
