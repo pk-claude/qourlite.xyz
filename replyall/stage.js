@@ -113,7 +113,7 @@
   // ---------------------------------------------------------------- particles
   var pc, px, parts = [], praf = 0, W = 0, H = 0, dpr = 1;
   function psize() { dpr = Math.min(2, window.devicePixelRatio || 1); W = pc.clientWidth; H = pc.clientHeight; pc.width = Math.round(W * dpr); pc.height = Math.round(H * dpr); }
-  function pstart() { if (!praf) { lastP = performance.now(); praf = requestAnimationFrame(ptick); } }
+  function pstart() { if (!praf && pc) { lastP = performance.now(); praf = requestAnimationFrame(ptick); } }
   var lastP = 0;
   function ptick(now) {
     var dt = Math.min(.05, (now - lastP) / 1000); lastP = now;
@@ -200,7 +200,7 @@
   function shade(c) { var v = hex(c); return 'rgb(' + v.map(function (x) { return Math.round(x * 255 * .62); }).join(',') + ')'; }
 
   function boot() {
-    pc = document.getElementById('fx'); px = pc.getContext('2d'); psize(); window.addEventListener('resize', psize);
+    pc = document.getElementById('fx'); px = pc.getContext('2d'); psize(); window.addEventListener('resize', psize); if (parts.length) pstart();   // effects asked for while the page was still loading
     start();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
