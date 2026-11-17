@@ -173,7 +173,7 @@ if (S.phase === 'survey' && S.survey && S.survey.st === 'closed' && !S.survey.gr
 const room = () => 'ra-' + S.sid.toLowerCase();
 const cur = () => S.useCustom && S.custom ? S.custom : G.rounds[S.ri];
 let dupHost = false, win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0, lastKid = '';
-let phones = [], answers = [], phoneErr = '';
+let phones = [], answers = [], phoneErr = '', streak = 0;   // streak: answers revealed in a row this round (the reveal sound climbs with it)
 // REH is set while the demo show (rehearsal) plays. It holds the real game, which comes back untouched when the demo ends.
 let REH = null;
 
@@ -354,7 +354,7 @@ async function cluster(question, list) {
 }
 
 // ---------- actions ----------
-function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; clearLater(); stopVoice(); }
+function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; streak = 0; clearLater(); stopVoice(); SFX.tension(0); }
 const leaveOk = () => !!REH || S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
 // Between rounds the audience sees the standings before the next round card.
 function standings(nextMult) {
@@ -383,7 +383,7 @@ let lastScene = 0, closeN = 0, openedAt = 0, struckAt = 0;
 const gate = () => { const n = Date.now(); if (n - lastScene < 600) return false; lastScene = n; return true; };
 const A = {
   open() { if (alive() && !confirm('The audience screen is already open and connected. Open a second one?')) return; win = window.open('display.html', 'replyall_display', 'width=1280,height=720'); },
-  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; struckAt = 0; up({clear: 1}); },
+  undo() { if (!hist.length) return; S = JSON.parse(hist.pop()); S.buzzOpen = false; clearLater(); SFX.tension(0); A.tstop(); stopVoice(); pending = null; note = ''; closeN++; busy = false; struckAt = 0; up({clear: 1}); },
   next() { resumed = false; const n = nextStep(); if (n) n[1](); },
   phase(p) { if (S.phase === p || !gate() || !leaveOk()) return; snap(); clearLater(); S.back = p === 'title' && S.phase !== 'winner' ? S.phase : null; S.phase = p; S.buzzOpen = false; up(); },   // follow-ups still queued for the old scene (takeover card, winner reveal) must not land on this one
   back() { if (!gate()) return; snap(); clearLater(); S.phase = S.back; S.back = null; up(); },
@@ -404,17 +404,17 @@ const A = {
   reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); gbLock(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
     if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i] && !S.awarded) {   // after the award the budget is banked: hiding a tile changes neither pot nor score
       S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
-    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (i === 0) SFX.top(); else SFX.reveal(i); up();
+    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (!S.awarded) streak++; if (i === 0) SFX.top(); else SFX.reveal(i, streak); up();
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
   strike() { if (S.strikes >= 3 || S.phase !== 'round' || Date.now() - struckAt < 450) return; struckAt = Date.now(); snap();   // a double-click is one strike, not two
-    gbLock(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; SFX.strike(); const a = said; said = '';
+    gbLock(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; streak = 0; SFX.strike(); if (S.strikes === 2) later(() => SFX.tension(1), 1200); const a = said; said = '';
     const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },
   wrong() { snap(); gbLock(); S.items++; SFX.strike(); const a = said; said = ''; up({stamp: WRONG[S.items % WRONG.length], sub: 'not on the board'}); later(() => chipLine('strike'), 600); roast(a, cur().q); },
-  clearStrikes() { snap(); S.strikes = 0; up(); },
-  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
+  clearStrikes() { snap(); S.strikes = 0; SFX.tension(0); up(); },
+  takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); later(() => SFX.tension(2), 1800); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
   award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award']();
     const x = {kind, i, pot};
@@ -625,7 +625,7 @@ function render() {
         <button class="wide" onclick="R.start()" ${REH ? 'disabled' : ''} title="Plays a whole made-up game on the big screen so you can see the show. Your real game is not changed.">${REH ? 'Demo show is playing' : 'Watch a demo show'}</button>
         <p class="muted">The button at the bottom left turns green when both windows are linked. They relink by themselves after a refresh.</p></div>
       <div class="card"><h2><b>2</b>Sound and Chip</h2>
-        <div class="row"><button onclick="SFX.theme()">Test sound</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
+        <div class="row"><button onclick="SFX.theme()">Test sound</button><button id="holdBtn" class="${SFX.holding() ? 'on' : ''}" onclick="SFX.hold();this.classList.toggle('on',SFX.holding())" title="Lobby music while people walk in and join. Stops when round 1 starts.">Hold music</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
         <label class="vol" title="Volume of the music and sound effects"><span aria-hidden="true">&#x1F50A;</span> Volume <input type="range" min="0" max="100" step="5" value="${Math.round(SFX.volume() * 100)}" oninput="setVol(this.value)" aria-label="Volume"><b id="volPct">${Math.round(SFX.volume() * 100)}%</b></label>
         <p><label>Voice <select onchange="setPref('voice',this.value)" style="max-width:100%"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></p>
         <p><label>Chip speaks out loud <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Big moments</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label></p>
