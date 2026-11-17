@@ -131,10 +131,10 @@ const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_sta
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const MODE = m => m === 3 ? 'Bonus season: triple budget' : m === 2 ? 'Q4 crunch: double budget' : 'Regular business';
 // strike stamps escalate like an email thread going wrong: polite, then pointed, then on the record
-const STAMPS = [['NOTED.', 'PARKING LOT', 'NOT IN SCOPE', 'DEPRIORITIZED', 'NOTED WITH CONCERN'],
-  ['SEE ME.', 'FLAGGED', 'CC: YOUR MANAGER', 'MOVED TO Q3', 'NEEDS ALIGNMENT'],
-  ['PER MY LAST EMAIL', 'MEETING ENDED', 'INVITE DECLINED', 'ESCALATED', 'THIS COULD HAVE BEEN AN EMAIL']];
-const WRONG = ["LET'S CIRCLE BACK", 'TAKE IT OFFLINE', 'NOT ON THE AGENDA', 'OUT OF OFFICE', 'WRONG THREAD'];
+const STAMPS = [['NOTED.', 'PARKING LOT', 'NOT IN SCOPE', 'DEPRIORITIZED', 'NOTED WITH CONCERN', 'ADDED TO BACKLOG', 'WE HEAR YOU', 'THANKS FOR SHARING'],
+  ['SEE ME.', 'FLAGGED', 'CC: YOUR MANAGER', 'MOVED TO Q3', 'NEEDS ALIGNMENT', 'LOOPING IN HR', 'FOLLOW-UP SCHEDULED', 'NOT A PRIORITY'],
+  ['PER MY LAST EMAIL', 'MEETING ENDED', 'INVITE DECLINED', 'ESCALATED', 'THIS COULD HAVE BEEN AN EMAIL', 'ACCESS REVOKED', 'CALENDAR CLEARED', 'REPLY ALL: DENIED']];
+const WRONG = ["LET'S CIRCLE BACK", 'TAKE IT OFFLINE', 'NOT ON THE AGENDA', 'OUT OF OFFICE', 'WRONG THREAD', 'SENT TO SPAM', 'MESSAGE BOUNCED', 'AUTO-REPLY: AWAY'];
 const STRIKE_SUB = ['strike 1 of 3 - gentle reminder', 'strike 2 of 3 - following up', 'strike 3 of 3 - final notice'];
 
 // ---------- question file check ----------
