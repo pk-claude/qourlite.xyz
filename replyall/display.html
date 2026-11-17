@@ -229,7 +229,7 @@ body.nogl #stagebg{display:none}
 @keyframes cur{0%{transform:translateX(100%)}13%,87%{transform:none}100%{transform:translateX(100%)}}
 .card .cc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;animation:ccf var(--d) linear forwards}
 @keyframes ccf{0%,12%{opacity:0;transform:scale(1.08)}20%{opacity:1;transform:none}82%{opacity:1}88%,100%{opacity:0;transform:scale(.97)}}
-.card .k0{font:800 1.4cqw var(--mono);letter-spacing:.4em;color:var(--ta);margin-bottom:2cqh}
+.card .k0{font:800 1.4cqw var(--mono);letter-spacing:.4em;color:var(--ta);margin-bottom:2cqh;max-width:92cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card h1{margin:0;font:900 var(--hs,14cqh)/0.92 var(--disp);text-transform:uppercase;letter-spacing:.01em;filter:drop-shadow(0 .5cqh 0 #6b3d00) drop-shadow(0 2cqh 3cqw rgba(0,0,0,.6))}
 .card p{margin:3cqh 0 0;max-width:70cqw;font:800 2.4cqw/1.2 var(--head);color:#fff}
 .card .rule{width:0;height:.3cqh;margin:3cqh auto 0;background:var(--goldtx);animation:rule var(--d) cubic-bezier(.2,.9,.3,1) forwards}
@@ -578,7 +578,7 @@ function build() {
     h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">The budget</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
         <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div>
       <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : 'Agenda item ' + (S.ri + 1)}</span></div>
-        <div class="q" style="--qfs:${Math.max(2, Math.min(3.1, 205 / (q.length + 10)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
+        <div class="q" style="--qfs:${Math.max(1.9, Math.min(2.8, 290 / (q.length + 6)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
       <div class="guesses" id="gs"></div>
       <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr);--afs:${Math.min(2.7, 96 / Math.max(1, ...r.a.map(a => String(a[0]).length)))}cqw">${r.a.map((a, i) =>
         `<div class="tile t-${i}${S.revealed[i] ? ' open' : ''}" style="--i:${i}"><div class="sh"></div><div class="rk">${i + 1}</div><div class="rd">CLASSIFIED</div>
@@ -853,7 +853,7 @@ function banner(text) {
 }
 // the budget pays out: gold coins arc from the pot into the team's ticker, which jumps when they land
 function payout(i, text) {
-  setTimeout(() => banner(text), 500);
+  const g = cardGen; setTimeout(() => { if (g === cardGen) banner(text); }, 500);   // an undo in the meantime wipes the screen; the banner must not come back after it
   const p = $('.pot'), t = $('#t' + i); if (!p || !t) return; if (window.STAGE) STAGE.flash('#ffd76a', .8);
   if (!window.FX) return;
   FX.coins(rect(p), rect(t.querySelector('.tsc')), 14, (k, lastOne) => { const tt = $('#t' + i); if (!tt) return; if (lastOne) { tt.classList.remove('paid'); void tt.offsetWidth; tt.classList.add('paid'); FX.sparks(rect(tt.querySelector('.tsc')), 40, ['#ffd76a', TEAMC[i]]); } });

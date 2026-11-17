@@ -75,17 +75,21 @@
     if (!cvs) return; var w = Math.max(2, Math.round(cvs.clientWidth * scale)), hgt = Math.max(2, Math.round(cvs.clientHeight * scale));
     if (cvs.width !== w || cvs.height !== hgt) { cvs.width = w; cvs.height = hgt; if (gl) gl.viewport(0, 0, w, hgt); }
   }
-  var lastF = performance.now(), slow = 0;
+  var lastF = performance.now(), slow = 0, win = 0, wn = 0, bad = 0, lite = false, lastDraw = 0;
   function ease(a, b, k) { return a + (b - a) * k; }
   function frame(now) {
     raf = requestAnimationFrame(frame);
-    var dt = Math.min(.1, (now - lastF) / 1000); lastF = now;
+    var dt = Math.min(.1, (now - lastF) / 1000);
     // a slow machine renders the backdrop at a lower resolution instead of dropping the whole show's frame rate
     if (dt > .028) { if (++slow > 40 && scale > .3) { scale = Math.max(.3, scale - .1); slow = 0; size(); } } else slow = Math.max(0, slow - 1);
+    // Still under 20 frames a second for two 2-second windows in a row (even at the lowest resolution): the backdrop drops to
+    // four redraws a second, so the board, the effects and the timers stay smooth. A hidden tab's long gaps do not count.
+    if (now - lastF < 1000) { win += now - lastF; wn++; } if (win > 2000) { bad = wn / win * 1000 < 20 ? bad + 1 : 0; if (bad >= 2 && !lite) { lite = true; document.body.classList.add('lite'); } win = 0; wn = 0; }
     var k = 1 - Math.exp(-dt * 2.2);
     ['ca', 'cb', 'ck'].forEach(function (c) { for (var i = 0; i < 3; i++) cur[c][i] = ease(cur[c][i], tgt[c][i], k); });
     ['sw', 'dim', 'al', 'party'].forEach(function (c) { cur[c] = ease(cur[c], tgt[c], c === 'al' ? 1 - Math.exp(-dt * 6) : k); });
-    flash *= Math.exp(-dt * 5.5);
+    flash *= Math.exp(-dt * 5.5); lastF = now;
+    if (lite && now - lastDraw < 250) return; lastDraw = now;
     size();
     var T = CALM ? 4 : (now - t0) / 1000;
     gl.uniform2f(U.R, cvs.width, cvs.height); gl.uniform1f(U.T, T);
