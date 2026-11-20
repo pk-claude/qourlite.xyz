@@ -1,4 +1,4 @@
-// REPLY ALL -- the stage: a WebGL backdrop (moving spotlights, haze, LED wall, floor glow) and one particle layer
+// REPLY ALL -- the stage: a WebGL backdrop (Winter Fest: forest green, string lights, pines, falling snow, soft spotlights) and one particle layer
 // (confetti, sparks, coins, shredded redaction strips, pyro fountains). The audience screen drives both through
 // window.STAGE and window.FX. If WebGL is missing the backdrop falls back to a CSS gradient and the game carries on.
 (function () {
@@ -16,27 +16,42 @@
     // one cone of light from (ox, top) aimed at angle a; soft edges, fades with distance, broken up by haze
     'float beam(vec2 uv,float ox,float a,float w){vec2 o=vec2(ox,1.08);vec2 d=vec2(sin(a),-cos(a));vec2 q=uv-o;float along=dot(q,d);if(along<0.)return 0.;',
     '  float across=abs(q.x*d.y-q.y*d.x);float wid=.012+along*w;float b=smoothstep(wid,wid*.15,across);return b*exp(-along*.75)*(.55+.45*smoothstep(0.,.25,along));}',
+    // a strand of string lights swagged across the top: wire sag between hooks every 1/m of the width, a bulb every 1/(m*k)
+    'float sag(float x,float y0,float m,float dep){float f=fract(x*m)*2.-1.;return y0-dep*(1.-f*f);}',
+    'vec3 strand(vec2 p,float asp,float y0,float m,float dep,float k,float seed,float tw){vec3 c=vec3(0.);float x=p.x/asp;',
+    '  float wire=smoothstep(.0028,.0008,abs(p.y-sag(x,y0,m,dep)));c+=vec3(.02,.03,.02)*wire;',
+    '  for(int j=-1;j<=1;j++){float i=floor(x*m*k)+float(j);float bx=(i+.5)/(m*k);vec2 b=vec2(bx*asp,sag(bx,y0,m,dep)-.012);float r=h(vec2(i,seed));',
+    '    vec3 bc=r<.6?vec3(1.,.72,.36):r<.8?vec3(1.,.45,.12):r<.92?vec3(1.,.93,.8):vec3(.55,1.,.6);float on=.65+.35*sin(T*(1.2+r*2.5)*(1.+tw)+r*40.);',
+    '    float d=length(p-b);c+=bc*on*(smoothstep(.007,.003,d)*1.4+exp(-d*d*1400.)*.55+exp(-d*d*90.)*.05);}',
+    '  return c;}',
+    // a pine silhouette: stacked sawtooth tiers, with a few warm lights tucked in
+    'vec3 pine(vec2 p,float cx,float w,float ht,inout float m){float y=p.y;if(y>ht||y<0.)return vec3(0.);float k=y/ht;float tier=fract(k*5.);',
+    '  float hw=w*(1.-k)*(.72+.28*(1.-tier));float inside=smoothstep(.004,-.004,abs(p.x-cx)-hw);m=max(m,inside);',
+    '  vec2 g=floor(p*42.);float r=h(g+cx*7.);float d=length(fract(p*42.)-.5);float lit=step(.9,r)*inside*smoothstep(.32,.1,d)*(.6+.4*sin(T*2.+r*30.));return vec3(1.,.72,.36)*lit*1.6+vec3(.03,.09,.05)*inside*tier;}',
     'void main(){vec2 uv=gl_FragCoord.xy/R;float asp=R.x/R.y;vec2 p=vec2(uv.x*asp,uv.y);float t=T*SW;',
-    // base: deep night gradient with a warm horizon
-    '  vec3 col=mix(vec3(.012,.01,.035),vec3(.05,.03,.11),pow(uv.y,1.4));',
-    '  col+=vec3(.10,.05,.18)*exp(-pow((uv.y-.36)*3.2,2.))*.55;',
-    // LED wall: a fine grid of dots that breathes in the two team colors
-    '  vec2 g=p*vec2(46.,46.);vec2 gf=fract(g)-.5;float dot=smoothstep(.32,.12,length(gf));',
-    '  float wave=.5+.5*sin(g.x*.11+t*.9+sin(g.y*.07+t*.4)*2.);float wall=dot*(.05+.07*wave)*smoothstep(.12,.55,uv.y)*(1.-DIM*.8);',
-    '  col+=mix(CA,CB,smoothstep(.2,.8,uv.x+.15*sin(t*.3)))*wall;',
-    // haze
-    '  float hz=fbm(p*2.2+vec2(t*.05,-t*.03));',
-    // spotlights: six moving heads on the truss, swinging slowly; PARTY swings them fast
-    '  float sp=1.+PARTY*2.4;vec3 L=vec3(0.);',
-    '  L+=CA*beam(p,asp*.12,.42*sin(t*.31*sp)+.18,.30);',
-    '  L+=CK*beam(p,asp*.30,.36*sin(t*.23*sp+1.7)-.05,.24);',
-    '  L+=CB*beam(p,asp*.46,.30*sin(t*.37*sp+3.1),.20);',
-    '  L+=CA*beam(p,asp*.54,.30*sin(t*.29*sp+4.2),.20);',
-    '  L+=CK*beam(p,asp*.70,.36*sin(t*.21*sp+.9)+.05,.24);',
-    '  L+=CB*beam(p,asp*.88,.42*sin(t*.33*sp+2.6)-.18,.30);',
-    '  col+=L*(.32+.9*hz)*(1.-DIM*.85);',
-    // the floor: a bright edge and a soft reflection of the light above
-    '  float fl=smoothstep(.2,0.,uv.y);col+=mix(CA,CB,uv.x)*fl*.22*(1.-DIM*.7);col+=vec3(1.,.85,.55)*exp(-pow((uv.y-.115)*40.,2.))*.05;',
+    // base: deep forest green, a warm glow of the room at the horizon
+    '  vec3 col=mix(vec3(.006,.03,.018),vec3(.02,.085,.05),pow(uv.y,1.2));',
+    '  col+=vec3(.20,.10,.03)*exp(-pow((uv.y-.30)*3.,2.))*.5;',
+    // bokeh: big soft out-of-focus lights far behind
+    '  for(int i=0;i<3;i++){vec2 g=p*vec2(5.+float(i)*3.)+vec2(float(i)*7.3,t*.02*float(i+1));vec2 c=floor(g);vec2 f=fract(g)-.5;float r=h(c+float(i));',
+    '    vec2 o=vec2(h(c+3.1),h(c+5.7))-.5;float d=length(f-o*.6);float b=smoothstep(.22,.16,d)*step(.62,r)*(.5+.5*sin(t*.6+r*20.));',
+    '    col+=mix(vec3(1.,.62,.25),CK,.35)*b*.05*(1.-DIM*.8)*smoothstep(.15,.6,uv.y);}',
+    // haze and the spotlights from the truss, softer than a show floor
+    '  float hz=fbm(p*2.2+vec2(t*.05,-t*.03));float sp=1.+PARTY*2.4;vec3 L=vec3(0.);',
+    '  L+=CA*beam(p,asp*.14,.38*sin(t*.27*sp)+.16,.28);L+=CK*beam(p,asp*.38,.30*sin(t*.21*sp+1.7),.22);',
+    '  L+=CK*beam(p,asp*.62,.30*sin(t*.25*sp+4.2),.22);L+=CB*beam(p,asp*.86,.38*sin(t*.29*sp+2.6)-.16,.28);',
+    '  col+=L*(.14+.5*hz)*(1.-DIM*.85);',
+    // string lights: three swagged strands across the top
+    '  vec3 S=strand(p,asp,.995,3.,.06,7.,1.,PARTY)+strand(p,asp,.955,4.,.045,6.,2.,PARTY)*.85+strand(p,asp,.915,2.5,.05,9.,3.,PARTY)*.7;col+=S*(1.-DIM*.6);',
+    // pines at both edges, dark against the glow
+    '  float m=0.;vec3 tl=pine(p,asp*.035,.09,.62,m)+pine(p,asp*.11,.07,.44,m)+pine(p,asp*.965,.09,.62,m)+pine(p,asp*.89,.07,.44,m);',
+    '  col=mix(col,vec3(.004,.022,.012),m*.92)+tl*(1.-DIM*.5);',
+    // snow on the ground
+    '  float drift=.07+.018*sin(p.x*7.)+.01*sin(p.x*19.+1.);float sn=smoothstep(drift+.006,drift-.006,uv.y);col=mix(col,vec3(.9,.94,.97)*(.78+.14*n(p*40.))-vec3(.25,.2,.1)*(drift-uv.y)*3.,sn*.92);col+=vec3(1.,.9,.75)*exp(-pow((uv.y-drift)*260.,2.))*.25;',
+    // falling snow: three layers, near flakes bigger and faster
+    '  for(int i=0;i<3;i++){float fi=float(i);float sc=7.+fi*7.;vec2 q=p*sc+vec2(sin(T*.25+fi)*.6+T*.05*fi,T*(.35+fi*.22));vec2 c=floor(q);vec2 f=fract(q)-.5;',
+    '    float r=h(c+fi*13.);vec2 o=vec2(h(c+1.3),h(c+7.1))-.5;o.x+=sin(T*1.3+r*20.)*.15;float d=length(f-o*.7);float sz=.06-.012*fi;',
+    '    col+=vec3(.95,.97,1.)*smoothstep(sz,sz*.3,d)*step(.45,r)*(.55-fi*.12);}',
     // alert: rotating red beacons sweep the room
     '  if(AL>0.){float a1=atan(uv.y-.98,uv.x-.08)-T*3.2;float a2=atan(uv.y-.98,uv.x-.92)+T*3.2;',
     '    float b1=pow(max(0.,cos(a1)),18.),b2=pow(max(0.,cos(a2)),18.);col=mix(col,col*.35,AL*.6);col+=vec3(1.,.08,.06)*(b1+b2)*.55*AL*(.6+.6*hz);',
@@ -44,14 +59,14 @@
     // a camera flash / strobe that the screen can fire
     '  col+=FC*FL*(.55+.45*smoothstep(1.,.0,length(uv-vec2(.5,.55))));',
     // vignette and grain
-    '  float v=smoothstep(1.25,.35,length((uv-vec2(.5,.48))*vec2(1.05,1.25)));col*=mix(.35,1.,v);',
+    '  float v=smoothstep(1.25,.35,length((uv-vec2(.5,.48))*vec2(1.05,1.25)));col*=mix(.4,1.,v);',
     '  col+=(h(gl_FragCoord.xy+fract(T)*100.)-.5)*.018;',
     '  gl_FragColor=vec4(col,1.);}'
   ].join('\n');
 
   var cvs, gl, prog, U = {}, t0 = performance.now(), raf = 0, scale = .5;
   // current and target values; everything eases so scene changes never pop
-  var cur = {ca: [.18, .9, .84], cb: [1, .31, .55], ck: [1, .8, .35], sw: 1, dim: 0, al: 0, party: 0};
+  var cur = {ca: [1, .48, .1], cb: [.75, .89, 1], ck: [1, .8, .45], sw: 1, dim: 0, al: 0, party: 0};
   var tgt = JSON.parse(JSON.stringify(cur));
   var flash = 0, flashC = [1, 1, 1];
 
@@ -148,7 +163,7 @@
     else if (p.kind === 'env') { px.fillStyle = '#f6f1e6'; px.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); px.strokeStyle = '#0b0b10'; px.lineWidth = Math.max(1, p.w * .06); px.beginPath(); px.moveTo(-p.w / 2, -p.h / 2); px.lineTo(0, p.h * .1); px.lineTo(p.w / 2, -p.h / 2); px.stroke(); }
     px.restore();
   }
-  var PAL = ['#ffc93c', '#2ee6d6', '#ff4f8b', '#f6f1e6', '#8b6cff', '#ffe9a6'];
+  var PAL = ['#ffc93c', '#f96302', '#a9dcff', '#f6f1e6', '#4fae7a', '#ffe9a6'];
   var rnd = function (a, b) { return a + Math.random() * (b - a); };
   window.FX = {
     // confetti from the top edge, or a cannon blast from a point

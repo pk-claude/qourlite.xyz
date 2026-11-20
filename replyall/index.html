@@ -123,8 +123,17 @@ table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
 <script src="sound.js"></script>
 <script>window.GAGS_NO_LISTEN = true;</script>
 <script src="gags.js"></script>
+<link rel="stylesheet" href="vendor/fonts.css">
 </head>
 <body>
+<div id="phoneGate" style="display:none;position:fixed;inset:0;z-index:99999;background:#04140c;color:#f3e9d2;font:500 17px/1.4 system-ui,sans-serif;padding:32px 22px;flex-direction:column;justify-content:center;gap:16px;text-align:center">
+  <div style="font:400 40px/1 'Kaushan Script',cursive;color:#f3e9d2">Reply <span style="color:#f96302">All</span></div>
+  <p style="margin:0">This is the host's control panel. It is built for a laptop.</p>
+  <p style="margin:0;color:#a8bfb0">Playing along? Open the player page and type the code from the big screen.</p>
+  <a href="buzz/" style="display:block;padding:16px;border-radius:14px;background:#f96302;color:#fff;font-weight:800;font-size:19px;text-decoration:none">Join the game</a>
+  <button onclick="document.getElementById('phoneGate').style.display='none';document.documentElement.classList.remove('gated')" style="padding:14px;border-radius:14px;border:1px solid rgba(243,233,210,.4);background:transparent;color:#f3e9d2;font:inherit">I am the host, stay here</button>
+</div>
+<style>html.gated body>*:not(#phoneGate){display:none!important}</style><script>if (screen.width <= 700 && matchMedia('(pointer:coarse)').matches) { document.documentElement.classList.add('gated'); document.getElementById('phoneGate').style.display = 'flex'; }</script>
 <div id="app"></div>
 <script>
 const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_state_v3';
