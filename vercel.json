@@ -12,6 +12,16 @@
   },
   "redirects": [
     {
+      "source": "/replyall",
+      "destination": "/replyall/",
+      "permanent": false
+    },
+    {
+      "source": "/replyall/buzz",
+      "destination": "/replyall/buzz/",
+      "permanent": false
+    },
+    {
       "source": "/cereal",
       "destination": "/reports/cereal/",
       "permanent": true
