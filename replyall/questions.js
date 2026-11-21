@@ -192,6 +192,20 @@ window.GAME = {
     ] }
   ],
 
+  // PITCH-OFF TOPICS. Two audience volunteers get 30 seconds each to pitch one of these. The room votes on phones.
+  pitches: [
+    "Sell us this used stapler.",
+    "Pitch a new mandatory meeting. Make us want to attend.",
+    "Convince us the office printer deserves a promotion.",
+    "Pitch the company holiday party theme for next year.",
+    "Sell us one extra 'quick sync' on Friday at 4:45.",
+    "Pitch a new corporate buzzword. Use it in a sentence.",
+    "Convince the room that the sad veggie tray is the best dish here.",
+    "Give the toast at your own retirement party. Today.",
+    "Sell us the hot cocoa. Like it is a startup.",
+    "Pitch why you deserve the last cookie."
+  ],
+
   // CHIP, THE AI INTERN. Chip picks a line from the matching list and never repeats one until the list runs out.
   // Add, remove or rewrite lines freely. Keep them short and kind.
   chip: {

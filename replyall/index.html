@@ -184,6 +184,7 @@ table.l td.act,table.l th.act{background:#fff3e3}
 .dock input{border-radius:10px;padding:9px 12px;background:#f6f1e6}
 .dock .muted{color:#9fb6a7}
 #gagMenu{border:0;border-radius:14px;background:var(--cream)}
+.cups{margin-bottom:12px}.row.cu{flex-wrap:nowrap}.row.cu b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 <script src="questions.js"></script>
 <script src="sound.js"></script>
@@ -347,16 +348,24 @@ async function pollPhones(countBuzzes) {
     const msgs = (await r.json()).msgs.map(m => { try { return JSON.parse(m); } catch (e) { return {}; } }).filter(m => m && m.id && /^[a-z0-9-]{1,32}$/i.test(m.p || ''));
     const fresh = msgs.filter(m => !seen.has(m.id)); msgs.forEach(m => seen.add(m.id));
     const now = Date.now();
-    phones = msgs.filter(m => m.k === 'join' && now - m.t < 8 * 3600e3).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
+    const lastJoin = {}; msgs.forEach(m => { if (m.k === 'join' && now - m.t < 8 * 3600e3 && (!lastJoin[m.p] || m.t >= lastJoin[m.p].t)) lastJoin[m.p] = m; });   // a promoted phone joins again with its new team
+    phones = Object.values(lastJoin).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
     const reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
     if (reacts.length && !first && S.rx) push({react: reacts.slice(0, 6)});
     let nw = false; phones.forEach(p => { nw = plAdd(p.p, p.name, p.team) || nw; }); if (nw && !first) push();
-    takeAnswers(msgs); takeGuesses(msgs);
+    takeAnswers(msgs); takeGuesses(msgs); takeVotes(msgs);
     // Only phones the scorekeeper approved can buzz.
     if (countBuzzes) { const b = fresh.filter(m => m.k === 'buzz' && S.allowed[m.p] && (m.team === 0 || m.team === 1)).sort((a, b) => (a.rt || a.t) - (b.rt || b.t))[0]; if (b) buzzIn(b.team, b.p); }
     first = false; phoneErr = '';
   } catch (e) { phoneErr = ' Phones are not reachable right now. Keyboard buzzers still work.'; }
   polling = false; setPhones();
+}
+// Pitch-off votes: each phone's latest vote for this pitch counts once.
+function takeVotes(msgs) {
+  const v = S.vote; if (!v || !v.open) return; const last = {};
+  msgs.forEach(m => { if (m.k === 'vote' && m.vid === v.id && (m.v === 0 || m.v === 1) && (!last[m.p] || m.t >= last[m.p].t)) last[m.p] = m; });
+  const c = [0, 0]; Object.values(last).forEach(m => c[m.v]++);
+  if (c[0] !== v.c[0] || c[1] !== v.c[1]) { v.c = c; push(); const el = document.getElementById('vcount'); if (el) el.textContent = c[0] + ' : ' + c[1]; }
 }
 // Survey answers arrive as relay messages. The demo show feeds its made-up answers through this same function.
 function takeAnswers(msgs) {
@@ -368,7 +377,8 @@ let lastState = '';
 function postState() {
   if (!ONLINE || REH) return;
   const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null,
-    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open} : null, pm: pmap()};
+    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open} : null, pm: pmap(),
+    promo: S.promo || null, vote: S.vote && S.vote.open ? {id: S.vote.id, n: S.vote.n, q: S.vote.q} : null};
   let j = JSON.stringify(st); while (j.length > 5600 && Object.keys(st.pm).length) { const k = Object.keys(st.pm); k.slice(Math.floor(k.length * .8)).forEach(p => delete st.pm[p]); j = JSON.stringify(st); }   // the relay takes 6000 bytes: the lowest ranks lose their line first
   if (j === lastState) return; lastState = j;
   fetch('/api/relay?room=' + room() + '&k=state', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(Object.assign({id: 's' + Date.now()}, st))}).catch(() => { lastState = ''; });
@@ -452,12 +462,34 @@ function nextStep() {
   if (p === 'lightning') return ['Winner', () => A.winner()];
   return null;
 }
+// ---------- audience call-ups panel ----------
+let cuOpen = false, pitchQ = '';
+const PITCH_BONUS = 50, PITCHES = G.pitches && G.pitches.length ? G.pitches : ['Sell us this used stapler.'];
+function callups() {
+  const cand = ranked().filter(p => S.pl[p].t === 2).slice(0, 3), behind = S.teams[0].score === S.teams[1].score ? null : S.teams[0].score < S.teams[1].score ? 0 : 1, v = S.vote;
+  if (!pitchQ) pitchQ = PITCHES[Math.floor(Math.random() * PITCHES.length)];
+  const promo = !ONLINE ? '<p class="muted">Needs phones (the online game).</p>' : !cand.length ? '<p class="muted">No audience phones have scored yet. Audience members score by calling answers on their phones each board.</p>' :
+    cand.map((p, i) => `<div class="row cu"><b>${i + 1}. ${esc(S.pl[p].n || guest(p))}</b><span class="muted">${total(p)} pts</span>${[0, 1].map(t => `<button class="${t === behind ? 'go' : ''}" onclick="A.promote('${p}',${t})">To ${esc(S.teams[t].name)}</button>`).join('')}</div>`).join('') +
+    (S.promo ? `<p class="muted">Last promoted: <b>${esc(S.promo.n)}</b> to ${esc(S.teams[S.promo.t].name)}.</p>` : '') + (behind !== null ? `<p class="muted">Orange = the team that is behind.</p>` : '');
+  let pitch;
+  if (!v) pitch = `<div class="row"><input id="pa" class="wide" placeholder="Volunteer 1 name" maxlength="16"><input id="pb" class="wide" placeholder="Volunteer 2 name" maxlength="16"></div>
+    <div class="row"><input id="pq" class="wide" value="${esc(pitchQ)}" maxlength="90" aria-label="What they pitch"><button onclick="pitchQ='';render()">New topic</button></div>
+    <div class="row"><button class="go" onclick="A.pitch(document.getElementById('pa').value,document.getElementById('pb').value,document.getElementById('pq').value)">Announce the pitch-off</button></div>`;
+  else pitch = `<p><b>${esc(v.n[0])}</b> vs <b>${esc(v.n[1])}</b>: ${esc(v.q)}</p><p>Votes: <b id="vcount">${v.c[0]} : ${v.c[1]}</b></p>
+    <div class="row">${v.open ? '<button class="bad" onclick="A.voteClose()">Close the vote</button>' : v.w === null ? '<button class="go" onclick="A.voteOpen()">Open the vote (after both pitches)</button>' : ''}
+    ${v.w === -1 ? `<span>Tie. Pick the winner:</span>${[0, 1].map(i => `<button onclick="A.pitchWin(${i})">${esc(v.n[i])}</button>`).join('')}` : ''}
+    ${v.w >= 0 ? `<span><b>${esc(v.n[v.w])}</b> joins</span>${[0, 1].map(t => `<button class="${t === behind ? 'go' : ''}" onclick="A.pitchJoin(${t})">${esc(S.teams[t].name)} +${PITCH_BONUS}</button>`).join('')}` : ''}
+    <button onclick="A.pitchClear()">Cancel pitch-off</button></div>`;
+  return `<div class="three even cups"><div class="card"><h2><b>1</b>Fast-track promotion</h2><p class="muted">Best audience players by phone points. Promote one after Round 2: their phone becomes a buzzer for that team.</p>${promo}</div>
+    <div class="card" style="grid-column:span 2"><h2><b>2</b>Pitch-off</h2><p class="muted">Two volunteers, 30 seconds each, the room votes on their phones. The winner joins a team with ${PITCH_BONUS} bonus points.</p>${pitch}</div></div>`;
+}
 // One plain sentence that tells the host what to do next.
 function coach() {
   const p = S.phase, nx = nextStep();
   if (p === 'title') return !alive() ? 'Open the big screen (orange button, bottom left) and drag that window onto the projector.' : S.back ? 'Paused on the title screen. Press Back to the game when ready.' : 'Big screen is up. Let people join on their phones and approve them on the right, then press Start round 1.';
   if (p === 'round') {
     if (!S.showQ) return 'Press Show question, then read it out (or press Read aloud).';
+    if (S.awarded && !S.useCustom && S.ri === 1 && !S.promo && ONLINE) return 'Round 2 done: time for a fast-track promotion. Open Audience call-ups on the left and promote the top audience player.';
     if (S.awarded) return nx ? 'Board finished. Press Next: ' + nx[0] + ' when the room is ready.' : 'Board finished.';
     if (S.strikes >= 3) return 'Hostile takeover: the other team gets one guess. If it is on the board, click it. If not, press Strike.';
     return 'Click each answer as the team says it. Wrong answer: Strike. Board done: give the budget to the team that earned it.';
@@ -482,6 +514,23 @@ const A = {
   back() { if (!gate()) return; snap(); clearLater(); S.phase = S.back; S.back = null; up(); },
   join() { S.join = !S.join; up(); },
   rx() { S.rx = !S.rx; up(); },
+  // Audience call-ups. Fast-track promotion: an audience phone joins a team, approved to buzz, keeping its points.
+  promote(p, t) { const pl = S.pl[p]; if (!pl || (t !== 0 && t !== 1)) return; snap(); const nm = pl.n || guest(p), pts = total(p);
+    pl.t = t; S.allowed[p] = true; S.promo = {p, t, id: Date.now().toString(36), n: nm}; SFX.win();
+    up({cards: [['Fast-track promotion / effective immediately', 'PROMOTED', nm + ' joins ' + S.teams[t].name + '. ' + pts + ' points of pure instinct.', 3800]], confetti: 220});
+    chip('Congratulations, ' + nm + '. Your new title is Team Member. Your old title was Snack Consumer.', true); },
+  // Pitch-off: two volunteers pitch, the room votes on their phones, the winner joins a team with bonus points.
+  pitch(a, b, q) { a = String(a || '').trim().slice(0, 16); b = String(b || '').trim().slice(0, 16); if (!a || !b || !q) return; snap();
+    S.vote = {id: Date.now().toString(36), n: [a, b], q, c: [0, 0], open: false, w: null}; SFX.whoosh();
+    up({cards: [['Pitch-off / ' + a + ' vs ' + b, 'THE PITCH', q, 4200]]}); chip('Thirty seconds each. No slides. I know. I am also scared.', true); },
+  voteOpen() { if (!S.vote) return; S.vote.open = true; S.vote.w = null; up(); },
+  voteClose() { const v = S.vote; if (!v) return; snap(); v.open = false; v.w = v.c[0] === v.c[1] ? -1 : v.c[0] > v.c[1] ? 0 : 1;
+    if (v.w >= 0) { SFX.win(); up({cards: [['Pitch-off / the room has spoken', 'HIRED', v.n[v.w] + ' wins ' + v.c[v.w] + ' to ' + v.c[1 - v.w] + '. Welcome to the team.', 3800]], confetti: 200}); }
+    else up({cards: [['Pitch-off / the room has spoken', 'IT IS A TIE', 'Both offers are pending approval. The host decides.', 3400]]}); },
+  pitchWin(w) { if (!S.vote) return; S.vote.w = w; up(); },
+  pitchJoin(t) { const v = S.vote; if (!v || v.w === null || v.w < 0) return; snap(); const nm = v.n[v.w]; S.teams[t].score += PITCH_BONUS; S.vote = null; SFX.award();
+    up({cards: [['Signing bonus approved', '+' + PITCH_BONUS + ' ' + S.teams[t].name.toUpperCase(), nm + ' joins ' + S.teams[t].name + ' and brings ' + PITCH_BONUS + ' points.', 3400]], confetti: 120}); },
+  pitchClear() { S.vote = null; up(); },
   hello() { chipLine('hello', true); },
   round(i) { i = Number(i); if (!G.rounds[i] || !gate() || !leaveOk()) return; snap(); const cards = standings(G.rounds[i].mult), intro = S.phase === 'title' && i === 0;
     if (intro) cards.push(['How it works', 'TOP ANSWERS SCORE', 'Guess what the survey said. Three strikes and the other team can steal.', 4600]);
@@ -704,11 +753,12 @@ function render() {
     <button id="thinkBtn" class="util ${SFX.thinking() ? 'on' : ''}" onclick="SFX.think(!SFX.thinking());thinkLight()">${SFX.thinking() ? 'Thinking music: on' : 'Thinking music'}</button>
     <button class="util ${S.join ? 'on' : ''}" onclick="A.join()" ${ONLINE ? '' : 'disabled'}>${S.join ? 'Join code: showing' : 'Show join code'}</button>
     <button id="gagBtn" class="util" onclick="gagMenu(event)" aria-haspopup="true" title="Fire a full-screen office gag on the big screen">Interruption</button>
+    <button class="util ${cuOpen ? 'on' : ''}" onclick="cuOpen=!cuOpen;render()">Audience call-ups</button>
     <button class="util" onclick="A.rx()">${S.rx ? 'Reactions: on' : 'Reactions: off'}</button>
     <button class="util" onclick="A.undo()" ${hist.length ? '' : 'disabled'}>Undo <kbd>Ctrl</kbd>+<kbd>Z</kbd></button>
     <button class="util" onclick="A.newGame()">New game</button></nav>
   <main>${REH ? `<div class="reh"><b>Rehearsal running</b><span id="rehLbl">${esc(REH.label)}</span><button onclick="R.stop()">Stop</button></div>` : ''}<div class="score">${[0, 1].map(i => { const t = S.teams[i]; return `<div class="tm ${i ? 'r' : ''} ${ph === 'round' && S.control === i ? 'floor' : ''}"><input class="nm" value="${esc(t.name)}" maxlength="20" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name" title="Click to rename">
-      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage"><div class="coach"><b>Do this now</b><span>${esc(coach())}</span></div>${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
+      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage"><div class="coach"><b>Do this now</b><span>${esc(coach())}</span></div>${cuOpen ? callups() : ''}${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
     ${resumed ? '<span class="status warn" style="margin:0 0 10px">Picked up the saved game from last time. <button onclick="resumed=false;render()">Keep going</button> <button onclick="resumed=false;A.newGame()">Start a new game</button></span>' : ''}`;
 
   if (ph === 'title') {
