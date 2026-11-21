@@ -118,6 +118,72 @@ table.l input.dup{border:2px solid #e5263a;background:#ffe2e5}
 .reh{display:flex;gap:10px;align-items:center;padding:5px 14px;background:var(--yellow);color:var(--ink);font-size:13px}
 .reh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .reh button{padding:2px 14px;font-weight:600;border-color:var(--ink)}
+
+/* ---------- Winter Fest control booth ---------- */
+:root{--ink:#04140c;--deep:#0b2418;--violet:#f96302;--pink:#f96302;--yellow:#ffc93c;--line:#e4dccb;--mute:#6b7a70;--bg:#0a2216;--cream:#f6f1e6;--orange:#f96302;--green:#1f7a4a}
+body{font-family:"Bricolage","Segoe UI",system-ui,sans-serif;background:#0a2216;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.5px),radial-gradient(ellipse 70% 45% at 50% -10%,rgba(249,99,2,.16),transparent 70%);background-size:22px 22px,auto;color:var(--deep)}
+button{border-color:#d6ccb6;border-radius:10px;transition:background .12s,transform .08s,box-shadow .12s}
+button:hover{background:#fbf3e2}
+button:active:not(:disabled){transform:translateY(1px)}
+button.go{background:linear-gradient(180deg,#ff8a3d,#f96302);border-color:#d85400;box-shadow:0 2px 0 #b24400;color:#fff}
+button.go:hover{background:linear-gradient(180deg,#ff9a55,#ff6f12)}
+button.on{background:var(--deep);border-color:var(--deep)}
+button.fun{background:#0b2418;border-color:#0b2418;color:#ffc93c}
+kbd{background:#fbf6ea;border-color:#d6ccb6}
+nav{background:linear-gradient(180deg,#031009,#06180f);border-right:1px solid rgba(255,201,60,.18);padding:16px 12px}
+nav h1{font:400 30px/1 "Kaushan Script",cursive;color:var(--cream);letter-spacing:0;margin:0 4px 6px;text-shadow:0 0 16px rgba(255,190,110,.35)}
+nav h1:after{content:"Control booth";display:block;margin-top:8px;font:800 10px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);text-shadow:none}
+nav .cap{color:#7f9a88}
+nav button{color:#cfe0d4;border-radius:10px}
+nav button:hover{background:rgba(255,255,255,.06)}
+nav button i{border-color:#4d6b58}
+nav button.done{color:#86a291}
+nav button.done i{background:#1f4a33;border-color:#1f4a33;color:#9fd3b4}
+nav button.cur{background:linear-gradient(90deg,#f96302,#ff8a3d);color:#fff;box-shadow:0 4px 14px rgba(249,99,2,.35)}
+nav button.cur i{border-color:#fff}
+nav button.sub{color:#86a291}
+nav select{background:#0e2c1e;color:#cfe0d4;border-color:#24493a}
+nav button.util{border-color:#24493a;color:#cfe0d4}
+nav button.util.need{background:linear-gradient(180deg,#ff8a3d,#f96302);border-color:#f96302;animation:needp 1.6s infinite}
+nav button.util.live{background:#1f7a4a;border-color:#1f7a4a}
+nav button.util.on{background:var(--yellow);color:#2b1800}
+@keyframes needp{50%{box-shadow:0 0 0 5px rgba(249,99,2,.25)}}
+.score{background:rgba(3,16,9,.72);border-bottom:1px solid rgba(255,201,60,.18);padding:12px 16px}
+.tm{background:var(--cream);border:0;border-radius:14px;padding:8px 12px;box-shadow:inset 4px 0 0 #ff7a1a}
+.tm.r{box-shadow:inset -4px 0 0 #a9dcff}
+.tm.floor{background:#fff6e8;box-shadow:inset 4px 0 0 #ff7a1a,0 0 0 3px #ffc93c,0 0 22px rgba(255,201,60,.35)}
+.tm.r.floor{box-shadow:inset -4px 0 0 #a9dcff,0 0 0 3px #ffc93c,0 0 22px rgba(255,201,60,.35)}
+.tm input.nm{font:900 20px/1 "Big Shoulders","Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.02em;color:var(--deep)}
+.tm input.sc{font:900 30px/1 "Big Shoulders","Arial Narrow",sans-serif;border:0;background:#fff;border-radius:10px;box-shadow:inset 0 0 0 1px #e4dccb;color:var(--deep)}
+.mid .where{color:#cfe0d4;font:800 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em}
+.mid button.next{font:900 22px/1 "Big Shoulders","Arial Narrow",sans-serif;letter-spacing:.04em;text-transform:uppercase;padding:12px 28px;border-radius:14px;box-shadow:0 4px 0 #b24400,0 10px 26px rgba(249,99,2,.35)}
+.coach{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:10px 14px;border-radius:14px;background:linear-gradient(90deg,rgba(255,201,60,.16),rgba(255,201,60,.04));border:1px solid rgba(255,201,60,.35);color:#fff6dd;font-size:15px;font-weight:500}
+.coach b{flex:none;padding:5px 9px;border-radius:8px;background:#ffc93c;color:#2b1800;font:800 10.5px/1 "JetBrains Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+.stage{padding:14px 16px}
+.card{background:var(--cream);border:0;border-radius:16px;padding:14px 16px;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 12px 30px rgba(0,0,0,.35)}
+.card>h2{color:#5d6b62;font-weight:800}
+.card>h2 b{background:var(--orange);font-weight:800}
+.qtext{font:800 21px/1.2 "Bricolage",sans-serif}
+.ans button{background:#fff;border-color:#e4dccb;border-radius:12px;padding:8px 11px;box-shadow:0 2px 0 #e4dccb}
+.ans button:hover{background:#fff8ec;border-color:#ffb27a}
+.ans button.done{background:#e8f3ec;color:#4f7a61;box-shadow:none;border-color:#cfe5d7}
+.ans button b,.ans button>b{font-family:"Big Shoulders",sans-serif}
+.pot{font:900 54px/1 "Big Shoulders",sans-serif;color:var(--deep)}
+.status{background:#efe7d6}
+.status.hot{background:var(--orange)}
+.steps span{background:#efe7d6}
+.steps span.cur{background:var(--deep)}
+.code{font-family:"Big Shoulders",sans-serif;font-weight:900;font-size:46px;color:var(--deep)}
+table.l td.act,table.l th.act{background:#fff3e3}
+.plist label{background:#fff3cf;border-color:#e4d29a}
+.plist label.ok{background:#e1f3e8;border-color:#1f7a4a}
+#roastBox:not(:empty){border-color:var(--orange);background:#fff3e8}
+.vol input{accent-color:var(--orange)}
+.dock{background:#031009;border-top:1px solid rgba(255,201,60,.18);padding:10px 16px}
+.dock>b:first-child,.dock b{font-family:"Kaushan Script",cursive;font-weight:400;font-size:20px;color:var(--cream)}
+.dock input{border-radius:10px;padding:9px 12px;background:#f6f1e6}
+.dock .muted{color:#9fb6a7}
+#gagMenu{border:0;border-radius:14px;background:var(--cream)}
 </style>
 <script src="questions.js"></script>
 <script src="sound.js"></script>
@@ -220,7 +286,10 @@ const SFX = window.SFX || new Proxy({}, {get: () => () => {}});
 
 // ---------- voices ----------
 let current = null;
-function tts(text, chipVoice) { if (!window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text), v = speechSynthesis.getVoices().find(x => x.name === pref('voice', '')); if (v) u.voice = v; u.rate = chipVoice ? 1.08 : .95; u.pitch = chipVoice ? 1.45 : 1; speechSynthesis.speak(u); }
+// Browser voice: picks the most natural-sounding English voice this computer has, unless the host chose one.
+function bestVoice() { const vs = window.speechSynthesis ? speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)) : [], want = pref('voice', '');
+  return vs.find(v => v.name === want) || [/natural|neural|online/i, /premium|enhanced|siri/i, /^(ava|samantha|aria|jenny|google us english)/i, /google/i].reduce((f, re) => f || vs.find(v => re.test(v.name)), null) || vs[0]; }
+function tts(text, chipVoice) { if (!window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text), v = bestVoice(); if (v) u.voice = v; u.rate = chipVoice ? 1.05 : .98; u.pitch = chipVoice ? 1.12 : 1; speechSynthesis.speak(u); }
 function speak(id, text) { stopVoice(); const a = new Audio('audio/' + id + '.mp3'); current = a; const fb = () => { if (current === a) tts(text); }; a.onerror = fb; a.play().catch(fb); }
 function stopVoice() { if (current) { current.pause(); current = null; } if (window.speechSynthesis) speechSynthesis.cancel(); }
 if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { if (S.phase === 'title') render(); };
@@ -229,7 +298,7 @@ if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { if (S.phas
 // Chip shows every line as text. He speaks out loud only for "big" lines unless the host picks Everything.
 function chip(text, big) {
   if (!text) return; chipLast = text; push({chip: text}); const el = document.getElementById('chipLast'); if (el) el.textContent = text;
-  const mode = pref('chip', 'highlights'); if (mode === 'all' || (mode === 'highlights' && big)) { if (window.speechSynthesis) speechSynthesis.cancel(); tts(text, true); }
+  const mode = pref('chip', 'highlights'); if (mode === 'all' || (mode === 'highlights' && big)) { stopVoice(); tts(text, true); }
 }
 // Lines are dealt like a shuffled deck: none repeats until its whole list has been used.
 const bags = {};
@@ -382,6 +451,21 @@ function nextStep() {
   }
   if (p === 'lightning') return ['Winner', () => A.winner()];
   return null;
+}
+// One plain sentence that tells the host what to do next.
+function coach() {
+  const p = S.phase, nx = nextStep();
+  if (p === 'title') return !alive() ? 'Open the big screen (orange button, bottom left) and drag that window onto the projector.' : S.back ? 'Paused on the title screen. Press Back to the game when ready.' : 'Big screen is up. Let people join on their phones and approve them on the right, then press Start round 1.';
+  if (p === 'round') {
+    if (!S.showQ) return 'Press Show question, then read it out (or press Read aloud).';
+    if (S.awarded) return nx ? 'Board finished. Press Next: ' + nx[0] + ' when the room is ready.' : 'Board finished.';
+    if (S.strikes >= 3) return 'Hostile takeover: the other team gets one guess. If it is on the board, click it. If not, press Strike.';
+    return 'Click each answer as the team says it. Wrong answer: Strike. Board done: give the budget to the team that earned it.';
+  }
+  if (p === 'survey') return 'Work left to right: pick the question, open the survey, then close it to count the answers.';
+  if (p === 'lightning') return 'Pick the player\'s team, start the clock, type what they say, then reveal one at a time with Space.';
+  if (p === 'winner') return 'Enjoy the moment. New game is at the bottom left if you need it.';
+  return '';
 }
 const ltotal = () => S.la.flat().reduce((n, a) => n + (a.sp ? Number(a.p) || 0 : 0), 0);
 const isDup = i => { const a = norm(S.la[0][i].t), b = norm(S.la[1][i].t); return !!a && a === b; };
@@ -624,7 +708,7 @@ function render() {
     <button class="util" onclick="A.undo()" ${hist.length ? '' : 'disabled'}>Undo <kbd>Ctrl</kbd>+<kbd>Z</kbd></button>
     <button class="util" onclick="A.newGame()">New game</button></nav>
   <main>${REH ? `<div class="reh"><b>Rehearsal running</b><span id="rehLbl">${esc(REH.label)}</span><button onclick="R.stop()">Stop</button></div>` : ''}<div class="score">${[0, 1].map(i => { const t = S.teams[i]; return `<div class="tm ${i ? 'r' : ''} ${ph === 'round' && S.control === i ? 'floor' : ''}"><input class="nm" value="${esc(t.name)}" maxlength="20" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name" title="Click to rename">
-      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage">${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
+      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="go next" onclick="A.next()">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage"><div class="coach"><b>Do this now</b><span>${esc(coach())}</span></div>${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
     ${resumed ? '<span class="status warn" style="margin:0 0 10px">Picked up the saved game from last time. <button onclick="resumed=false;render()">Keep going</button> <button onclick="resumed=false;A.newGame()">Start a new game</button></span>' : ''}`;
 
   if (ph === 'title') {
@@ -636,7 +720,7 @@ function render() {
       <div class="card"><h2><b>2</b>Sound and Chip</h2>
         <div class="row"><button onclick="SFX.theme()">Test sound</button><button id="holdBtn" class="${SFX.holding() ? 'on' : ''}" onclick="SFX.hold();this.classList.toggle('on',SFX.holding())" title="Lobby music while people walk in and join. Stops when round 1 starts.">Hold music</button><button onclick="tts('Testing, one two three')">Test voice</button><button class="fun" onclick="A.hello()">Chip says hello</button></div>
         <label class="vol" title="Volume of the music and sound effects"><span aria-hidden="true">&#x1F50A;</span> Volume <input type="range" min="0" max="100" step="5" value="${Math.round(SFX.volume() * 100)}" oninput="setVol(this.value)" aria-label="Volume"><b id="volPct">${Math.round(SFX.volume() * 100)}%</b></label>
-        <p><label>Voice <select onchange="setPref('voice',this.value)" style="max-width:100%"><option value="">Browser default</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></p>
+        <p><label>Voice <select onchange="setPref('voice',this.value)" style="max-width:100%"><option value="">Best available</option>${voices.map(v => `<option ${v.name===vsel?'selected':''}>${esc(v.name)}</option>`).join('')}</select></label></p>
         <p><label>Chip speaks out loud <select onchange="setPref('chip',this.value)"><option value="off" ${cm==='off'?'selected':''}>Never (text only)</option><option value="highlights" ${cm==='highlights'?'selected':''}>Big moments</option><option value="all" ${cm==='all'?'selected':''}>Everything</option></select></label></p>
         <p class="muted">Keys in a round: <kbd>1</kbd>-<kbd>8</kbd> reveal, <kbd>X</kbd> strike. In the final: <kbd>Space</kbd> reveals the next item.</p></div>
       <div class="card"><h2><b>3</b>Phones</h2>${ONLINE ? `<div class="code">${S.sid}</div><p class="muted" style="text-align:center">People scan the QR code on the big screen. Tick the phones that may buzz. <a href="#" onclick="A.newCode();return false">New code</a></p>` : ''}
