@@ -136,10 +136,11 @@ body.nogl #stagebg{display:none}
 .tk .spk{position:absolute;left:0;right:0;bottom:0;width:100%;height:42%;opacity:.5}
 .tk .spk polyline{fill:none;stroke:var(--c);stroke-width:1.4;vector-effect:non-scaling-stroke}
 .tk .spk polygon{fill:color-mix(in srgb,var(--c) 18%,transparent)}
-.tk .flr{font:800 .8cqw var(--mono);letter-spacing:.2em;padding:.5cqh .7cqw;border-radius:.4cqw;background:var(--c);color:var(--ink);opacity:0;transform:scale(.6);transition:all .35s cubic-bezier(.3,1.6,.5,1)}
+.tk .flr{font:800 1.15cqw var(--mono);letter-spacing:.2em;padding:.6cqh .9cqw;text-transform:uppercase;border-radius:.4cqw;background:var(--c);color:var(--ink);opacity:0;transform:scale(.6);transition:all .35s cubic-bezier(.3,1.6,.5,1)}
 .tk.ctl{border-color:var(--c);box-shadow:0 0 0 .2cqw var(--c),0 0 5cqw color-mix(in srgb,var(--c) 45%,transparent),0 2cqh 4cqw rgba(0,0,0,.5)}
 .tk.ctl .flr,.tk.buzz .flr{opacity:1;transform:none}
 .tk.buzz{animation:buzz .5s 2;border-color:#fff}
+.tk{transition:box-shadow .4s,border-color .4s,transform .4s,opacity .4s,filter .4s}.tk.idle{opacity:.5;filter:saturate(.4)}
 @keyframes buzz{30%{transform:scale(1.04);box-shadow:0 0 0 .4cqw #fff,0 0 8cqw var(--c)}}
 .tk.paid{animation:paid .8s}
 @keyframes paid{25%{transform:scale(1.05);box-shadow:0 0 0 .3cqw var(--gold),0 0 8cqw rgba(255,201,60,.8)}}
@@ -462,6 +463,23 @@ body.nogl #stagebg{display:none}
 /* audience fun: hot-take poll (between boards) and bingo toasts (any time) */
 #hot{position:absolute;right:2.4cqw;bottom:16cqh;width:30cqw;z-index:7;padding:1.8cqh 1.4cqw;border-radius:1.2cqw;background:linear-gradient(180deg,rgba(13,44,29,.96),rgba(3,16,9,.96));box-shadow:0 0 0 .18cqw rgba(255,201,60,.4),0 2cqh 4cqw rgba(0,0,0,.5);transform:translateX(130%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);pointer-events:none}
 #hot.on{transform:none}
+/* title lobby: the poll sits in the left column, between the logo and the join pass, so it never covers the LED board */
+body[data-phase=title] #hot{left:25cqw;right:auto;bottom:34cqh;width:36cqw;transform:translate(-50%,6cqh);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.3,1.1),opacity .4s}
+body[data-phase=title] #hot.on{transform:translate(-50%,0);opacity:1}
+body:has(.ttl:not(.lob)) #hot{opacity:0}
+/* after a board: a slim bar in the bottom-left strip, under the board and clear of the streak dock */
+body[data-phase=round] #hot{left:7cqw;right:auto;bottom:2.4cqh;width:44cqw;height:6.6cqh;padding:0 1.4cqw;border-radius:4cqh;display:grid;grid-template-columns:minmax(0,1fr) 20cqw;grid-template-rows:1fr 1fr;column-gap:1.4cqw;align-items:center;transform:translateY(14cqh)}
+body[data-phase=round] #hot.on{transform:none}
+/* Chip's speech bubble uses the same strip: the poll steps aside while Chip talks */
+body[data-phase=round] #hot{transition:transform .5s cubic-bezier(.2,.9,.3,1.1),opacity .3s}
+body:has(#chip.say)[data-phase=round] #hot{opacity:0}
+body[data-phase=round] #hot .hk{grid-area:1/1;font-size:.8cqw;align-self:end}
+body[data-phase=round] #hot .hq{grid-area:2/1;margin:0;font-size:2.8cqh;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:start}
+body[data-phase=round] #hot .hr{grid-column:2;margin:0;gap:.5cqw;font-size:1.8cqh}
+body[data-phase=round] #hot .hr span{width:9cqw}
+body[data-phase=round] #hot .hr u{height:1.4cqh}
+body[data-phase=round] #hot .hr b{width:3cqw}
+body[data-phase=round] #hot .hf{display:none}
 #hot .hk{font:800 .95cqw var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--orange)}
 #hot .hq{margin:.6cqh 0 1.4cqh;font:600 3.6cqh/1.15 var(--chalk);color:var(--cream)}
 #hot .hr{display:flex;align-items:center;gap:.8cqw;margin-top:.9cqh;font:800 2.2cqh var(--head);color:#fff}
@@ -490,6 +508,7 @@ body.nogl #stagebg{display:none}
 #rules .rd i{width:3.4cqw;height:.9cqh;border-radius:1cqh;background:rgba(255,255,255,.18)}
 #rules .rd i.on{background:var(--orange)}
 #vote{position:absolute;left:50%;bottom:15cqh;width:74cqw;transform:translate(-50%,140%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);z-index:8;padding:2.2cqh 2cqw 2.6cqh;border-radius:1.4cqw;background:linear-gradient(180deg,rgba(13,44,29,.97),rgba(3,16,9,.97));box-shadow:0 0 0 .2cqw rgba(255,201,60,.45),0 3cqh 6cqw rgba(0,0,0,.6);text-align:center;pointer-events:none}
+#vote:not(.on){visibility:hidden;transition:transform .5s,visibility 0s .5s}
 #vote.on{transform:translate(-50%,0)}
 #vote .vk{font:800 1.2cqw var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--orange)}
 #vote .vq{margin:.8cqh 0 1.8cqh;font:600 5.4cqh/1.1 var(--chalk);color:var(--cream)}
@@ -611,7 +630,7 @@ function look() {
   if (ctl === 0) o = Object.assign(o, {b: '#ff7a1a', k: '#ffd9a8'}); if (ctl === 1) o = Object.assign(o, {a: '#a9dcff', k: '#e6f4ff'});
   if (p === 'title') o.speed = 1.3;
   if (p === 'survey') o = Object.assign(o, {a: '#4fae7a', b: '#ff7a1a', k: '#f6f1e6'});
-  if (p === 'lightning') { const max = S.lp ? 25 : 20, left = Math.max(0, S.timer); o.dim = Math.min(.85, (1 - left / max) * .85); o.k = '#ffb347'; o.speed = left <= 5 ? 2.2 : 1.2; }
+  if (p === 'lightning') { const max = S.lp ? 50 : 45, left = Math.max(0, S.timer); o.dim = Math.min(.85, (1 - left / max) * .85); o.k = '#ffb347'; o.speed = left <= 5 ? 2.2 : 1.2; }
   if (p === 'winner') { const w = S.teams[0].score === S.teams[1].score ? '#4fae7a' : TEAMC[S.teams[0].score > S.teams[1].score ? 0 : 1]; o = Object.assign(o, {a: '#b8740f', b: w, k: '#ffd76a', party: 1, speed: 1.4}); }
   STAGE.look(o);
 }
@@ -622,6 +641,8 @@ function sceneKey() {
   return p + ':' + (p === 'round' ? (S.useCustom ? 'you' + S.custom.n : S.ri) : p === 'lightning' ? S.li + ':' + S.lreset : p === 'survey' ? S.survey.n + S.survey.st : p === 'title' ? S.sid + (S.phones ? 1 : 0) : '');
 }
 const hist = [[0], [0]];   // score history per team for the sparklines (this screen's memory only)
+// Who is up right now: [team, label] or null. Shared idea with the big screen, so both always agree.
+const actT = () => S.phase === 'round' ? (S.buzz === 0 || S.buzz === 1 ? [S.buzz, 'Buzzed in'] : S.control === null || S.awarded ? null : S.strikes >= 3 ? [1 - S.control, 'Stealing'] : [S.control, 'Answering']) : S.phase === 'lightning' ? [S.lp, 'Up now'] : null;
 function teamHtml(i) {
   const n = S.teams[i].name;
   return `<div class="tk t${i}" id="t${i}"><div class="sym"><span>NYSE: ${esc(sym(n))}</span><b class="flr">Has the floor</b></div><div class="tnm" style="font-size:${fit(n, 2.1, 30)}cqw">${esc(n)}</div>
@@ -701,7 +722,8 @@ function syncRound() {
     const tn = t.querySelector('.tnm'); if (tn.textContent !== S.teams[i].name) { tn.textContent = S.teams[i].name; tn.style.fontSize = fit(S.teams[i].name, 2.1, 30) + 'cqw'; t.querySelector('.sym span').textContent = 'NYSE: ' + sym(S.teams[i].name); }
     if (sc !== old) { const d = sc - old, dl = t.querySelector('.dl'); dl.textContent = (d > 0 ? '▲ +' : '▼ ') + d + (old ? '  (' + (d > 0 ? '+' : '') + Math.round(d / Math.max(1, old) * 100) + '%)' : ''); dl.classList.toggle('upd', d > 0); hist[i].push(sc); if (hist[i].length > 12) hist[i].shift(); spark(i); }
     tween(el, sc, 900);
-    t.classList.toggle('ctl', S.control === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i);
+    const act = actT(); t.classList.toggle('ctl', !!act && act[0] === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); t.classList.toggle('idle', !!act && act[0] !== i);
+    const fl = t.querySelector('.flr'); if (act && act[0] === i && fl.textContent !== act[1]) fl.textContent = act[1];
   });
   const pot = $('.pot'); if (Number(pot.dataset.v) !== S.pot) { pot.classList.remove('pump'); void pot.offsetWidth; pot.classList.add('pump'); } tween(pot, S.pot, 600);
   $('.q').classList.toggle('on', !!S.showQ);
@@ -1012,7 +1034,7 @@ function chipSay(text) {
 const AV = ['☕', '\u{1F4CE}', '\u{1F5A8}️', '\u{1F984}', '\u{1F422}', '\u{1F989}', '\u{1F419}', '\u{1F369}', '\u{1F335}', '\u{1F9CA}', '\u{1F996}', '\u{1F427}'];
 // Hot take: a one-tap phone poll whenever nothing is in play. Shown before the show and after each board.
 function hotSync() {
-  const el = document.getElementById('hot'), h = S.hot, on = !!h && !S.rule && !S.join && ((S.phase === 'title') || (S.phase === 'round' && S.awarded)); el.classList.toggle('on', on); if (!on) return;
+  const el = document.getElementById('hot'), h = S.hot, on = !!h && !S.rule && !S.join && !S.vote && ((S.phase === 'title') || (S.phase === 'round' && S.awarded)); el.classList.toggle('on', on); if (!on) return;
   const q = h.q; if (!q) return; const tot = h.c[0] + h.c[1];
   if (el.dataset.i !== String(h.i)) { el.dataset.i = h.i; el.innerHTML = `<div class="hk">Hot take / vote on your phone</div><div class="hq"></div>` + [0, 1].map(() => '<div class="hr"><span></span><u><i></i></u><b>0%</b></div>').join('') + '<div class="hf"></div>'; }
   el.querySelector('.hq').textContent = q[0]; el.querySelectorAll('.hr').forEach((r, i) => { const pc = tot ? Math.round(h.c[i] / tot * 100) : 0; r.querySelector('span').textContent = q[i + 1]; r.querySelector('i').style.width = pc + '%'; r.querySelector('b').textContent = pc + '%'; });
