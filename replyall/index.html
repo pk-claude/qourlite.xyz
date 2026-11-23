@@ -370,11 +370,11 @@ async function pollPhones(countBuzzes) {
     const fresh = msgs.filter(m => !seen.has(m.id)); msgs.forEach(m => seen.add(m.id));
     const now = Date.now();
     const lastJoin = {}; msgs.forEach(m => { if (m.k === 'join' && now - m.t < 8 * 3600e3 && (!lastJoin[m.p] || m.t >= lastJoin[m.p].t)) lastJoin[m.p] = m; });   // a promoted phone joins again with its new team
-    phones = Object.values(lastJoin).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14)})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
+    phones = Object.values(lastJoin).map(m => ({p: m.p, team: m.team === 0 || m.team === 1 ? m.team : 2, name: String(m.name || '').slice(0, 14), av: m.av, jt: m.jt})).sort((a, b) => a.team - b.team || a.name.localeCompare(b.name));
     const reacts = fresh.filter(m => m.k === 'react' && EMOJI[m.e]).map(m => EMOJI[m.e]);
     if (reacts.length && !first && S.rx) push({react: reacts.slice(0, 6)});
-    let nw = false; phones.forEach(p => { nw = plAdd(p.p, p.name, p.team) || nw; }); if (nw && !first) push();
-    takeAnswers(msgs); takeGuesses(msgs); takeVotes(msgs);
+    let nw = false; phones.forEach(p => { nw = plAdd(p.p, p.name, p.team, p.av, p.jt) || nw; }); if (nw && !first) push();
+    takeAnswers(msgs); takeGuesses(msgs); takeVotes(msgs); takeFun(msgs);
     // Only phones the scorekeeper approved can buzz.
     if (countBuzzes) { const b = fresh.filter(m => m.k === 'buzz' && S.allowed[m.p] && (m.team === 0 || m.team === 1)).sort((a, b) => (a.rt || a.t) - (b.rt || b.t))[0]; if (b) buzzIn(b.team, b.p); }
     first = false; phoneErr = '';
@@ -398,7 +398,9 @@ let lastState = '';
 function postState() {
   if (!ONLINE || REH) return;
   const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null,
-    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open} : null, pm: pmap(),
+    q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open, aw: S.awarded && S.gb.aw !== undefined ? S.gb.aw : null, m: cur().mult} : null, pm: pmap(),
+    ev: Object.keys(S.ev || {}).join(','), bg: S.bingo || {}, hot: hotOn() && S.hot ? {i: S.hot.i, q: HOT[S.hot.i][0], o: HOT[S.hot.i].slice(1), c: S.hot.c} : null,
+    mvp: S.phase === 'winner' ? (S.mvpDone ? {w: S.mvpDone} : {c: mvpCands().map(p => [p, S.pl[p].n || guest(p), S.pl[p].a === undefined ? -1 : S.pl[p].a, S.pl[p].t])}) : null,
     promo: S.promo || null, vote: S.vote && S.vote.open ? {id: S.vote.id, n: S.vote.n, q: S.vote.q} : null};
   let j = JSON.stringify(st); while (j.length > 5600 && Object.keys(st.pm).length) { const k = Object.keys(st.pm); k.slice(Math.floor(k.length * .8)).forEach(p => delete st.pm[p]); j = JSON.stringify(st); }   // the relay takes 6000 bytes: the lowest ranks lose their line first
   if (j === lastState) return; lastState = j;
@@ -413,7 +415,10 @@ setInterval(() => { lastState = ''; postState(); }, 30000);
 // A guess that matches any answer on the board pays that answer's points (times the round multiplier) to that person.
 // S.pl: pid -> {n: name, t: team, s: banked points}. S.gb: this board's guesses, pid -> [text, answer index or -1].
 const guest = p => 'Guest ' + p.slice(0, 3).toUpperCase();
-function plAdd(p, n, t) { n = String(n || '').slice(0, 14); const o = S.pl[p]; if (o) { if (n && o.n !== n) o.n = n; if (t === 0 || t === 1 || t === 2) o.t = t; return false; } S.pl[p] = {n, t: t === 0 || t === 1 ? t : 2, s: 0}; return true; }
+const okAv = a => Number.isInteger(a) && a >= 0 && a < AV.length ? a : undefined;
+function plAdd(p, n, t, a, j) { n = String(n || '').slice(0, 14); a = okAv(a); j = Number.isInteger(j) && j >= 0 && j < 12 ? j : undefined; const o = S.pl[p];
+  if (o) { if (n && o.n !== n) o.n = n; if (t === 0 || t === 1 || t === 2) o.t = t; if (a !== undefined) o.a = a; if (j !== undefined) o.j = j; return false; }
+  S.pl[p] = {n, t: t === 0 || t === 1 ? t : 2, s: 0, a, j}; return true; }
 function gmatch(txt, r) {
   const t = norm(txt); if (t.length < 2) return -1; const w = x => ' ' + x + ' ';
   return r.a.findIndex(a => [a[0]].concat(String(a[2] || '').split(',')).map(norm).filter(Boolean).some(c => c === t || (t.length >= 3 && c.length >= 3 && (w(c).includes(w(t)) || w(t).includes(w(c))))));
@@ -428,14 +433,14 @@ function takeGuesses(msgs) {
   const b = S.gb; if (!b || b.banked || S.phase !== 'round') return; let ch = false;
   msgs.forEach(m => { if (m.k !== 'guess' || m.g !== b.id || typeof m.a !== 'string' || !m.a.trim() || RUDE.test(m.a)) return;
     if (!b.open && (m.rt || m.t) > b.lockAt + 1000) return;   // sent after the lock (a second of grace for clock drift)
-    const a = m.a.trim().slice(0, 30), o = b.g[m.p]; if (o && o[0] === a) return; plAdd(m.p, m.name, m.team); b.g[m.p] = [a, gmatch(a, cur())]; ch = true; });
+    const a = m.a.trim().slice(0, 30), o = b.g[m.p]; if (o && o[0] === a) return; plAdd(m.p, m.name, m.team, m.av, m.jt); b.g[m.p] = [a, gmatch(a, cur())]; ch = true; });
   if (ch) { push(); setPhones(); }
 }
 const ranked = () => Object.keys(S.pl).sort((a, b) => total(b) - total(a));
 function aud() {
   const b = S.gb, live = S.phase === 'round' && b && !b.banked, g = live ? Object.values(b.g) : [], hits = [];
   g.forEach(x => { if (x[1] >= 0) hits[x[1]] = (hits[x[1]] || 0) + 1; });
-  const ids = Object.keys(S.pl), top = ranked().filter(p => total(p) > 0).slice(0, 5).map(p => [S.pl[p].n || guest(p), total(p), S.pl[p].t]);
+  const ids = Object.keys(S.pl), top = ranked().filter(p => total(p) > 0).slice(0, 5).map(p => [S.pl[p].n || guest(p), total(p), S.pl[p].t, S.pl[p].a]);
   return {n: ids.length, g: g.length, hits, top, names: ids.slice(-6).map(p => S.pl[p].n || guest(p))};
 }
 // What each phone shows about itself: [points, points from this board so far, 0 no guess / 1 waiting / 2 on the board / 3 not on the board, rank]. Capped to fit the relay.
@@ -444,6 +449,43 @@ function pmap() {
   ranked().slice(0, 140).forEach((p, i) => { const x = live && b.g[p]; out[p] = [total(p), gain(p), !x ? 0 : x[1] >= 0 && S.revealed[x[1]] ? 2 : done ? 3 : 1, i + 1]; });
   return out;
 }
+// ---------- audience fun: board bets, office bingo, hot takes and the MVP vote ----------
+// None of these needs a host click except the MVP reveal at the end. Phones send 'bet', 'bingo', 'hot' and 'mvp' messages.
+const AV = ['☕', '\u{1F4CE}', '\u{1F5A8}️', '\u{1F984}', '\u{1F422}', '\u{1F989}', '\u{1F419}', '\u{1F369}', '\u{1F335}', '\u{1F9CA}', '\u{1F996}', '\u{1F427}'];
+const BET = 15;   // a right call on who takes the board pays BET x the round multiplier
+// Office bingo: every phone has its own 3x3 card of things that can happen in the show, seeded by its id. The host checks a claimed line.
+const BINGO = ['strike', 'three', 'steal', 'kept', 'clean', 'top', 'roast', 'gag', 'double', 'survey', 'promo', 'pitch', 'zero', 'dup', 'target', 'audhit', 'rest', 'chip'];
+const BLINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+function bcard(p) { let h = 7; for (const ch of String(p)) h = (Math.imul(h, 31) + ch.charCodeAt(0)) >>> 0;
+  const a = BINGO.slice(); for (let i = a.length - 1; i > 0; i--) { h = (Math.imul(h, 1103515245) + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  const c = a.slice(0, 8); c.splice(4, 0, 'free'); return c; }
+const hasBingo = p => { const c = bcard(p), ev = S.ev || {}; return BLINES.some(l => l.every(i => c[i] === 'free' || ev[c[i]])); };
+function evt(k) { if (!S.ev) S.ev = {}; S.ev[k] = 1; }
+// Hot takes: a one-tap poll on every phone whenever nothing is in play (before the show and after each board).
+const HOT = [['Reply all is...', 'Sometimes necessary', 'A crime'], ['Cameras on in meetings?', 'Yes, be present', 'Never. Snacks.'], ['The ideal meeting is...', '15 minutes', 'An email'],
+  ['The office thermostat is...', 'Too cold', 'Too hot'], ["'Per my last email' is...", 'Polite', 'A declaration of war'], ['Fridge leftovers after Friday are...', 'Fair game', 'Still theirs'],
+  ['Microwaving fish at work is...', 'Your right', 'A fireable offense'], ['Out of office replies should be...', 'Professional', 'Unhinged'], ['The open office plan is...', 'Collaboration', 'Chaos'], ['Sign off with...', 'Thanks!', 'Thanks.']];
+const hotOn = () => (S.phase === 'title' && !S.rule) || (S.phase === 'round' && S.awarded);
+function nextHot() { const i = S.hot ? (S.hot.i + 1) % HOT.length : 1; S.hot = {i, c: [0, 0], q: HOT[i]}; }
+const mvpCands = () => ranked().filter(p => S.pl[p].t === 0 || S.pl[p].t === 1).slice(0, 8);
+// The latest message of one kind from each phone.
+function latest(msgs, f) { const o = {}; msgs.forEach(m => { if (f(m) && (!o[m.p] || m.t >= o[m.p].t)) o[m.p] = m; }); return o; }
+function takeFun(msgs) {
+  let ch = false; const b = S.gb;
+  if (b && !b.banked && S.phase === 'round' && !S.awarded) {
+    const last = latest(msgs, m => m.k === 'bet' && m.g === b.id && (m.v === 0 || m.v === 1) && (b.open || (m.rt || m.t) <= b.lockAt + 1000));
+    Object.values(last).forEach(m => { if (!b.bet) b.bet = {}; if (b.bet[m.p] !== m.v) { b.bet[m.p] = m.v; plAdd(m.p, m.name, m.team, m.av, m.jt); ch = true; } }); }
+  if (!S.hot || !S.hot.q) S.hot = {i: 0, c: [0, 0], q: HOT[0]};
+  if (hotOn()) { const c = [0, 0]; Object.values(latest(msgs, m => m.k === 'hot' && m.h === S.hot.i && (m.v === 0 || m.v === 1))).forEach(m => c[m.v]++); if (c[0] !== S.hot.c[0] || c[1] !== S.hot.c[1]) { S.hot.c = c; ch = true; } }
+  if (!S.bingo) S.bingo = {};
+  msgs.forEach(m => { if (m.k !== 'bingo' || S.bingo[m.p] || !hasBingo(m.p)) return; plAdd(m.p, m.name, m.team, m.av, m.jt);
+    const n = Object.keys(S.bingo).length + 1, bonus = [100, 60, 40][n - 1] || 20, pl = S.pl[m.p]; S.bingo[m.p] = n; pl.s += bonus; ch = true;
+    push({toast: ['Office bingo' + (n === 1 ? ' / first!' : ' #' + n), (pl.n || guest(m.p)) + ' +' + bonus, pl.a]}); });
+  if (S.phase === 'winner' && !S.mvpDone) { const ok = new Set(mvpCands()), c = {}; Object.values(latest(msgs, m => m.k === 'mvp' && ok.has(m.v))).forEach(m => { c[m.v] = (c[m.v] || 0) + 1; });
+    if (JSON.stringify(c) !== JSON.stringify(S.mvp || {})) { S.mvp = c; ch = true; const el = document.getElementById('mvpN'); if (el) el.textContent = Object.values(c).reduce((a, x) => a + x, 0); } }
+  if (ch) push();
+}
+function payBets(i) { const b = S.gb; if (!b || b.aw !== undefined) return; b.aw = i; const m = cur().mult; Object.keys(b.bet || {}).forEach(p => { if (b.bet[p] === i && S.pl[p]) S.pl[p].s += BET * m; }); }
 function leadersCard() { const t = aud().top; return t.length ? [['Between rounds', 'TOP INDIVIDUAL CONTRIBUTORS', 'Call an answer on your phone every round. On the board means points.', 4200, t]] : []; }
 
 // ---------- the "You said" round: turn the room's answers into a board ----------
@@ -553,7 +595,9 @@ function flow() {
       ['Reveal 2', b.every(c => c.sp) || !!S.lend, 'lnext', 'Reveal player 2 one step at a time: Space or the glowing button.'],
       ['Winner', false, 'next', 'Final round done. Press Next: Winner.']];
   }
-  return [['Winner', false, '-', 'Enjoy the moment. Scores can still be corrected at the top, and the certificate updates.']];
+  const mc = ONLINE ? mvpCands() : [];
+  return [['MVP vote', !!S.mvpDone || !mc.length, 'mvp', 'Say: everyone, vote for the MVP on your phone. Give it about 30 seconds, then reveal the MVP.'],
+    ['Done', false, '-', 'Enjoy the moment. Scores can still be corrected at the top, and the certificate updates.']];
 }
 function coachHtml() {
   const f = flow(), at = f.findIndex(s => !s[1]), c = f[at];
@@ -585,12 +629,12 @@ const A = {
   rx() { S.rx = !S.rx; up(); },
   // Audience call-ups. Fast-track promotion: an audience phone joins a team, approved to buzz, keeping its points.
   promote(p, t) { const pl = S.pl[p]; if (!pl || (t !== 0 && t !== 1)) return; snap(); const nm = pl.n || guest(p), pts = total(p);
-    pl.t = t; S.allowed[p] = true; S.promo = {p, t, id: Date.now().toString(36), n: nm}; SFX.win();
+    pl.t = t; S.allowed[p] = true; evt('promo'); S.promo = {p, t, id: Date.now().toString(36), n: nm}; SFX.win();
     up({cards: [['Fast-track promotion / effective immediately', 'PROMOTED', nm + ' joins ' + S.teams[t].name + '. ' + pts + ' points of pure instinct.', 3800]], confetti: 220});
     chip('Congratulations, ' + nm + '. Your new title is Team Member. Your old title was Snack Consumer.', true); },
   // Pitch-off: two volunteers pitch, the room votes on their phones, the winner joins a team with bonus points.
   pitch(a, b, q) { a = String(a || '').trim().slice(0, 16); b = String(b || '').trim().slice(0, 16); if (!a || !b || !q) return; snap();
-    S.vote = {id: Date.now().toString(36), n: [a, b], q, c: [0, 0], open: false, w: null}; SFX.whoosh();
+    S.vote = {id: Date.now().toString(36), n: [a, b], q, c: [0, 0], open: false, w: null}; evt('pitch'); SFX.whoosh();
     up({cards: [['Pitch-off / ' + a + ' vs ' + b, 'THE PITCH', q, 4200]]}); chip('Thirty seconds each. No slides. I know. I am also scared.', true); },
   voteOpen() { if (!S.vote) return; S.vote.open = true; S.vote.w = null; up(); },
   voteClose() { const v = S.vote; if (!v) return; snap(); v.open = false; v.w = v.c[0] === v.c[1] ? -1 : v.c[0] > v.c[1] ? 0 : 1;
@@ -600,13 +644,16 @@ const A = {
   pitchJoin(t) { const v = S.vote; if (!v || v.w === null || v.w < 0) return; snap(); const nm = v.n[v.w]; S.teams[t].score += PITCH_BONUS; S.vote = null; SFX.award();
     up({cards: [['Signing bonus approved', '+' + PITCH_BONUS + ' ' + S.teams[t].name.toUpperCase(), nm + ' joins ' + S.teams[t].name + ' and brings ' + PITCH_BONUS + ' points.', 3400]], confetti: 120}); },
   pitchClear() { S.vote = null; up(); },
+  // MVP: the room votes on phones during the winner screen; the most votes wins (a tie goes to the higher scorer).
+  mvp() { if (S.mvpDone) return; const c = S.mvp || {}, w = mvpCands().sort((a, b) => (c[b] || 0) - (c[a] || 0))[0]; if (!w) return; snap(); const pl = S.pl[w], nm = pl.n || guest(w);
+    S.mvpDone = nm; SFX.win(); up({cards: [['Peer review results', 'MOST VALUABLE PLAYER', nm + ', ' + S.teams[pl.t].name + '. ' + (c[w] || 0) + ' vote' + (c[w] === 1 ? '' : 's') + ' from the room.', 4400]], confetti: 220}); },
   // House rules: one slide at a time on the big screen; the join code steps aside while they show.
   rule(i) { i = Number(i); if (i < 0) return; if (i >= RULES.length) { S.rule = null; S.rulesDone = true; S.join = !!S.rj; return up(); }
     if (!S.rule) S.rj = S.join; S.join = false; const r = RULES[i]; S.rule = {i, n: RULES.length, k: r[0], h: r[1], l: r[2]}; SFX.whoosh(); up(); },
   hello() { chipLine('hello', true); },
   round(i) { i = Number(i); if (!G.rounds[i] || !gate() || !leaveOk()) return; snap(); const cards = standings(G.rounds[i].mult), intro = S.phase === 'title' && i === 0;
     if (intro) cards.push(['How it works', 'TOP ANSWERS SCORE', 'Guess what the survey said. Three strikes and the other team can steal.', 4600]);
-    S.ri = i; S.useCustom = false; resetRound(); gbNew(); S.phase = 'round'; SFX.theme(!intro);
+    S.ri = i; S.useCustom = false; resetRound(); if (G.rounds[i].mult === 2) evt('double'); gbNew(); S.phase = 'round'; SFX.theme(!intro);
     cards.push(['Agenda item ' + (i + 1), 'ROUND ' + (i + 1), MODE(G.rounds[i].mult)]); up({cards}); later(() => chipLine('round'), cards.length * 2400 + 300); },
   showQ() { S.showQ = !S.showQ; up(); },
   read() { const r = cur(); S.showQ = true; up(); speak(r.id, r.q); },
@@ -618,11 +665,11 @@ const A = {
   reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); gbLock(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
     if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i] && !S.awarded) {   // after the award the budget is banked: hiding a tile changes neither pot nor score
       S.pot -= r.a[i][1] * r.mult; S.counted[i] = false; } return up(); }
-    S.revealed[i] = true; if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (!S.awarded) streak++; if (i === 0) SFX.top(); else SFX.reveal(i, streak); up();
+    S.revealed[i] = true; if (i === 0) evt('top'); if (S.gb && Object.values(S.gb.g).some(x => x[1] === i)) evt('audhit'); if (!S.awarded) { S.pot += r.a[i][1] * r.mult; S.counted[i] = true; } if (!S.awarded) streak++; if (i === 0) SFX.top(); else SFX.reveal(i, streak); up();
     if (!S.awarded) { if (r.a.every((_, k) => S.revealed[k])) { later(() => SFX.sweep(), 900); chipLine('sweep', true); } else if (r.a[i][3] || i === 0 || Math.random() < .4) chip(r.a[i][3] || draw(i === 0 ? 'top' : 'good'), i === 0); } },   // Chip stays quiet on most ordinary answers
   said(v) { said = v; },
   strike() { if (S.strikes >= 3 || S.phase !== 'round' || Date.now() - struckAt < 450) return; struckAt = Date.now(); snap();   // a double-click is one strike, not two
-    gbLock(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; streak = 0; SFX.strike(); if (S.strikes === 2) later(() => SFX.tension(1), 1200); const a = said; said = '';
+    gbLock(); S.buzzOpen = false; S.buzz = null; S.strikes++; S.items++; evt('strike'); if (S.strikes === 3) evt('three'); streak = 0; SFX.strike(); if (S.strikes === 2) later(() => SFX.tension(1), 1200); const a = said; said = '';
     const pool = STAMPS[S.strikes - 1]; up({stamp: pool[S.items % pool.length], sub: STRIKE_SUB[S.strikes - 1]});
     if (S.strikes === 3) later(() => A.takeover(), 1900); else if (a.trim() || Math.random() < .6) later(() => chipLine('strike'), 600);
     roast(a, cur().q); },
@@ -630,11 +677,11 @@ const A = {
   clearStrikes() { snap(); S.strikes = 0; SFX.tension(0); up(); },
   takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); later(() => SFX.tension(2), 1800); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
-  award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award']();
+  award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award'](); payBets(i); nextHot(); if (!S.strikes) evt('clean'); if (kind === 'stolen') evt('steal'); if (kind === 'kept') evt('kept');
     const x = {kind, i, pot};
     up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n, 3200, x]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot, 3200, x]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n, payout: i});
     later(() => chipLine(kind || 'award', !!kind), kind ? 2500 : 900); },
-  rest() { const left = cur().a.map((_, i) => i).filter(i => !S.revealed[i]).reverse(); if (!left.length) return; snap(); chipLine('rest');
+  rest() { const left = cur().a.map((_, i) => i).filter(i => !S.revealed[i]).reverse(); if (!left.length) return; evt('rest'); snap(); chipLine('rest');
     left.forEach((i, k) => later(() => { S.revealed[i] = true; SFX.reveal(i); up(); }, 900 + k * 1300)); },
   name(i, v) { S.teams[i].name = v; push(); },
   score(i, v) { S.teams[i].score = Number(v) || 0; push(); },
@@ -642,14 +689,14 @@ const A = {
   newCode() { if (!confirm('Make a new join code? Every phone has to join again. Use this only if someone who should not have the code is buzzing.')) return; const s = newSid(); setPref('sid', s); S.sid = s; S.joinUrl = joinUrl(s); S.allowed = {}; phones = []; hist.length = 0; lastState = ''; up(); },
   allow(p, on) { if (on) S.allowed[p] = true; else delete S.allowed[p]; push(); setPhones(); },
   allowAll() { phones.forEach(p => { if (p.team < 2) S.allowed[p.p] = true; }); push(); setPhones(); },
-  chipSay() { const el = document.getElementById('chipSay'); if (el.value.trim()) chip(el.value.trim(), true); el.value = ''; },
-  roastSend() { const t = pending; pending = null; setRoast(); chip(t, true); },
+  chipSay() { const el = document.getElementById('chipSay'); if (el.value.trim()) evt('chip'); if (el.value.trim()) chip(el.value.trim(), true); el.value = ''; },
+  roastSend() { evt('roast'); const t = pending; pending = null; setRoast(); chip(t, true); },
   roastDrop() { pending = null; setRoast(); },
   // "You said" round
   sprep() { if (!gate() || !leaveOk()) return; snap(); const cards = standings(3); S.survey = {n: Date.now().toString(36), q: G.room[0], st: 'ready', count: 0, groups: null}; S.phase = 'survey'; S.buzzOpen = false; answers = []; note = ''; clearLater(); SFX.theme(true);
     cards.push(['Agenda item 4 / triple budget', 'YOU SAID', 'This one is about you']); up({cards}); later(() => chipLine('survey', true), cards.length * 2400 + 300); },
   sq(v) { S.survey.q = v; const el = document.getElementById('sq'); if (el && el.value !== v) el.value = v; },
-  sopen() { if (S.survey.st !== 'ready' || !S.survey.q.trim()) return; lastScene = Date.now(); snap(); Object.assign(S.survey, {n: Date.now().toString(36), q: S.survey.q.trim(), st: 'open', count: 0, groups: null}); answers = []; note = ''; up(); },
+  sopen() { if (S.survey.st !== 'ready' || !S.survey.q.trim()) return; lastScene = Date.now(); snap(); Object.assign(S.survey, {n: Date.now().toString(36), q: S.survey.q.trim(), st: 'open', count: 0, groups: null}); evt('survey'); answers = []; note = ''; up(); },
   // Close and count sits where Open the survey was, so the second half of a double-click must not close it. A repeated or undone close drops the older count.
   async sclose() { if (!S.survey || S.survey.st !== 'open' || !gate()) return; const n = ++closeN, v = S.survey.n; snap(); polling = false; await pollPhones(false);
     if (n !== closeN || S.phase !== 'survey' || S.survey.n !== v || S.survey.st !== 'open') return; S.survey.st = 'closed'; busy = true; up();
@@ -673,16 +720,16 @@ const A = {
   lq(i) { if (S.lq !== i) { S.lq = i; push(); } },
   ltext(p, i, v) { S.la[p][i].t = v; push(); },
   lpts(p, i, v) { S.la[p][i].p = Number(v) || 0; push(); },
-  ldup(p, i, el) { const d = p === 1 && isDup(i); el.classList.toggle('dup', d); if (d) { SFX.dup(); push({stamp: 'DUPLICATE', sub: 'give a different answer'}); } },
+  ldup(p, i, el) { const d = p === 1 && isDup(i); el.classList.toggle('dup', d); if (d) { evt('dup'); SFX.dup(); push({stamp: 'DUPLICATE', sub: 'give a different answer'}); } },
   lgo(p, i) { const el = document.getElementById('lt' + p + (i + 1)); if (el) el.focus(); else document.activeElement.blur(); },
   lfill(i, k) { snap(); const a = G.lightning[S.li].qs[i].a[k], c = S.la[S.lp][i]; if (!c.t) c.t = a[0]; c.p = a[1]; up(); },
   // One button walks the whole reveal: answer, then its points, row by row, player 1 then player 2.
   lstep() { for (const p of [0, 1]) for (let i = 0; i < 5; i++) { const c = S.la[p][i]; if (c.st && c.sp) continue; if (p === 1 && S.lp === 0) return null; return [p, i, c.st ? 'sp' : 'st']; } return null; },
   lnext() { const s = A.lstep(); if (!s) return; snap(); const [p, i, what] = s, c = S.la[p][i]; if (p === 1) S.hideP1 = false; S.lq = i; c[what] = true; A.tstop();
-    if (what === 'sp') S.teams[p].score += Number(c.p) || 0;   // each player's points go to their own team
+    if (what === 'sp') { S.teams[p].score += Number(c.p) || 0; if (!(Number(c.p) > 0)) evt('zero'); }   // each player's points go to their own team
     if (what === 'sp') { if (Number(c.p) > 0) SFX.reveal(4 - i); else SFX.zero(); } else SFX.whoosh(); up();
     const total = ltotal(), hit = total >= G.lightningTarget; if (S.lend || !(hit || S.la.flat().every(x => x.sp))) return;
-    S.lend = hit ? 'hit' : 'miss'; push();
+    S.lend = hit ? 'hit' : 'miss'; if (hit) evt('target'); push();
     later(() => { if (hit) { SFX.win(); push({cards: [['Final round', 'TARGET HIT', G.finalStakes || '']], confetti: 260}); }
       else { SFX.zero(); push({cards: [['Final round', 'SO CLOSE', (G.lightningTarget - total) + ' short. Still the best meeting all week.']]}); } }, 1500); },
   lread(i) { const q = G.lightning[S.li].qs[i]; A.lq(i); speak(q.id, q.q); },
@@ -703,7 +750,7 @@ const GAG_LIST = (window.GAGS && GAGS.list) || [];
 let gseq = Date.now(), lastGag = '';
 function fireGag(id) {
   if (id === '?') { const pool = GAG_LIST.filter(g => g.id !== lastGag); if (!pool.length) return; id = pool[Math.floor(Math.random() * pool.length)].id; }
-  lastGag = id; const m = {gag: id, gseq: ++gseq};
+  lastGag = id; evt('gag'); push(); const m = {gag: id, gseq: ++gseq};
   try { if (bc) bc.postMessage(m); } catch (e) {} try { if (win && !win.closed) win.postMessage(m, '*'); } catch (e) {}
   SFX.gag(id); gagClose();
 }
@@ -855,6 +902,7 @@ function render() {
 
   if (ph === 'winner') {
     h += `<div class="one card"><h2>The winner is on the big screen</h2><p>Scores can still be corrected at the top. The certificate updates as you type.</p>
+      ${ONLINE && mvpCands().length ? `<p>${S.mvpDone ? 'MVP: <b>' + esc(S.mvpDone) + '</b>' : 'MVP votes in: <b id="mvpN">' + Object.values(S.mvp || {}).reduce((a, x) => a + x, 0) + '</b>'}</p>${S.mvpDone ? '' : '<div class="row"><button class="go" data-cue="mvp" onclick="A.mvp()">Reveal the MVP</button></div>'}` : ''}
       <div class="row"><button class="fun" onclick="chipLine('win', true)">Chip congratulates again</button><button onclick="A.newGame()">Start a new game</button></div></div>`;
   }
 

@@ -459,6 +459,25 @@ body.nogl #stagebg{display:none}
 @keyframes cufade{0%{opacity:0}12%,88%{opacity:1}100%{opacity:0}}
 
 /* pitch-off vote meter */
+/* audience fun: hot-take poll (between boards) and bingo toasts (any time) */
+#hot{position:absolute;right:2.4cqw;bottom:16cqh;width:30cqw;z-index:7;padding:1.8cqh 1.4cqw;border-radius:1.2cqw;background:linear-gradient(180deg,rgba(13,44,29,.96),rgba(3,16,9,.96));box-shadow:0 0 0 .18cqw rgba(255,201,60,.4),0 2cqh 4cqw rgba(0,0,0,.5);transform:translateX(130%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);pointer-events:none}
+#hot.on{transform:none}
+#hot .hk{font:800 .95cqw var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--orange)}
+#hot .hq{margin:.6cqh 0 1.4cqh;font:600 3.6cqh/1.15 var(--chalk);color:var(--cream)}
+#hot .hr{display:flex;align-items:center;gap:.8cqw;margin-top:.9cqh;font:800 2.2cqh var(--head);color:#fff}
+#hot .hr span{width:11cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hot .hr u{flex:1;height:2.2cqh;border-radius:2cqh;background:rgba(255,255,255,.1);overflow:hidden;text-decoration:none}
+#hot .hr u i{display:block;height:100%;width:0;border-radius:2cqh;background:linear-gradient(90deg,#ff7a1a,#ffc93c);transition:width .6s}
+#hot .hr:last-child u i{background:linear-gradient(90deg,#7cc4ff,#cfeaff)}
+#hot .hr b{width:4cqw;text-align:right;color:var(--gold)}
+#hot .hf{margin-top:1cqh;font:700 .9cqw var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#9fb6a7}
+#toasts{position:absolute;left:2.4cqw;bottom:16cqh;z-index:11;display:flex;flex-direction:column;gap:1cqh;pointer-events:none}
+.toast{display:flex;align-items:center;gap:1cqw;padding:1.2cqh 1.4cqw 1.2cqh 1cqw;border-radius:1cqw;background:#fff6dd;color:#0b2418;box-shadow:0 1.4cqh 3cqw rgba(0,0,0,.45),inset .35cqw 0 0 #ff7a1a;animation:toast 5.2s cubic-bezier(.2,.9,.3,1.1) forwards}
+.toast i{font-style:normal;font-size:5cqh;line-height:1}
+.toast small{display:block;font:800 .9cqw var(--mono);letter-spacing:.2em;text-transform:uppercase;color:#d85400}
+.toast b{display:block;font:900 3.6cqh/1.05 var(--disp);text-transform:uppercase}
+@keyframes toast{0%{transform:translateX(-120%)}9%,88%{transform:none;opacity:1}100%{transform:translateX(-30%);opacity:0}}
+.lb em.av{flex:none;width:auto;font-style:normal;font-size:4.4cqh;line-height:1}
 #rules{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#0d2c1d,#020c07);pointer-events:none}
 #rules.on{display:flex}
 #rules .rb{width:76cqw;animation:fin .4s}
@@ -516,6 +535,8 @@ body.nogl #stagebg{display:none}
 <div id="over"></div>
 <div id="vote"></div>
 <div id="rules"></div>
+<div id="hot"></div>
+<div id="toasts"></div>
 <div id="chip" data-mood="idle"><div class="chw"><div class="chp"><svg viewBox="0 0 96 116" aria-hidden="true">
   <defs><linearGradient id="chg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a1a"/><stop offset="1" stop-color="#4fae7a"/></linearGradient></defs>
   <g class="chh">
@@ -893,6 +914,7 @@ function effects(fx) {
   else if (fx.banner) banner(fx.banner);
   if (fx.confetti && window.FX) FX.confetti(fx.confetti);
   if (fx.chip) chipSay(fx.chip);
+  if (fx.toast) toast(fx.toast);
   (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 8) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e;
     d.style.left = (Math.random() < .5 ? 1 + Math.random() * 7 : 90 + Math.random() * 7) + 'cqw'; d.style.fontSize = (3 + Math.random() * 1.6) + 'cqw'; d.style.setProperty('--wx', ((Math.random() - .5) * 6) + 'cqw'); document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 140));
 }
@@ -958,7 +980,7 @@ function results(c, ms) {
   return `<div class="cc"><div class="k0 mono">Quarterly earnings call / slide 47 of 212</div><h1 class="gt" style="--hs:9cqh">${lead < 0 ? 'Dead even' : esc(nm[lead]) + ' leads'}</h1><div class="earn">${col(0)}${col(1)}</div><p style="font-size:2cqw">${esc(c[2] || '')}</p></div>`;
 }
 function leaders(c) {
-  return `<div class="cc"><div class="k0 mono">${esc(c[0])}</div><h1 class="gt" style="--hs:11cqh">Top individual contributors</h1><div class="lb">${c[4].slice(0, 5).map((r, i) => `<div style="--dl:${.4 + i * .12}s"><b>${i + 1}</b><i style="background:${r[2] === 0 || r[2] === 1 ? TEAMC[r[2]] : '#4fae7a'}"></i><span>${esc(r[0])}</span><em>${esc(r[1])}</em></div>`).join('')}</div><p style="font-size:1.8cqw;color:rgba(255,255,255,.7)">${esc(c[2] || '')}</p></div>`;
+  return `<div class="cc"><div class="k0 mono">${esc(c[0])}</div><h1 class="gt" style="--hs:11cqh">Top individual contributors</h1><div class="lb">${c[4].slice(0, 5).map((r, i) => `<div style="--dl:${.4 + i * .12}s"><b>${i + 1}</b><i style="background:${r[2] === 0 || r[2] === 1 ? TEAMC[r[2]] : '#4fae7a'}"></i>${AV[r[3]] ? `<em class="av">${AV[r[3]]}</em>` : ''}<span>${esc(r[0])}</span><em>${esc(r[1])}</em></div>`).join('')}</div><p style="font-size:1.8cqw;color:rgba(255,255,255,.7)">${esc(c[2] || '')}</p></div>`;
 }
 
 // ---------- Chip ----------
@@ -987,6 +1009,17 @@ function chipSay(text) {
 
 // ---------- pitch-off vote meter ----------
 // House rules: the host steps through slides while explaining the game (title screen only).
+const AV = ['☕', '\u{1F4CE}', '\u{1F5A8}️', '\u{1F984}', '\u{1F422}', '\u{1F989}', '\u{1F419}', '\u{1F369}', '\u{1F335}', '\u{1F9CA}', '\u{1F996}', '\u{1F427}'];
+// Hot take: a one-tap phone poll whenever nothing is in play. Shown before the show and after each board.
+function hotSync() {
+  const el = document.getElementById('hot'), h = S.hot, on = !!h && !S.rule && !S.join && ((S.phase === 'title') || (S.phase === 'round' && S.awarded)); el.classList.toggle('on', on); if (!on) return;
+  const q = h.q; if (!q) return; const tot = h.c[0] + h.c[1];
+  if (el.dataset.i !== String(h.i)) { el.dataset.i = h.i; el.innerHTML = `<div class="hk">Hot take / vote on your phone</div><div class="hq"></div>` + [0, 1].map(() => '<div class="hr"><span></span><u><i></i></u><b>0%</b></div>').join('') + '<div class="hf"></div>'; }
+  el.querySelector('.hq').textContent = q[0]; el.querySelectorAll('.hr').forEach((r, i) => { const pc = tot ? Math.round(h.c[i] / tot * 100) : 0; r.querySelector('span').textContent = q[i + 1]; r.querySelector('i').style.width = pc + '%'; r.querySelector('b').textContent = pc + '%'; });
+  el.querySelector('.hf').textContent = tot + ' vote' + (tot === 1 ? '' : 's');
+}
+function toast(t) { const box = document.getElementById('toasts'); if (box.children.length >= 3) box.firstChild.remove(); const d = document.createElement('div'); d.className = 'toast';
+  d.innerHTML = `${AV[t[2]] ? `<i>${AV[t[2]]}</i>` : ''}<div><small>${esc(t[0])}</small><b>${esc(t[1])}</b></div>`; box.appendChild(d); setTimeout(() => d.remove(), 5300); if (window.FX) FX.confetti(60); }
 function rulesSync() {
   const el = document.getElementById('rules'), r = S.phase === 'title' && S.rule; el.classList.toggle('on', !!r); if (!r) { el.dataset.i = ''; return; }
   if (el.dataset.i === String(r.i)) return; el.dataset.i = r.i;
@@ -1010,7 +1043,7 @@ function recv(d) {
   if (built === key) sync(); else look();
   if (!moodT && chipBox.dataset.mood !== chipRest()) chipBox.dataset.mood = chipRest(); chipLook(); chipVis();
   const jb = document.getElementById('joinbox'), on = !!(S.join && S.phones); if (on !== jb.classList.contains('on')) { jb.classList.toggle('on', on); jb.innerHTML = on ? `<div class="how">${qr(S.joinUrl)}<div>Play along on your phone.<br>Scan, or open<br><b style="font-size:${fit(shortUrl(), 2.6, 76)}cqw">${esc(shortUrl())}</b><br>code <b style="font-size:4.4cqw">${esc(S.sid)}</b></div></div>` : ''; }
-  voteSync(); rulesSync();
+  voteSync(); rulesSync(); hotSync();
   effects(fx);
 }
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
