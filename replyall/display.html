@@ -459,6 +459,17 @@ body.nogl #stagebg{display:none}
 @keyframes cufade{0%{opacity:0}12%,88%{opacity:1}100%{opacity:0}}
 
 /* pitch-off vote meter */
+#rules{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#0d2c1d,#020c07);pointer-events:none}
+#rules.on{display:flex}
+#rules .rb{width:76cqw;animation:fin .4s}
+#rules .rk{font:800 1.3cqw var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--orange)}
+#rules h1{margin:1.6cqh 0 4cqh;font:900 12cqh/.95 var(--disp);text-transform:uppercase;color:var(--gold)}
+#rules ol{margin:0;padding:0;list-style:none;counter-reset:r}
+#rules li{counter-increment:r;display:flex;gap:2cqw;align-items:center;margin:0 0 3cqh;font:600 5.8cqh/1.15 var(--chalk);color:var(--cream)}
+#rules li:before{content:counter(r);flex:none;width:7cqh;height:7cqh;border-radius:50%;display:grid;place-items:center;background:var(--orange);color:#fff;font:900 4cqh/1 var(--disp)}
+#rules .rd{display:flex;gap:.8cqw;margin-top:5cqh}
+#rules .rd i{width:3.4cqw;height:.9cqh;border-radius:1cqh;background:rgba(255,255,255,.18)}
+#rules .rd i.on{background:var(--orange)}
 #vote{position:absolute;left:50%;bottom:15cqh;width:74cqw;transform:translate(-50%,140%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);z-index:8;padding:2.2cqh 2cqw 2.6cqh;border-radius:1.4cqw;background:linear-gradient(180deg,rgba(13,44,29,.97),rgba(3,16,9,.97));box-shadow:0 0 0 .2cqw rgba(255,201,60,.45),0 3cqh 6cqw rgba(0,0,0,.6);text-align:center;pointer-events:none}
 #vote.on{transform:translate(-50%,0)}
 #vote .vk{font:800 1.2cqw var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--orange)}
@@ -504,6 +515,7 @@ body.nogl #stagebg{display:none}
 <canvas id="fx"></canvas>
 <div id="over"></div>
 <div id="vote"></div>
+<div id="rules"></div>
 <div id="chip" data-mood="idle"><div class="chw"><div class="chp"><svg viewBox="0 0 96 116" aria-hidden="true">
   <defs><linearGradient id="chg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a1a"/><stop offset="1" stop-color="#4fae7a"/></linearGradient></defs>
   <g class="chh">
@@ -974,6 +986,12 @@ function chipSay(text) {
 }
 
 // ---------- pitch-off vote meter ----------
+// House rules: the host steps through slides while explaining the game (title screen only).
+function rulesSync() {
+  const el = document.getElementById('rules'), r = S.phase === 'title' && S.rule; el.classList.toggle('on', !!r); if (!r) { el.dataset.i = ''; return; }
+  if (el.dataset.i === String(r.i)) return; el.dataset.i = r.i;
+  el.innerHTML = `<div class="rb"><div class="rk">House rules / ${r.i + 1} of ${r.n} / ${esc(r.k)}</div><h1>${esc(r.h)}</h1><ol>${r.l.map(x => `<li>${esc(x)}</li>`).join('')}</ol><div class="rd">${Array.from({length: r.n}, (_, i) => `<i class="${i <= r.i ? 'on' : ''}"></i>`).join('')}</div></div>`;
+}
 function voteSync() {
   const el = document.getElementById('vote'), v = S.vote; el.classList.toggle('on', !!v); if (!v) return;
   const tot = v.c[0] + v.c[1], foot = v.open ? 'Vote on your phone now' : v.w === null ? 'Voting opens after both pitches' : v.w < 0 ? 'Tie. The host decides.' : esc(v.n[v.w]) + ' is hired';
@@ -992,7 +1010,7 @@ function recv(d) {
   if (built === key) sync(); else look();
   if (!moodT && chipBox.dataset.mood !== chipRest()) chipBox.dataset.mood = chipRest(); chipLook(); chipVis();
   const jb = document.getElementById('joinbox'), on = !!(S.join && S.phones); if (on !== jb.classList.contains('on')) { jb.classList.toggle('on', on); jb.innerHTML = on ? `<div class="how">${qr(S.joinUrl)}<div>Play along on your phone.<br>Scan, or open<br><b style="font-size:${fit(shortUrl(), 2.6, 76)}cqw">${esc(shortUrl())}</b><br>code <b style="font-size:4.4cqw">${esc(S.sid)}</b></div></div>` : ''; }
-  voteSync();
+  voteSync(); rulesSync();
   effects(fx);
 }
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
