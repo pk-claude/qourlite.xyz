@@ -293,6 +293,37 @@ body{background-color:#04140c;background-image:radial-gradient(rgba(255,255,255,
 .vbtn button.on{background:var(--orange);color:#fff;box-shadow:0 4px 0 #7a2f00}
 #vs{margin-top:8px;font-size:12.5px;color:var(--mute);text-align:center}
 body.voting #stage,body.voting #call{display:none}
+/* profile picker on the sign-in card */
+#avs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+#avs button{height:44px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:24px;line-height:1;padding:0}
+#avs button.on{border-color:var(--orange);background:#fff1e3;box-shadow:0 0 0 3px rgba(249,99,2,.25)}
+#jt{width:100%;height:44px;border-radius:12px;border:2px solid var(--line);background:#fff;font:600 16px var(--body,inherit);padding:0 10px;color:var(--ink)}
+#av.pic{font-size:22px;background:#fff6dd}
+/* side bet inside the call-it card (audience only) */
+#bet{margin-top:10px;padding-top:10px;border-top:2px dashed var(--line)}
+#bet small{display:block;font:800 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:7px}
+#bet .vbtn button{min-height:48px;font-size:18px}
+#br{margin:8px 0 0;font-size:13.5px;font-weight:600}
+#br.win{color:#1f7a4a}#br.miss{color:#b3261e}
+/* the fun cards: hot take, office bingo, MVP */
+.fun{background:var(--paper);color:var(--ink);border-radius:16px;padding:12px 12px 11px;text-align:left;animation:rise .4s both;box-shadow:0 0 0 1px rgba(255,201,60,.38),0 0 0 4px rgba(255,201,60,.07),0 22px 50px rgba(0,0,0,.55)}
+.fun .th em{background:#0d2c1d;color:var(--cream)}
+.fun p{margin:0 0 9px;font-size:15px;font-weight:700;line-height:1.3}
+.fun .vbtn button{min-height:56px;font-size:18px;position:relative;overflow:hidden}
+.fun .vbtn button i{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--gold);transition:width .5s}
+.fun .vbtn button b{display:block;margin-top:5px;font:800 12px var(--mono);letter-spacing:.06em;color:var(--gold)}
+.fun .vbtn button.on b{color:#fff}
+#mvpl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#mvpl button{min-height:52px;border-radius:12px;background:#0d2c1d;color:var(--cream);font:900 17px/1.05 var(--disp);text-transform:uppercase;padding:6px 8px;display:flex;align-items:center;gap:7px;text-align:left;overflow-wrap:anywhere;box-shadow:0 3px 0 #031009}
+#mvpl button span{font-size:22px}
+#mvpl button.on{background:var(--orange);color:#fff}
+#bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#bgrid div{min-height:62px;border-radius:10px;border:2px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px;font:700 12px/1.15 var(--body,inherit);color:var(--ink);transition:background .3s,transform .3s}
+#bgrid div.hit{background:var(--orange);border-color:var(--orange);color:#fff;transform:rotate(-1.5deg)}
+#bgrid div.free{background:#0d2c1d;border-color:#0d2c1d;color:var(--gold)}
+#bgrid div.ln{box-shadow:0 0 0 3px var(--gold)}
+#bs2{margin:9px 0 0;font-size:13px;font-weight:600;color:var(--mute)}
+#bingo.won{box-shadow:0 0 0 2px var(--gold),0 0 40px rgba(255,201,60,.35),0 22px 50px rgba(0,0,0,.55)}
 /* ---------- phone fit: one screen, no hunting ---------- */
 body.hot #sc{order:-3}body.hot #stage{order:-2}body.hot #mail{display:none}
 body.hot #call #cs{display:none}
@@ -318,6 +349,10 @@ body.typing .rxw{display:none}
     <div id="mstat" aria-live="polite">Enter the 4-character Meeting ID.</div>
     <label for="name">Display name <small>(as it will appear in the meeting)</small></label>
     <input id="name" maxlength="12" autocomplete="off" placeholder="Your first name" aria-label="Your first name">
+    <label>Your avatar <small>(shows on the big screen)</small></label>
+    <div id="avs" role="radiogroup" aria-label="Avatar"></div>
+    <label for="jt">Job title <small>(for your badge)</small></label>
+    <select id="jt" aria-label="Job title"></select>
     <div class="or">Pick a department</div>
     <button class="jb" id="j0" onclick="join(0)"><i>1</i><span><small>Join the call as</small><b id="j0n">Team Synergy</b></span><u>&gt;</u></button>
     <button class="jb" id="j1" onclick="join(1)"><i>2</i><span><small>Join the call as</small><b id="j1n">Team Bandwidth</b></span><u>&gt;</u></button>
@@ -343,7 +378,10 @@ body.typing .rxw{display:none}
       <div id="cl"><small id="ck"></small><span id="ct"></span></div>
       <div id="cv"></div>
       <div class="comp"><input id="ca" maxlength="30" autocomplete="off" enterkeyhint="send" placeholder="Your answer..." aria-label="Your guess"><button id="cgo" onclick="guess()">LOCK IT</button></div>
+      <div id="bet" class="hide"><small>Side bet: who takes this board?</small><div class="vbtn"><button id="b0" onclick="bet(0)"></button><button id="b1" onclick="bet(1)"></button></div><p id="br"></p></div>
     </div>
+    <div id="mvp" class="fun hide"><div class="th"># peer-review <em>MVP VOTE</em></div><p id="mvq">Who carried their team tonight? Tap one.</p><div id="mvpl"></div></div>
+    <div id="hotc" class="fun hide"><div class="th"># hot-take <em>ONE TAP</em></div><p id="hq"></p><div class="vbtn"><button id="h0" onclick="hot(0)"></button><button id="h1" onclick="hot(1)"></button></div></div>
     <div id="vote" class="hide">
       <div class="th"># pitch-off <em>LIVE VOTE</em></div>
       <p id="vq"></p>
@@ -362,6 +400,7 @@ body.typing .rxw{display:none}
       <div class="comp"><input id="sa" maxlength="30" autocomplete="off" enterkeyhint="send" placeholder="Reply all..." aria-label="Your answer"><button id="ss" onclick="answer()" aria-label="Send my answer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5 22 12 3 3.5v6.6L15 12 3 13.9z"/></svg></button></div>
       <p id="sdone"></p>
     </div>
+    <div id="bingo" class="fun hide"><div class="th"># office-bingo <em>FILLS ITSELF</em></div><div id="bgrid"></div><p id="bs2"></p></div>
     <p id="quip" aria-hidden="true"></p>
     <a id="lv" href="#" onclick="leave();return false">Leave meeting / change team or ID</a>
   </div>
@@ -408,12 +447,22 @@ function sndToggle() { SND.toggle(); }
 SND.paint();
 // This phone keeps one id, so a refresh keeps its team and its approval.
 let pid = localStorage.getItem('replyall_pid'); if (!/^[a-z0-9]{8}$/.test(pid || '')) { pid = Math.random().toString(36).slice(2, 10).padEnd(8, '0'); localStorage.setItem('replyall_pid', pid); }
+// Profile: an avatar and a joke job title, kept on this phone and sent with every message.
+const AV = ['☕', '\u{1F4CE}', '\u{1F5A8}️', '\u{1F984}', '\u{1F422}', '\u{1F989}', '\u{1F419}', '\u{1F369}', '\u{1F335}', '\u{1F9CA}', '\u{1F996}', '\u{1F427}'];
+const JT = ['VP of Vibes', 'Chief Snack Officer', 'Reply-All Enthusiast', 'Head of Circling Back', 'Synergy Lead', 'Intern (unpaid)', 'Director of Fridge Ops', 'Senior Meeting Attendee', 'Spreadsheet Whisperer', 'Professional Nodder', 'Calendar Tetris Champ', 'Keeper of the Stapler'];
+let prof = null; try { prof = JSON.parse(localStorage.getItem('replyall_prof')); } catch (e) {}
+if (!prof || !(prof.av >= 0 && prof.av < AV.length) || !(prof.jt >= 0 && prof.jt < JT.length)) prof = {av: Math.floor(Math.random() * AV.length), jt: Math.floor(Math.random() * JT.length)};
+function saveProf() { try { localStorage.setItem('replyall_prof', JSON.stringify(prof)); } catch (e) {} }
+function paintProf() { $('avs').innerHTML = AV.map((a, i) => `<button type="button" role="radio" aria-checked="${i === prof.av}" aria-label="Avatar ${i + 1}" class="${i === prof.av ? 'on' : ''}" onclick="pickAv(${i})">${a}</button>`).join('');
+  $('jt').innerHTML = JT.map((j, i) => `<option value="${i}" ${i === prof.jt ? 'selected' : ''}>${j}</option>`).join(''); }
+function pickAv(i) { prof.av = i; saveProf(); paintProf(); buzzz(15); SND.play('pop'); }
+paintProf(); $('jt').addEventListener('change', e => { prof.jt = Number(e.target.value) || 0; saveProf(); });
 let guessed = {}, lastPm = null, sid = '', team = 2, name = '', n = 0, lastReact = 0, st = null, known = null, joined = false, pressed = 0, answered = {}, sentAt = 0, lastMode = '', ctx = '', qi = 0;
 try { answered = JSON.parse(sessionStorage.getItem('replyall_ans')) || {}; guessed = JSON.parse(sessionStorage.getItem('replyall_guess')) || {}; } catch (e) {}
 const code = () => (sid || $('code').value.trim().toUpperCase()), api = k => '/api/relay?room=ra-' + code().toLowerCase() + '&k=' + k;
 function send(k, extra) {
   return fetch(api('up'), {method: 'POST', headers: {'content-type': 'application/json'},
-    body: JSON.stringify(Object.assign({id: pid + '-' + k + '-' + Date.now().toString(36) + (n++), sid, p: pid, k, team, name, t: Date.now()}, extra || {}))}).then(r => { if (!r.ok) throw 0; });
+    body: JSON.stringify(Object.assign({id: pid + '-' + k + '-' + Date.now().toString(36) + (n++), sid, p: pid, k, team, name, av: prof.av, jt: prof.jt, t: Date.now()}, extra || {}))}).then(r => { if (!r.ok) throw 0; });
 }
 // What the host says right now: team names, whether buzzers are open, who was first, which phones may buzz, and the survey question.
 async function poll() {
@@ -458,8 +507,8 @@ function show() {
   $('sc').classList.toggle('hide', !(st && st.scores));
   if (st && st.scores) [0, 1].forEach(i => { const d = $('sc' + i); set(d.firstChild, names[i]); set(d.lastChild, String(st.scores[i])); cls(d, team === i ? 'me' : ''); });
   $('mail').classList.toggle('hide', !(st && st.q)); set($('live'), st && st.q || '');
-  set($('who'), (name ? name + ' / ' : '') + (team === 2 ? 'Audience' : names[team]) + ' / ID ' + sid);
-  set($('av'), (name || (team === 2 ? 'A' : '?')).charAt(0).toUpperCase()); cls($('av'), st ? '' : 'off');
+  set($('who'), (name ? name + ' / ' : '') + JT[prof.jt] + ' / ' + (team === 2 ? 'Audience' : names[team]));
+  set($('av'), AV[prof.av]); cls($('av'), st ? 'pic' : 'pic off');
   const ok = st && st.ok.includes(pid), lobby = team !== 2 && st && !ok, v = st && st.survey;
   let mode = '';
   $('pad').classList.toggle('hide', team === 2 || !!lobby); $('hint').classList.toggle('hide', team === 2 || !!lobby);
@@ -481,9 +530,10 @@ function show() {
     if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); SND.play('chime'); } else if (mode === 'slow') { buzzz(220); SND.play('bonk'); } }
   }
   lastMode = mode;
-  showCall(); showVote(); takePromo();
+  showCall(); showVote(); takePromo(); showFun();
   $('survey').classList.toggle('hide', !v);
-  $('stage').classList.toggle('hide', !!v && !/^(open|sent)$/.test(mode));
+  if (team === 2 && st && !v) $('lobby').classList.add('hide');   // the audience has the fun cards instead of a mute card
+  $('stage').classList.toggle('hide', (!!v && !/^(open|sent)$/.test(mode)) || (team === 2 && $('lobby').classList.contains('hide')));
   document.body.classList.toggle('hot', /^(open|sent|first|slow)$/.test(mode));   // the hand is in play: it moves to the top of the screen
   if (v) $('mail').classList.add('hide');   // the survey card already carries the question   // the survey gets the whole screen unless a buzz is in play
   if (v) {
@@ -519,6 +569,52 @@ function takePromo() {
   msg.textContent = 'You have been promoted to ' + ((st.names || DEF)[team]) + '. Your phone is now a buzzer.'; setTimeout(() => { msg.textContent = ''; }, 6000);
   ctx = ''; lastMode = ''; show(); burst();
 }
+// ---------- the fun layer: side bets, office bingo, hot takes, MVP vote ----------
+let bets = {}, hots = {}, mvpv = '', bsent = '', lastHits = '';
+try { bets = JSON.parse(sessionStorage.getItem('replyall_bet')) || {}; hots = JSON.parse(sessionStorage.getItem('replyall_hot')) || {}; mvpv = sessionStorage.getItem('replyall_mvp') || ''; bsent = sessionStorage.getItem('replyall_bingo') || ''; } catch (e) {}
+const keep = (k, v) => { try { sessionStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) {} };
+// Office bingo: the same card the host computes for this phone (seeded by its id). The game fills it; nobody has to tap.
+const BINGO = ['strike', 'three', 'steal', 'kept', 'clean', 'top', 'roast', 'gag', 'double', 'survey', 'promo', 'pitch', 'zero', 'dup', 'target', 'audhit', 'rest', 'chip'];
+const BL = {strike: 'A strike', three: 'Three strikes', steal: 'A steal works', kept: 'A steal fails', clean: 'Board cleared, no strikes', top: 'Top answer found', roast: 'Chip roasts an answer',
+  gag: 'An office interruption', double: 'Double points', survey: 'The room writes a board', promo: 'Someone gets promoted', pitch: 'A pitch-off', zero: 'A zero in the final',
+  dup: 'A repeat in the final', target: 'Final hits the target', audhit: 'The audience calls one', rest: 'Answers nobody got', chip: 'Chip goes off script', free: 'Someone says synergy'};
+const BLN = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+function bcard(p) { let h = 7; for (const ch of String(p)) h = (Math.imul(h, 31) + ch.charCodeAt(0)) >>> 0;
+  const a = BINGO.slice(); for (let i = a.length - 1; i > 0; i--) { h = (Math.imul(h, 1103515245) + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  const c = a.slice(0, 8); c.splice(4, 0, 'free'); return c; }
+const CARD = bcard(pid);
+$('bgrid').innerHTML = CARD.map(k => `<div class="${k === 'free' ? 'free hit' : ''}">${BL[k]}</div>`).join('');
+function showFun() {
+  const on = joined && st, ev = new Set(on && st.ev ? st.ev.split(',') : []), cells = $('bgrid').children, won = on && st.bg && st.bg[pid];
+  $('bingo').classList.toggle('hide', !on || !!(st && (st.survey || st.vote)));
+  const hits = CARD.map(k => k === 'free' || ev.has(k)), lines = BLN.filter(l => l.every(i => hits[i])), inLine = new Set(lines.flat()), key = hits.join('');
+  CARD.forEach((k, i) => cls(cells[i], (k === 'free' ? 'free ' : '') + (hits[i] ? 'hit' : '') + (inLine.has(i) ? ' ln' : '')));
+  if (on && lastHits && key !== lastHits && hits.filter(Boolean).length > lastHits.split('true').length - 1) { buzzz(30); SND.play('pop'); }
+  lastHits = on ? key : '';
+  if (lines.length && on && bsent !== sid && !won) { bsent = sid; keep('replyall_bingo', sid); send('bingo').catch(() => { bsent = ''; }); buzzz([60, 50, 60, 50, 200]); SND.play('chime'); msg.textContent = 'BINGO! Watch the big screen.'; setTimeout(() => { msg.textContent = ''; }, 4000); }
+  $('bingo').classList.toggle('won', !!won);
+  set($('bs2'), won ? 'Bingo #' + won + '. Bonus points are on your score.' : lines.length ? 'Bingo! Sending it to the host...' : 'Squares fill themselves as things happen in the show. One line in any direction wins bonus points.');
+  // hot take
+  const h = on && st.hot; $('hotc').classList.toggle('hide', !h || !!st.vote || !!st.survey);
+  if (h) { set($('hq'), h.q); const tot = h.c[0] + h.c[1], mine = hots[h.i];
+    [0, 1].forEach(i => { const b = $('h' + i), pc = tot ? Math.round(h.c[i] / tot * 100) : 0, html = `${esc(h.o[i])}${mine !== undefined ? `<b>${pc}%</b><i style="width:${pc}%"></i>` : ''}`; if (b.innerHTML !== html) b.innerHTML = html; cls(b, mine === i ? 'on' : ''); }); }
+  // MVP
+  const m = on && st.mvp; $('mvp').classList.toggle('hide', !m || (m.c && !m.c.some(c => c[0] !== pid)));
+  if (m && m.w) { set($('mvq'), 'MVP: ' + m.w + '. The room has spoken.'); $('mvpl').innerHTML = ''; }
+  else if (m) { set($('mvq'), mvpv ? 'Vote in. Tap another name to change it.' : 'Who carried their team tonight? Tap one.');
+    const html = m.c.filter(c => c[0] !== pid).map(c => `<button class="${mvpv === c[0] ? 'on' : ''}" onclick="mvp('${c[0]}')"><span>${AV[c[2]] || ''}</span>${esc(c[1])}</button>`).join(''); if ($('mvpl').innerHTML !== html) $('mvpl').innerHTML = html; }
+  // side bet (audience): open while the board takes guesses
+  const g = on && st.gb, bt = $('bet'); bt.classList.toggle('hide', !(g && st.q && team === 2));
+  if (g && st.q && team === 2) { const names = st.names || DEF, mine = bets.g === g.id ? bets.v : undefined;
+    [0, 1].forEach(i => { const b = $('b' + i); set(b, names[i]); cls(b, mine === i ? 'on' : ''); b.disabled = !g.open; });
+    const br = $('br'), pts = 15 * (g.m || 1);
+    if (g.aw === 0 || g.aw === 1) { cls(br, mine === undefined ? '' : mine === g.aw ? 'win' : 'miss'); set(br, mine === undefined ? names[g.aw] + ' took it.' : mine === g.aw ? 'Called it. +' + pts + ' points.' : 'Wrong call. ' + names[g.aw] + ' took it.'); }
+    else { cls(br, ''); set(br, mine === undefined ? (g.open ? 'Right call pays ' + pts + ' points. Closes at the first reveal.' : 'Bets are closed for this board.') : 'Your money is on ' + names[mine] + '.'); } }
+}
+const esc = x => String(x).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+function bet(i) { const g = st && st.gb; if (!g || !g.open) return; bets = {g: g.id, v: i}; keep('replyall_bet', bets); buzzz(20); SND.play('pop'); showFun(); send('bet', {g: g.id, v: i}).catch(() => {}); }
+function hot(i) { const h = st && st.hot; if (!h) return; hots[h.i] = i; keep('replyall_hot', hots); buzzz(20); SND.play('pop'); showFun(); send('hot', {h: h.i, v: i}).catch(() => {}); }
+function mvp(p) { if (!st || !st.mvp || st.mvp.w) return; mvpv = p; keep('replyall_mvp', p); buzzz(20); SND.play('pop'); showFun(); send('mvp', {v: p}).catch(() => {}); }
 // Call it: one guess per board, open until the first answer is revealed. Any answer on the board pays its points.
 function showCall() {
   const g = st && st.gb, c = $('call'), me = st && st.pm && st.pm[pid];
