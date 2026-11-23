@@ -22,6 +22,11 @@
       "permanent": false
     },
     {
+      "source": "/replyall/crew",
+      "destination": "/replyall/crew/",
+      "permanent": false
+    },
+    {
       "source": "/cereal",
       "destination": "/reports/cereal/",
       "permanent": true
