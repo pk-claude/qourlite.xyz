@@ -284,6 +284,15 @@ body{background-color:#04140c;background-image:radial-gradient(rgba(255,255,255,
 #msg{background:var(--cream)}
 .chip{background:var(--orange)}
 .chip b:after{background:var(--cream)}
+/* pitch-off vote */
+#vote{background:var(--paper);color:var(--ink);border-radius:16px;padding:12px 12px 11px;text-align:left;animation:rise .4s both;box-shadow:0 0 0 2px var(--orange),0 0 40px rgba(249,99,2,.35),0 22px 50px rgba(0,0,0,.55)}
+#vq{font-weight:800;font-size:17px;line-height:1.25;margin:2px 0 10px}
+.vbtn{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.vbtn button{min-height:76px;padding:10px 8px;border-radius:14px;background:#0d2c1d;color:var(--cream);font:900 24px/1 var(--disp);text-transform:uppercase;letter-spacing:.02em;overflow-wrap:anywhere;box-shadow:0 4px 0 #031009}
+.vbtn button:active{transform:translateY(3px);box-shadow:0 1px 0 #031009}
+.vbtn button.on{background:var(--orange);color:#fff;box-shadow:0 4px 0 #7a2f00}
+#vs{margin-top:8px;font-size:12.5px;color:var(--mute);text-align:center}
+body.voting #stage,body.voting #call{display:none}
 /* ---------- phone fit: one screen, no hunting ---------- */
 body.hot #sc{order:-3}body.hot #stage{order:-2}body.hot #mail{display:none}
 body.hot #call #cs{display:none}
@@ -334,6 +343,12 @@ body.typing .rxw{display:none}
       <div id="cl"><small id="ck"></small><span id="ct"></span></div>
       <div id="cv"></div>
       <div class="comp"><input id="ca" maxlength="30" autocomplete="off" enterkeyhint="send" placeholder="Your answer..." aria-label="Your guess"><button id="cgo" onclick="guess()">LOCK IT</button></div>
+    </div>
+    <div id="vote" class="hide">
+      <div class="th"># pitch-off <em>LIVE VOTE</em></div>
+      <p id="vq"></p>
+      <div class="vbtn"><button id="v0" onclick="vote(0)"></button><button id="v1" onclick="vote(1)"></button></div>
+      <p id="vs">Tap who pitched it better. You can change your vote until it closes.</p>
     </div>
     <div class="stage" id="stage">
       <div class="card hide" id="lobby"><div class="chip"><b></b><i></i></div><h3 id="lt">Waiting for the host to let you in</h3><p id="ls">The scorekeeper has to approve this phone.</p><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div><div id="lq"></div></div>
@@ -466,7 +481,7 @@ function show() {
     if (mode !== lastMode) { if (mode === 'open') buzzz(40); else if (mode === 'first') { buzzz([60, 50, 160]); burst(); SND.play('chime'); } else if (mode === 'slow') { buzzz(220); SND.play('bonk'); } }
   }
   lastMode = mode;
-  showCall();
+  showCall(); showVote(); takePromo();
   $('survey').classList.toggle('hide', !v);
   $('stage').classList.toggle('hide', !!v && !/^(open|sent)$/.test(mode));
   document.body.classList.toggle('hot', /^(open|sent|first|slow)$/.test(mode));   // the hand is in play: it moves to the top of the screen
@@ -481,6 +496,28 @@ function show() {
   }
   const c = gone ? 'ended' : !st ? 'conn' : lobby ? 'lobby' : v ? 'survey' : team === 2 ? 'aud' : mode === 'wait' ? 'wait' : '';
   if (c !== ctx) { ctx = c; quip(true); }
+}
+// Pitch-off: one vote per pitch, changeable until the host closes it.
+let voted = {};
+try { voted = JSON.parse(sessionStorage.getItem('replyall_vote')) || {}; } catch (e) {}
+function showVote() {
+  const v = st && st.vote, el = $('vote'); el.classList.toggle('hide', !v); document.body.classList.toggle('voting', !!v); if (!v) return;
+  set($('vq'), v.q); [0, 1].forEach(i => { const b = $('v' + i); set(b, v.n[i]); cls(b, voted[v.id] === i ? 'on' : ''); });
+}
+function vote(i) {
+  const v = st && st.vote; if (!v) return; voted = {[v.id]: i}; try { sessionStorage.setItem('replyall_vote', JSON.stringify(voted)); } catch (e) {}
+  buzzz(25); SND.play('pop'); showVote(); set($('vs'), 'Vote sent for ' + v.n[i] + '. Tap the other name to change it.');
+  send('vote', {v: i, vid: v.id}).catch(() => { set($('vs'), 'Could not send. Check your signal and tap again.'); });
+}
+// Fast-track promotion: the host moved this audience phone onto a team. Join again as that team and celebrate.
+function takePromo() {
+  const p = st && st.promo; if (!p || p.p !== pid || team !== 2) return;
+  let seen = ''; try { seen = localStorage.getItem('replyall_promo') || ''; } catch (e) {} if (seen === p.id) return;
+  try { localStorage.setItem('replyall_promo', p.id); } catch (e) {}
+  team = p.t; try { localStorage.setItem(LS, JSON.stringify({sid, team, name})); } catch (e) {}
+  send('join').catch(() => {}); buzzz([60, 50, 60, 50, 200]); SND.play('chime');
+  msg.textContent = 'You have been promoted to ' + ((st.names || DEF)[team]) + '. Your phone is now a buzzer.'; setTimeout(() => { msg.textContent = ''; }, 6000);
+  ctx = ''; lastMode = ''; show(); burst();
 }
 // Call it: one guess per board, open until the first answer is revealed. Any answer on the board pays its points.
 function showCall() {

@@ -458,6 +458,19 @@ body.nogl #stagebg{display:none}
 }
 @keyframes cufade{0%{opacity:0}12%,88%{opacity:1}100%{opacity:0}}
 
+/* pitch-off vote meter */
+#vote{position:absolute;left:50%;bottom:15cqh;width:74cqw;transform:translate(-50%,140%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);z-index:8;padding:2.2cqh 2cqw 2.6cqh;border-radius:1.4cqw;background:linear-gradient(180deg,rgba(13,44,29,.97),rgba(3,16,9,.97));box-shadow:0 0 0 .2cqw rgba(255,201,60,.45),0 3cqh 6cqw rgba(0,0,0,.6);text-align:center;pointer-events:none}
+#vote.on{transform:translate(-50%,0)}
+#vote .vk{font:800 1.2cqw var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--orange)}
+#vote .vq{margin:.8cqh 0 1.8cqh;font:600 5.4cqh/1.1 var(--chalk);color:var(--cream)}
+#vote .vr{display:grid;grid-template-columns:1fr 1fr;gap:2cqw}
+#vote .vn{display:flex;justify-content:space-between;align-items:baseline;font:900 4.4cqh/1 var(--disp);text-transform:uppercase;color:#fff;margin-bottom:1cqh}
+#vote .vn b{font-size:5.4cqh;color:var(--gold)}
+#vote .vb{height:3.4cqh;border-radius:2cqh;background:rgba(255,255,255,.1);overflow:hidden}
+#vote .vb i{display:block;height:100%;width:0;border-radius:2cqh;transition:width .6s cubic-bezier(.2,.9,.3,1)}
+#vote .c0 .vb i{background:linear-gradient(90deg,#ff7a1a,#ffb36b)}#vote .c1 .vb i{background:linear-gradient(90deg,#7cc4ff,#cfeaff)}
+#vote .win .vn{color:var(--gold)}
+#vote .vf{margin-top:1.6cqh;font:800 1.3cqw var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#cfe0d4}
 /* ---------- Winter Fest dressing ---------- */
 .logo{font:400 21cqh/1 var(--script);text-transform:none;letter-spacing:0;padding:0 2cqw}
 .logo b{background:none;color:var(--cream);-webkit-background-clip:border-box;background-clip:border-box;filter:drop-shadow(0 .4cqh 0 #0b2a1c) drop-shadow(0 0 3cqw rgba(255,190,110,.45)) drop-shadow(0 2cqh 3cqw rgba(0,0,0,.6))}
@@ -490,6 +503,7 @@ body.nogl #stagebg{display:none}
 <div id="stage"><div class="center"><div class="sub0">Open this screen from the host page</div></div></div>
 <canvas id="fx"></canvas>
 <div id="over"></div>
+<div id="vote"></div>
 <div id="chip" data-mood="idle"><div class="chw"><div class="chp"><svg viewBox="0 0 96 116" aria-hidden="true">
   <defs><linearGradient id="chg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7a1a"/><stop offset="1" stop-color="#4fae7a"/></linearGradient></defs>
   <g class="chh">
@@ -959,6 +973,15 @@ function chipSay(text) {
   chipT = setTimeout(() => { chipSaying = false; chipBox.classList.remove('say', 'talk'); chipVis(); }, 2600 + text.length * 70);
 }
 
+// ---------- pitch-off vote meter ----------
+function voteSync() {
+  const el = document.getElementById('vote'), v = S.vote; el.classList.toggle('on', !!v); if (!v) return;
+  const tot = v.c[0] + v.c[1], foot = v.open ? 'Vote on your phone now' : v.w === null ? 'Voting opens after both pitches' : v.w < 0 ? 'Tie. The host decides.' : esc(v.n[v.w]) + ' is hired';
+  if (!el.firstChild) el.innerHTML = '<div class="vk">Pitch-off / live vote</div><div class="vq"></div><div class="vr">' + [0, 1].map(i => `<div class="c${i}"><div class="vn"><span></span><b>0</b></div><div class="vb"><i></i></div></div>`).join('') + '</div><div class="vf"></div>';
+  el.querySelector('.vq').textContent = v.q; el.querySelector('.vf').innerHTML = foot;
+  [0, 1].forEach(i => { const c = el.querySelector('.c' + i); c.querySelector('.vn span').textContent = v.n[i]; c.querySelector('.vn b').textContent = v.c[i]; c.querySelector('.vb i').style.width = (tot ? Math.round(v.c[i] / tot * 100) : 0) + '%'; c.classList.toggle('win', v.w === i); });
+}
+
 // ---------- link to the host page ----------
 // The host sends every update on two links; the sequence number drops the copy. On load this page reads the last saved
 // state, so it recovers by itself if either window is refreshed.
@@ -969,6 +992,7 @@ function recv(d) {
   if (built === key) sync(); else look();
   if (!moodT && chipBox.dataset.mood !== chipRest()) chipBox.dataset.mood = chipRest(); chipLook(); chipVis();
   const jb = document.getElementById('joinbox'), on = !!(S.join && S.phones); if (on !== jb.classList.contains('on')) { jb.classList.toggle('on', on); jb.innerHTML = on ? `<div class="how">${qr(S.joinUrl)}<div>Play along on your phone.<br>Scan, or open<br><b style="font-size:${fit(shortUrl(), 2.6, 76)}cqw">${esc(shortUrl())}</b><br>code <b style="font-size:4.4cqw">${esc(S.sid)}</b></div></div>` : ''; }
+  voteSync();
   effects(fx);
 }
 const bc = 'BroadcastChannel' in window ? new BroadcastChannel('replyall') : null;
