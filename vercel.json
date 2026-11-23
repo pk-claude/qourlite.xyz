@@ -8,9 +8,17 @@
     },
     "api/quip.js": {
       "maxDuration": 30
+    },
+    "api/snowman.js": {
+      "maxDuration": 60
     }
   },
   "redirects": [
+    {
+      "source": "/snowman",
+      "destination": "/snowman/",
+      "permanent": false
+    },
     {
       "source": "/replyall",
       "destination": "/replyall/",
