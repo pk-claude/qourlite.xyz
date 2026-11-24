@@ -21,6 +21,21 @@ body.nogl #stagebg{display:none}
 #stage{position:absolute;inset:0;z-index:2}
 #fx{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none}
 #over{position:absolute;inset:0;z-index:7;pointer-events:none}
+/* wow: lead change band */
+.flip{position:absolute;left:-4cqw;right:-4cqw;top:36cqh;z-index:12;padding:2.4cqh 0 0;text-align:center;pointer-events:none;background:linear-gradient(180deg,rgba(4,18,11,.96),rgba(10,40,26,.96));border-top:.5cqh solid var(--c);border-bottom:.5cqh solid var(--c);box-shadow:0 0 8cqw color-mix(in srgb,var(--c) 60%,transparent);transform:skewY(-3deg);animation:flipin 4.2s cubic-bezier(.2,.9,.3,1) forwards}
+.flip .fk{font:800 1.2cqw var(--mono);letter-spacing:.4em;text-transform:uppercase;color:var(--c)}
+.flip .fh{font:900 4cqh/1 var(--disp);letter-spacing:.2em;text-transform:uppercase;color:#fff;margin-top:1cqh}
+.flip .fn{font:900 12cqh/1 var(--disp);text-transform:uppercase;color:var(--c);text-shadow:0 0 4cqw color-mix(in srgb,var(--c) 70%,transparent);animation:pump .6s .5s 2}
+.flip .ft{margin-top:1.6cqh;padding:1cqh 0;background:var(--c);color:#04120b;overflow:hidden;white-space:nowrap;font:800 1.6cqw var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.flip .ft span{display:inline-block;animation:tickr 4.2s linear}
+@keyframes flipin{0%{transform:skewY(-3deg) translateX(-110%)}12%,85%{transform:skewY(-3deg) translateX(0)}100%{transform:skewY(-3deg) translateX(110%)}}
+@keyframes tickr{to{transform:translateX(-50%)}}
+/* wow: steal in progress, the whole stage goes on alert */
+body.steal #stage:after{content:"";position:absolute;inset:.6cqw;border:.35cqw solid #ff3b30;border-radius:1.4cqw;box-shadow:inset 0 0 5cqw rgba(255,59,48,.45),0 0 4cqw rgba(255,59,48,.6);pointer-events:none;z-index:6;animation:alarm 1s ease-in-out infinite}
+@keyframes alarm{50%{opacity:.35}}
+/* wow: last ten seconds of the final, the edges close in */
+body.crunch:after{content:"";position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(213,22,12,.55));animation:alarm .5s ease-in-out infinite}
+body.crunch .rush .dig{animation:pump .5s infinite}
 #cards{position:absolute;inset:0;z-index:9;pointer-events:none}
 #joinbox{position:absolute;inset:0;z-index:10;pointer-events:none}
 .mono{font-family:var(--mono);font-weight:800;letter-spacing:.2em;text-transform:uppercase}
@@ -136,15 +151,18 @@ body.nogl #stagebg{display:none}
 .tk .spk{position:absolute;left:0;right:0;bottom:0;width:100%;height:42%;opacity:.5}
 .tk .spk polyline{fill:none;stroke:var(--c);stroke-width:1.4;vector-effect:non-scaling-stroke}
 .tk .spk polygon{fill:color-mix(in srgb,var(--c) 18%,transparent)}
-.tk .flr{font:800 .8cqw var(--mono);letter-spacing:.2em;padding:.5cqh .7cqw;border-radius:.4cqw;background:var(--c);color:var(--ink);opacity:0;transform:scale(.6);transition:all .35s cubic-bezier(.3,1.6,.5,1)}
+.tk .flr{font:800 1.15cqw var(--mono);letter-spacing:.2em;padding:.6cqh .9cqw;text-transform:uppercase;border-radius:.4cqw;background:var(--c);color:var(--ink);opacity:0;transform:scale(.6);transition:all .35s cubic-bezier(.3,1.6,.5,1)}
 .tk.ctl{border-color:var(--c);box-shadow:0 0 0 .2cqw var(--c),0 0 5cqw color-mix(in srgb,var(--c) 45%,transparent),0 2cqh 4cqw rgba(0,0,0,.5)}
 .tk.ctl .flr,.tk.buzz .flr{opacity:1;transform:none}
 .tk.buzz{animation:buzz .5s 2;border-color:#fff}
+.tk{transition:box-shadow .4s,border-color .4s,transform .4s,opacity .4s,filter .4s}.tk.idle{opacity:.5;filter:saturate(.4)}
 @keyframes buzz{30%{transform:scale(1.04);box-shadow:0 0 0 .4cqw #fff,0 0 8cqw var(--c)}}
 .tk.paid{animation:paid .8s}
 @keyframes paid{25%{transform:scale(1.05);box-shadow:0 0 0 .3cqw var(--gold),0 0 8cqw rgba(255,201,60,.8)}}
 .mid{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:.6cqh 0 .2cqh}
 .mid .lab{font:800 1cqw var(--mono);letter-spacing:.34em;color:rgba(255,255,255,.55);text-transform:uppercase}
+.mid .lab .mx{font-size:1.35cqw;color:#ffb347;text-shadow:0 0 1cqw rgba(255,122,26,.8);animation:mxp 1.2s ease-in-out infinite}
+@keyframes mxp{50%{color:#fff;text-shadow:0 0 2.4cqw rgba(255,150,40,1)}}
 .pot{font:900 9.6cqh/0.95 var(--disp);font-variant-numeric:tabular-nums;filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 2cqw rgba(255,201,60,.35))}
 .pot.pump{animation:pump .45s}
 @keyframes pump{40%{transform:scale(1.18)}}
@@ -318,7 +336,7 @@ body.nogl #stagebg{display:none}
 .rush{position:absolute;inset:0}
 .rush .rh{position:absolute;left:3cqw;top:4cqh}
 .rush .rh .mono{font-size:1.1cqw;color:var(--ta)}
-.rush .rh h1{margin:.8cqh 0 0;font:900 11cqh/0.9 var(--disp);text-transform:uppercase}
+.rush .rh h1{margin:2.4cqh 0 0;font:900 11cqh/0.9 var(--disp);text-transform:uppercase}
 .rush .lq{margin-top:2cqh;max-width:60cqw;font:800 2.4cqw/1.15 var(--head);min-height:6cqh}
 .rush .lq.pop{animation:fin .4s}
 .rush .clk{position:absolute;right:3cqw;top:3cqh;display:flex;align-items:center;gap:2cqw}
@@ -462,6 +480,23 @@ body.nogl #stagebg{display:none}
 /* audience fun: hot-take poll (between boards) and bingo toasts (any time) */
 #hot{position:absolute;right:2.4cqw;bottom:16cqh;width:30cqw;z-index:7;padding:1.8cqh 1.4cqw;border-radius:1.2cqw;background:linear-gradient(180deg,rgba(13,44,29,.96),rgba(3,16,9,.96));box-shadow:0 0 0 .18cqw rgba(255,201,60,.4),0 2cqh 4cqw rgba(0,0,0,.5);transform:translateX(130%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);pointer-events:none}
 #hot.on{transform:none}
+/* title lobby: the poll sits in the left column, between the logo and the join pass, so it never covers the LED board */
+body[data-phase=title] #hot{left:25cqw;right:auto;bottom:34cqh;width:36cqw;transform:translate(-50%,6cqh);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.3,1.1),opacity .4s}
+body[data-phase=title] #hot.on{transform:translate(-50%,0);opacity:1}
+body:has(.ttl:not(.lob)) #hot{opacity:0}
+/* after a board: a slim bar in the bottom-left strip, under the board and clear of the streak dock */
+body[data-phase=round] #hot{left:7cqw;right:auto;bottom:2.4cqh;width:44cqw;height:6.6cqh;padding:0 1.4cqw;border-radius:4cqh;display:grid;grid-template-columns:minmax(0,1fr) 20cqw;grid-template-rows:1fr 1fr;column-gap:1.4cqw;align-items:center;transform:translateY(14cqh)}
+body[data-phase=round] #hot.on{transform:none}
+/* Chip's speech bubble uses the same strip: the poll steps aside while Chip talks */
+body[data-phase=round] #hot{transition:transform .5s cubic-bezier(.2,.9,.3,1.1),opacity .3s}
+body:has(#chip.say)[data-phase=round] #hot{opacity:0}
+body[data-phase=round] #hot .hk{grid-area:1/1;font-size:.8cqw;align-self:end}
+body[data-phase=round] #hot .hq{grid-area:2/1;margin:0;font-size:2.8cqh;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:start}
+body[data-phase=round] #hot .hr{grid-column:2;margin:0;gap:.5cqw;font-size:1.8cqh}
+body[data-phase=round] #hot .hr span{width:9cqw}
+body[data-phase=round] #hot .hr u{height:1.4cqh}
+body[data-phase=round] #hot .hr b{width:3cqw}
+body[data-phase=round] #hot .hf{display:none}
 #hot .hk{font:800 .95cqw var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--orange)}
 #hot .hq{margin:.6cqh 0 1.4cqh;font:600 3.6cqh/1.15 var(--chalk);color:var(--cream)}
 #hot .hr{display:flex;align-items:center;gap:.8cqw;margin-top:.9cqh;font:800 2.2cqh var(--head);color:#fff}
@@ -490,6 +525,7 @@ body.nogl #stagebg{display:none}
 #rules .rd i{width:3.4cqw;height:.9cqh;border-radius:1cqh;background:rgba(255,255,255,.18)}
 #rules .rd i.on{background:var(--orange)}
 #vote{position:absolute;left:50%;bottom:15cqh;width:74cqw;transform:translate(-50%,140%);transition:transform .5s cubic-bezier(.2,.9,.3,1.1);z-index:8;padding:2.2cqh 2cqw 2.6cqh;border-radius:1.4cqw;background:linear-gradient(180deg,rgba(13,44,29,.97),rgba(3,16,9,.97));box-shadow:0 0 0 .2cqw rgba(255,201,60,.45),0 3cqh 6cqw rgba(0,0,0,.6);text-align:center;pointer-events:none}
+#vote:not(.on){visibility:hidden;transition:transform .5s,visibility 0s .5s}
 #vote.on{transform:translate(-50%,0)}
 #vote .vk{font:800 1.2cqw var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--orange)}
 #vote .vq{margin:.8cqh 0 1.8cqh;font:600 5.4cqh/1.1 var(--chalk);color:var(--cream)}
@@ -611,7 +647,7 @@ function look() {
   if (ctl === 0) o = Object.assign(o, {b: '#ff7a1a', k: '#ffd9a8'}); if (ctl === 1) o = Object.assign(o, {a: '#a9dcff', k: '#e6f4ff'});
   if (p === 'title') o.speed = 1.3;
   if (p === 'survey') o = Object.assign(o, {a: '#4fae7a', b: '#ff7a1a', k: '#f6f1e6'});
-  if (p === 'lightning') { const max = S.lp ? 25 : 20, left = Math.max(0, S.timer); o.dim = Math.min(.85, (1 - left / max) * .85); o.k = '#ffb347'; o.speed = left <= 5 ? 2.2 : 1.2; }
+  if (p === 'lightning') { const max = S.lp ? 50 : 45, left = Math.max(0, S.timer); o.dim = Math.min(.85, (1 - left / max) * .85); o.k = '#ffb347'; o.speed = left <= 5 ? 2.2 : 1.2; }
   if (p === 'winner') { const w = S.teams[0].score === S.teams[1].score ? '#4fae7a' : TEAMC[S.teams[0].score > S.teams[1].score ? 0 : 1]; o = Object.assign(o, {a: '#b8740f', b: w, k: '#ffd76a', party: 1, speed: 1.4}); }
   STAGE.look(o);
 }
@@ -622,6 +658,8 @@ function sceneKey() {
   return p + ':' + (p === 'round' ? (S.useCustom ? 'you' + S.custom.n : S.ri) : p === 'lightning' ? S.li + ':' + S.lreset : p === 'survey' ? S.survey.n + S.survey.st : p === 'title' ? S.sid + (S.phones ? 1 : 0) : '');
 }
 const hist = [[0], [0]];   // score history per team for the sparklines (this screen's memory only)
+// Who is up right now: [team, label] or null. Shared idea with the big screen, so both always agree.
+const actT = () => S.phase === 'round' ? (S.buzz === 0 || S.buzz === 1 ? [S.buzz, 'Buzzed in'] : S.control === null || S.awarded ? null : S.strikes >= 3 ? [1 - S.control, 'Stealing'] : [S.control, 'Answering']) : S.phase === 'lightning' ? [S.lp, 'Up now'] : null;
 function teamHtml(i) {
   const n = S.teams[i].name;
   return `<div class="tk t${i}" id="t${i}"><div class="sym"><span>NYSE: ${esc(sym(n))}</span><b class="flr">Has the floor</b></div><div class="tnm" style="font-size:${fit(n, 2.1, 30)}cqw">${esc(n)}</div>
@@ -647,7 +685,7 @@ function build() {
   } else if (S.phase === 'round') {
     const r = cur(), max = Math.max(...r.a.map(a => Number(a[1]) || 0), 1), q = String(r.q);
     hist[0] = [S.teams[0].score]; hist[1] = [S.teams[1].score];
-    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">The budget</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
+    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">${r.mult > 1 ? `<b class="mx">${r.mult === 3 ? 'Triple' : 'Double'} budget x${r.mult}</b>` : 'The budget'}</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
         <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div>
       <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : 'Agenda item ' + (S.ri + 1)}</span></div>
         <div class="q" style="--qfs:${Math.max(1.9, Math.min(2.8, 290 / (q.length + 6)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
@@ -687,6 +725,8 @@ function deal() { if (CALM) return; const b = $('.board'); if (!b) return; b.cla
 
 function sync() {
   look();
+  const steal = S.phase === 'round' && S.strikes >= 3 && !S.awarded && (S.control === 0 || S.control === 1); document.body.classList.toggle('steal', steal);
+  const tl = S.phase === 'lightning' ? Math.max(0, S.timer) : 99; document.body.classList.toggle('crunch', tl > 0 && tl <= 10 && !!S.run);
   if (S.phase === 'title') { [0, 1].forEach(i => { const el = $('#n' + i); if (el) el.textContent = S.teams[i].name; }); const vs = $('.vs'); if (vs) vs.style.fontSize = fit(S.teams[0].name + S.teams[1].name, 3.6, 70) + 'cqw'; }
   if (S.phase === 'round') syncRound();
   if (S.phase === 'survey') survSync();
@@ -701,7 +741,8 @@ function syncRound() {
     const tn = t.querySelector('.tnm'); if (tn.textContent !== S.teams[i].name) { tn.textContent = S.teams[i].name; tn.style.fontSize = fit(S.teams[i].name, 2.1, 30) + 'cqw'; t.querySelector('.sym span').textContent = 'NYSE: ' + sym(S.teams[i].name); }
     if (sc !== old) { const d = sc - old, dl = t.querySelector('.dl'); dl.textContent = (d > 0 ? '▲ +' : '▼ ') + d + (old ? '  (' + (d > 0 ? '+' : '') + Math.round(d / Math.max(1, old) * 100) + '%)' : ''); dl.classList.toggle('upd', d > 0); hist[i].push(sc); if (hist[i].length > 12) hist[i].shift(); spark(i); }
     tween(el, sc, 900);
-    t.classList.toggle('ctl', S.control === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i);
+    const act = actT(); t.classList.toggle('ctl', !!act && act[0] === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); t.classList.toggle('idle', !!act && act[0] !== i);
+    const fl = t.querySelector('.flr'); if (act && act[0] === i && fl.textContent !== act[1]) fl.textContent = act[1];
   });
   const pot = $('.pot'); if (Number(pot.dataset.v) !== S.pot) { pot.classList.remove('pump'); void pot.offsetWidth; pot.classList.add('pump'); } tween(pot, S.pot, 600);
   $('.q').classList.toggle('on', !!S.showQ);
@@ -803,7 +844,7 @@ const SEGS = [
   {t: 'Calendar / today', e: 'Starts soon(ish)', ms: 12000, h: () => `<div class="k">Pre-meeting</div><h2>Winter Fest agenda</h2><ul class="ag">${[['Hot cocoa', '(mandatory)'], ['Gingerbread house', '(load-bearing)'], ['Action items', '(none)'], ['Leave early', '']].map(a => `<li><i>${TICK}</i>${a[0]}${a[1] ? `<small>${a[1]}</small>` : ''}<u>Pending approval</u></li>`).join('')}</ul><div class="foot">Eat. Sip. Play. Reply all.</div>`,
     run: el => { const li = el.querySelectorAll('li'); [1500, 3200, 4900].forEach((t, i) => lobAt(t, () => li[i].classList.add('ok'))); lobAt(7000, () => li[3].classList.add('pend')); lobAt(8600, () => el.querySelector('.foot').classList.add('on')); }},
   {t: 'Live poll / while you wait', e: 'Results are in', ms: 11000, h: () => `<div class="k">Office poll</div><h2>What are you here for?</h2><div class="poll">${[['The hot cocoa', 61], ['The gift table', 27], ['Team bonding', 9], ['Sorry, I was on mute', 3]].map((r, i) => `<div class="pr"><span>${r[0]}<b>${r[1]}%</b></span><u><i style="--p:${r[1] / 100};--dl:${.4 + i * .3}s"></i></u></div>`).join('')}</div>`},
-  {t: 'House rules', e: 'Read them. Nobody will.', ms: 15000, h: () => `<div class="k">How this works</div><h2>Three house rules</h2><ul class="rules"><li><b>1</b><div>Name the top answers<small>We surveyed people like you. Teams guess what they said.</small></div></li><li><b>2</b><div>Three strikes and it's a hostile takeover<small>The other team gets one answer to steal the whole budget.</small></div></li>${S.phones ? '<li><b>3</b><div>Everyone plays on their phone<small>Guess the top answer every round. Score points. Become Employee of the Quarter.</small></div></li>' : '<li><b>3</b><div>Cheer like your bonus depends on it<small>It does not. Cheer anyway.</small></div></li>'}</ul>`},
+  {t: 'House rules', e: 'Read them. Nobody will.', ms: 15000, h: () => `<div class="k">How this works</div><h2>Three house rules</h2><ul class="rules"><li><b>1</b><div>Guess the popular answer, not the right one<small>We surveyed people about office life. On the board means points.</small></div></li><li><b>2</b><div>Three strikes and it's a hostile takeover<small>The other team gets one answer to steal the whole budget.</small></div></li>${S.phones ? '<li><b>3</b><div>Audience: call your guess on your phone<small>Before the first answer shows. On the board means points. The top scorer joins a team after Round 2.</small></div></li>' : '<li><b>3</b><div>Cheer like your bonus depends on it<small>It does not. Cheer anyway.</small></div></li>'}</ul>`},
   {t: 'Did you know', e: 'Facts (unverified)', ms: 10000, h: () => `<div class="k">Office science</div><div class="fact">${esc(FACTS[lobF++ % FACTS.length])}</div>`},
   {t: 'Market open', e: 'Pre-market', ms: 11000, h: () => `<div class="k">Trading floor</div><h2>Tonight's tickers</h2><div class="mkt">${[0, 1].map(i => `<div style="--c:${TEAMC[i]}"><b>${esc(sym(S.teams[i].name))}</b><span>${esc(S.teams[i].name)}</span><em>0.00 / flat / analysts nervous</em></div>`).join('')}</div><div class="mktn">Every point either team scores moves its stock. Insider trading is encouraged.</div>`},
   {t: 'Now joining', e: 'Lobby', ms: 11000, h: () => { const names = (S.aud && S.aud.names || []).slice(-6); const rows = names.length ? names.map((n, i) => [n, JOINS[(lobJ + i) % JOINS.length]]) : ROLES.slice(0, 6).map((n, i) => [n, JOINS[(lobJ + i) % JOINS.length]]); lobJ += 3;
@@ -915,6 +956,7 @@ function effects(fx) {
   if (fx.confetti && window.FX) FX.confetti(fx.confetti);
   if (fx.chip) chipSay(fx.chip);
   if (fx.toast) toast(fx.toast);
+  if (fx.lead === 0 || fx.lead === 1) leadFlip(fx.lead);
   (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 8) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e;
     d.style.left = (Math.random() < .5 ? 1 + Math.random() * 7 : 90 + Math.random() * 7) + 'cqw'; d.style.fontSize = (3 + Math.random() * 1.6) + 'cqw'; d.style.setProperty('--wx', ((Math.random() - .5) * 6) + 'cqw'); document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 140));
 }
@@ -999,7 +1041,15 @@ function chipLook() {
   chipBox.style.setProperty('--lx', on ? (t ? 1 : -.45) : 0); chipBox.style.setProperty('--ly', on ? -1 : 0);
 }
 if (!CALM) setInterval(() => { if (!S || glanceT || chipBox.style.getPropertyValue('--ly') === '-1') return; chipBox.style.setProperty('--lx', Math.random() < .5 ? -1 : 1); glanceT = setTimeout(() => { glanceT = 0; chipLook(); }, 900); }, 6500);
+// Wow moment: the lead changes hands. A breaking-news band sweeps the screen in the new leader's colour.
+function leadFlip(i) {
+  setTimeout(() => { if (!S || S.phase !== 'round') return; const el = document.createElement('div'); el.className = 'flip'; el.style.setProperty('--c', TEAMC[i]);
+    const tk = esc(sym(S.teams[i].name)) + ' &#9650; ' + S.teams[i].score + ' / ' + esc(sym(S.teams[1 - i].name)) + ' &#9660; ' + S.teams[1 - i].score + ' / analysts stunned / ';
+    el.innerHTML = `<div class="fk">Breaking / market update</div><div class="fh">New market leader</div><div class="fn">${esc(S.teams[i].name)}</div><div class="ft"><span>${tk.repeat(4)}</span></div>`;
+    document.body.appendChild(el); if (window.FX) FX.confetti(90); chipMood('money'); setTimeout(() => el.remove(), 4200); }, 2300);
+}
 function chipSay(text) {
+  text = String(text || '').trim(); if (!text) return;   // never an empty speech bubble
   const out = document.getElementById('chipText'); clearTimeout(chipT); clearInterval(typeT); clearTimeout(talkT);
   chipSaying = true; chipBox.classList.add('say', 'talk'); chipVis(); out.textContent = ''; let i = 0;
   typeT = setInterval(() => { out.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(typeT); }, 22);
@@ -1012,7 +1062,7 @@ function chipSay(text) {
 const AV = ['☕', '\u{1F4CE}', '\u{1F5A8}️', '\u{1F984}', '\u{1F422}', '\u{1F989}', '\u{1F419}', '\u{1F369}', '\u{1F335}', '\u{1F9CA}', '\u{1F996}', '\u{1F427}'];
 // Hot take: a one-tap phone poll whenever nothing is in play. Shown before the show and after each board.
 function hotSync() {
-  const el = document.getElementById('hot'), h = S.hot, on = !!h && !S.rule && !S.join && ((S.phase === 'title') || (S.phase === 'round' && S.awarded)); el.classList.toggle('on', on); if (!on) return;
+  const el = document.getElementById('hot'), h = S.hot, on = !!h && !S.rule && !S.join && !S.vote && ((S.phase === 'title') || (S.phase === 'round' && S.awarded)); el.classList.toggle('on', on); if (!on) return;
   const q = h.q; if (!q) return; const tot = h.c[0] + h.c[1];
   if (el.dataset.i !== String(h.i)) { el.dataset.i = h.i; el.innerHTML = `<div class="hk">Hot take / vote on your phone</div><div class="hq"></div>` + [0, 1].map(() => '<div class="hr"><span></span><u><i></i></u><b>0%</b></div>').join('') + '<div class="hf"></div>'; }
   el.querySelector('.hq').textContent = q[0]; el.querySelectorAll('.hr').forEach((r, i) => { const pc = tot ? Math.round(h.c[i] / tot * 100) : 0; r.querySelector('span').textContent = q[i + 1]; r.querySelector('i').style.width = pc + '%'; r.querySelector('b').textContent = pc + '%'; });
