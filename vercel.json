@@ -27,6 +27,11 @@
       "permanent": false
     },
     {
+      "source": "/replyall/print",
+      "destination": "/replyall/print/",
+      "permanent": false
+    },
+    {
       "source": "/cereal",
       "destination": "/reports/cereal/",
       "permanent": true

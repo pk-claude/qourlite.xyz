@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>REPLY ALL - Room flyer</title>
+<link href="../vendor/fonts.css" rel="stylesheet">
+<link href="print.css" rel="stylesheet">
+<style>
+@page{size:letter portrait;margin:0}
+.page{width:8.5in;height:10.98in;display:flex;flex-direction:column}
+.band{background:var(--pine);color:#fff;text-align:center;padding:.32in .4in .28in;position:relative}
+.band .k{font:800 13px/1 var(--mono);letter-spacing:.3em;text-transform:uppercase;color:#ffb27a}
+.band h1{margin:.08in 0 0;font:900 84px/.9 var(--disp);letter-spacing:.02em}
+.band h1 em{font-style:normal;color:var(--orange)}
+.band p{margin:.1in 0 0;font:400 34px/1 var(--script);color:#ffe7c2}
+.lights{position:absolute;left:0;right:0;bottom:-9px;height:18px;background:radial-gradient(circle,#ffd35a 0 5px,transparent 6px) 0 0/40px 18px,radial-gradient(circle,#ff6b2c 0 5px,transparent 6px) 20px 0/40px 18px}
+.mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.14in;padding:.24in .5in 0}
+.big{font:900 46px/1 var(--disp);text-transform:uppercase;color:var(--pine);text-align:center}
+.qrbox{background:#fff;border:6px solid var(--pine);border-radius:22px;padding:.18in;line-height:0}
+.qrbox svg{width:2.9in;height:2.9in;display:block}
+.url{font:800 22px/1 var(--mono);color:var(--pine)}
+.code{display:flex;align-items:center;gap:.15in;font:800 18px/1 var(--body);color:var(--mute)}
+.code b{display:inline-block;min-width:2.1in;padding:.08in .18in;border:3px dashed var(--orange);border-radius:12px;font:800 40px/1 var(--mono);letter-spacing:.25em;color:var(--ink);text-align:center}
+.code b.none{font:800 20px/1.5 var(--body);letter-spacing:0;color:var(--mute)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:.14in;padding:.22in .45in .2in}
+.st{background:var(--cream);border-radius:14px;padding:.14in .12in;text-align:center}
+.st i{display:block;margin:0 auto .06in;width:.46in;height:.46in;border-radius:50%;background:var(--orange);color:#fff;font:900 26px/.46in var(--disp);font-style:normal}
+.st b{display:block;font:800 16px/1.15 var(--body);color:var(--pine)}
+.st span{display:block;margin-top:3px;font-size:12.5px;color:var(--mute)}
+.foot{background:var(--pine2);color:#fff;text-align:center;padding:.16in;font:800 17px/1.2 var(--body)}
+.foot em{font-style:normal;color:#ffb27a}
+</style>
+</head>
+<body>
+<div class="tools">
+  <span>Meeting ID (optional, from the control panel):</span><input id="ci" maxlength="4" placeholder="ABCD">
+  <button onclick="setCode()">Put it on the flyer</button><button onclick="print()">Print</button><a href="./">All printables</a>
+</div>
+<div class="page">
+  <div class="band"><div class="k">Winter Fest / live game show</div><h1>REPLY <em>ALL</em></h1><p>the survey showdown</p><div class="lights"></div></div>
+  <div class="mid">
+    <div class="big">You are not the audience.<br>You are playing.</div>
+    <div class="qrbox" id="qr"></div>
+    <div class="url" id="url">qourlite.xyz/replyall/buzz</div>
+    <div class="code">Meeting ID <b id="cd">on screen</b></div>
+  </div>
+  <div class="steps">
+    <div class="st"><i>1</i><b>Scan the code</b><span>Any phone camera</span></div>
+    <div class="st"><i>2</i><b>Type the Meeting ID</b><span>It is on the big screen</span></div>
+    <div class="st"><i>3</i><b>Join as audience</b><span>Pick a name and a job title</span></div>
+    <div class="st"><i>4</i><b>Guess every round</b><span>Right guesses score you points</span></div>
+  </div>
+  <div class="foot">Top scorer gets promoted onto a team. Plus side bets, office bingo and the pitch-off. <em>Hot Cocoa vs Chewy Cookies.</em></div>
+</div>
+<script src="../vendor/qrcode-generator-1.4.4.js"></script>
+<script>
+// The QR opens the phone page. With ?c=CODE it also carries the Meeting ID, so phones skip typing it.
+var BASE = 'https://qourlite.xyz/replyall/buzz/';
+function draw(c) {
+  var url = BASE + (c ? '?c=' + c : ''), q = qrcode(0, 'M'); q.addData(url); q.make();
+  document.getElementById('qr').innerHTML = q.createSvgTag({cellSize: 4, margin: 0, scalable: true});
+  var cd = document.getElementById('cd'); cd.textContent = c || 'shown on the big screen'; cd.className = c ? '' : 'none';
+  document.getElementById('ci').value = c || '';
+}
+function setCode() {
+  var c = document.getElementById('ci').value.trim().toUpperCase();
+  if (c && !/^[A-Z0-9]{4}$/.test(c)) { alert('The Meeting ID has 4 letters or numbers.'); return; }
+  history.replaceState(null, '', c ? '?c=' + c : location.pathname); draw(c);
+}
+draw((new URLSearchParams(location.search).get('c') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4));
+</script>
+</body>
+</html>

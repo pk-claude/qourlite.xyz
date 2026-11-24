@@ -1,0 +1,10 @@
+/* Shared look for REPLY ALL printables: Winter Fest colors on white paper. */
+:root{--pine:#0d3b26;--pine2:#165c3b;--orange:#f96302;--cream:#f6efe0;--ink:#13231a;--mute:#5d6b62;--gold:#e0a800;--ice:#2f7fb8;--mint:#1f9e5a;
+  --disp:"Big Shoulders","Arial Narrow",Impact,sans-serif;--body:"Bricolage","Segoe UI",Arial,sans-serif;--mono:"JetBrains Mono",Consolas,monospace;--script:"Kaushan Script","Segoe Script",cursive}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;background:#cfd6d1;color:var(--ink);font:500 15px/1.4 var(--body)}
+.page{position:relative;margin:24px auto;background:#fff;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.18)}
+.tools{max-width:1056px;margin:16px auto 0;padding:0 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-family:var(--body)}
+.tools button,.tools a{font:800 14px/1 var(--body);padding:10px 14px;border-radius:8px;border:0;background:var(--pine);color:#fff;text-decoration:none;cursor:pointer}
+.tools input{font:800 16px/1 var(--mono);padding:8px 10px;width:110px;text-transform:uppercase;border:2px solid var(--pine);border-radius:8px}
+@media print{html,body{background:#fff}.page{margin:0;box-shadow:none;page-break-after:always;break-after:page}.page:last-of-type{page-break-after:auto;break-after:auto}.tools{display:none}}
