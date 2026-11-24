@@ -161,7 +161,8 @@ body.crunch .rush .dig{animation:pump .5s infinite}
 @keyframes paid{25%{transform:scale(1.05);box-shadow:0 0 0 .3cqw var(--gold),0 0 8cqw rgba(255,201,60,.8)}}
 .mid{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:.6cqh 0 .2cqh}
 .mid .lab{font:800 1cqw var(--mono);letter-spacing:.34em;color:rgba(255,255,255,.55);text-transform:uppercase}
-.mid .lab .mx{display:block;margin:.6cqh auto 0;width:max-content;padding:.4cqh .8cqw;border-radius:.6cqw;background:var(--orange);color:#fff;letter-spacing:.2em;font-size:1.1cqw;box-shadow:0 0 2cqw rgba(255,122,26,.7);animation:pump 1.2s ease-in-out infinite}
+.mid .lab .mx{font-size:1.35cqw;color:#ffb347;text-shadow:0 0 1cqw rgba(255,122,26,.8);animation:mxp 1.2s ease-in-out infinite}
+@keyframes mxp{50%{color:#fff;text-shadow:0 0 2.4cqw rgba(255,150,40,1)}}
 .pot{font:900 9.6cqh/0.95 var(--disp);font-variant-numeric:tabular-nums;filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 2cqw rgba(255,201,60,.35))}
 .pot.pump{animation:pump .45s}
 @keyframes pump{40%{transform:scale(1.18)}}
@@ -684,7 +685,7 @@ function build() {
   } else if (S.phase === 'round') {
     const r = cur(), max = Math.max(...r.a.map(a => Number(a[1]) || 0), 1), q = String(r.q);
     hist[0] = [S.teams[0].score]; hist[1] = [S.teams[1].score];
-    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">The budget${r.mult > 1 ? `<b class="mx">x${r.mult} ${r.mult === 3 ? 'triple' : 'double'} points</b>` : ''}</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
+    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">${r.mult > 1 ? `<b class="mx">${r.mult === 3 ? 'Triple' : 'Double'} budget x${r.mult}</b>` : 'The budget'}</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
         <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div>
       <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : 'Agenda item ' + (S.ri + 1)}</span></div>
         <div class="q" style="--qfs:${Math.max(1.9, Math.min(2.8, 290 / (q.length + 6)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
