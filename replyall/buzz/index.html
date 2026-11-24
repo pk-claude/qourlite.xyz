@@ -204,6 +204,8 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 
 #msg{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:9;max-width:406px;margin:0 auto;padding:11px 14px;border-radius:13px;background:var(--yellow);color:var(--ink);border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-weight:700;font-size:14.5px;text-align:center}
 #msg:empty{display:none}
+#chase{margin:0;padding:7px 12px;border-radius:10px;background:rgba(255,201,60,.12);border:1px solid rgba(255,201,60,.4);font:700 12.5px/1.3 var(--mono);color:inherit;text-align:center}
+#chase.hide{display:none}
 /* ---------- prime-time skin: matches the big screen (night stage, gold, paper memos) ---------- */
 :root{--ink:#04140c;--paper:#f6f1e6;--violet:#4fae7a;--pink:#a9dcff;--cyan:#ff7a1a;--yellow:#ffc93c;--green:#2fd97a;--red:#ff3b30;--line:#ddd3bd;--mute:#686579;--gold:#ffc93c;
   --goldtx:linear-gradient(180deg,#fff3c4 0%,#ffd45a 38%,#e9a514 62%,#ffcf4a 100%);
@@ -370,6 +372,7 @@ body.typing .rxw{display:none}
     <div class="rec" title="It is not">REC</div>
   </div>
   <div class="main">
+    <p id="chase" class="hide"></p>
     <div id="sc" class="hide"><div id="sc0"><span></span><b></b></div><div id="sc1"><span></span><b></b></div></div>
     <div id="mail" class="hide"><div class="chip"><b></b><i></i></div><div><small>Agenda item / from Chip</small><div id="live"></div></div></div>
     <div id="call" class="hide">
@@ -620,6 +623,7 @@ function showCall() {
   const g = st && st.gb, c = $('call'), me = st && st.pm && st.pm[pid];
   const pts = me ? me[0] : 0, rk = me ? me[3] : 0, mp = $('me'); set(mp, pts + ' pts' + (rk && pts ? ' / #' + rk : '')); mp.className = me && pts ? 'on' : '';
   if (lastPm && me && me[0] > lastPm[0]) { mp.className = 'on up'; }
+  rankNews(me); chase(me);
   c.classList.toggle('hide', !(g && st.q));
   if (team === 2 && g && st.q) $('lobby').classList.add('hide');   // the audience's mute card steps aside for the guess
   if (!g || !st.q) { lastPm = me; return; }
@@ -636,6 +640,20 @@ function showCall() {
   set($('cv'), me && me[1] ? '+' + me[1] + ' POINTS' : ''); set($('cgo'), guessed.a ? 'CHANGE' : 'LOCK IT');
   if (k !== c.dataset.k) { if (k === 'win') { buzzz([60, 50, 160]); SND.play('chime'); cburst(); } else if (k === 'miss' && c.dataset.k) SND.play('bonk'); c.dataset.k = k; }
   lastPm = me;
+}
+// rank movement: when your points lift you past people, say so
+let bestRk = 0, rkT = 0;
+function rankNews(me) {
+  if (!me || !me[0] || !me[3]) return; const rk = me[3];
+  if (bestRk && rk < bestRk && lastPm && me[0] > lastPm[0]) { const n = bestRk - rk; msg.textContent = 'Up ' + n + (n === 1 ? ' place' : ' places') + '. You are now #' + rk + ' in the room.'; clearTimeout(rkT); rkT = setTimeout(() => { msg.textContent = ''; }, 4000); buzzz([40, 40, 80]); }
+  bestRk = rk;
+}
+// the next spot up: how many points it takes
+function chase(me) {
+  const el = $('chase'); let t = '';
+  if (me && me[0] && me[3]) { const rk = me[3], up = rk > 1 && st.pm ? Object.values(st.pm).find(x => x[3] === rk - 1) : null, gap = up ? up[0] - me[0] : 0;
+    t = rk === 1 ? 'You are #1 in the room. Everyone is chasing you.' : up ? (gap > 0 ? gap + ' pts behind #' + (rk - 1) + '. Keep calling answers.' : 'Tied with #' + (rk - 1) + '. Next point wins it.') : ''; }
+  set(el, t); el.className = t ? '' : 'hide';
 }
 function cburst() { const d = document.createElement('div'); d.className = 'burst'; d.style.top = '60%'; for (let i = 0; i < 14; i++) { const p = document.createElement('i'); p.style.setProperty('--a', (i * 26) + 'deg'); p.style.setProperty('--d', (110 + (i % 4) * 20) + 'px'); d.appendChild(p); } $('call').appendChild(d); setTimeout(() => d.remove(), 1100); }
 function guess() {
