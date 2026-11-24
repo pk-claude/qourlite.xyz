@@ -13,7 +13,7 @@ window.GAME = {
   title: "Reply All",
   subtitle: "The Winter Fest survey showdown",
   tagline: "Eat. Sip. Play. Reply all.",
-  teams: ["Team Synergy", "Team Bandwidth"],
+  teams: ["Hot Cocoa", "Chewy Cookies"],
   lightningTarget: 200,
   finalStakes: "200 points and the whole room wins. No action items.",
 
@@ -194,6 +194,8 @@ window.GAME = {
 
   // PITCH-OFF TOPICS. Two audience volunteers get 30 seconds each to pitch one of these. The room votes on phones.
   pitches: [
+    "Is Die Hard a Christmas movie? Make your case.",
+    "What is the best college? Make your case.",
     "Sell us this used stapler.",
     "Pitch a new mandatory meeting. Make us want to attend.",
     "Convince us the office printer deserves a promotion.",

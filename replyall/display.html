@@ -597,6 +597,17 @@ body[data-phase=round] #hot .hf{display:none}
 .wfoot .pod li:nth-child(2) i{color:#d9d9e0}.wfoot .pod li:nth-child(3) i{color:#d08a4a}
 .wfoot .pod li em{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-style:normal}
 .wfoot .pod li u{text-decoration:none;font:700 1.1cqw var(--mono);color:rgba(255,255,255,.6)}
+
+/* team feedback: a much louder 'who is answering', and the rosters */
+.tk .ros{margin-top:.5cqh;font:600 1.05cqw/1.2 var(--body);color:rgba(255,255,255,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:19cqw}
+.tk.t1 .ros{margin-left:auto;text-align:right}
+.tk.t0{transform-origin:left center}.tk.t1{transform-origin:right center}
+.tk.ctl,.tk.buzz{transform:scale(1.05);z-index:2;border-width:.3cqw;box-shadow:0 0 0 .35cqw var(--c),0 0 7cqw color-mix(in srgb,var(--c) 65%,transparent),0 2cqh 4cqw rgba(0,0,0,.5);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 30%,#0c2a1c),rgba(4,18,11,.92))}
+.tk.ctl .flr,.tk.buzz .flr{font-size:1.6cqw;padding:.7cqh 1.1cqw;animation:flrp 1.3s ease-in-out infinite}
+@keyframes flrp{50%{box-shadow:0 0 1.6cqw var(--c)}}
+.tk.ctl .tnm,.tk.buzz .tnm{color:#fff}
+.tk.idle{opacity:.38;filter:saturate(.25) brightness(.8)}
+.cap.a0{border-color:var(--ta);box-shadow:0 0 1.6cqw rgba(255,122,26,.45)}.cap.a1{border-color:var(--tb);box-shadow:0 0 1.6cqw rgba(169,220,255,.45)}
 </style>
 </head>
 <body>
@@ -698,7 +709,7 @@ const hist = [[0], [0]];   // score history per team for the sparklines (this sc
 const actT = () => S.phase === 'round' ? (S.buzz === 0 || S.buzz === 1 ? [S.buzz, 'Buzzed in'] : S.control === null || S.awarded ? null : S.strikes >= 3 ? [1 - S.control, 'Stealing'] : [S.control, 'Answering']) : S.phase === 'lightning' ? [S.lp, 'Up now'] : null;
 function teamHtml(i) {
   const n = S.teams[i].name;
-  return `<div class="tk t${i}" id="t${i}"><div class="sym"><span>NYSE: ${esc(sym(n))}</span><b class="flr">Has the floor</b></div><div class="tnm" style="font-size:${fit(n, 2.1, 30)}cqw">${esc(n)}</div>
+  return `<div class="tk t${i}" id="t${i}"><div class="sym"><span>NYSE: ${esc(sym(n))}</span><b class="flr">Has the floor</b></div><div class="tnm" style="font-size:${fit(n, 2.1, 30)}cqw">${esc(n)}</div><div class="ros"></div>
     <div class="tsc" data-v="${S.teams[i].score}">${S.teams[i].score}</div><div class="dl">--</div>
     <svg class="spk" viewBox="0 0 100 40" preserveAspectRatio="none"><polygon/><polyline/></svg></div>`;
 }
@@ -780,6 +791,7 @@ function syncRound() {
     tween(el, sc, 900);
     const act = actT(); t.classList.toggle('ctl', !!act && act[0] === i && S.buzz !== i); t.classList.toggle('buzz', S.buzz === i); t.classList.toggle('idle', !!act && act[0] !== i);
     const fl = t.querySelector('.flr'); if (act && act[0] === i && fl.textContent !== act[1]) fl.textContent = act[1];
+    const rs = t.querySelector('.ros'), rt = roster(i).join(', '); if (rs.textContent !== rt) rs.textContent = rt;
   });
   const pot = $('.pot'); if (Number(pot.dataset.v) !== S.pot) { pot.classList.remove('pump'); void pot.offsetWidth; pot.classList.add('pump'); } tween(pot, S.pot, 600);
   $('.q').classList.toggle('on', !!S.showQ);
@@ -798,7 +810,7 @@ function syncRound() {
   // tug-of-war: each team's share of all points so far
   const a0 = S.teams[0].score, a1 = S.teams[1].score, tg = $('.tug i'); if (tg) tg.style.width = (a0 + a1 ? a0 / (a0 + a1) * 100 : 50).toFixed(1) + '%';
   pot.classList.toggle('fire', S.pot >= 100);
-  if ((S.buzz === 0 || S.buzz === 1) && S.buzz !== lastBuzz) slam(S.buzz); lastBuzz = S.buzz;
+  if ((S.buzz === 0 || S.buzz === 1) && S.buzz !== lastBuzz) slam(S.buzz, 'Buzzed in', buzzName()); lastBuzz = S.buzz;
   caption();
 }
 // where the show is: four boards, then the final
@@ -811,12 +823,13 @@ function caption() {
   let t = '';
   if (S.awarded) t = '';
   else if (!S.showQ) t = 'New agenda item. The question is coming up.';
-  else if (act && act[1] === 'Buzzed in') t = n(act[0]) + ' buzzed in first. Give your answer.';
-  else if (S.control !== 0 && S.control !== 1) t = 'Face-off: first team to buzz gets the first answer.';
+  else if (act && act[1] === 'Buzzed in') t = (buzzName() ? buzzName() + ' buzzed in for ' + n(act[0]) : n(act[0]) + ' buzzed in first') + '. The top answer wins the board.';
+  else if ((S.control !== 0 && S.control !== 1) && S.fo && S.fo.first) { const f = S.fo.first; t = f.k >= 0 ? n(f.t) + ' found #' + (f.k + 1) + '. ' + n(S.fo.next) + ': beat it to win the board.' : n(f.t) + ' missed. ' + n(S.fo.next) + ': any answer on the board wins it.'; }
+  else if (S.control !== 0 && S.control !== 1) t = 'Face-off: buzz in. The top answer wins the board.';
   else if (steal) t = n(act[0]) + ': one answer to steal all ' + S.pot + ' points.';
   else { const left = 3 - S.strikes; t = n(S.control) + ' is answering. ' + left + ' more wrong and ' + n(1 - S.control) + ' can steal.'; }
   const sp = cap.querySelector('span'); if (sp.textContent !== t) sp.textContent = t;
-  cap.classList.toggle('on', !!t); cap.classList.toggle('stl', steal);
+  cap.classList.toggle('on', !!t); cap.classList.toggle('stl', steal); const ta = act ? act[0] : S.fo && S.fo.first ? S.fo.next : -1; cap.classList.toggle('a0', ta === 0); cap.classList.toggle('a1', ta === 1);
   if (steal && !stealT) { stealT = Date.now(); stealIv = setInterval(stealTick, 200); stealTick(); } else if (!steal && stealT) stealStop();
 }
 // steal shot clock: pressure only. It never ends the turn; the host still judges the answer.
@@ -826,9 +839,12 @@ function stealTick() {
   cap.querySelector('.scl .arc').style.strokeDashoffset = (107 * (1 - left / STEAL_S)).toFixed(1); cap.classList.toggle('out', !left);
 }
 function stealStop() { clearInterval(stealIv); stealIv = 0; stealT = 0; const cap = $('#cap'); if (cap) cap.classList.remove('out'); }
-function slam(i) {
-  if (CALM) return; over.querySelectorAll('.slam').forEach(e => e.remove());
-  over.insertAdjacentHTML('beforeend', `<div class="slam s${i}"><small>Buzzed in</small><b style="font-size:${fit(S.teams[i].name, 7, 110)}cqw">${esc(S.teams[i].name)}</b></div>`);
+// who is on each team: names typed by the host, plus phones that joined that team
+function roster(i) { const seen = new Set(), out = []; String(S.teams[i].ros || '').split(',').concat(Object.values(S.pl || {}).filter(p => p.t === i).map(p => p.n)).forEach(x => { x = String(x || '').trim(); const k = x.toLowerCase(); if (x && !seen.has(k)) { seen.add(k); out.push(x); } }); return out; }
+const buzzName = () => { const p = S.buzzPid && S.pl && S.pl[S.buzzPid]; return p && p.n ? p.n : ''; };
+function slam(i, label, who) {
+  if (CALM) return; over.querySelectorAll('.slam').forEach(e => e.remove()); const big = who || S.teams[i].name, sm = who && !who.includes(S.teams[i].name) ? label + ' / ' + S.teams[i].name : label;
+  over.insertAdjacentHTML('beforeend', `<div class="slam s${i}"><small>${esc(sm)}</small><b style="font-size:${fit(big, 7, 110)}cqw">${esc(big)}</b></div>`);
   if (window.STAGE) STAGE.flash(TEAMC[i], .7); setTimeout(() => over.querySelectorAll('.slam').forEach(e => e.remove()), 1500);
 }
 function setStreak() { const el = $('#stk'); if (!el) return; const on = streak >= 2 && !S.awarded; el.classList.toggle('on', on); if (on) { el.querySelector('b').textContent = streak; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); } }
@@ -1029,6 +1045,7 @@ function effects(fx) {
   if (fx.chip) chipSay(fx.chip);
   if (fx.toast) toast(fx.toast);
   if (fx.lead === 0 || fx.lead === 1) leadFlip(fx.lead);
+  if (fx.won === 0 || fx.won === 1) setTimeout(() => { if (S && S.phase === 'round') slam(fx.won, 'Won the face-off', S.teams[fx.won].name + ' plays'); }, 900);
   (fx.react || []).forEach((e, i) => setTimeout(() => { if (document.querySelectorAll('.float').length >= 8) return; const d = document.createElement('div'); d.className = 'float'; d.textContent = e;
     d.style.left = (Math.random() < .5 ? 1 + Math.random() * 7 : 90 + Math.random() * 7) + 'cqw'; d.style.fontSize = (3 + Math.random() * 1.6) + 'cqw'; d.style.setProperty('--wx', ((Math.random() - .5) * 6) + 'cqw'); document.body.appendChild(d); setTimeout(() => d.remove(), 3300); }, i * 140));
 }
