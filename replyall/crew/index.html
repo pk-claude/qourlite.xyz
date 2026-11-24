@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>REPLY ALL - Crew</title>
+<link href="../vendor/fonts.css" rel="stylesheet">
+<style>
+/* Crew cheat sheet for REPLY ALL. Stand-alone page: reads nothing from the game files except the shared fonts. */
+:root{--night:#04140c;--pine:#0d2c1e;--pine2:#133a28;--line:rgba(255,255,255,.12);--cream:#f3e9d2;--mute:rgba(243,233,210,.66);
+  --op:#f96302;--host:#ffc93c;--wr:#a9dcff;--tech:#3dff8f;
+  --disp:"Big Shoulders","Arial Narrow",Impact,sans-serif;--head:"Bricolage","Arial Black",sans-serif;--body:"Bricolage","Segoe UI",Arial,sans-serif;--mono:"JetBrains Mono",Consolas,monospace;--script:"Kaushan Script","Segoe Script",cursive}
+*{box-sizing:border-box}
+html{background:var(--night)}
+body{margin:0;color:var(--cream);font:500 16px/1.45 var(--body);background:radial-gradient(900px 500px at 15% -10%,rgba(249,99,2,.18),transparent 70%),radial-gradient(900px 500px at 85% -10%,rgba(169,220,255,.12),transparent 70%),var(--night)}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 16px 64px}
+a{color:inherit}
+header{text-align:center;padding:8px 0 18px}
+header .k{font:800 12px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--op)}
+header h1{margin:6px 0 2px;font:400 clamp(44px,9vw,84px)/1 var(--script);color:#fff;text-shadow:0 4px 30px rgba(249,99,2,.35)}
+header p{margin:6px 0 0;color:var(--mute)}
+nav{position:sticky;top:0;z-index:5;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px 0;background:linear-gradient(var(--night) 70%,transparent)}
+nav a{text-decoration:none;font:800 13px/1 var(--mono);letter-spacing:.06em;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--pine)}
+nav a:hover{border-color:var(--cream)}
+@media (max-width:600px){nav{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none}nav a{flex:none}}
+h2{margin:44px 0 6px;font:900 clamp(30px,5vw,44px)/1 var(--disp);letter-spacing:.02em;text-transform:uppercase;color:#fff}
+h2+p.lead{margin:0 0 16px;color:var(--mute)}
+.card{background:linear-gradient(180deg,var(--pine2),var(--pine));border:1px solid var(--line);border-radius:16px;padding:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:860px){.grid4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.grid4{grid-template-columns:1fr}}
+.role{position:relative;border-top:5px solid var(--c);text-decoration:none;display:block}
+.role svg{width:44px;height:44px;color:var(--c)}
+.role h3{margin:8px 0 2px;font:800 20px/1.1 var(--head);color:#fff}
+.role .one{margin:0 0 12px;color:var(--mute);font-size:15px}
+.need{display:flex;gap:6px;flex-wrap:wrap}
+.need span{font:800 11px/1 var(--mono);letter-spacing:.04em;padding:6px 8px;border-radius:6px;background:rgba(0,0,0,.3)}
+.need b{color:var(--c)}
+.opt{position:absolute;top:12px;right:12px;font:800 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line);padding:4px 6px;border-radius:5px}
+.map svg{width:100%;height:auto;display:block}
+.map text{font-family:var(--body);font-weight:800}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:14px;color:var(--mute)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+@media (max-width:860px){.flow{grid-template-columns:repeat(2,1fr)}}
+.step{background:var(--pine);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.step .n{font:900 28px/1 var(--disp);color:#fff}
+.step .t{font:800 15px/1.15 var(--head);color:#fff}
+.step .m{font:800 11px/1 var(--mono);color:var(--mute)}
+.step .who{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto}
+.dot{font:800 10px/1 var(--mono);padding:4px 6px;border-radius:5px;color:#111;background:var(--c)}
+.sig{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:860px){.sig{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.sig{grid-template-columns:1fr}}
+.sig .card{text-align:center}
+.sig .big{font:400 30px/1.1 var(--script);color:var(--host);min-height:68px;display:flex;align-items:center;justify-content:center}
+.sig .arrow{font:900 22px/1 var(--disp);color:var(--mute);margin:4px 0}
+.sig .act{display:inline-block;font:800 14px/1 var(--mono);padding:9px 12px;border-radius:8px;background:var(--op);color:#fff}
+.sheet{border-left:6px solid var(--c);margin-top:14px}
+.sheet .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sheet .top svg{width:40px;height:40px;color:var(--c);flex:none}
+.sheet h3{margin:0;font:900 30px/1 var(--disp);text-transform:uppercase;color:#fff}
+.sheet .where{margin-left:auto;font:800 12px/1.3 var(--mono);color:var(--mute);text-align:right}
+.sheet .gold{margin:12px 0 4px;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,.28);font-weight:800;color:#fff}
+.sheet .gold b{color:var(--c)}
+ol.do{list-style:none;counter-reset:s;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+ol.do li{counter-increment:s;position:relative;padding:12px 12px 12px 52px;background:rgba(0,0,0,.22);border-radius:10px;min-height:56px}
+ol.do li::before{content:counter(s);position:absolute;left:12px;top:10px;width:30px;height:30px;border-radius:50%;background:var(--c);color:#111;font:900 18px/30px var(--disp);text-align:center}
+ol.do li small{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.when{font:800 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c);margin:16px 0 0}
+details{margin-top:14px;background:rgba(0,0,0,.22);border-radius:10px;padding:0 14px}
+summary{cursor:pointer;padding:12px 0;font:800 15px/1.2 var(--head);color:#fff}
+.slides{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:14px}
+@media (max-width:760px){.slides{grid-template-columns:1fr}}
+.slide{background:var(--night);border:1px solid var(--line);border-radius:10px;padding:12px}
+.slide b{display:block;font:800 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--host);margin-bottom:6px}
+.slide p{margin:0;font-size:15px}
+.check{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.check label{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:rgba(0,0,0,.22);border-radius:10px;cursor:pointer}
+.check input{width:22px;height:22px;flex:none;accent-color:var(--op);margin:0}
+.check input:checked+span{opacity:.45;text-decoration:line-through}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:860px){.cols{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.cols{grid-template-columns:1fr}}
+.cols h4{margin:0 0 10px;font:900 22px/1 var(--disp);text-transform:uppercase;color:#fff}
+.cols h4 small{display:block;font:800 11px/1.4 var(--mono);letter-spacing:.08em;color:var(--mute);text-transform:none}
+.pass{margin:0 0 14px;padding:12px 14px;border-radius:10px;border:1px dashed var(--op);font-weight:800}
+.fix{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (max-width:640px){.fix{grid-template-columns:1fr}}
+.fix div{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--pine);border:1px solid var(--line);border-radius:10px}
+.fix i{font-style:normal;flex:none;width:34px;height:34px;border-radius:8px;background:rgba(255,59,48,.18);color:#ff8a80;font:900 18px/34px var(--disp);text-align:center}
+.fix b{display:block;color:#fff}
+.fix span{color:var(--mute);font-size:14px}
+kbd{font:800 12px/1 var(--mono);padding:3px 6px;border-radius:5px;background:var(--cream);color:#111}
+.note{margin-top:40px;padding:14px;border-radius:12px;background:rgba(255,201,60,.08);border:1px solid rgba(255,201,60,.3);color:var(--mute);font-size:14px}
+.note b{color:var(--host)}
+footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
+@media print{nav{display:none}body{background:#fff;color:#111}.card,.step,.fix div,ol.do li,.check label,details,.slide{background:#fff!important;border-color:#bbb}h2,h3,.role h3,.step .n,.step .t,.cols h4,summary,.fix b{color:#111!important}details{display:block}details>*{display:block}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-op" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20M9 9l2 2 4-4"/></symbol>
+  <symbol id="i-host" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></symbol>
+  <symbol id="i-wr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 21v-2a5 5 0 0 1 10 0v2M13 21v-1a4 4 0 0 1 8 0v1"/></symbol>
+  <symbol id="i-tech" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.2" fill="currentColor"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <div class="k">REPLY ALL / Winter Fest</div>
+  <h1>The Crew</h1>
+  <p>Who does what. Find your role, read your card, done.</p>
+</header>
+
+<nav>
+  <a href="#crew">Crew</a><a href="#room">Room</a><a href="#show">Show</a><a href="#signals">Signals</a>
+  <a href="#operator" style="color:var(--op)">Operator</a><a href="#host" style="color:var(--host)">Host</a><a href="#wrangler" style="color:var(--wr)">Wrangler</a><a href="#tech" style="color:var(--tech)">Tech</a>
+  <a href="#test">Test day</a><a href="#fix">If it breaks</a>
+</nav>
+
+<h2 id="crew">The crew</h2>
+<p class="lead">Small test: Pavel + a host. Real event: Pavel + three.</p>
+<div class="grid4">
+  <a class="card role" href="#operator" style="--c:var(--op)"><svg><use href="#i-op"/></svg><h3>Operator</h3><p class="one">Clicks the game. Keeps score.</p><div class="need"><span>Test <b>Pavel</b></span><span>Dec 3 <b>Pavel</b></span></div></a>
+  <a class="card role" href="#host" style="--c:var(--host)"><svg><use href="#i-host"/></svg><h3>Host</h3><p class="one">Talks. Reads. Rules on answers.</p><div class="need"><span>Test <b>1</b></span><span>Dec 3 <b>1</b></span></div></a>
+  <a class="card role" href="#wrangler" style="--c:var(--wr)"><svg><use href="#i-wr"/></svg><h3>Wrangler</h3><p class="one">Moves people. Runs call-ups.</p><div class="need"><span>Test <b>host covers</b></span><span>Dec 3 <b>1</b></span></div></a>
+  <a class="card role" href="#tech" style="--c:var(--tech)"><span class="opt">optional</span><svg><use href="#i-tech"/></svg><h3>Tech</h3><p class="one">Screen, sound, Wi-Fi, phones.</p><div class="need"><span>Test <b>Pavel covers</b></span><span>Dec 3 <b>1</b></span></div></a>
+</div>
+
+<h2 id="room">Where everyone stands</h2>
+<p class="lead">The host and the operator must see each other.</p>
+<div class="card map">
+<svg viewBox="0 0 800 420" role="img" aria-label="Room layout: screen at the front, host beside it, operator at the laptop facing the host, two teams in front, wrangler between them, audience behind, tech at the back">
+  <rect x="230" y="18" width="340" height="38" rx="6" fill="#f3e9d2"/>
+  <text x="400" y="43" text-anchor="middle" fill="#04140c" font-size="18">BIG SCREEN</text>
+  <circle cx="160" cy="70" r="26" fill="#ffc93c"/><text x="160" y="76" text-anchor="middle" fill="#111" font-size="15">HOST</text>
+  <rect x="610" y="58" width="130" height="50" rx="8" fill="#f96302"/><text x="675" y="80" text-anchor="middle" fill="#fff" font-size="14">OPERATOR</text><text x="675" y="98" text-anchor="middle" fill="#fff" font-size="12">laptop</text>
+  <path d="M190 72 Q400 130 606 82" fill="none" stroke="#ffc93c" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="400" y="122" text-anchor="middle" fill="#ffc93c" font-size="13">eye contact</text>
+  <rect x="150" y="150" width="190" height="70" rx="10" fill="none" stroke="#f96302" stroke-width="3"/><text x="245" y="192" text-anchor="middle" fill="#f3e9d2" font-size="18">TEAM 1</text>
+  <rect x="460" y="150" width="190" height="70" rx="10" fill="none" stroke="#a9dcff" stroke-width="3"/><text x="555" y="192" text-anchor="middle" fill="#f3e9d2" font-size="18">TEAM 2</text>
+  <rect x="356" y="168" width="88" height="34" rx="17" fill="#a9dcff"/><text x="400" y="190" text-anchor="middle" fill="#111" font-size="12">WRANGLER</text>
+  <g fill="rgba(243,233,210,.25)"><rect x="110" y="260" width="580" height="26" rx="13"/><rect x="110" y="296" width="580" height="26" rx="13"/><rect x="110" y="332" width="580" height="26" rx="13"/></g>
+  <text x="400" y="314" text-anchor="middle" fill="#f3e9d2" font-size="16">AUDIENCE (on phones)</text>
+  <circle cx="740" cy="372" r="24" fill="#3dff8f"/><text x="740" y="377" text-anchor="middle" fill="#111" font-size="13">TECH</text>
+  <text x="400" y="400" text-anchor="middle" fill="rgba(243,233,210,.55)" font-size="13">Tech checks sound from the back row, then roams</text>
+</svg>
+</div>
+
+<h2 id="show">The show at a glance</h2>
+<p class="lead">About 45 to 60 minutes. Colored tags show who is busiest.</p>
+<div class="flow">
+  <div class="step"><div class="n">1</div><div class="t">Setup + rules</div><div class="m">5 min</div><div class="who"><span class="dot" style="--c:var(--host)">HOST</span><span class="dot" style="--c:var(--tech)">TECH</span></div></div>
+  <div class="step"><div class="n">2</div><div class="t">Rounds 1 + 2</div><div class="m">8-10 min each</div><div class="who"><span class="dot" style="--c:var(--host)">HOST</span><span class="dot" style="--c:var(--op)">OP</span></div></div>
+  <div class="step"><div class="n">3</div><div class="t">Call-ups</div><div class="m">5 min</div><div class="who"><span class="dot" style="--c:var(--wr)">WRANGLER</span><span class="dot" style="--c:var(--host)">HOST</span></div></div>
+  <div class="step"><div class="n">4</div><div class="t">Round 3 <br>x2 points</div><div class="m">8-10 min</div><div class="who"><span class="dot" style="--c:var(--host)">HOST</span><span class="dot" style="--c:var(--op)">OP</span></div></div>
+  <div class="step"><div class="n">5</div><div class="t">You said <br>x3 points</div><div class="m">8 min</div><div class="who"><span class="dot" style="--c:var(--op)">OP</span><span class="dot" style="--c:var(--tech)">TECH</span></div></div>
+  <div class="step"><div class="n">6</div><div class="t">Final round</div><div class="m">5 min</div><div class="who"><span class="dot" style="--c:var(--wr)">WRANGLER</span><span class="dot" style="--c:var(--op)">OP</span></div></div>
+  <div class="step"><div class="n">7</div><div class="t">Winner + MVP</div><div class="m">2 min</div><div class="who"><span class="dot" style="--c:var(--host)">HOST</span></div></div>
+</div>
+
+<h2 id="signals">Host to operator signals</h2>
+<p class="lead">Agree on these before the show. No talking to the laptop.</p>
+<div class="sig">
+  <div class="card"><div class="big">a nod</div><div class="arrow">&darr;</div><span class="act">Press the glowing button</span></div>
+  <div class="card"><div class="big">"Survey says..."</div><div class="arrow">&darr;</div><span class="act">Reveal that answer</span></div>
+  <div class="card"><div class="big">"The survey accepts that"</div><div class="arrow">&darr;</div><span class="act">Click closest answer</span></div>
+  <div class="card"><div class="big">"That's a strike"</div><div class="arrow">&darr;</div><span class="act">Strike (X)</span></div>
+</div>
+
+<h2>Role cards</h2>
+
+<section class="card sheet" id="operator" style="--c:var(--op)">
+  <div class="top"><svg><use href="#i-op"/></svg><h3>Operator</h3><div class="where">at the laptop<br>facing the host</div></div>
+  <div class="gold">One rule: press the button with the <b>yellow ring + NOW tag</b>. The bar on top says what it does.</div>
+  <ol class="do">
+    <li>Setup<small>Open big screen, test sound, show join code, approve 1-2 buzzer phones per team, name the teams.</small></li>
+    <li>Rules<small>Host reads each slide. Press Next slide when they stop.</small></li>
+    <li>Each round<small>Show question, Open buzzers, click the face-off winner, then answers or Strike.</small></li>
+    <li>Call-ups<small>After Round 2: promote top audience player, run the pitch-off vote.</small></li>
+    <li>You said<small>Open survey, Close and count, tidy answers, put it on the board.</small></li>
+    <li>Final + winner<small>Type what players say, Space to reveal. Then Reveal the MVP.</small></li>
+  </ol>
+  <p class="when">Shortcuts</p>
+  <ol class="do">
+    <li><kbd>1</kbd>-<kbd>8</kbd> reveal answer<small><kbd>X</kbd> strike / <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo</small></li>
+    <li>Phones fail?<small>Buzzers open: left half of keyboard = Team 1, right half = Team 2.</small></li>
+  </ol>
+</section>
+
+<section class="card sheet" id="host" style="--c:var(--host)">
+  <div class="top"><svg><use href="#i-host"/></svg><h3>Host</h3><div class="where">beside the screen<br>facing the room</div></div>
+  <div class="gold">You <b>talk, read and rule</b>. You never touch the laptop. Never wait in silence.</div>
+  <ol class="do">
+    <li>Welcome<small>"Phones out. Scan the code. Join as Just the audience."</small></li>
+    <li>Rules<small>Read the 6 slides (script below). Stop talking = next slide.</small></li>
+    <li>Each board<small>Read the question. "Audience, call your guess now." Call up the face-off.</small></li>
+    <li>Rule on answers<small>Use the 4 signals. You decide what counts.</small></li>
+    <li>Call-ups + final<small>Read the call-up and final round lines in the host script.</small></li>
+    <li>Close<small>Thank the teams, promoted players, bingo winners.</small></li>
+  </ol>
+  <details>
+    <summary>Rules script: 6 slides, read aloud</summary>
+    <div class="slides">
+      <div class="slide"><b>1 How to play</b><p>"You are not guessing the right answer. You are guessing the popular one."</p></div>
+      <div class="slide"><b>2 Face-off</b><p>"One player per team. Fastest buzz answers first. Better answer wins the board."</p></div>
+      <div class="slide"><b>3 Three strikes</b><p>"Answer one at a time. Three misses and the other team gets one guess to steal it all."</p></div>
+      <div class="slide"><b>4 Audience</b><p>"You play too. Call a guess before the first reveal. On the board, the points are yours."</p></div>
+      <div class="slide"><b>5 Get called up</b><p>"Top audience player gets promoted. Or win the pitch-off: 30 seconds, room votes, +50."</p></div>
+      <div class="slide"><b>6 The stakes</b><p>"Round 3 pays double. You write the next board for triple. Then the final round."</p></div>
+    </div>
+  </details>
+</section>
+
+<section class="card sheet" id="wrangler" style="--c:var(--wr)">
+  <div class="top"><svg><use href="#i-wr"/></svg><h3>Wrangler</h3><div class="where">between the teams<br>near the front</div></div>
+  <div class="gold">You <b>move people</b> so the host never has to stop and organize.</div>
+  <p class="when">Before</p>
+  <ol class="do">
+    <li>Split two teams<small>3-5 each. Names to Pavel.</small></li>
+    <li>Buzzer phones<small>1-2 per team join as their team. Tell Pavel whose to approve.</small></li>
+    <li>Face-off order<small>Who steps up in Round 1, 2, 3. No arguing on stage.</small></li>
+  </ol>
+  <p class="when">During</p>
+  <ol class="do">
+    <li>Send the next pair<small>As the host reads the question.</small></li>
+    <li>Phones fail?<small>Shout who buzzed first. Pavel enters it.</small></li>
+    <li>Promotion<small>Screen says PROMOTED: walk that person to their team.</small></li>
+    <li>Pitch-off<small>Have 2 volunteers ready early. Time 30 sec each.</small></li>
+    <li>Final round<small>Take player two out of earshot. Bring back on cue.</small></li>
+    <li>Winner<small>Line both teams up by the screen.</small></li>
+  </ol>
+</section>
+
+<section class="card sheet" id="tech" style="--c:var(--tech)">
+  <div class="top"><svg><use href="#i-tech"/></svg><h3>Tech</h3><div class="where">back of the room<br>then roaming</div></div>
+  <div class="gold">The room must <b>see, hear and join</b>. Everything else is someone else's job.</div>
+  <p class="when">30 minutes before</p>
+  <ol class="do">
+    <li>Plug in<small>Power, projector, speakers. Display = Extend, not Duplicate. PC: <kbd>Win</kbd>+<kbd>P</kbd>. Mac: Displays, mirroring off.</small></li>
+    <li>Wi-Fi<small>Test on laptop and a phone. Post the Wi-Fi name and password by the QR.</small></li>
+    <li>Big screen<small>Drag it to the projector, click once for full screen.</small></li>
+    <li>Sound check<small>Stand in the back row during Test voice. Signal louder / softer.</small></li>
+  </ol>
+  <p class="when">During</p>
+  <ol class="do">
+    <li>Join help<small>Same Wi-Fi, reload, Meeting ID matches the screen.</small></li>
+    <li>Frozen screen<small>Click it, then <kbd>F5</kbd> (Mac <kbd>Cmd</kbd>+<kbd>R</kbd>). It reconnects.</small></li>
+  </ol>
+</section>
+
+<h2 id="test">Test day</h2>
+<p class="lead">Ticks are saved on this device only.</p>
+<div class="pass">Pass = one full game, start to winner, no reset. Write down the time and every "what now?" moment.</div>
+<div class="cols">
+  <div class="card"><h4>Before<small>night before</small></h4><ul class="check">
+    <li><label><input type="checkbox"><span>Pick a host, send them this page</span></label></li>
+    <li><label><input type="checkbox"><span>Room with a screen + HDMI</span></label></li>
+    <li><label><input type="checkbox"><span>Two teams of 2-3, extras = audience</span></label></li>
+    <li><label><input type="checkbox"><span>Run Watch a demo show once</span></label></li>
+  </ul></div>
+  <div class="card"><h4>Setup<small>15 min before</small></h4><ul class="check">
+    <li><label><input type="checkbox"><span>Laptop on power, display Extend</span></label></li>
+    <li><label><input type="checkbox"><span>Big screen full screen</span></label></li>
+    <li><label><input type="checkbox"><span>Test sound + voice</span></label></li>
+    <li><label><input type="checkbox"><span>Everyone joins, buzzers approved</span></label></li>
+    <li><label><input type="checkbox"><span>Practice the 4 signals</span></label></li>
+  </ul></div>
+  <div class="card"><h4>During<small>take notes</small></h4><ul class="check">
+    <li><label><input type="checkbox"><span>Time each round</span></label></li>
+    <li><label><input type="checkbox"><span>Note every "what now?"</span></label></li>
+    <li><label><input type="checkbox"><span>Note phone failures (iPhone / Android)</span></label></li>
+    <li><label><input type="checkbox"><span>Try the pitch-off</span></label></li>
+  </ul></div>
+  <div class="card"><h4>After<small>10 min</small></h4><ul class="check">
+    <li><label><input type="checkbox"><span>Ask: confusing? funny? dragged?</span></label></li>
+    <li><label><input type="checkbox"><span>Ask host: what line was missing?</span></label></li>
+    <li><label><input type="checkbox"><span>Decide Dec 3 crew size + cuts</span></label></li>
+  </ul></div>
+</div>
+
+<h2 id="fix">If it breaks</h2>
+<p class="lead">Keep talking. Fix quietly.</p>
+<div class="fix">
+  <div><i>?</i><p style="margin:0"><b>Not sure what to press</b><span>Find the yellow ring with NOW.</span></p></div>
+  <div><i>&larr;</i><p style="margin:0"><b>Wrong click</b><span>Undo, bottom left, or <kbd>Ctrl</kbd>+<kbd>Z</kbd>. One step at a time.</span></p></div>
+  <div><i>#</i><p style="margin:0"><b>Score wrong</b><span>Click the score at the top of the panel, type the right number.</span></p></div>
+  <div><i>!</i><p style="margin:0"><b>Laptop refreshed</b><span>Choose Keep going. The game resumes.</span></p></div>
+  <div><i>~</i><p style="margin:0"><b>Phone will not buzz</b><span>Approved in the phone list? Else call it by ear.</span></p></div>
+  <div><i>||</i><p style="margin:0"><b>Need a pause</b><span>Click Setup in the left column. Back to the game returns.</span></p></div>
+  <div><i>&gt;&gt;</i><p style="margin:0"><b>Running long</b><span>Skip the pitch-off, then the You said round.</span></p></div>
+  <div><i>))</i><p style="margin:0"><b>Chip too loud</b><span>Setup: Chip speaks out loud = Big moments or Never.</span></p></div>
+</div>
+
+<div class="note"><b>May change before Dec 3:</b> the call-up rules slide (slide 5) and the keyboard shortcuts are being reworked. If the control panel shows different words or keys, the panel wins.</div>
+
+<footer><a href="../">Open the control panel</a> &nbsp;/&nbsp; <a href="../buzz/">Phone page</a></footer>
+</div>
+<script>
+// Remember ticked boxes on this device only.
+(function () {
+  var K = 'replyall_crew_ticks', boxes = document.querySelectorAll('.check input'), saved = {};
+  try { saved = JSON.parse(localStorage.getItem(K) || '{}'); } catch (e) {}
+  boxes.forEach(function (b, i) {
+    b.checked = !!saved[i];
+    b.addEventListener('change', function () { saved[i] = b.checked; try { localStorage.setItem(K, JSON.stringify(saved)); } catch (e) {} });
+  });
+})();
+</script>
+</body>
+</html>
