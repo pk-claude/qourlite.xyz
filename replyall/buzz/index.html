@@ -206,6 +206,9 @@ label small{font-weight:500;color:var(--mute);font-size:12px}
 #msg:empty{display:none}
 #chase{margin:0;padding:7px 12px;border-radius:10px;background:rgba(255,201,60,.12);border:1px solid rgba(255,201,60,.4);font:700 12.5px/1.3 var(--mono);color:inherit;text-align:center}
 #chase.hide{display:none}
+#hostc .hp{margin:6px 0 10px}
+#micf{display:block;width:100%;height:320px;border:0;border-radius:14px;background:#0b0b10}
+#micf.hide{display:none}
 #tband{margin:0 auto 10px;padding:8px 14px;border-radius:12px;font:900 18px/1.15 var(--disp);letter-spacing:.04em;text-transform:uppercase;text-align:center;color:#0b0b10;max-width:340px}
 #tband.tb0{background:#ff7a1a}#tband.tb1{background:#a9dcff}
 /* ---------- prime-time skin: matches the big screen (night stage, gold, paper memos) ---------- */
@@ -375,6 +378,8 @@ body.typing .rxw{display:none}
   </div>
   <div class="main">
     <p id="chase" class="hide"></p>
+    <div id="hostc" class="fun hide"><div class="th"># host <em>SNOWMAN MIC</em></div><p class="hp">You are the host. Hold the button to talk to the snowman. The answer plays on the big screen.</p>
+      <iframe id="micf" class="hide" title="Snowman mic" allow="microphone; autoplay"></iframe><p id="micx" class="hide">The snowman mic is not switched on yet. Ask the organizer.</p></div>
     <div id="sc" class="hide"><div id="sc0"><span></span><b></b></div><div id="sc1"><span></span><b></b></div></div>
     <div id="mail" class="hide"><div class="chip"><b></b><i></i></div><div><small>Agenda item / from Chip</small><div id="live"></div></div></div>
     <div id="call" class="hide">
@@ -509,6 +514,7 @@ function show() {
     else { cls(ms, 'look'); set(ms, 'Looking for the meeting...'); }
     return;
   }
+  takeRole(); showHost();
   const gone = !st && known === false;
   $('sc').classList.toggle('hide', !(st && st.scores));
   if (st && st.scores) [0, 1].forEach(i => { const d = $('sc' + i); set(d.firstChild, names[i]); set(d.lastChild, String(st.scores[i])); cls(d, team === i ? 'me' : ''); });
@@ -567,6 +573,22 @@ function vote(i) {
   send('vote', {v: i, vid: v.id}).catch(() => { set($('vs'), 'Could not send. Check your signal and tap again.'); });
 }
 // Fast-track promotion: the host moved this audience phone onto a team. Join again as that team and celebrate.
+// The host's roster decides this phone's role: a team buzzer, the audience, or the host with the snowman mic.
+let isHost = false, micOk = null;
+function takeRole() {
+  const r = st && st.ro ? st.ro[pid] : undefined; isHost = r === 'h'; if (r === undefined) return;
+  const t = r === 'h' ? 2 : r; if (t === team) return;
+  team = t; try { localStorage.setItem(LS, JSON.stringify({sid, team, name})); } catch (e) {} send('join').catch(() => {}); timer();
+  const names = st.names || DEF; msg.textContent = r === 'h' ? 'You are the host tonight. Your snowman mic is at the top.' : t === 2 ? 'The host seated you in the audience.' : 'The host put you on ' + names[t] + '. Your phone is now a buzzer.';
+  setTimeout(() => { msg.textContent = ''; }, 6000); buzzz([60, 50, 160]); ctx = ''; lastMode = '';
+}
+function showHost() {
+  const c = $('hostc'); c.classList.toggle('hide', !isHost); if (!isHost) return;
+  if (micOk === null) { micOk = 'wait'; fetch((st && st.mic) || '/snowman/mic/', {method: 'HEAD', cache: 'no-store'}).then(r => { micOk = r.ok; showHost(); }).catch(() => { micOk = false; showHost(); }); }
+  const f = $('micf'), url = (st && st.mic) || '/snowman/mic/';
+  if (micOk === true && !f.getAttribute('src')) f.setAttribute('src', url);
+  f.classList.toggle('hide', micOk !== true); $('micx').classList.toggle('hide', micOk !== false);
+}
 function takePromo() {
   const p = st && st.promo; if (!p || p.p !== pid || team !== 2) return;
   let seen = ''; try { seen = localStorage.getItem('replyall_promo') || ''; } catch (e) {} if (seen === p.id) return;

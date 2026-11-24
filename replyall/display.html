@@ -840,7 +840,7 @@ function stealTick() {
 }
 function stealStop() { clearInterval(stealIv); stealIv = 0; stealT = 0; const cap = $('#cap'); if (cap) cap.classList.remove('out'); }
 // who is on each team: names typed by the host, plus phones that joined that team
-function roster(i) { const seen = new Set(), out = []; String(S.teams[i].ros || '').split(',').concat(Object.values(S.pl || {}).filter(p => p.t === i).map(p => p.n)).forEach(x => { x = String(x || '').trim(); const k = x.toLowerCase(); if (x && !seen.has(k)) { seen.add(k); out.push(x); } }); return out; }
+function roster(i) { const seen = new Set(), out = []; String(S.teams[i].ros || '').split(',').concat(Object.values(S.pl || {}).filter(p => p.t === i).map(p => p.n)).forEach(x => { x = String(x || '').trim(); const k = x.toLowerCase(); if (x && !seen.has(k)) { seen.add(k); seen.add(k.split(' ')[0]); out.push(x); } }); return out; }   // a phone called Dana is the Dana Smith already listed
 const buzzName = () => { const p = S.buzzPid && S.pl && S.pl[S.buzzPid]; return p && p.n ? p.n : ''; };
 function slam(i, label, who) {
   if (CALM) return; over.querySelectorAll('.slam').forEach(e => e.remove()); const big = who || S.teams[i].name, sm = who && !who.includes(S.teams[i].name) ? label + ' / ' + S.teams[i].name : label;
