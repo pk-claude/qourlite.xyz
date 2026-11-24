@@ -47,7 +47,7 @@ ol li b{font-weight:800}
 .slides div{background:#fff;border-radius:6px;padding:7px 9px;font-size:13px;line-height:1.3}
 .slides b{display:block;font:800 9.5px/1 var(--mono);text-transform:uppercase;color:var(--c);margin-bottom:2px}
 kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:var(--ink);color:#fff}
-.ck{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:14px}
+.ck{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
 .ck li::before{content:"";display:inline-block;width:12px;height:12px;border:2px solid var(--pine);border-radius:3px;margin-right:7px;vertical-align:-2px}
 .fix{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .fix div{background:#fff;border-radius:6px;padding:7px 9px;font-size:13.5px;line-height:1.3}
@@ -84,9 +84,9 @@ kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:v
     <div class="box"><h2>Host to operator signals</h2>
       <div class="row c2" style="gap:.22in .1in">
         <div class="sig"><div class="q">a nod</div><span class="a">Press the glowing button</span></div>
-        <div class="sig"><div class="q">"Survey says..."</div><span class="a">Reveal that answer</span></div>
+        <div class="sig"><div class="q">host repeats the answer</div><span class="a">Type it + Enter</span></div>
         <div class="sig"><div class="q">"The survey accepts that"</div><span class="a">Closest answer</span></div>
-        <div class="sig"><div class="q">"That's a strike"</div><span class="a">Strike (X)</span></div>
+        <div class="sig"><div class="q">"That's a strike"</div><span class="a">Not on the board (X)</span></div>
       </div>
       <p style="margin:.1in 0 0;font-size:12.5px;color:var(--mute)">Agree on these before the show. The operator never talks to the room.</p>
     </div>
@@ -113,15 +113,15 @@ kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:v
       <div class="top"><b>Operator</b><span>at the laptop<br>facing the host</span></div>
       <div class="gold">One rule: press the button with the <em>yellow ring + NOW tag</em>.</div>
       <ol>
-        <li><b>Setup.</b> Open big screen, test sound, show join code, approve 1-2 buzzer phones per team.</li>
+        <li><b>Setup.</b> Open big screen, test sound, show join code, approve 1-2 buzzer phones per team. Type team names and players.</li>
         <li><b>Rules.</b> Host reads each slide. Press Next slide when they stop talking.</li>
-        <li><b>Each round.</b> Show question, Open buzzers, then enter each answer the team gives. Wrong answer = Strike.</li>
+        <li><b>Each round.</b> Show question, Open buzzers. Type what each player says + Enter. The game runs the face-off, strikes, steal and points.</li>
         <li><b>Call-ups</b> after Round 2. Promote the top audience player, then run the pitch-off vote.</li>
         <li><b>You said.</b> Open survey, Close and count, tidy answers, put it on the board.</li>
         <li><b>Final + winner.</b> Type what players say, Space to reveal. Then Reveal the MVP.</li>
       </ol>
       <div class="when">Keys</div>
-      <div style="font-size:12.5px"><kbd>1</kbd>-<kbd>8</kbd> reveal &nbsp; <kbd>X</kbd> strike &nbsp; <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd> undo &nbsp; Phones fail: left half of keyboard buzzes team 1, right half team 2.</div>
+      <div style="font-size:13px"><kbd>1</kbd>-<kbd>8</kbd> = that answer &nbsp; <kbd>X</kbd> Not on the board &nbsp; <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd> undo. Phones fail: click the team under "No buzzers?". Game wrong: Steal worked / Steal failed / Give to [team].</div>
     </div>
     <div class="card" style="--c:var(--gold)">
       <div class="top"><b>Host</b><span>beside the screen<br>facing the room</span></div>
@@ -129,7 +129,7 @@ kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:v
       <ol>
         <li><b>Welcome.</b> "Phones out. Scan the code. Join as Just the audience."</li>
         <li><b>Each board.</b> Read the question. "Audience, call your guess now." Call up the face-off.</li>
-        <li><b>Rule out loud.</b> Use the four signals. You decide what counts.</li>
+        <li><b>Rule out loud.</b> Repeat each answer loudly so the operator can type it. You decide what counts.</li>
         <li><b>Close.</b> Thank the teams, promoted players and bingo winners.</li>
       </ol>
       <div class="when">Rules script, one line per slide</div>
@@ -153,7 +153,7 @@ kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:v
     <div class="card" style="--c:var(--ice)">
       <div class="top"><b>Wrangler</b><span>between the teams</span></div>
       <ol>
-        <li><b>Before.</b> Two teams of 3-5. Pick 1-2 buzzer phones per team. Set the face-off order for Rounds 1-3.</li>
+        <li><b>Before.</b> Two teams of 3-5; give team and player names to Pavel. Pick 1-2 buzzer phones per team. Set the face-off order for Rounds 1-3.</li>
         <li><b>Each round.</b> Send the next pair up as the question is read. Phones fail? Shout who buzzed first.</li>
         <li><b>Call-ups.</b> Screen says PROMOTED: walk that person to their team. Have 2 pitch-off volunteers ready early; time 30 sec each.</li>
         <li><b>Final.</b> Take player two out of earshot; bring them back on cue. Line both teams up for the winner.</li>
@@ -183,7 +183,7 @@ kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:v
         <div><b>Wrong click</b>Undo (bottom left), one step at a time.</div>
         <div><b>Score wrong</b>Click the score at the top, type the number.</div>
         <div><b>Laptop refreshed</b>Choose Keep going.</div>
-        <div><b>Phone will not buzz</b>Approved in the phone list? Else call it by ear.</div>
+        <div><b>Phone will not buzz</b>Click the team under "No buzzers?".</div>
         <div><b>Need a pause</b>Click Setup in the left column.</div>
         <div><b>Running long</b>Skip the pitch-off, then You said.</div>
         <div><b>Chip too loud</b>Setup: Chip speaks = Big moments or Never.</div>

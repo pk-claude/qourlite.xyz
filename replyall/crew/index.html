@@ -165,9 +165,9 @@ footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
 <p class="lead">Agree on these before the show. No talking to the laptop.</p>
 <div class="sig">
   <div class="card"><div class="big">a nod</div><div class="arrow">&darr;</div><span class="act">Press the glowing button</span></div>
-  <div class="card"><div class="big">"Survey says..."</div><div class="arrow">&darr;</div><span class="act">Reveal that answer</span></div>
+  <div class="card"><div class="big">host repeats the answer</div><div class="arrow">&darr;</div><span class="act">Type it + Enter</span></div>
   <div class="card"><div class="big">"The survey accepts that"</div><div class="arrow">&darr;</div><span class="act">Click closest answer</span></div>
-  <div class="card"><div class="big">"That's a strike"</div><div class="arrow">&darr;</div><span class="act">Strike (X)</span></div>
+  <div class="card"><div class="big">"That's a strike"</div><div class="arrow">&darr;</div><span class="act">Not on the board (X)</span></div>
 </div>
 
 <h2>Role cards</h2>
@@ -176,17 +176,17 @@ footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
   <div class="top"><svg><use href="#i-op"/></svg><h3>Operator</h3><div class="where">at the laptop<br>facing the host</div></div>
   <div class="gold">One rule: press the button with the <b>yellow ring + NOW tag</b>. The bar on top says what it does.</div>
   <ol class="do">
-    <li>Setup<small>Open big screen, test sound, show join code, approve 1-2 buzzer phones per team, name the teams.</small></li>
+    <li>Setup<small>Open big screen, test sound, show join code, approve 1-2 buzzer phones per team. Type team names and players.</small></li>
     <li>Rules<small>Host reads each slide. Press Next slide when they stop.</small></li>
-    <li>Each round<small>Show question, Open buzzers, click the face-off winner, then answers or Strike.</small></li>
+    <li>Each round<small>Show question, Open buzzers. Then type what each player says + Enter. The game scores, strikes and steals by itself.</small></li>
     <li>Call-ups<small>After Round 2: promote top audience player, run the pitch-off vote.</small></li>
     <li>You said<small>Open survey, Close and count, tidy answers, put it on the board.</small></li>
     <li>Final + winner<small>Type what players say, Space to reveal. Then Reveal the MVP.</small></li>
   </ol>
   <p class="when">Shortcuts</p>
   <ol class="do">
-    <li><kbd>1</kbd>-<kbd>8</kbd> reveal answer<small><kbd>X</kbd> strike / <kbd>Ctrl</kbd>+<kbd>Z</kbd> or <kbd>Cmd</kbd>+<kbd>Z</kbd> undo</small></li>
-    <li>Phones fail?<small>Buzzers open: left half of keyboard = Team 1, right half = Team 2.</small></li>
+    <li><kbd>1</kbd>-<kbd>8</kbd> = that answer<small><kbd>X</kbd> Not on the board / <kbd>Ctrl</kbd>+<kbd>Z</kbd> or <kbd>Cmd</kbd>+<kbd>Z</kbd> undo</small></li>
+    <li>Phones fail?<small>Click the team under "No buzzers? Click who buzzed first". Game wrong? Use Steal worked / Steal failed / Give to [team].</small></li>
   </ol>
 </section>
 
@@ -197,7 +197,7 @@ footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
     <li>Welcome<small>"Phones out. Scan the code. Join as Just the audience."</small></li>
     <li>Rules<small>Read the 6 slides (script below). Stop talking = next slide.</small></li>
     <li>Each board<small>Read the question. "Audience, call your guess now." Call up the face-off.</small></li>
-    <li>Rule on answers<small>Use the 4 signals. You decide what counts.</small></li>
+    <li>Rule on answers<small>Repeat each answer loudly so the operator can type it. You decide what counts.</small></li>
     <li>Call-ups + final<small>Read the call-up and final round lines in the host script.</small></li>
     <li>Close<small>Thank the teams, promoted players, bingo winners.</small></li>
   </ol>
@@ -219,8 +219,8 @@ footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
   <div class="gold">You <b>move people</b> so the host never has to stop and organize.</div>
   <p class="when">Before</p>
   <ol class="do">
-    <li>Split two teams<small>3-5 each. Names to Pavel.</small></li>
-    <li>Buzzer phones<small>1-2 per team join as their team. Tell Pavel whose to approve.</small></li>
+    <li>Split two teams<small>3-5 each. Team and player names to Pavel: they show on the big screen.</small></li>
+    <li>Buzzer phones<small>1-2 per team join as their team. Tell Pavel whose to approve. Phones say "You buzz for [team]".</small></li>
     <li>Face-off order<small>Who steps up in Round 1, 2, 3. No arguing on stage.</small></li>
   </ol>
   <p class="when">During</p>
@@ -288,7 +288,7 @@ footer{margin-top:24px;text-align:center;color:var(--mute);font-size:14px}
   <div><i>&larr;</i><p style="margin:0"><b>Wrong click</b><span>Undo, bottom left, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> (Mac <kbd>Cmd</kbd>+<kbd>Z</kbd>). One step at a time.</span></p></div>
   <div><i>#</i><p style="margin:0"><b>Score wrong</b><span>Click the score at the top of the panel, type the right number.</span></p></div>
   <div><i>!</i><p style="margin:0"><b>Laptop refreshed</b><span>Choose Keep going. The game resumes.</span></p></div>
-  <div><i>~</i><p style="margin:0"><b>Phone will not buzz</b><span>Approved in the phone list? Else call it by ear.</span></p></div>
+  <div><i>~</i><p style="margin:0"><b>Phone will not buzz</b><span>Approved in the phone list? Else click the team under "No buzzers?".</span></p></div>
   <div><i>||</i><p style="margin:0"><b>Need a pause</b><span>Click Setup in the left column. Back to the game returns.</span></p></div>
   <div><i>&gt;&gt;</i><p style="margin:0"><b>Running long</b><span>Skip the pitch-off, then the You said round.</span></p></div>
   <div><i>))</i><p style="margin:0"><b>Chip too loud</b><span>Setup: Chip speaks out loud = Big moments or Never.</span></p></div>
