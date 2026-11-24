@@ -133,6 +133,9 @@ window.GAME = {
   // "YOU SAID" ROUND. The audience answers one of these on their phones, live,
   // and the board is built from what this room actually said. Keep them answerable in one or two words.
   room: [
+    "In one or two words: the most overused word in supply chain.",
+    "In one or two words: your most-used tool at home.",
+    "In one or two words: if our team had a mascot, what would it be?",
     "In one or two words: what is the real reason you came to Winter Fest?",
     "In one or two words: name the gift you are hoping not to get.",
     "In one or two words: translate 'per my last email'.",
