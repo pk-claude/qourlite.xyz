@@ -343,7 +343,7 @@ async function roast(answer, question) {
     const j = await r.json(); if (!r.ok || !j.text || roundKey() !== k) return; pending = String(j.text); setRoast();
   } catch (e) {}
 }
-const roastHtml = () => pending && !S.awarded ? 'Chip wrote a live line about that answer: <b>' + esc(pending) + '</b> <button class="fun" onclick="A.roastSend()">Send to screen</button> <button onclick="A.roastDrop()">Discard</button>' : '';
+const roastHtml = () => pending ? 'Chip wrote a live line about that answer: <b>' + esc(pending) + '</b> <button class="fun" onclick="A.roastSend()">Send to screen</button> <button onclick="A.roastDrop()">Discard</button>' : '';
 function setRoast() { const el = document.getElementById('roastBox'); if (el) el.innerHTML = roastHtml(); }
 
 // ---------- buzzers ----------
@@ -689,8 +689,8 @@ const A = {
   clearStrikes() { snap(); S.strikes = 0; SFX.tension(0); up(); },
   takeover() { const o = S.control === null ? null : 1 - S.control; SFX.takeover(); later(() => SFX.tension(2), 1800); up({cards: [['Three strikes', 'HOSTILE TAKEOVER', o === null ? 'One answer to steal the budget' : S.teams[o].name + ': one answer to steal the budget', 3600]]}); later(() => chipLine('takeover', true), 2200); },
   steal(ok) { A.award(ok ? 1 - S.control : S.control, ok ? 'stolen' : 'kept'); },
-  award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name; S.teams[i].score += pot; S.awarded = true; SFX[kind || 'award'](); payBets(i); nextHot(); if (!S.strikes) evt('clean'); if (kind === 'stolen') evt('steal'); if (kind === 'kept') evt('kept');
-    const x = {kind, i, pot};
+  award(i, kind) { if (S.awarded) return; snap(); const pot = S.pot, n = S.teams[i].name, was = S.teams[i].score <= S.teams[1 - i].score; S.teams[i].score += pot; const flip = was && pot > 0 && S.teams[i].score > S.teams[1 - i].score && S.teams[1 - i].score > 0; S.awarded = true; SFX[kind || 'award'](); payBets(i); nextHot(); if (!S.strikes) evt('clean'); if (kind === 'stolen') evt('steal'); if (kind === 'kept') evt('kept');
+    const x = {kind, i, pot}; if (flip) later(() => { push({lead: i}); SFX.whoosh(); }, kind ? 3600 : 200);
     up(kind === 'stolen' ? {cards: [['Hostile takeover', 'TAKEOVER COMPLETE', '+' + pot + ' to ' + n, 3200, x]], confetti: 140} : kind === 'kept' ? {cards: [['Hostile takeover', 'TAKEOVER DENIED', n + ' keeps the ' + pot, 3200, x]], confetti: 140} : {banner: 'Budget approved: +' + pot + ' to ' + n, payout: i});
     later(() => chipLine(kind || 'award', !!kind), kind ? 2500 : 900); },
   rest() { const left = cur().a.map((_, i) => i).filter(i => !S.revealed[i]).reverse(); if (!left.length) return; evt('rest'); snap(); chipLine('rest');
@@ -746,8 +746,8 @@ const A = {
       else { SFX.zero(); push({cards: [['Final round', 'SO CLOSE', (G.lightningTarget - total) + ' short. Still the best meeting all week.']]}); } }, 1500); },
   lread(i) { const q = G.lightning[S.li].qs[i]; A.lq(i); speak(q.id, q.q); },
   tstart() { A.tstop(); if (S.timer <= 0) { S.timer = CLK[S.lp ? 1 : 0]; up(); }   // after time is up, Start clock begins a fresh countdown
-    tick = setInterval(() => { if (S.phase !== 'lightning') return A.tstop(); S.timer--; let fx; if (S.timer <= 0) { S.timer = 0; A.tstop(); SFX.timeUp(); fx = {stamp: 'PENCILS DOWN', sub: 'time is up'}; refreshCue(); } else SFX.tick(S.timer <= 5); push(fx); const el = document.getElementById('tm'); if (el) el.textContent = S.timer + 's'; }, 1000); refreshCue(); },
-  tstop() { clearInterval(tick); tick = null; },
+    S.run = true; tick = setInterval(() => { if (S.phase !== 'lightning') return A.tstop(); S.timer--; let fx; if (S.timer <= 0) { S.timer = 0; A.tstop(); SFX.timeUp(); fx = {stamp: 'PENCILS DOWN', sub: 'time is up'}; refreshCue(); } else SFX.tick(S.timer <= 5); push(fx); const el = document.getElementById('tm'); if (el) el.textContent = S.timer + 's'; }, 1000); refreshCue(); },
+  tstop() { clearInterval(tick); tick = null; S.run = false; },
   treset() { A.tstop(); S.timer = CLK[S.lp ? 1 : 0]; up(); },
   lclear() { if (!confirm('Clear all final round answers?')) return; A.lset(S.li); },
   winner() { if (!gate() || !leaveOk()) return; const [a, b] = S.teams;
@@ -963,7 +963,7 @@ function render() {
       <span class="muted">${c.sp ? '&#10003;&#10003;' : c.st ? '&#10003;' : ''}</span></td>`; };
     h += `<div class="three even"><div class="card"><h2><b>1</b>Type the answers</h2>
         <div class="row"><button class="${S.lp===0?'on':''}" onclick="A.lplayer(0)">${esc(S.teams[0].name)}</button><button class="${S.lp===1?'on':''}" data-cue="lp1" onclick="A.lplayer(1)">${esc(S.teams[1].name)}</button><span class="bigtxt" id="tm" style="margin-left:auto">${S.timer}s</span></div>
-        <div class="row"><button class="go" data-cue="tstart" onclick="A.tstart()">Start clock</button><button onclick="A.tstop()">Stop</button><button onclick="A.treset()">Reset</button></div></div>
+        <div class="row"><button class="go" data-cue="tstart" onclick="A.tstart()">Start clock</button><button onclick="A.tstop();push()">Stop</button><button onclick="A.treset()">Reset</button></div></div>
       <div class="card"><h2><b>2</b>Score, then reveal</h2>
         <button class="go big wide" style="margin-top:0" data-cue="lnext" onclick="A.lnext()" ${st ? '' : 'disabled'}>${st ? 'Reveal ' + (st[2] === 'st' ? 'answer ' : 'points ') + (st[1] + 1) + ' for ' + esc(S.teams[st[0]].name) : S.lp === 0 && S.la[0].every(c => c.sp) ? 'Now switch to ' + esc(S.teams[1].name) : 'All revealed'} <kbd>Space</kbd></button>
         <p class="muted">Click a chip under a question to set the points first. No match means 0. Points go to that player's team as they are revealed.</p></div>
