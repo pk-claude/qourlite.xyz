@@ -179,9 +179,9 @@ body.crunch .rush .dig{animation:pump .5s infinite}
 .subj .q.on .w{background-size:0 100%;color:#fff;transition-delay:calc(var(--i)*38ms),calc(var(--i)*38ms + 120ms)}
 .subj .cls{position:absolute;right:2cqw;top:50%;transform:translateY(-50%) rotate(-4deg);font:800 1cqw var(--mono);letter-spacing:.3em;color:var(--red);border:.18cqw solid var(--red);padding:.6cqh .9cqw;border-radius:.4cqw;opacity:.8;transition:opacity .3s}
 .subj .q.on~.cls{opacity:0}
-.guesses{position:absolute;right:2.6cqw;top:33.6cqh;font:800 .95cqw var(--mono);letter-spacing:.16em;color:var(--ta);opacity:0;transition:opacity .4s}
+.guesses{position:absolute;right:2.6cqw;top:34.3cqh;font:800 .95cqw var(--mono);letter-spacing:.16em;color:var(--ta);opacity:0;transition:opacity .4s}
 .guesses.on{opacity:1}
-.board{position:absolute;left:2cqw;right:2cqw;top:36.2cqh;bottom:11.4cqh;display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;gap:1.5cqh 1.4cqw}
+.board{position:absolute;left:2cqw;right:2cqw;top:39.6cqh;bottom:11.4cqh;display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;gap:1.5cqh 1.4cqw}
 .tile{position:relative;border-radius:1cqw;--ant:300ms}
 .tile .sh{position:absolute;inset:0;border-radius:1cqw;background:linear-gradient(180deg,rgba(18,58,40,.92),rgba(5,22,14,.95));border:.12cqw solid rgba(255,255,255,.13);box-shadow:inset 0 .2cqh 0 rgba(255,255,255,.08),0 1.4cqh 3cqw rgba(0,0,0,.45);overflow:hidden}
 .tile .sh:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.14) 50%,transparent 70%) -100% 0/60% 100% no-repeat}
@@ -561,6 +561,42 @@ body[data-phase=round] #hot .hf{display:none}
 .card .cu:before{content:"";position:absolute;left:0;right:0;top:0;height:7cqh;background:radial-gradient(circle at 50% 70%,#ffe2a8 0 .45cqw,rgba(255,190,90,.35) .5cqw,transparent 1.6cqw) 0 0/5cqw 100% repeat-x;filter:drop-shadow(0 0 .8cqw rgba(255,190,90,.7))}
 .card .cu.r:before{background-position:2.5cqw 0}
 .chh .hat path:first-child{fill:var(--orange)}.chh .hat path:nth-child(2){stroke:var(--cream)}.chh .hat circle{fill:var(--cream)}
+
+/* final pass: progress pips, tug-of-war, caption and steal clock, x2/x3 math, buzz slam, budget on fire, podium */
+.subj .pips{display:flex;gap:.35cqw;margin-top:.7cqh;align-items:center}
+.subj .pips i{width:1.5cqw;height:.7cqh;border-radius:.4cqh;background:rgba(255,255,255,.16)}
+.subj .pips i.d{background:var(--gold);opacity:.55}
+.subj .pips i.c{background:var(--gold);box-shadow:0 0 .8cqw var(--gold);animation:alarm 1.4s ease-in-out infinite}
+.subj .pips i.f{width:auto;height:auto;padding:.15cqh .4cqw;background:none;border:.1cqw solid rgba(255,255,255,.3);font:800 .62cqw/1.2 var(--mono);letter-spacing:.12em;color:rgba(255,255,255,.55);font-style:normal;text-transform:uppercase}
+.tug{position:absolute;left:2cqw;right:2cqw;top:19.75cqh;height:.75cqh;border-radius:1cqh;background:var(--tb);overflow:hidden;box-shadow:0 0 1.2cqw rgba(0,0,0,.4)}
+.tug i{position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(90deg,#c4500a,var(--ta));box-shadow:.3cqw 0 1cqw rgba(255,255,255,.6);transition:width 1.2s cubic-bezier(.2,.9,.3,1)}
+.tug em{position:absolute;left:50%;top:0;bottom:0;width:.18cqw;margin-left:-.09cqw;background:#0b0b10;opacity:.7}
+.tile .pp .mxm{margin-top:.6cqh;font:800 .82cqw/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#7a5200}
+.cap{position:absolute;left:2cqw;top:33.1cqh;max-width:68cqw;height:3.9cqh;display:flex;align-items:center;gap:.8cqw;padding:0 1.4cqw 0 1.4cqw;border-radius:4cqh;background:rgba(4,20,12,.82);border:.1cqw solid rgba(255,255,255,.14);font:700 2.3cqh/1 var(--body);color:var(--paper);opacity:0;transform:translateX(-4cqw);transition:transform .45s cubic-bezier(.2,.9,.3,1.1),opacity .3s;z-index:6}
+.cap.on{opacity:1;transform:none}
+.cap span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cap .scl{display:none;flex:none;position:relative;width:3.3cqh;height:3.3cqh;margin-left:-.8cqw}
+.cap .scl svg{width:100%;height:100%}
+.cap .scl circle{fill:none;stroke:rgba(255,255,255,.15);stroke-width:4}
+.cap .scl .arc{stroke:#ff3b30;stroke-dasharray:107;stroke-dashoffset:0;stroke-linecap:round;transition:stroke-dashoffset .2s linear}
+.cap .scl b{position:absolute;inset:0;display:grid;place-items:center;font:900 2.1cqh/1 var(--disp);color:#fff}
+.cap.stl{border-color:#ff3b30;box-shadow:0 0 2.4cqw rgba(255,59,48,.45);background:rgba(40,6,4,.88)}
+.cap.stl .scl{display:block}
+.cap.out .scl{animation:alarm .5s ease-in-out infinite}
+.slam{position:absolute;left:0;right:0;top:40cqh;z-index:30;display:flex;flex-direction:column;align-items:center;padding:2.4cqh 0 2.8cqh;pointer-events:none;background:linear-gradient(90deg,transparent,var(--c) 18%,var(--c) 82%,transparent);animation:slamin 1.5s cubic-bezier(.2,1.3,.4,1) forwards}
+.slam.s0{--c:rgba(255,122,26,.94)}.slam.s1{--c:rgba(120,190,255,.94)}
+.slam small{font:800 1.3cqw var(--mono);letter-spacing:.4em;text-transform:uppercase;color:#0b0b10}
+.slam b{font-family:var(--disp);font-weight:900;line-height:1;color:#fff;text-transform:uppercase;text-shadow:0 .5cqh 0 rgba(0,0,0,.35)}
+@keyframes slamin{0%{transform:scale(1.8);opacity:0}14%{transform:scale(.96);opacity:1}22%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1.03)}}
+.pot.fire{color:#ffd76a;filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 1.4cqw #ff7a1a) drop-shadow(0 -.8cqh 1.6cqw #ff3b30);animation:fire 1.1s ease-in-out infinite}
+.pot.fire.pump{animation:pump .45s,fire 1.1s ease-in-out infinite}
+@keyframes fire{0%,100%{filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 1.4cqw #ff7a1a) drop-shadow(0 -.8cqh 1.6cqw #ff3b30)}50%{filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 2.4cqw #ffb347) drop-shadow(0 -1.4cqh 2.4cqw #ff5a1a)}}
+.wfoot .pod ol{list-style:none;margin:.8cqh 0 0;padding:0;display:grid;gap:.5cqh}
+.wfoot .pod li{display:flex;align-items:baseline;gap:.8cqw;font:800 1.6cqw/1.2 var(--head);white-space:nowrap}
+.wfoot .pod li i{font:900 1.6cqw var(--disp);font-style:normal;color:var(--gold);width:1.4cqw}
+.wfoot .pod li:nth-child(2) i{color:#d9d9e0}.wfoot .pod li:nth-child(3) i{color:#d08a4a}
+.wfoot .pod li em{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-style:normal}
+.wfoot .pod li u{text-decoration:none;font:700 1.1cqw var(--mono);color:rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
@@ -686,13 +722,14 @@ function build() {
     const r = cur(), max = Math.max(...r.a.map(a => Number(a[1]) || 0), 1), q = String(r.q);
     hist[0] = [S.teams[0].score]; hist[1] = [S.teams[1].score];
     h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">${r.mult > 1 ? `<b class="mx">${r.mult === 3 ? 'Triple' : 'Double'} budget x${r.mult}</b>` : 'The budget'}</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
-        <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div>
-      <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : 'Agenda item ' + (S.ri + 1)}</span></div>
+        <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div><div class="tug"><i></i><em></em></div>
+      <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : S.ri < 4 ? 'Agenda item ' + (S.ri + 1) + ' of 4' : 'Bonus item'}</span>${pips()}</div>
         <div class="q" style="--qfs:${Math.max(1.9, Math.min(2.8, 290 / (q.length + 6)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
       <div class="guesses" id="gs"></div>
       <div class="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},1fr);--afs:${Math.min(2.7, 96 / Math.max(1, ...r.a.map(a => String(a[0]).length)))}cqw">${r.a.map((a, i) =>
         `<div class="tile t-${i}${S.revealed[i] ? ' open' : ''}" style="--i:${i}"><div class="sh"></div><div class="rk">${i + 1}</div><div class="rd">CLASSIFIED</div>
-          <div class="pp" style="--k:${((Number(a[1]) || 0) / max).toFixed(3)}"><div class="an">${esc(a[0])}<div class="called"></div></div><div class="pt" data-to="${esc(a[1])}">${esc(a[1])}</div><div class="kpi"></div></div>${i ? '' : '<div class="tr">Top reply</div>'}</div>`).join('')}</div>
+          <div class="pp" style="--k:${((Number(a[1]) || 0) / max).toFixed(3)}"><div class="an">${esc(a[0])}${r.mult > 1 ? `<div class="mxm">${esc(a[1])} x${r.mult} = ${(Number(a[1]) || 0) * r.mult} to the budget</div>` : ''}<div class="called"></div></div><div class="pt" data-to="${esc(a[1])}">${esc(a[1])}</div><div class="kpi"></div></div>${i ? '' : '<div class="tr">Top reply</div>'}</div>`).join('')}</div>
+      <div class="cap" id="cap"><div class="scl"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"/><circle class="arc" cx="20" cy="20" r="17" transform="rotate(-90 20 20)"/></svg><b></b></div><span></span></div>
       <div class="dock"><div class="streak" id="stk"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 0 2 1 3 2 3 0-3-1-5 1-8z"/></svg><span>Synergy streak x<b>2</b></span></div>
         <div class="mode m${r.mult}"><b>x${r.mult}</b>${esc(S.useCustom ? 'The room has spoken / triple budget' : MODE(r.mult))}</div></div>`;
   } else if (S.phase === 'survey') {
@@ -717,7 +754,7 @@ function build() {
   }
   stage.innerHTML = h; stage.className = ''; void stage.offsetWidth; stage.className = 'in'; built = key; document.body.dataset.phase = S.phase;
   if (S.phase === 'title') { storm(); lobby(); }
-  if (S.phase === 'round') { deal(); [0, 1].forEach(spark); }
+  if (S.phase === 'round') { deal(); [0, 1].forEach(spark); lastBuzz = S.buzz; stealStop(); }
   if (S.phase === 'survey') survSet(Math.max(0, S.survey.count | 0));
   if (S.phase === 'winner') winnerRun();
 }
@@ -758,6 +795,41 @@ function syncRound() {
   if (fresh.length) setStreak();
   const lamps = $$('.lamp'); lamps.forEach((el, i) => { const on = i < S.strikes; if (on && !el.classList.contains('on')) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 600); } el.classList.toggle('on', on); });
   if (S.strikes > lastStrikes) { streak = 0; setStreak(); } lastStrikes = S.strikes;
+  // tug-of-war: each team's share of all points so far
+  const a0 = S.teams[0].score, a1 = S.teams[1].score, tg = $('.tug i'); if (tg) tg.style.width = (a0 + a1 ? a0 / (a0 + a1) * 100 : 50).toFixed(1) + '%';
+  pot.classList.toggle('fire', S.pot >= 100);
+  if ((S.buzz === 0 || S.buzz === 1) && S.buzz !== lastBuzz) slam(S.buzz); lastBuzz = S.buzz;
+  caption();
+}
+// where the show is: four boards, then the final
+function pips() { const at = S.useCustom ? 3 : S.ri; return `<div class="pips">${[0, 1, 2, 3].map(k => `<i class="${k < at ? 'd' : k === at ? 'c' : ''}"></i>`).join('')}<i class="f">Final</i></div>`; }
+// one plain line on what is happening now, so nobody in the room has to ask
+let lastBuzz = null, stealT = 0, stealIv = 0;
+const STEAL_S = 10;
+function caption() {
+  const cap = $('#cap'); if (!cap) return; const r = cur(), n = i => S.teams[i].name, act = actT(), steal = !!act && act[1] === 'Stealing';
+  let t = '';
+  if (S.awarded) t = '';
+  else if (!S.showQ) t = 'New agenda item. The question is coming up.';
+  else if (act && act[1] === 'Buzzed in') t = n(act[0]) + ' buzzed in first. Give your answer.';
+  else if (S.control !== 0 && S.control !== 1) t = 'Face-off: first team to buzz gets the first answer.';
+  else if (steal) t = n(act[0]) + ': one answer to steal all ' + S.pot + ' points.';
+  else { const left = 3 - S.strikes; t = n(S.control) + ' is answering. ' + left + ' more wrong and ' + n(1 - S.control) + ' can steal.'; }
+  const sp = cap.querySelector('span'); if (sp.textContent !== t) sp.textContent = t;
+  cap.classList.toggle('on', !!t); cap.classList.toggle('stl', steal);
+  if (steal && !stealT) { stealT = Date.now(); stealIv = setInterval(stealTick, 200); stealTick(); } else if (!steal && stealT) stealStop();
+}
+// steal shot clock: pressure only. It never ends the turn; the host still judges the answer.
+function stealTick() {
+  const cap = $('#cap'); if (!cap || !stealT) return stealStop(); const left = Math.max(0, STEAL_S - (Date.now() - stealT) / 1000), b = cap.querySelector('.scl b');
+  const v = Math.ceil(left), txt = v ? String(v) : '0'; if (b.textContent !== txt) b.textContent = txt;
+  cap.querySelector('.scl .arc').style.strokeDashoffset = (107 * (1 - left / STEAL_S)).toFixed(1); cap.classList.toggle('out', !left);
+}
+function stealStop() { clearInterval(stealIv); stealIv = 0; stealT = 0; const cap = $('#cap'); if (cap) cap.classList.remove('out'); }
+function slam(i) {
+  if (CALM) return; over.querySelectorAll('.slam').forEach(e => e.remove());
+  over.insertAdjacentHTML('beforeend', `<div class="slam s${i}"><small>Buzzed in</small><b style="font-size:${fit(S.teams[i].name, 7, 110)}cqw">${esc(S.teams[i].name)}</b></div>`);
+  if (window.STAGE) STAGE.flash(TEAMC[i], .7); setTimeout(() => over.querySelectorAll('.slam').forEach(e => e.remove()), 1500);
 }
 function setStreak() { const el = $('#stk'); if (!el) return; const on = streak >= 2 && !S.awarded; el.classList.toggle('on', on); if (on) { el.querySelector('b').textContent = streak; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); } }
 
@@ -922,7 +994,7 @@ function winnerText() {
   $('#wp').textContent = tie ? 'Tied at ' + a.score + '. Awarded jointly, to avoid a meeting.' : w.score + ' to ' + l.score + '. Exceeds expectations. Briefly.';
   const au = S.aud || {}, mvp = au.top && au.top[0];
   const f = `${tie ? '' : `<div><small>Runner-up / lateral move</small><b>${esc(l.name)}</b><span>Most Valuable Reply. A certificate is in the mail.</span></div>`}
-    ${mvp ? `<div class="mvp"><small>Individual contributor of the quarter</small><b>${esc(mvp[0])}</b><span>${esc(mvp[1])} points on their phone. Promotion pending budget.</span></div>` : '<div><small>Signed</small><b>Chip, AI intern (unpaid)</b><span>Valid for bragging rights only.</span></div>'}`;
+    ${mvp ? `<div class="mvp pod"><small>Top phone players</small><ol>${au.top.slice(0, 3).map((p, k) => `<li><i>${k + 1}</i><em>${esc(p[0])}</em><u>${esc(p[1])} pts</u></li>`).join('')}</ol></div>` : '<div><small>Signed</small><b>Chip, AI intern (unpaid)</b><span>Valid for bragging rights only.</span></div>'}`;
   const wf = $('#wf'); if (wf.dataset.h !== f) { wf.dataset.h = f; wf.innerHTML = f; }
 }
 function winnerRun() {
