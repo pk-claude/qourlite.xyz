@@ -646,7 +646,7 @@ function guess() {
 function join(t) {
   sid = $('code').value.trim().toUpperCase(); team = t; name = $('name').value.replace(/[^\p{L}\p{N} ]/gu, '').trim().slice(0, 12);
   if (!/^[A-Z0-9]{4}$/.test(sid)) { sid = ''; msg.textContent = 'Type the 4-character Meeting ID first.'; $('code').focus(); return; }
-  if (t !== 2 && !name) { sid = ''; msg.textContent = 'Type your first name so the scorekeeper can approve your buzzer.'; $('name').focus(); return; }
+  if (!name) { sid = ''; msg.textContent = t === 2 ? 'Type your first name so your points show up on the big screen.' : 'Type your first name so the scorekeeper can approve your buzzer.'; $('name').focus(); return; }
   if (known === false) { sid = ''; msg.textContent = 'No meeting is using that ID. Check the big screen.'; return; }
   send('join').then(() => {
     joined = true; localStorage.setItem(LS, JSON.stringify({sid, team, name}));

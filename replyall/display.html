@@ -146,6 +146,7 @@ body.nogl #stagebg{display:none}
 @keyframes paid{25%{transform:scale(1.05);box-shadow:0 0 0 .3cqw var(--gold),0 0 8cqw rgba(255,201,60,.8)}}
 .mid{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:.6cqh 0 .2cqh}
 .mid .lab{font:800 1cqw var(--mono);letter-spacing:.34em;color:rgba(255,255,255,.55);text-transform:uppercase}
+.mid .lab .mx{display:block;margin:.6cqh auto 0;width:max-content;padding:.4cqh .8cqw;border-radius:.6cqw;background:var(--orange);color:#fff;letter-spacing:.2em;font-size:1.1cqw;box-shadow:0 0 2cqw rgba(255,122,26,.7);animation:pump 1.2s ease-in-out infinite}
 .pot{font:900 9.6cqh/0.95 var(--disp);font-variant-numeric:tabular-nums;filter:drop-shadow(0 .4cqh 0 #6b3d00) drop-shadow(0 0 2cqw rgba(255,201,60,.35))}
 .pot.pump{animation:pump .45s}
 @keyframes pump{40%{transform:scale(1.18)}}
@@ -319,7 +320,7 @@ body.nogl #stagebg{display:none}
 .rush{position:absolute;inset:0}
 .rush .rh{position:absolute;left:3cqw;top:4cqh}
 .rush .rh .mono{font-size:1.1cqw;color:var(--ta)}
-.rush .rh h1{margin:.8cqh 0 0;font:900 11cqh/0.9 var(--disp);text-transform:uppercase}
+.rush .rh h1{margin:2.4cqh 0 0;font:900 11cqh/0.9 var(--disp);text-transform:uppercase}
 .rush .lq{margin-top:2cqh;max-width:60cqw;font:800 2.4cqw/1.15 var(--head);min-height:6cqh}
 .rush .lq.pop{animation:fin .4s}
 .rush .clk{position:absolute;right:3cqw;top:3cqh;display:flex;align-items:center;gap:2cqw}
@@ -668,7 +669,7 @@ function build() {
   } else if (S.phase === 'round') {
     const r = cur(), max = Math.max(...r.a.map(a => Number(a[1]) || 0), 1), q = String(r.q);
     hist[0] = [S.teams[0].score]; hist[1] = [S.teams[1].score];
-    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">The budget</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
+    h = `<div class="hud">${teamHtml(0)}<div class="mid"><div class="lab">The budget${r.mult > 1 ? `<b class="mx">x${r.mult} ${r.mult === 3 ? 'triple' : 'double'} points</b>` : ''}</div><div class="pot gt" data-v="${S.pot}">${S.pot}</div>
         <div class="lamps"><div class="lamp">WARNING</div><div class="lamp">FINAL WARNING</div><div class="lamp">FINAL_FINAL_v2</div></div></div>${teamHtml(1)}</div>
       <div class="subj"><div class="sl">Subject:<span>${S.useCustom ? 'You said / ' + r.n + ' replies' : 'Agenda item ' + (S.ri + 1)}</span></div>
         <div class="q" style="--qfs:${Math.max(1.9, Math.min(2.8, 290 / (q.length + 6)))}cqw">${q.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${esc(w)}</span>`).join(' ')}</div><div class="cls">Classified</div></div>
@@ -825,7 +826,7 @@ const SEGS = [
   {t: 'Calendar / today', e: 'Starts soon(ish)', ms: 12000, h: () => `<div class="k">Pre-meeting</div><h2>Winter Fest agenda</h2><ul class="ag">${[['Hot cocoa', '(mandatory)'], ['Gingerbread house', '(load-bearing)'], ['Action items', '(none)'], ['Leave early', '']].map(a => `<li><i>${TICK}</i>${a[0]}${a[1] ? `<small>${a[1]}</small>` : ''}<u>Pending approval</u></li>`).join('')}</ul><div class="foot">Eat. Sip. Play. Reply all.</div>`,
     run: el => { const li = el.querySelectorAll('li'); [1500, 3200, 4900].forEach((t, i) => lobAt(t, () => li[i].classList.add('ok'))); lobAt(7000, () => li[3].classList.add('pend')); lobAt(8600, () => el.querySelector('.foot').classList.add('on')); }},
   {t: 'Live poll / while you wait', e: 'Results are in', ms: 11000, h: () => `<div class="k">Office poll</div><h2>What are you here for?</h2><div class="poll">${[['The hot cocoa', 61], ['The gift table', 27], ['Team bonding', 9], ['Sorry, I was on mute', 3]].map((r, i) => `<div class="pr"><span>${r[0]}<b>${r[1]}%</b></span><u><i style="--p:${r[1] / 100};--dl:${.4 + i * .3}s"></i></u></div>`).join('')}</div>`},
-  {t: 'House rules', e: 'Read them. Nobody will.', ms: 15000, h: () => `<div class="k">How this works</div><h2>Three house rules</h2><ul class="rules"><li><b>1</b><div>Name the top answers<small>We surveyed people like you. Teams guess what they said.</small></div></li><li><b>2</b><div>Three strikes and it's a hostile takeover<small>The other team gets one answer to steal the whole budget.</small></div></li>${S.phones ? '<li><b>3</b><div>Everyone plays on their phone<small>Guess the top answer every round. Score points. Become Employee of the Quarter.</small></div></li>' : '<li><b>3</b><div>Cheer like your bonus depends on it<small>It does not. Cheer anyway.</small></div></li>'}</ul>`},
+  {t: 'House rules', e: 'Read them. Nobody will.', ms: 15000, h: () => `<div class="k">How this works</div><h2>Three house rules</h2><ul class="rules"><li><b>1</b><div>Guess the popular answer, not the right one<small>We surveyed people about office life. On the board means points.</small></div></li><li><b>2</b><div>Three strikes and it's a hostile takeover<small>The other team gets one answer to steal the whole budget.</small></div></li>${S.phones ? '<li><b>3</b><div>Audience: call your guess on your phone<small>Before the first answer shows. On the board means points. The top scorer joins a team after Round 2.</small></div></li>' : '<li><b>3</b><div>Cheer like your bonus depends on it<small>It does not. Cheer anyway.</small></div></li>'}</ul>`},
   {t: 'Did you know', e: 'Facts (unverified)', ms: 10000, h: () => `<div class="k">Office science</div><div class="fact">${esc(FACTS[lobF++ % FACTS.length])}</div>`},
   {t: 'Market open', e: 'Pre-market', ms: 11000, h: () => `<div class="k">Trading floor</div><h2>Tonight's tickers</h2><div class="mkt">${[0, 1].map(i => `<div style="--c:${TEAMC[i]}"><b>${esc(sym(S.teams[i].name))}</b><span>${esc(S.teams[i].name)}</span><em>0.00 / flat / analysts nervous</em></div>`).join('')}</div><div class="mktn">Every point either team scores moves its stock. Insider trading is encouraged.</div>`},
   {t: 'Now joining', e: 'Lobby', ms: 11000, h: () => { const names = (S.aud && S.aud.names || []).slice(-6); const rows = names.length ? names.map((n, i) => [n, JOINS[(lobJ + i) % JOINS.length]]) : ROLES.slice(0, 6).map((n, i) => [n, JOINS[(lobJ + i) % JOINS.length]]); lobJ += 3;
@@ -1022,6 +1023,7 @@ function chipLook() {
 }
 if (!CALM) setInterval(() => { if (!S || glanceT || chipBox.style.getPropertyValue('--ly') === '-1') return; chipBox.style.setProperty('--lx', Math.random() < .5 ? -1 : 1); glanceT = setTimeout(() => { glanceT = 0; chipLook(); }, 900); }, 6500);
 function chipSay(text) {
+  text = String(text || '').trim(); if (!text) return;   // never an empty speech bubble
   const out = document.getElementById('chipText'); clearTimeout(chipT); clearInterval(typeT); clearTimeout(talkT);
   chipSaying = true; chipBox.classList.add('say', 'talk'); chipVis(); out.textContent = ''; let i = 0;
   typeT = setInterval(() => { out.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(typeT); }, 22);
