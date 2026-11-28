@@ -13,7 +13,7 @@ window.GAME = {
   title: "Reply All",
   subtitle: "The Winter Fest survey showdown",
   tagline: "Eat. Sip. Play. Reply all.",
-  teams: ["Team Synergy", "Team Bandwidth"],
+  teams: ["Hot Cocoa", "Chewy Cookies"],
   lightningTarget: 200,
   finalStakes: "200 points and the whole room wins. No action items.",
 
@@ -133,6 +133,9 @@ window.GAME = {
   // "YOU SAID" ROUND. The audience answers one of these on their phones, live,
   // and the board is built from what this room actually said. Keep them answerable in one or two words.
   room: [
+    "In one or two words: the most overused word in supply chain.",
+    "In one or two words: your most-used tool at home.",
+    "In one or two words: if our team had a mascot, what would it be?",
     "In one or two words: what is the real reason you came to Winter Fest?",
     "In one or two words: name the gift you are hoping not to get.",
     "In one or two words: translate 'per my last email'.",
@@ -194,6 +197,8 @@ window.GAME = {
 
   // PITCH-OFF TOPICS. Two audience volunteers get 30 seconds each to pitch one of these. The room votes on phones.
   pitches: [
+    "Is Die Hard a Christmas movie? Make your case.",
+    "What is the best college? Make your case.",
     "Sell us this used stapler.",
     "Pitch a new mandatory meeting. Make us want to attend.",
     "Convince us the office printer deserves a promotion.",

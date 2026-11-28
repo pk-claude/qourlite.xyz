@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>REPLY ALL - Crew handout</title>
+<link href="../vendor/fonts.css" rel="stylesheet">
+<link href="print.css" rel="stylesheet">
+<style>
+@page{size:letter landscape;margin:0}
+.page{width:11in;height:8.48in;padding:.38in .45in;display:flex;flex-direction:column;gap:.16in}
+.hd{display:flex;align-items:baseline;gap:.2in;border-bottom:4px solid var(--pine);padding-bottom:.08in}
+.hd h1{margin:0;font:900 44px/1 var(--disp);text-transform:uppercase;color:var(--pine)}
+.hd h1 em{font-style:normal;color:var(--orange)}
+.hd span{margin-left:auto;font:800 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+h2{margin:0 0 .06in;font:900 22px/1 var(--disp);text-transform:uppercase;color:var(--pine)}
+.row{display:grid;gap:.16in}
+.c4{grid-template-columns:repeat(4,1fr)}.c2{grid-template-columns:1fr 1fr}.c7{grid-template-columns:repeat(7,1fr)}
+.box{border-radius:12px;background:var(--cream);padding:.12in}
+.role{border-top:8px solid var(--c)}
+.role b{display:block;font:900 24px/1 var(--disp);text-transform:uppercase;color:var(--ink)}
+.role p{margin:3px 0 6px;font-size:13.5px}
+.tag{display:inline-block;margin:2px 4px 0 0;padding:3px 6px;border-radius:5px;background:#fff;font:800 10.5px/1 var(--mono)}
+.tag i{font-style:normal;color:var(--c)}
+.map svg{width:100%;height:auto;display:block}
+.step{background:var(--cream);border-radius:10px;padding:.1in;display:flex;flex-direction:column;gap:4px;min-height:1.2in}
+.step .n{font:900 24px/1 var(--disp);color:var(--pine)}
+.step .t{font:800 13px/1.1 var(--body)}
+.step .m{font:800 10px/1 var(--mono);color:var(--mute)}
+.dot{display:inline-block;margin-top:auto;padding:3px 5px;border-radius:4px;color:#fff;background:var(--c);font:800 9px/1 var(--mono);margin-right:2px}
+.sig{text-align:center}
+.sig .q{font:400 26px/1.05 var(--script);color:var(--pine);min-height:.5in;display:flex;align-items:center;justify-content:center}
+.sig .a{display:inline-block;margin-top:4px;padding:5px 8px;border-radius:6px;background:var(--orange);color:#fff;font:800 11.5px/1 var(--mono)}
+.card{border-left:10px solid var(--c);border-radius:12px;background:var(--cream);padding:.14in .16in;display:flex;flex-direction:column;gap:.08in}
+.card .top{display:flex;align-items:baseline;gap:.12in}
+.card .top b{font:900 30px/1 var(--disp);text-transform:uppercase}
+.card .top span{margin-left:auto;font:800 10.5px/1.2 var(--mono);color:var(--mute);text-align:right}
+.gold{background:#fff;border-radius:8px;padding:.09in .12in;font-weight:800;font-size:16px}
+.gold em{font-style:normal;color:var(--c)}
+ol{margin:0;padding:0;list-style:none;counter-reset:s;display:grid;gap:9px}
+ol li{counter-increment:s;position:relative;padding:2px 0 2px 34px;font-size:15px;line-height:1.3}
+ol li::before{content:counter(s);position:absolute;left:0;top:0;width:23px;height:23px;border-radius:50%;background:var(--c);color:#fff;font:900 15px/23px var(--disp);text-align:center}
+ol li b{font-weight:800}
+.when{font:800 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.slides{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.slides div{background:#fff;border-radius:6px;padding:7px 9px;font-size:13px;line-height:1.3}
+.slides b{display:block;font:800 9.5px/1 var(--mono);text-transform:uppercase;color:var(--c);margin-bottom:2px}
+kbd{font:800 10.5px/1 var(--mono);padding:2px 4px;border-radius:4px;background:var(--ink);color:#fff}
+.ck{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+.ck li::before{content:"";display:inline-block;width:12px;height:12px;border:2px solid var(--pine);border-radius:3px;margin-right:7px;vertical-align:-2px}
+.fix{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.fix div{background:#fff;border-radius:6px;padding:7px 9px;font-size:13.5px;line-height:1.3}
+.fix b{display:block;color:#b3261e;font-weight:800}
+.foot{margin-top:auto;font:800 10.5px/1 var(--mono);color:var(--mute);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="tools"><button onclick="print()">Print (landscape)</button><a href="crew.pdf">Download PDF</a><a href="./">All printables</a></div>
+
+<!-- PAGE 1: overview -->
+<div class="page">
+  <div class="hd"><h1>REPLY <em>ALL</em> / The crew</h1><span>Winter Fest / Dec 3 / page 1 of 3</span></div>
+  <div class="row c4">
+    <div class="box role" style="--c:var(--orange)"><b>Operator</b><p>Runs the game laptop. Keeps score.</p><span class="tag">Test <i>Pavel</i></span><span class="tag">Dec 3 <i>Pavel</i></span></div>
+    <div class="box role" style="--c:var(--gold)"><b>Host</b><p>On the mic. Reads, rules, keeps it moving.</p><span class="tag">Test <i>1</i></span><span class="tag">Dec 3 <i>1</i></span></div>
+    <div class="box role" style="--c:var(--ice)"><b>Wrangler</b><p>Moves people. Runs call-ups.</p><span class="tag">Test <i>host</i></span><span class="tag">Dec 3 <i>1</i></span></div>
+    <div class="box role" style="--c:var(--mint)"><b>Tech</b><p>Screen, sound, Wi-Fi, phone help.</p><span class="tag">Test <i>Pavel</i></span><span class="tag">Dec 3 <i>1, optional</i></span></div>
+  </div>
+  <div class="row c2" style="grid-template-columns:1.15fr 1fr;flex:1">
+    <div class="box map"><h2>Where everyone stands</h2>
+      <svg viewBox="0 0 800 380" role="img" aria-label="Room layout">
+        <rect x="230" y="10" width="340" height="38" rx="6" fill="#0d3b26"/><text x="400" y="35" text-anchor="middle" fill="#fff" font-size="18" font-weight="800" font-family="Bricolage,Arial">BIG SCREEN</text>
+        <circle cx="160" cy="62" r="30" fill="#e0a800"/><text x="160" y="68" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" font-family="Bricolage,Arial">HOST</text>
+        <rect x="600" y="46" width="150" height="54" rx="8" fill="#f96302"/><text x="675" y="70" text-anchor="middle" fill="#fff" font-size="15" font-weight="800" font-family="Bricolage,Arial">OPERATOR</text><text x="675" y="90" text-anchor="middle" fill="#fff" font-size="12" font-family="Bricolage,Arial">laptop</text>
+        <path d="M192 66 Q400 125 596 76" fill="none" stroke="#e0a800" stroke-width="3" stroke-dasharray="7 7"/><text x="400" y="118" text-anchor="middle" fill="#8a6a00" font-size="14" font-weight="800" font-family="Bricolage,Arial">eye contact</text>
+        <rect x="140" y="145" width="200" height="66" rx="10" fill="#fff" stroke="#f96302" stroke-width="4"/><text x="240" y="185" text-anchor="middle" fill="#13231a" font-size="17" font-weight="800" font-family="Bricolage,Arial">HOT COCOA</text>
+        <rect x="460" y="145" width="200" height="66" rx="10" fill="#fff" stroke="#2f7fb8" stroke-width="4"/><text x="560" y="185" text-anchor="middle" fill="#13231a" font-size="17" font-weight="800" font-family="Bricolage,Arial">CHEWY COOKIES</text>
+        <rect x="352" y="161" width="96" height="34" rx="17" fill="#2f7fb8"/><text x="400" y="183" text-anchor="middle" fill="#fff" font-size="12" font-weight="800" font-family="Bricolage,Arial">WRANGLER</text>
+        <g fill="#e3dccb"><rect x="110" y="245" width="580" height="24" rx="12"/><rect x="110" y="279" width="580" height="24" rx="12"/><rect x="110" y="313" width="580" height="24" rx="12"/></g>
+        <text x="400" y="296" text-anchor="middle" fill="#13231a" font-size="16" font-weight="800" font-family="Bricolage,Arial">AUDIENCE (on phones)</text>
+        <circle cx="740" cy="330" r="28" fill="#1f9e5a"/><text x="740" y="336" text-anchor="middle" fill="#fff" font-size="14" font-weight="800" font-family="Bricolage,Arial">TECH</text>
+      </svg></div>
+    <div class="box"><h2>Host to operator signals</h2>
+      <div class="row c2" style="gap:.22in .1in">
+        <div class="sig"><div class="q">a nod</div><span class="a">Press the glowing button</span></div>
+        <div class="sig"><div class="q">host repeats the answer</div><span class="a">Type it + Enter</span></div>
+        <div class="sig"><div class="q">"The survey accepts that"</div><span class="a">Closest answer</span></div>
+        <div class="sig"><div class="q">"That's a strike"</div><span class="a">Not on the board (X)</span></div>
+      </div>
+      <p style="margin:.1in 0 0;font-size:12.5px;color:var(--mute)">Agree on these before the show. The operator never talks to the room.</p>
+    </div>
+  </div>
+  <div><h2>The show, about 45 to 60 minutes</h2>
+    <div class="row c7" style="gap:.08in">
+      <div class="step"><div class="n">1</div><div class="t">Setup + rules</div><div class="m">5 min</div><div><span class="dot" style="--c:var(--gold)">HOST</span><span class="dot" style="--c:var(--mint)">TECH</span></div></div>
+      <div class="step"><div class="n">2</div><div class="t">Rounds 1 + 2</div><div class="m">8-10 min each</div><div><span class="dot" style="--c:var(--gold)">HOST</span><span class="dot" style="--c:var(--orange)">OP</span></div></div>
+      <div class="step"><div class="n">3</div><div class="t">Call-ups</div><div class="m">5 min</div><div><span class="dot" style="--c:var(--ice)">WRANGLER</span></div></div>
+      <div class="step"><div class="n">4</div><div class="t">Round 3, x2</div><div class="m">8-10 min</div><div><span class="dot" style="--c:var(--gold)">HOST</span><span class="dot" style="--c:var(--orange)">OP</span></div></div>
+      <div class="step"><div class="n">5</div><div class="t">You said, x3</div><div class="m">8 min</div><div><span class="dot" style="--c:var(--orange)">OP</span><span class="dot" style="--c:var(--mint)">TECH</span></div></div>
+      <div class="step"><div class="n">6</div><div class="t">Final round</div><div class="m">5 min</div><div><span class="dot" style="--c:var(--ice)">WRANGLER</span><span class="dot" style="--c:var(--orange)">OP</span></div></div>
+      <div class="step"><div class="n">7</div><div class="t">Winner + MVP</div><div class="m">2 min</div><div><span class="dot" style="--c:var(--gold)">HOST</span></div></div>
+    </div>
+  </div>
+  <div class="foot"><span>qourlite.xyz/replyall/crew</span><span>If the control panel says something different, the panel wins.</span></div>
+</div>
+
+<!-- PAGE 2: operator + host -->
+<div class="page">
+  <div class="hd"><h1>Operator + Host</h1><span>page 2 of 3</span></div>
+  <div class="row c2" style="flex:1">
+    <div class="card" style="--c:var(--orange)">
+      <div class="top"><b>Operator</b><span>at the laptop<br>facing the host</span></div>
+      <div class="gold">One rule: press the button with the <em>yellow ring + NOW tag</em>.</div>
+      <ol>
+        <li><b>Setup.</b> Open big screen, test sound, show join code, fill the Roster (host + players). Phones joining with a listed first name get their role by itself.</li>
+        <li><b>Rules.</b> Host reads each slide. Press Next slide when they stop talking.</li>
+        <li><b>Each round.</b> Show question, Open buzzers. Type what each player says + Enter. The game runs the face-off, strikes, steal and points.</li>
+        <li><b>Call-ups</b> after Round 2. Promote the top audience player, then run the pitch-off vote.</li>
+        <li><b>You said.</b> Open survey, Close and count, tidy answers, put it on the board.</li>
+        <li><b>Final + winner.</b> Type what players say, Space to reveal. Then Reveal the MVP.</li>
+      </ol>
+      <div class="when">Keys</div>
+      <div style="font-size:13px"><kbd>1</kbd>-<kbd>8</kbd> = that answer &nbsp; <kbd>X</kbd> Not on the board &nbsp; <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd> undo. Phones fail: click the team under "No buzzers?". Game wrong: Steal worked / Steal failed / Give to [team].</div>
+    </div>
+    <div class="card" style="--c:var(--gold)">
+      <div class="top"><b>Host</b><span>beside the screen<br>facing the room</span></div>
+      <div class="gold">You <em>talk, read and rule</em>. Never wait in silence.</div>
+      <ol>
+        <li><b>Welcome.</b> "Phones out. Scan the code. Join as Just the audience."</li>
+        <li><b>Each board.</b> Read the question. "Audience, call your guess now." Call up the face-off.</li>
+        <li><b>Rule out loud.</b> Repeat each answer loudly so the operator can type it. You decide what counts.</li>
+        <li><b>Close.</b> Thank the teams, promoted players and bingo winners.</li>
+      </ol>
+      <div class="when">Rules script, one line per slide</div>
+      <div class="slides">
+        <div><b>1 How to play</b>"Guess the popular answer, not the right one."</div>
+        <div><b>2 Face-off</b>"One per team. Fastest buzz answers first. Better answer wins the board."</div>
+        <div><b>3 Three strikes</b>"Answer one at a time. Three misses and the other team gets one guess to steal it all."</div>
+        <div><b>4 Audience</b>"You play too. Guess before the first reveal. On the board, the points are yours."</div>
+        <div><b>5 Get called up</b>"After Round 2, two of you join the teams: the top phone scorer, then the pitch-off winner, +50."</div>
+        <div><b>6 The stakes</b>"Round 3 pays double. You write the next board for triple. Then the final round."</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Full host script: qourlite.xyz/replyall/crew</span><span>REPLY ALL / Winter Fest</span></div>
+</div>
+
+<!-- PAGE 3: wrangler, tech, test day, fixes -->
+<div class="page">
+  <div class="hd"><h1>Wrangler + Tech + Test day</h1><span>page 3 of 3</span></div>
+  <div class="row c2">
+    <div class="card" style="--c:var(--ice)">
+      <div class="top"><b>Wrangler</b><span>between the teams</span></div>
+      <ol>
+        <li><b>Before.</b> Two teams of 3-5; give team and player first names to Pavel for the Roster. Players join with that same first name. Set the face-off order for Rounds 1-3.</li>
+        <li><b>Each round.</b> Send the next pair up as the question is read. Phones fail? Shout who buzzed first.</li>
+        <li><b>Call-ups.</b> Screen says PROMOTED: walk that person to their team. Have 2 pitch-off volunteers ready early; time 30 sec each.</li>
+        <li><b>Final.</b> Take player two out of earshot; bring them back on cue. Line both teams up for the winner.</li>
+      </ol>
+    </div>
+    <div class="card" style="--c:var(--mint)">
+      <div class="top"><b>Tech</b><span>back row, then roaming</span></div>
+      <ol>
+        <li><b>Plug in.</b> Power, projector, speakers. Display = Extend. PC <kbd>Win</kbd>+<kbd>P</kbd>. Mac: Displays, mirroring off.</li>
+        <li><b>Wi-Fi.</b> Test on laptop and a phone. Post the Wi-Fi name by the flyers.</li>
+        <li><b>Sound.</b> Stand in the back row during Test voice. Signal louder or softer.</li>
+        <li><b>Join help.</b> Same Wi-Fi, reload, Meeting ID matches the screen. Frozen screen: click it, <kbd>F5</kbd> (Mac <kbd>Cmd</kbd>+<kbd>R</kbd>).</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row c2" style="flex:1">
+    <div class="box"><h2>Test day checklist</h2>
+      <div class="row c2" style="gap:.1in">
+        <ul class="ck"><li>Host picked, has this handout</li><li>Room with screen + HDMI</li><li>Run Watch a demo show once</li><li>Laptop on power, display Extend</li><li>Test sound + voice</li><li>Roster filled, everyone joins</li></ul>
+        <ul class="ck"><li>Practice the 4 signals</li><li>Time each round</li><li>Note every "what now?" moment</li><li>Note phone failures (iPhone / Android)</li><li>Try the pitch-off</li><li>Ask: confusing? funny? dragged?</li></ul>
+      </div>
+      <p style="margin:.1in 0 0;font-weight:800;font-size:13px">Pass = one full game, start to winner, no reset.</p>
+    </div>
+    <div class="box"><h2>If it breaks</h2>
+      <div class="fix">
+        <div><b>Not sure what to press</b>Find the yellow ring with NOW.</div>
+        <div><b>Wrong click</b>Undo (bottom left), one step at a time.</div>
+        <div><b>Score wrong</b>Click the score at the top, type the number.</div>
+        <div><b>Laptop refreshed</b>Choose Keep going.</div>
+        <div><b>Phone will not buzz</b>Fix its role in the Roster list, or the team under "No buzzers?".</div>
+        <div><b>Need a pause</b>Click Setup in the left column.</div>
+        <div><b>Running long</b>Skip the pitch-off, then You said.</div>
+        <div><b>Chip too loud</b>Setup: Chip speaks = Big moments or Never.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>qourlite.xyz/replyall/crew</span><span>REPLY ALL / Winter Fest</span></div>
+</div>
+</body>
+</html>

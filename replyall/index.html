@@ -225,7 +225,23 @@ table.l td.act,table.l th.act{background:#fff3e3}
   <a href="buzz/" style="display:block;padding:16px;border-radius:14px;background:#f96302;color:#fff;font-weight:800;font-size:19px;text-decoration:none">Join the game</a>
   <button onclick="document.getElementById('phoneGate').style.display='none';document.documentElement.classList.remove('gated')" style="padding:14px;border-radius:14px;border:1px solid rgba(243,233,210,.4);background:transparent;color:#f3e9d2;font:inherit">I am the host, stay here</button>
 </div>
-<style>html.gated body>*:not(#phoneGate){display:none!important}</style><script>if (screen.width <= 700 && matchMedia('(pointer:coarse)').matches) { document.documentElement.classList.add('gated'); document.getElementById('phoneGate').style.display = 'flex'; }</script>
+<style>html.gated body>*:not(#phoneGate){display:none!important}
+nav a.util{display:block;padding:6px 8px;border:1px solid #24493a;border-radius:10px;color:#cfe0d4;text-align:center;text-decoration:none;font-size:13px}
+nav a.util:hover{background:rgba(255,255,255,.06)}
+.said{margin:10px 0 6px;padding:10px;border-radius:10px;background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.45)}
+.said label{display:block;font-weight:700;margin-bottom:6px}
+.said .row{margin:0}
+.said input{flex:1;min-width:0;padding:9px 10px;font-size:16px}
+.said .jn{margin:6px 0 0;font-size:13px;opacity:.85}
+
+.rgrid{display:grid;grid-template-columns:max-content 1fr;gap:6px 10px;align-items:center;margin:4px 0 8px}
+.rgrid label{font-weight:700}
+.rgrid input{padding:7px 9px;min-width:0}
+.rtab{width:100%;border-collapse:collapse;font-size:13.5px}
+.rtab th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.7;padding:4px 6px}
+.rtab td{padding:4px 6px;border-top:1px solid rgba(127,127,127,.25)}
+.rtab select{max-width:200px}
+</style><script>if (screen.width <= 700 && matchMedia('(pointer:coarse)').matches) { document.documentElement.classList.add('gated'); document.getElementById('phoneGate').style.display = 'flex'; }</script>
 <div id="app"></div>
 <script>
 const G = window.GAME, app = document.getElementById('app'), KEY = 'replyall_state_v3';
@@ -271,12 +287,13 @@ let S; try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
 let resumed = !!(S && S.teams && (S.phase !== 'title' || S.teams.some(t => t.score)));
 if (!S || !S.teams || !G.rounds[S.ri] || !G.lightning[S.li]) { S = fresh(); resumed = false; }
 S.buzzOpen = false; if (S.rx === undefined) S.rx = true; if (!S.pl) S.pl = {};
+['Team Synergy', 'Team Bandwidth'].forEach((n, i) => { if (S.teams[i].name === n) S.teams[i].name = G.teams[i]; });   // the old default names give way to the new ones
 // The page was refreshed while the survey answers were being counted: reopen it, so Close and count can run again.
 if (S.phase === 'survey' && S.survey && S.survey.st === 'closed' && !S.survey.groups) S.survey.st = 'open';
 // Each game code has its own relay room, so two hosts never overwrite each other.
 const room = () => 'ra-' + S.sid.toLowerCase();
 const cur = () => S.useCustom && S.custom ? S.custom : G.rounds[S.ri];
-let dupHost = false, win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0, lastKid = '';
+let jnote = '', dupHost = false, win = null, tick = null, said = '', chipLast = '', pending = null, busy = false, note = '', lastAlive = 0, seq = 0, lastKid = '';
 let phones = [], answers = [], phoneErr = '', streak = 0;   // streak: answers revealed in a row this round (the reveal sound climbs with it)
 // REH is set while the demo show (rehearsal) plays. It holds the real game, which comes back untouched when the demo ends.
 let REH = null;
@@ -351,7 +368,7 @@ function setRoast() { const el = document.getElementById('roastBox'); if (el) el
 // A presenter clicker (Page Up / Page Down) = team 1. A number pad = team 2.
 const LEFT = new Set('Backquote Digit1 Digit2 Digit3 Digit4 Digit5 KeyQ KeyW KeyE KeyR KeyT KeyA KeyS KeyD KeyF KeyG KeyZ KeyX KeyC KeyV KeyB PageUp PageDown'.split(' '));
 const isRight = c => /^(Digit[6-90]|Key[YUIOPHJKLNM]|Minus|Equal|Bracket|Backslash|Semicolon|Quote|Comma|Period|Slash|Arrow|Numpad(?!Enter))/.test(c);
-function buzzIn(t, pid) { if (!S.buzzOpen || S.phase !== 'round') return false; S.buzz = t; S.buzzPid = pid || null; S.buzzOpen = false; if (S.control === null) S.control = t; SFX.buzz(); up(); return true; }
+function buzzIn(t, pid) { if (!S.buzzOpen || S.phase !== 'round') return false; S.buzz = t; S.buzzPid = pid || null; S.buzzOpen = false; if (S.control === null && S.fo) S.fo.next = t; SFX.buzz(); up(); return true; }
 function buzzKey(code) { return LEFT.has(code) ? buzzIn(0) : isRight(code) ? buzzIn(1) : false; }
 document.addEventListener('keydown', e => {
   const typing = /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
@@ -362,7 +379,7 @@ document.addEventListener('keydown', e => {
 // Also called for keys pressed while the big screen window has the focus.
 function handleKey(code) {
   if (S.buzzOpen) return buzzKey(code);
-  if (S.phase === 'round') { const m = /^(?:Digit|Numpad)([1-8])$/.exec(code); if (m && cur().a[m[1] - 1] && !S.revealed[m[1] - 1]) { A.reveal(m[1] - 1); return true; } if (code === 'KeyX') { A.strike(); return true; } }
+  if (S.phase === 'round') { const m = /^(?:Digit|Numpad)([1-8])$/.exec(code); if (m && cur().a[m[1] - 1] && !S.revealed[m[1] - 1]) { A.pick(m[1] - 1); return true; } if (code === 'KeyX') { A.miss(); return true; } }
   if (S.phase === 'lightning' && code === 'Space') { A.lnext(); return true; }
   return false;
 }
@@ -406,6 +423,7 @@ function postState() {
   if (!ONLINE || REH) return;
   const st = {sid: S.sid, names: S.teams.map(t => t.name), open: S.buzzOpen, buzz: S.buzz, first: S.buzzPid, ok: Object.keys(S.allowed).filter(k => S.allowed[k]), survey: S.survey && S.survey.st === 'open' ? {n: S.survey.n, q: S.survey.q} : null,
     q: S.phase === 'round' && S.showQ ? cur().q : null, scores: S.teams.map(t => t.score), ph: S.phase, gb: S.phase === 'round' && S.gb && !S.gb.banked ? {id: S.gb.id, open: S.gb.open, aw: S.awarded && S.gb.aw !== undefined ? S.gb.aw : null, m: cur().mult} : null, pm: pmap(),
+    ro: Object.fromEntries(Object.keys(S.pl).filter(p => S.pl[p].as).map(p => [p, roleOf(p)])), mic: '/snowman/mic/',
     ev: Object.keys(S.ev || {}).join(','), bg: S.bingo || {}, hot: hotOn() && S.hot ? {i: S.hot.i, q: HOT[S.hot.i][0], o: HOT[S.hot.i].slice(1), c: S.hot.c} : null,
     mvp: S.phase === 'winner' ? (S.mvpDone ? {w: S.mvpDone} : {c: mvpCands().map(p => [p, S.pl[p].n || guest(p), S.pl[p].a === undefined ? -1 : S.pl[p].a, S.pl[p].t])}) : null,
     promo: S.promo || null, vote: S.vote && S.vote.open ? {id: S.vote.id, n: S.vote.n, q: S.vote.q} : null};
@@ -424,14 +442,65 @@ setInterval(() => { lastState = ''; postState(); }, 30000);
 const guest = p => 'Guest ' + p.slice(0, 3).toUpperCase();
 const okAv = a => Number.isInteger(a) && a >= 0 && a < AV.length ? a : undefined;
 function plAdd(p, n, t, a, j) { n = String(n || '').slice(0, 14); a = okAv(a); j = Number.isInteger(j) && j >= 0 && j < 12 ? j : undefined; const o = S.pl[p];
-  if (o) { if (n && o.n !== n) o.n = n; if (t === 0 || t === 1 || t === 2) o.t = t; if (a !== undefined) o.a = a; if (j !== undefined) o.j = j; return false; }
-  S.pl[p] = {n, t: t === 0 || t === 1 ? t : 2, s: 0, a, j}; return true; }
+  if (o) { const nn = n && o.n !== n; if (nn) o.n = n; if ((t === 0 || t === 1 || t === 2) && !o.as) o.t = t; if (a !== undefined) o.a = a; if (j !== undefined) o.j = j; if (nn) fromRoster(p); return false; }
+  S.pl[p] = {n, t: t === 0 || t === 1 ? t : 2, s: 0, a, j}; fromRoster(p); return true; }
+// ---------- roster: the host, each team's players, everyone else in the audience ----------
+// Names typed in Setup are matched to phones by first name when they join. A matched phone gets that role's screen:
+// team players get the buzzer, the host gets the snowman mic, everyone else plays from the audience. A role set by hand wins.
+const rkey = x => String(x || '').toLowerCase().replace(/[^\p{L}\p{N} ]/gu, ' ').replace(/\s+/g, ' ').trim();
+function rosterRole(n) { const k = rkey(n); if (!k) return null; const hit = x => { const e = rkey(x); return !!e && (e === k || e.split(' ')[0] === k); };
+  if (String(S.hostName || '').split(',').some(hit)) return 'h'; for (const i of [0, 1]) if (String(S.teams[i].ros || '').split(',').some(hit)) return i; return null; }
+function setRole(p, r) { const o = S.pl[p]; if (!o) return; o.as = true; o.h = r === 'h'; o.t = r === 0 || r === 1 ? r : 2; S.allowed[p] = o.t !== 2; }
+function fromRoster(p) { const o = S.pl[p]; if (!o || o.man) return; const r = rosterRole(o.n); if (r !== null) setRole(p, r); else if (o.as) { o.as = false; o.h = false; } }
+const roleOf = p => { const o = S.pl[p]; return o.h ? 'h' : o.t; };
 function gmatch(txt, r) {
   const t = norm(txt); if (t.length < 2) return -1; const w = x => ' ' + x + ' ';
   return r.a.findIndex(a => [a[0]].concat(String(a[2] || '').split(',')).map(norm).filter(Boolean).some(c => c === t || (t.length >= 3 && c.length >= 3 && (w(c).includes(w(t)) || w(t).includes(w(c))))));
 }
 const gain = p => { const b = S.gb, x = b && !b.banked && b.g[p]; return x && x[1] >= 0 && S.revealed[x[1]] ? cur().a[x[1]][1] * cur().mult : 0; };
 const total = p => S.pl[p].s + gain(p);
+// ---------- the Family Feud flow, automated ----------
+// Face-off: the player who buzzed answers first. The top answer wins the board at once. Otherwise the other team's player answers,
+// and the higher answer on the board wins it (a miss loses to any hit; two misses start the face-off again).
+// Then the team that won plays: hits open, misses are strikes. Three strikes: the other team gets one answer to steal the whole budget.
+// The board cleared, a steal that hits or a steal that misses: the budget goes to the right team without a click.
+const foTeam = () => S.buzz === 0 || S.buzz === 1 ? S.buzz : S.fo && (S.fo.next === 0 || S.fo.next === 1) ? S.fo.next : null;
+function judge(k, txt) {
+  if (S.phase !== 'round' || S.awarded) return; const r = cur(), T = i => S.teams[i].name, A1 = j => '#' + (j + 1) + ' ' + r.a[j][0];
+  if (k >= 0 && S.revealed[k]) { jnote = A1(k) + ' is already on the board. Nothing changed.'; return render(); }
+  const miss = () => { said = txt || said; };
+  if (S.control === null) {
+    const t = foTeam(); if (t === null) { jnote = 'Who is answering? Open the buzzers, or click who buzzed first in step 1.'; return render(); }
+    const f = S.fo && S.fo.first;
+    if (!f) {
+      if (k >= 0) A.reveal(k); else { miss(); A.wrong(); }
+      if (k === 0) return foWin(t, T(t) + ' found the top answer and plays the board.');
+      S.fo = {first: {t, k}, next: 1 - t}; S.buzz = null;
+      jnote = (k >= 0 ? T(t) + ' found ' + A1(k) + '. ' : T(t) + ' missed. ') + 'Now ' + T(1 - t) + ' answers: ' + (k >= 0 ? 'a higher answer wins the board.' : 'any answer on the board wins it.');
+      return up();
+    }
+    if (k >= 0) A.reveal(k); else { miss(); A.wrong(); }
+    const win = f.k < 0 ? (k < 0 ? null : t) : (k >= 0 && k < f.k ? t : f.t);
+    if (win === null) { S.fo = null; S.buzz = null; jnote = 'Both missed. Face-off again: open the buzzers for the next two players.'; return up(); }
+    return foWin(win, T(win) + ' had the higher answer and plays the board.');
+  }
+  if (S.strikes >= 3) {
+    const o = 1 - S.control;
+    if (k >= 0) { A.reveal(k); jnote = T(o) + ' stole it with ' + A1(k) + '.'; later(() => { if (!S.awarded) A.steal(true); }, 1800); }
+    else { miss(); A.wrong(); jnote = 'Steal missed. ' + T(S.control) + ' keeps the budget.'; later(() => { if (!S.awarded) A.steal(false); }, 1600); }
+    return render();
+  }
+  if (k >= 0) { A.reveal(k); jnote = 'On the board: ' + A1(k) + '.';
+    if (r.a.every((_, j) => S.revealed[j])) { jnote += ' Board cleared: the budget goes to ' + T(S.control) + '.'; later(() => { if (!S.awarded && S.control !== null) A.award(S.control); }, 2600); } }
+  else { miss(); A.strike(); jnote = 'Not on the board: strike ' + S.strikes + '.' + (S.strikes >= 3 ? ' ' + T(1 - S.control) + ' now gets one answer to steal.' : ''); }
+  render();
+}
+const buzzer = () => { const p = S.buzzPid && S.pl[S.buzzPid]; return (p && p.n ? p.n + ' (' + S.teams[S.buzz].name + ')' : S.teams[S.buzz].name); };
+function sayWho() { if (S.awarded) return 'Board given. Next agenda item when ready.'; const T = i => S.teams[i].name;
+  if (S.control === null) { const t = foTeam(); return t === null ? 'Face-off: open the buzzers first' : 'Face-off: what did ' + T(t) + ' say?'; }
+  return S.strikes >= 3 ? 'Steal: what did ' + T(1 - S.control) + ' say? One answer.' : 'What did ' + T(S.control) + ' say?'; }
+function foWin(t, msg) { S.control = t; S.buzz = null; S.fo = null; jnote = msg; up({won: t}); }
+
 function gbNew() { S.gb = {id: Date.now().toString(36), open: true, lockAt: 0, g: {}}; }
 function gbLock() { if (S.gb && S.gb.open) { S.gb.open = false; S.gb.lockAt = Date.now(); } }
 // At the end of a board every guess that is on the board pays, revealed or not.
@@ -512,7 +581,7 @@ async function cluster(question, list) {
 }
 
 // ---------- actions ----------
-function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false}); said = ''; pending = null; note = ''; streak = 0; clearLater(); stopVoice(); SFX.tension(0); }
+function resetRound() { Object.assign(S, {revealed: [], counted: [], strikes: 0, pot: 0, awarded: false, control: null, buzzOpen: false, buzz: null, buzzPid: null, showQ: false, fo: null}); said = ''; jnote = ''; pending = null; note = ''; streak = 0; clearLater(); stopVoice(); SFX.tension(0); }
 const leaveOk = () => !!REH || S.phase !== 'round' || S.awarded || !S.pot || confirm("This round's budget of " + S.pot + ' has not been given to a team. Move on anyway?');
 // Between rounds the audience sees the standings before the next round card.
 function standings(nextMult) {
@@ -537,7 +606,23 @@ function nextStep() {
 // ---------- audience call-ups panel ----------
 // Who is up right now: [team, label] or null. Shared idea with the big screen, so both always agree.
 const actT = () => S.phase === 'round' ? (S.buzz === 0 || S.buzz === 1 ? [S.buzz, 'Buzzed in'] : S.control === null || S.awarded ? null : S.strikes >= 3 ? [1 - S.control, 'Stealing'] : [S.control, 'Answering']) : S.phase === 'lightning' ? [S.lp, 'Up now'] : null;
-let cuOpen = false, pitchQ = '';
+let cuOpen = false, pitchQ = '', rosOpen = false;
+const ROLES = () => [['h', 'Host (snowman mic)'], [0, S.teams[0].name], [1, S.teams[1].name], [2, 'Audience']];
+function rosListHtml() {
+  const ids = Object.keys(S.pl).sort((a, b) => { const ra = roleOf(a), rb = roleOf(b), ord = r => r === 'h' ? -1 : r; return ord(ra) - ord(rb) || String(S.pl[a].n).localeCompare(String(S.pl[b].n)); });
+  if (!ids.length) return '<p class="muted">No phones have joined yet. They show up here as people scan the code.</p>';
+  return `<table class="rtab"><tr><th>Phone</th><th>Role</th><th>How</th><th>Pts</th></tr>${ids.map(p => { const o = S.pl[p], r = roleOf(p);
+    return `<tr><td>${esc(o.n || guest(p))}</td><td><select onchange="A.role('${p}',this.value)" aria-label="Role for ${esc(o.n || guest(p))}">${ROLES().map(x => `<option value="${x[0]}" ${String(x[0]) === String(r) ? 'selected' : ''}>${esc(x[1])}</option>`).join('')}<option value="auto">Match the roster again</option></select></td>
+      <td class="muted">${o.man ? 'set by hand' : o.as ? 'from the roster' : 'picked on the phone'}</td><td>${total(p)}</td></tr>`; }).join('')}</table>`;
+}
+function setRos() { const el = document.getElementById('rosList'); if (el) el.innerHTML = rosListHtml(); }
+function rosterHtml() {
+  return `<div class="card rcard" style="margin-bottom:12px"><h2>Roster</h2>
+    <div class="rgrid"><label>Host</label><input value="${esc(S.hostName || '')}" maxlength="60" placeholder="Host's first name" oninput="A.hostName(this.value)">
+    ${[0, 1].map(i => `<label>${esc(S.teams[i].name)}</label><input value="${esc(S.teams[i].ros || '')}" maxlength="300" placeholder="Players, comma separated: Dana, Marcus, Lee" oninput="A.ros(${i},this.value)">`).join('')}</div>
+    <p class="muted">Type names before the show. When someone joins with that first name, their phone switches by itself: team players get the buzzer for their team, the host gets the snowman mic, everyone else plays from the audience. Team names show on the big screen under each team. Change anyone below; a role set by hand wins.</p>
+    <div id="rosList">${rosListHtml()}</div></div>`;
+}
 const PITCH_BONUS = 50, PITCHES = G.pitches && G.pitches.length ? G.pitches : ['Sell us this used stapler.'];
 function callups() {
   const cand = ranked().filter(p => S.pl[p].t === 2 && total(p) > 0).slice(0, 3), behind = S.teams[0].score === S.teams[1].score ? null : S.teams[0].score < S.teams[1].score ? 0 : 1, v = S.vote;
@@ -583,9 +668,9 @@ function flow() {
     const cand = ONLINE ? ranked().filter(k => S.pl[k].t === 2) : [], cu = !S.useCustom && S.ri === 1 && ONLINE && cand.some(k => total(k) > 0);
     const f = [['Question', S.showQ || started, 'showq', 'Show the question on the big screen and read it out, or let Chip read it.'],
       ['Buzzers', S.buzzOpen || S.buzz !== null || S.control !== null || started, 'buzz', 'One player from each team steps up. Open the buzzers.'],
-      ['Who plays', S.control !== null, S.buzz !== null ? 'ctl' + S.buzz : 'ctl', S.buzzOpen ? 'Buzzers are open. Waiting for the first buzz. No phones? Click the team that answered first.' : 'Click the team that plays this board.'],
-      ['Answers', S.awarded || all || S.strikes >= 3, 'board', 'Click each answer as the team says it (or press its number). Wrong answer: Strike or X.'],
-      ['Budget', S.awarded, steal ? 'steal' : S.control !== null ? 'award' + S.control : 'award', steal ? T(1 - S.control) + ' gets one guess to steal. On the board? Click it first, then Steal worked. Not there? Steal failed.' : 'Board done. Give the budget to the team that played it.']];
+      ['Face-off', S.control !== null, S.buzzOpen ? 'buzz' : foTeam() === null ? 'first' : 'say', S.buzzOpen ? 'Buzzers are open. Waiting for the first buzz. No buzzers? Click who buzzed first.' : foTeam() === null ? 'Click who buzzed first.' : 'Type what ' + T(foTeam()) + ' said and press Enter. The top answer wins the board; otherwise the other team answers and the higher answer wins.'],
+      ['Answers', S.awarded || all || S.strikes >= 3, 'say', 'Type each answer ' + (S.control !== null ? T(S.control) : 'the team') + ' gives and press Enter. On the board: it opens. Not there: a strike. Three strikes and the other team gets one answer to steal.'],
+      ['Budget', S.awarded, 'say', steal ? T(1 - S.control) + ' gets one answer to steal. Type it and press Enter: the game gives the budget to the right team.' : 'Board cleared: the budget goes to ' + (S.control !== null ? T(S.control) : 'the team') + ' by itself.']];
     if (cu) f.push(['Call-ups', !!S.promo, cuOpen ? 'cuP' : 'cu', cuOpen ? 'Fast-track promotion: send the top audience player to a team (glowing button). Then, if you like, one pitch-off.' : 'Round 2 is done: time to promote the top audience player. Open Audience call-ups.']);
     const nx = nextStep(); if (nx) f.push(['Next', false, 'next', 'Board finished. When the room is ready, press Next: ' + nx[0] + '.']);
     return f;
@@ -641,7 +726,7 @@ const A = {
   rx() { S.rx = !S.rx; up(); },
   // Audience call-ups. Fast-track promotion: an audience phone joins a team, approved to buzz, keeping its points.
   promote(p, t) { const pl = S.pl[p]; if (!pl || (t !== 0 && t !== 1)) return; snap(); const nm = pl.n || guest(p), pts = total(p);
-    pl.t = t; S.allowed[p] = true; evt('promo'); S.promo = {p, t, id: Date.now().toString(36), n: nm}; SFX.win();
+    pl.t = t; pl.as = true; pl.man = true; pl.h = false; S.allowed[p] = true; evt('promo'); S.promo = {p, t, id: Date.now().toString(36), n: nm}; SFX.win();
     up({cards: [['Fast-track promotion / effective immediately', 'PROMOTED', nm + ' joins ' + S.teams[t].name + '. ' + pts + ' points of pure instinct.', 3800]], confetti: 220});
     chip('Congratulations, ' + nm + '. Your new title is Team Member. Your old title was Snack Consumer.', true); },
   // Pitch-off: two volunteers pitch, the room votes on their phones, the winner joins a team with bonus points.
@@ -672,7 +757,16 @@ const A = {
   async buzzOpen() { openedAt = Date.now(); S.buzz = null; S.buzzPid = null; armed = false; S.buzzOpen = true; S.showQ = true; up(); if (document.activeElement) document.activeElement.blur(); await pollPhones(false); armed = true; },
   buzzClear() { if (Date.now() - openedAt < 500) return;   // the second half of a double-click on Open buzzers lands on Close buzzers
     S.buzz = null; S.buzzPid = null; S.buzzOpen = false; up(); },
-  control(i) { snap(); S.control = i; S.buzz = null; up(); },
+  control(i) { snap(); S.control = i; S.buzz = null; S.fo = null; jnote = ''; up(); },
+  // Who buzzed first, when there are no phone or keyboard buzzers: that player answers the face-off first.
+  first(i) { snap(); S.buzz = i; S.buzzPid = null; S.buzzOpen = false; if (S.fo) S.fo.next = i; up(); },
+  // Type what a player said. The game finds it on the board (or not) and runs the face-off, strikes, steal and award.
+  say(v) { const t = String(v || '').trim(); if (!t || S.phase !== 'round') return; judge(gmatch(t, cur()), t); },
+  pick(i) { if (S.awarded || S.revealed[i]) return A.reveal(i); judge(i, ''); },   // clicking an answer = the player said it
+  miss() { judge(-1, said); },
+  ros(i, v) { S.teams[i].ros = String(v || '').slice(0, 300); Object.keys(S.pl).forEach(fromRoster); push(); setRos(); },
+  hostName(v) { S.hostName = String(v || '').slice(0, 60); Object.keys(S.pl).forEach(fromRoster); push(); setRos(); },
+  role(p, v) { const o = S.pl[p]; if (!o) return; snap(); if (v === 'auto') { o.man = false; o.as = false; o.h = false; fromRoster(p); } else { o.man = true; setRole(p, v === 'h' ? 'h' : Number(v)); } up(); },
   // Click an answer to reveal it. Click it again to hide it (a misclick costs nothing).
   reveal(i) { const r = cur(); if (!r.a[i]) return; snap(); gbLock(); S.buzzOpen = false; S.buzz = null; S.showQ = true;
     if (S.revealed[i]) { S.revealed[i] = false; if (S.counted[i] && !S.awarded) {   // after the award the budget is banked: hiding a tile changes neither pot nor score
@@ -792,7 +886,7 @@ const REH_ANS = ['Read it', 'read it', 'Can you read', 'You fool', 'Scroll up', 
 function rehScript() {
   const st = [], add = (fn, ms) => st.push([fn, ms]), seg = t => add(() => { REH.label = t; const el = document.getElementById('rehLbl'); if (el) el.textContent = t; }, 0);
   const sc = fn => () => { lastScene = 0; fn(); };   // the demo is not a double-click: skip the scene gate
-  const buzz = key => { add(() => A.buzzOpen(), 2400); add(() => handleKey(key), 2400); };
+  const buzz = key => { add(() => A.buzzOpen(), 2400); add(() => handleKey(key), 2400); add(() => { if (S.control === null && S.buzz !== null) A.control(S.buzz); }, 900); };   // the demo skips the face-off answer
   const strike = (txt, ms) => { if (txt) add(() => { A.said(txt); render(); }, 1300); add(() => A.strike(), ms || 3400); };
   const rest = () => add(() => A.rest(), () => 2200 + cur().a.filter((_, i) => !S.revealed[i]).length * 1300);
   seg('Lobby'); add(() => chipLine('hello', true), 6000);
@@ -885,15 +979,20 @@ function render() {
     <button data-cue="join" class="util ${S.join ? 'on' : ''}" onclick="A.join()" ${ONLINE ? '' : 'disabled'}>${S.join ? 'Join code: showing' : 'Show join code'}</button>
     <button id="gagBtn" class="util" onclick="gagMenu(event)" aria-haspopup="true" title="Fire a full-screen office gag on the big screen">Interruption</button>
     <button data-cue="cu" class="util ${cuOpen ? 'on' : ''}" onclick="cuOpen=!cuOpen;render()">Audience call-ups</button>
+    <button class="util ${rosOpen ? 'on' : ''}" onclick="rosOpen=!rosOpen;render()" ${ph === 'title' ? 'disabled title="The roster is on this Setup page"' : ''}>Roster</button>
     <button class="util" onclick="A.rx()">${S.rx ? 'Reactions: on' : 'Reactions: off'}</button>
     <button class="util" onclick="A.undo()" ${hist.length ? '' : 'disabled'}>Undo <small style="font-size:11px;opacity:.75;white-space:nowrap">Ctrl+Z / Cmd+Z</small></button>
-    <button class="util" onclick="A.newGame()">New game</button></nav>
+    <button class="util" onclick="A.newGame()">New game</button>
+    <a class="util" href="crew/" target="_blank" rel="noopener">Crew roles</a>
+    <a class="util" href="print/" target="_blank" rel="noopener">Printables</a></nav>
   <main>${REH ? `<div class="reh"><b>Rehearsal running</b><span id="rehLbl">${esc(REH.label)}</span><button onclick="R.stop()">Stop</button></div>` : ''}<div class="score">${[0, 1].map(i => { const t = S.teams[i], act = actT(); return `<div class="tm ${i ? 'r' : ''} ${act && act[0] === i ? 'floor' : act ? 'idle' : ''}"><input class="nm" value="${esc(t.name)}" maxlength="20" oninput="A.name(${i},this.value)" aria-label="Team ${i+1} name" title="Click to rename">${act && act[0] === i ? `<b class="act">${act[1]}</b>` : ''}
-      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="${stageDone() ? 'go ' : 'early '}next" data-cue="next" onclick="A.next()" title="${stageDone() ? '' : 'Finish this board first. Clicking asks before skipping.'}">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage"><div class="coach">${coachHtml()}</div>${cuOpen ? callups() : ''}${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
+      <input class="sc" type="number" value="${t.score}" oninput="A.score(${i},this.value)" aria-label="Team ${i+1} score" title="Type over to correct"></div>`; }).join(`<div class="mid"><div class="where">${where}</div>${nx ? `<button class="${stageDone() ? 'go ' : 'early '}next" data-cue="next" onclick="A.next()" title="${stageDone() ? '' : 'Finish this board first. Clicking asks before skipping.'}">Next: ${esc(nx[0])}</button>` : ''}</div>`)}</div><div class="stage"><div class="coach">${coachHtml()}</div>${rosOpen && ph !== 'title' ? rosterHtml() : ''}${cuOpen ? callups() : ''}${dupHost ? '<span class="status hot" style="margin:0 0 10px">This host screen is open in another tab or window. Close one of them, or the big screen will jump between the two.</span>' : ''}
     ${resumed ? '<span class="status warn" style="margin:0 0 10px">Picked up the saved game from last time. <button onclick="resumed=false;render()">Keep going</button> <button onclick="resumed=false;A.newGame()">Start a new game</button></span>' : ''}`;
 
   if (ph === 'title') {
-    h += `<div class="card" style="margin-bottom:12px"><h2>Team names</h2><div class="row">${[0, 1].map(i => `<input class="wide" value="${esc(S.teams[i].name)}" maxlength="20" oninput="A.name(${i},this.value)" onchange="render()" aria-label="Team ${i + 1} name">`).join('<b style="align-self:center">vs</b>')}</div><p class="muted">Type over the names before the show. You can also click a name in the score bar at the top at any time.</p></div>
+    h += `<div class="card" style="margin-bottom:12px"><h2>Team names</h2><div class="row">${[0, 1].map(i => `<input class="wide" value="${esc(S.teams[i].name)}" maxlength="20" oninput="A.name(${i},this.value)" onchange="render()" aria-label="Team ${i + 1} name">`).join('<b style="align-self:center">vs</b>')}</div>
+      <p class="muted">Type over the names before the show. You can also click a name in the score bar at the top at any time.</p></div>
+      ${rosterHtml()}
       <div class="three even"><div class="card"><h2><b>1</b>Big screen</h2>
         <p>PC: press <kbd>Win</kbd>+<kbd>P</kbd> and choose <b>Extend</b>. Mac: System Settings &gt; Displays, set the projector to <b>Extended display</b> (not Mirror). Open the big screen, drag it onto the projector and click it once for full screen.</p>
         <button class="${alive() ? '' : 'go'} wide" data-cue="open" onclick="A.open()">${alive() ? 'Open it again' : 'Open big screen'}</button>
@@ -923,21 +1022,23 @@ function render() {
     const canSteal = S.strikes >= 3 && S.control !== null && !S.awarded, o = S.control === null ? 0 : 1 - S.control, all = r.a.every((_, i) => S.revealed[i]);
     h += `<div class="three"><div class="card"><h2><b>1</b>Face-off</h2>
         ${S.buzzOpen ? '<button class="big wide" onclick="A.buzzClear()">Close buzzers</button><p class="muted">While open, keyboard keys are buzzers. Click an answer to close them.</p>' : '<button class="go big wide" data-cue="buzz" onclick="A.buzzOpen()">Open buzzers</button>'}
-        <span class="status ${S.buzzOpen || S.buzz !== null ? 'hot' : ''}">${S.buzzOpen ? 'Open. Waiting...' : S.buzz !== null ? esc(S.teams[S.buzz].name) + ' buzzed first' : 'Buzzers closed'}</span>
-        <p class="muted" style="margin-top:12px">Who plays this board?</p>
-        ${S.teams.map((t, i) => `<button class="wide ${S.control === i ? 'on' : ''}" data-cue="ctl${i}" onclick="A.control(${i})">${esc(t.name)}</button>`).join('')}
+        <span class="status ${S.buzzOpen || S.buzz !== null ? 'hot' : ''}">${S.buzzOpen ? 'Open. Waiting...' : S.buzz !== null ? esc(buzzer()) + ' buzzed first' : S.control !== null ? esc(S.teams[S.control].name) + ' plays this board' : S.fo ? esc(S.teams[S.fo.next].name) + ' answers next' : 'Buzzers closed'}</span>
+        ${S.control === null ? `<p class="muted" style="margin-top:12px">No buzzers? Click who buzzed first:</p>
+        ${S.teams.map((t, i) => `<button class="wide ${foTeam() === i ? 'on' : ''}" data-cue="first${i}" onclick="A.first(${i})">${esc(t.name)}</button>`).join('')}` : ''}
+        <details style="margin-top:8px"><summary class="muted">Skip the face-off</summary>${S.teams.map((t, i) => `<button class="wide ${S.control === i ? 'on' : ''}" data-cue="ctl${i}" onclick="A.control(${i})">${esc(t.name)} plays the board</button>`).join('')}</details>
         <p id="phonesBox" class="muted" style="margin-top:12px">${phonesHtml()}</p></div>
       <div class="card"><h2><b>2</b>The board</h2>
         <div class="qhead"><div class="qtext">${esc(r.q)}</div><button class="${S.showQ ? 'on' : 'go'}" data-cue="showq" onclick="A.showQ()">${S.showQ ? 'Question is showing' : 'Show question'}</button><button onclick="A.read()">Read aloud</button></div>
         <div class="ans" data-cue="board" style="grid-template-rows:repeat(${Math.ceil(r.a.length / 2)},auto)">${r.a.map((a, i) => `<button class="${S.revealed[i]?'done':''}" onclick="A.reveal(${i})" title="${S.revealed[i] ? 'Click to hide again' : 'Click to reveal'}"><span><kbd>${i+1}</kbd> <u>${esc(a[0])}</u>${a[2] ? `<small>also: ${esc(a[2])}</small>` : ''}</span><b>${a[1]}</b></button>`).join('')}</div>
-        <div class="strike"><input value="${esc(said)}" oninput="A.said(this.value)" placeholder="Wrong answer they gave (optional, Chip drafts a line)" onkeydown="if(event.key==='Enter')A.strike()">
-          <button class="bad" onclick="A.strike()" ${S.strikes >= 3 ? 'disabled' : ''}>Strike <kbd>X</kbd></button><span class="pips">${[0, 1, 2].map(i => `<i class="${i < S.strikes ? 'on' : ''}">X</i>`).join('')}</span></div>
+        <div class="said" data-cue="say"><label for="sayIn">${esc(sayWho())}</label><div class="row"><input id="sayIn" autocomplete="off" placeholder="Type what they said, press Enter" onkeydown="if(event.key==='Enter'){A.say(this.value);this.value='';setTimeout(()=>{const e=document.getElementById('sayIn');if(e)e.focus()},0)}" ${S.awarded ? 'disabled' : ''}><button class="go" onclick="const e=document.getElementById('sayIn');A.say(e.value);e.value=''" ${S.awarded ? 'disabled' : ''}>Check</button></div>
+          <p class="jn">${esc(jnote || 'The game finds the answer on the board, or gives the strike. Or click the answer, or press its number.')}</p></div>
+        <div class="strike"><button class="bad" onclick="A.miss()" ${S.awarded ? 'disabled' : ''}>Not on the board <kbd>X</kbd></button><span class="pips">${[0, 1, 2].map(i => `<i class="${i < S.strikes ? 'on' : ''}">X</i>`).join('')}</span></div>
         <div id="roastBox">${roastHtml()}</div>
         <details ${more ? 'open' : ''} ontoggle="more=this.open"><summary>More</summary><div class="row"><button onclick="A.wrong()">Wrong answer, no strike</button><button onclick="A.clearStrikes()" ${S.strikes ? '' : 'disabled'}>Clear strikes</button>
           <button onclick="A.takeover()">Replay takeover card</button><button onclick="stopVoice()">Stop voice</button></div></details></div>
       <div class="card"><h2><b>3</b>The budget</h2><div class="pot">${S.pot}<small>points on this board</small></div>
         ${S.awarded ? `<span class="status">Given</span><button class="wide" onclick="A.rest()" ${all ? 'disabled' : ''}>Reveal the rest</button>`
-          : canSteal ? `<span class="status warn">Three strikes: ${esc(S.teams[o].name)} gets one answer</span><button class="go wide" data-cue="steal" onclick="A.steal(true)">Steal worked: ${esc(S.teams[o].name)}</button><button class="go wide" data-cue="steal" onclick="A.steal(false)">Steal failed: ${esc(S.teams[S.control].name)} keeps it</button><p class="muted">If their answer is on the board, click it first.</p>`
+          : canSteal ? `<span class="status warn">Three strikes: ${esc(S.teams[o].name)} gets one answer</span><button class="go wide" data-cue="steal" onclick="A.steal(true)">Steal worked: ${esc(S.teams[o].name)}</button><button class="go wide" data-cue="steal" onclick="A.steal(false)">Steal failed: ${esc(S.teams[S.control].name)} keeps it</button><p class="muted">Type their answer in step 2 and the game decides. These buttons are only to overrule it.</p>`
           : (S.strikes >= 3 ? '<span class="status warn">Three strikes. Pick who was playing in step 1 to offer the steal.</span>' : '') + S.teams.map((t, i) => `<button class="go wide" data-cue="award${i}" onclick="A.award(${i})">Give to ${esc(t.name)}</button>`).join('')}</div></div>`;
   }
 
