@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flurry the Snowman</title>
+<style>
+:root{--bg:#0c2418;--bg2:#123524;--ink:#f6f3ea;--muted:#9fc7a8;--orange:#f96302;--green:#2fb36b;--snow:#eef2ef}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(ellipse at 30% 40%,var(--bg2),var(--bg) 70%);color:var(--ink);font-family:"Helvetica Neue",Arial,sans-serif;overflow:hidden}
+#snow{position:fixed;inset:0;pointer-events:none}
+main{position:relative;height:100%;display:grid;grid-template-columns:minmax(260px,38%) 1fr;align-items:center;gap:4vw;padding:4vh 5vw}
+#man{width:100%;max-height:88vh}
+.mouth circle{transition:fill .08s,opacity .08s}
+h1{margin:0 0 1vh;font-size:clamp(28px,4.2vw,72px);letter-spacing:.01em}
+h1 span{color:var(--orange)}
+.sub{color:var(--muted);font-size:clamp(16px,1.8vw,30px);margin:0 0 5vh}
+.qa{min-height:40vh}
+.label{font-size:clamp(13px,1.2vw,20px);letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin:0 0 .6vh;font-weight:700}
+#q{font-size:clamp(20px,2.4vw,42px);color:var(--muted);margin:0 0 4vh;font-style:italic;min-height:1.2em}
+#a{font-size:clamp(28px,3.6vw,64px);line-height:1.18;margin:0;font-weight:700;min-height:2.4em}
+#status{position:fixed;left:5vw;bottom:3vh;color:var(--muted);font-size:clamp(12px,1.1vw,18px)}
+#start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2vh;background:rgba(8,26,17,.92);z-index:5;cursor:pointer}
+#start b{font-size:clamp(24px,3vw,48px)}
+#start span{color:var(--muted)}
+#test{position:fixed;right:2vw;bottom:2vh;display:none;gap:8px;align-items:center;background:rgba(0,0,0,.45);padding:10px;border-radius:12px;z-index:4}
+#test.on{display:flex}
+#test input{width:min(46vw,520px);font-size:16px;padding:8px 10px;border-radius:8px;border:0}
+#test button{font-size:15px;padding:8px 12px;border-radius:8px;border:0;background:var(--orange);color:#fff;font-weight:700;cursor:pointer}
+#test button.talk{background:var(--green)}
+#test button.rec{background:#d33}
+@media (max-width:700px){main{grid-template-columns:1fr;grid-template-rows:auto 1fr;padding:3vh 16px}#man{max-height:38vh}}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<main>
+  <svg id="man" viewBox="0 0 200 300" aria-label="Flurry the snowman">
+    <defs>
+      <radialGradient id="ball" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cfd8d3"/></radialGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <ellipse cx="100" cy="292" rx="78" ry="7" fill="#000" opacity=".25"/>
+    <rect x="28" y="268" width="144" height="22" rx="8" fill="#1e6b43"/>
+    <ellipse cx="100" cy="269" rx="72" ry="7" fill="url(#ball)"/>
+    <circle cx="100" cy="222" r="50" fill="url(#ball)"/>
+    <g fill="#1b1b1d"><circle cx="100" cy="214" r="3"/><circle cx="92" cy="220" r="3"/><circle cx="108" cy="220" r="3"/><circle cx="88" cy="230" r="3"/><circle cx="100" cy="228" r="3"/><circle cx="112" cy="230" r="3"/><circle cx="94" cy="238" r="3"/><circle cx="106" cy="238" r="3"/></g>
+    <circle cx="100" cy="150" r="38" fill="url(#ball)"/>
+    <g id="btn"><circle cx="100" cy="150" r="17" fill="#1b1b1d"/><circle cx="100" cy="150" r="13" fill="var(--orange)"/></g>
+    <g id="scarf"><rect x="64" y="110" width="72" height="12" rx="6" fill="var(--orange)"/><rect x="76" y="110" width="10" height="12" fill="var(--green)"/><rect x="96" y="110" width="10" height="12" fill="var(--green)"/><rect x="116" y="110" width="10" height="12" fill="var(--green)"/><rect x="118" y="116" width="12" height="40" rx="4" fill="var(--orange)" transform="rotate(-8 124 116)"/><rect x="118" y="128" width="12" height="8" fill="var(--green)" transform="rotate(-8 124 116)"/></g>
+    <g id="head">
+      <circle cx="100" cy="82" r="32" fill="url(#ball)"/>
+      <g id="eyes" fill="#1b1b1d"><ellipse cx="89" cy="72" rx="3.6" ry="3.6"/><ellipse cx="111" cy="72" rx="3.6" ry="3.6"/></g>
+      <polygon points="100,78 100,84 122,82" fill="var(--orange)"/>
+      <g class="mouth" id="mouth" filter="url(#glow)"></g>
+      <rect x="66" y="48" width="68" height="6" rx="3" fill="#1b1b1d"/>
+      <rect x="76" y="18" width="48" height="32" rx="3" fill="#1b1b1d"/>
+      <rect x="76" y="40" width="48" height="7" fill="var(--orange)"/>
+    </g>
+  </svg>
+  <section>
+    <h1>Ask <span>Flurry</span></h1>
+    <p class="sub" id="sub">Press the big button and ask me anything.</p>
+    <div class="qa">
+      <p class="label">You asked</p>
+      <p id="q"></p>
+      <p class="label">Flurry says</p>
+      <p id="a">Hello, team! Let's circle back on all your burning questions. Burning, not melting.</p>
+    </div>
+  </section>
+</main>
+<div id="start"><b>Click to start Flurry</b><span>The browser needs one click before it can play sound. Press T for the test panel.</span></div>
+<div id="test">
+  <input id="tq" placeholder="Type a question and press Enter" maxlength="300">
+  <button id="ask">Ask</button>
+  <button id="talk" class="talk" title="Hold to talk with this computer's microphone (or hold Space)">Hold to talk</button>
+</div>
+<div id="status"></div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const status = t => { $('status').textContent = t || ''; };
+
+  // Mouth: 12 lights in a ring, like the LED ring on the real snowman.
+  const mouth = $('mouth'), dots = [];
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * Math.PI * 2, c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', 100 + Math.cos(a) * 9); c.setAttribute('cy', 97 + Math.sin(a) * 6.5); c.setAttribute('r', 1.8);
+    mouth.appendChild(c); dots.push(c);
+  }
+  let mode = 'idle', level = 0, spin = 0;
+  function drawMouth(t) {
+    dots.forEach((c, i) => {
+      let col = '#555', op = .5;
+      if (mode === 'listen') { col = '#2fe07a'; op = 1; }
+      else if (mode === 'think') { col = (i === Math.floor(spin) % 12 || i === (Math.floor(spin) + 6) % 12) ? '#ff8a2a' : '#5a3a1a'; op = 1; }
+      else if (mode === 'talk') { col = i % 2 ? '#2fe07a' : '#ff7a1a'; op = .35 + Math.min(1, level * 3.2) * .65; }
+      else { op = .45 + .25 * Math.sin(t / 900 + i); col = i % 2 ? '#1f7a4a' : '#9a4a10'; }
+      c.setAttribute('fill', col); c.setAttribute('opacity', op.toFixed(2));
+    });
+    spin += .35;
+  }
+  // Gentle idle sway and blinks.
+  const head = $('head'), eyes = $('eyes');
+  let blinkAt = 0;
+  function frame(t) {
+    const sway = mode === 'talk' ? Math.sin(t / 120) * (1 + level * 6) : Math.sin(t / 1400) * 2;
+    head.setAttribute('transform', `rotate(${sway.toFixed(2)} 100 110)`);
+    if (t > blinkAt) { eyes.setAttribute('transform', 'translate(0 72) scale(1 .15) translate(0 -72)'); if (t > blinkAt + 140) { eyes.removeAttribute('transform'); blinkAt = t + 2500 + Math.random() * 3500; } }
+    if (analyser) { analyser.getByteTimeDomainData(buf); let s = 0; for (const v of buf) s += (v - 128) * (v - 128); level = level * .6 + Math.sqrt(s / buf.length) / 128 * .4; }
+    drawMouth(t);
+    requestAnimationFrame(frame);
+  }
+
+  // Falling snow.
+  const cv = $('snow'), cx = cv.getContext('2d'); let flakes = [];
+  function resize() { cv.width = innerWidth; cv.height = innerHeight; flakes = Array.from({ length: Math.round(innerWidth / 9) }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: .6 + Math.random() * 2.2, v: .3 + Math.random() * .9 })); }
+  addEventListener('resize', resize); resize();
+  (function fall() { cx.clearRect(0, 0, cv.width, cv.height); cx.fillStyle = 'rgba(255,255,255,.7)'; for (const f of flakes) { f.y += f.v; f.x += Math.sin(f.y / 40) * .3; if (f.y > cv.height) { f.y = -5; f.x = Math.random() * cv.width; } cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 7); cx.fill(); } requestAnimationFrame(fall); })();
+
+  // Audio: every answer is spoken through this computer, so it can go to the room's speakers.
+  let actx, analyser, buf;
+  const player = new Audio();
+  function unlock() {
+    if (actx) return;
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = actx.createMediaElementSource(player);
+    analyser = actx.createAnalyser(); analyser.fftSize = 512; buf = new Uint8Array(analyser.fftSize);
+    src.connect(analyser); analyser.connect(actx.destination);
+  }
+  $('start').onclick = () => { unlock(); $('start').remove(); poll(); };
+
+  function typeOut(el, text) {
+    el.textContent = ''; let i = 0;
+    const step = () => { el.textContent = text.slice(0, ++i); if (i < text.length) setTimeout(step, 28); };
+    step();
+  }
+
+  let lastId = null, busy = false;
+  async function show(s) {
+    if (!s || !s.id || s.id === lastId) return;
+    lastId = s.id; busy = true;
+    $('q').textContent = s.q ? '"' + s.q + '"' : '';
+    mode = 'think'; $('a').textContent = '...';
+    try {
+      const r = await fetch('/api/snowman?do=say', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: s.a }) });
+      if (!r.ok) throw new Error('voice ' + r.status);
+      player.src = URL.createObjectURL(await r.blob());
+      if (actx && actx.state === 'suspended') await actx.resume();
+      mode = 'talk'; typeOut($('a'), s.a);
+      await player.play();
+      await new Promise(res => { player.onended = res; player.onerror = res; });
+      status('');
+    } catch (e) {
+      typeOut($('a'), s.a); status('Voice unavailable (' + e.message + '). Showing text only.');
+      await new Promise(res => setTimeout(res, 2500 + s.a.length * 45));
+    }
+    mode = 'idle'; busy = false;
+  }
+
+  // Answers from the snowman board arrive through the relay.
+  let first = true;
+  async function poll() {
+    try {
+      const r = await fetch('/api/relay?room=snowman&k=state', { cache: 'no-store' });
+      const j = await r.json();
+      const s = j.msgs && j.msgs[0] ? JSON.parse(j.msgs[0]) : null;
+      if (first) { first = false; if (s) lastId = s.id; } // do not replay the last answer on load
+      else if (!busy && s) show(s);
+      if (!busy && mode !== 'listen' && mode !== 'think') status('');
+    } catch (e) { status('Waiting for the network...'); }
+    setTimeout(poll, 1200);
+  }
+
+  // Test panel (press T): type a question, or hold to talk through this computer's microphone.
+  addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 't' || e.key === 'T') $('test').classList.toggle('on');
+    if (e.code === 'Space' && !e.repeat && $('test').classList.contains('on')) { e.preventDefault(); startRec(); }
+  });
+  addEventListener('keyup', e => { if (e.code === 'Space' && rec) { e.preventDefault(); stopRec(); } });
+
+  async function ask(body, type) {
+    mode = 'think'; status('Thinking...');
+    try {
+      const r = await fetch('/api/snowman?do=ask', { method: 'POST', headers: { 'content-type': type }, body });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.status);
+      await show(j);
+    } catch (e) { mode = 'idle'; status('Could not ask: ' + e.message); }
+  }
+  const sendText = () => { const t = $('tq').value.trim(); if (t) { $('tq').value = ''; ask(JSON.stringify({ text: t }), 'application/json'); } };
+  $('ask').onclick = sendText;
+  $('tq').addEventListener('keydown', e => { if (e.key === 'Enter') sendText(); });
+
+  let rec, chunks, stream;
+  async function startRec() {
+    if (rec || busy) return;
+    unlock();
+    try { stream = stream || await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) { status('Microphone blocked: ' + e.message); return; }
+    chunks = []; rec = new MediaRecorder(stream);
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => { const b = new Blob(chunks, { type: rec.mimeType || 'audio/webm' }); const t = b.type; rec = null; $('talk').classList.remove('rec'); ask(b, t.split(';')[0]); };
+    rec.start(); mode = 'listen'; $('talk').classList.add('rec'); status('Listening... release to send');
+  }
+  function stopRec() { if (rec && rec.state === 'recording') rec.stop(); }
+  $('talk').addEventListener('pointerdown', startRec);
+  $('talk').addEventListener('pointerup', stopRec);
+  $('talk').addEventListener('pointerleave', stopRec);
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

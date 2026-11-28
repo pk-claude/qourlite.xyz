@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Flurry Mic</title>
+<style>
+  :root { --orange: #f96302; --green: #2fb36b; --bg: #0c2418; --ink: #f4f7f5; --dim: #9fb8aa; }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 17px/1.4 system-ui, -apple-system, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 28px 16px; text-align: center; }
+  h1 { margin: 0; font-size: 26px; } h1 b { color: var(--orange); }
+  #status { color: var(--dim); min-height: 1.4em; margin-top: 6px; }
+  #talk { width: min(72vw, 300px); aspect-ratio: 1; border-radius: 50%; border: 10px solid #0006; background: var(--orange);
+    color: #fff; font: 700 24px/1.2 system-ui, sans-serif; box-shadow: 0 10px 0 #a84300, 0 18px 40px #0008; touch-action: none; }
+  #talk.rec { background: var(--green); box-shadow: 0 4px 0 #1d7444, 0 0 0 14px #2fb36b44; transform: translateY(6px); }
+  #talk:disabled { opacity: .5; }
+  #log { width: 100%; max-width: 520px; min-height: 6em; }
+  #log p { margin: 4px 0; } #log .q { color: var(--dim); font-style: italic; }
+</style>
+</head>
+<body>
+  <div><h1>Flurry <b>Mic</b></h1><div id="status">Hold the button, ask Flurry a question, let go.</div></div>
+  <button id="talk">Hold to talk</button>
+  <div id="log"></div>
+<script>
+// Phone as a handheld mic for Flurry. The answer shows and plays on the projector page (/snowman/).
+const $ = id => document.getElementById(id), btn = $('talk');
+let stream, rec, chunks, started = 0, held = false;
+const status = t => $('status').textContent = t;
+
+async function start(e) {
+  e.preventDefault();
+  if (rec || btn.disabled) return;
+  held = true; btn.setPointerCapture(e.pointerId);
+  try { stream = stream || await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch (err) { status('Allow the microphone for this page, then try again.'); return; }
+  if (!held) { status('Microphone ready. Now hold the button and talk.'); return; } // first tap only asked permission
+  chunks = []; rec = new MediaRecorder(stream); started = Date.now();
+  rec.ondataavailable = ev => ev.data.size && chunks.push(ev.data);
+  rec.onstop = send;
+  rec.start();
+  btn.classList.add('rec'); btn.textContent = 'Listening...'; status('Talk now. Let go when you are done.');
+}
+function stop(e) {
+  e.preventDefault();
+  held = false;
+  if (!rec || rec.state !== 'recording') return;
+  // keep the tail of the last word
+  setTimeout(() => rec && rec.state === 'recording' && rec.stop(), 250);
+}
+async function send() {
+  const type = (rec.mimeType || 'audio/webm').split(';')[0], blob = new Blob(chunks, { type });
+  rec = null; btn.classList.remove('rec');
+  if (Date.now() - started < 700) { btn.textContent = 'Hold to talk'; status('Hold the button while you talk.'); return; }
+  btn.disabled = true; btn.textContent = 'Thinking...'; status('Flurry is thinking...');
+  try {
+    const r = await fetch('/api/snowman?do=ask', { method: 'POST', headers: { 'content-type': type }, body: blob });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    $('log').innerHTML = '';
+    if (j.q) { const q = document.createElement('p'); q.className = 'q'; q.textContent = '"' + j.q + '"'; $('log').append(q); }
+    const a = document.createElement('p'); a.textContent = j.a; $('log').append(a);
+    status('Answer is on the big screen.');
+  } catch (err) { status('That did not go through (' + err.message + '). Try again.'); }
+  btn.disabled = false; btn.textContent = 'Hold to talk';
+}
+btn.addEventListener('pointerdown', start);
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev, stop));
+btn.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+</body>
+</html>
